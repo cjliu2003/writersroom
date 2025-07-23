@@ -120,7 +120,7 @@ export function ScreenplayEditor({ content, onChange }: ScreenplayEditorProps) {
     <div className="h-[calc(100vh-120px)] flex flex-col bg-white">
       {/* Toolbar */}
       <div className="border-b p-2 flex items-center gap-2 bg-gray-50">
-        <Button variant="ghost" size="sm" onClick={() => insertTemplate("INT. LOCATION - DAY\n\n")}>
+        <Button variant="ghost" size="sm" onClick={() => insertTemplate("INT. LOCATION - NIGHT\n\n")}>
           INT. Scene
         </Button>
         <Button variant="ghost" size="sm" onClick={() => insertTemplate("EXT. LOCATION - DAY\n\n")}>
