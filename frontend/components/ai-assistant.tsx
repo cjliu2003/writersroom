@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -10,20 +10,21 @@ import { Badge } from "@/components/ui/badge"
 import { Send, Sparkles, X, MessageSquare, Lightbulb, Zap, RefreshCw } from "lucide-react"
 
 
+interface Scene {
+  id: string
+  heading: string
+  content: string
+}
+
+
 interface Script {
   id: string
   title: string
-  scenes: any[]
+  scenes: Scene[]
   content: string
   createdAt: string
 }
 
-interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: Date
-}
 
 interface AIAssistantProps {
   script: Script
@@ -64,17 +65,20 @@ const PRESET_PROMPTS = [
 ]
 
 export function AIAssistant({ script, onClose }: AIAssistantProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content:
-        "Hi! I'm your AI screenwriting assistant. I can help you develop characters, improve dialogue, suggest plot twists, and more. I'm familiar with your script and can provide context-aware suggestions. What would you like to work on?",
-      timestamp: new Date(),
-    },
-  ])
+  const messages = useMemo(
+    () => [
+      {
+        id: "1",
+        role: "assistant",
+        content:
+          "Hi! I'm your AI screenwriting assistant. I can help you develop characters, improve dialogue, suggest plot twists, and more. I'm familiar with your script and can provide context-aware suggestions. What would you like to work on?",
+        timestamp: new Date(),
+      },
+    ],
+    []
+  )
   const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const isLoading = false
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

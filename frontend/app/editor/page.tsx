@@ -26,7 +26,7 @@ export default function EditorPage() {
   const [isAssistantOpen, setIsAssistantOpen] = useState(true)
   const [lastSaved, setLastSaved] = useState<Date>(new Date())
   const router = useRouter()
-  const saveTimeoutRef = useRef<NodeJS.Timeout>()
+const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const savedScript = localStorage.getItem("current-script")
