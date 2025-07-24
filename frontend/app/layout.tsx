@@ -6,7 +6,7 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "AI Screenwriter Studio",
+  title: "WritersRoom",
   description: "Professional screenwriting meets AI assistance",
 }
 

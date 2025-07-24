@@ -2,20 +2,17 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect, useMemo } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
 import { Send, Sparkles, X, MessageSquare, Lightbulb, Zap, RefreshCw } from "lucide-react"
-
 
 interface Scene {
   id: string
   heading: string
   content: string
 }
-
 
 interface Script {
   id: string
@@ -25,6 +22,12 @@ interface Script {
   createdAt: string
 }
 
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: Date
+}
 
 interface AIAssistantProps {
   script: Script
@@ -65,20 +68,17 @@ const PRESET_PROMPTS = [
 ]
 
 export function AIAssistant({ script, onClose }: AIAssistantProps) {
-  const messages = useMemo(
-    () => [
-      {
-        id: "1",
-        role: "assistant",
-        content:
-          "Hi! I'm your AI screenwriting assistant. I can help you develop characters, improve dialogue, suggest plot twists, and more. I'm familiar with your script and can provide context-aware suggestions. What would you like to work on?",
-        timestamp: new Date(),
-      },
-    ],
-    []
-  )
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      role: "assistant",
+      content:
+        "Hi! I'm your AI screenwriting assistant. I can help you develop characters, improve dialogue, suggest plot twists, and more. I'm familiar with your script and can provide context-aware suggestions. What would you like to work on?",
+      timestamp: new Date(),
+    },
+  ])
   const [input, setInput] = useState("")
-  const isLoading = false
+  const [isLoading, setIsLoading] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -86,6 +86,79 @@ export function AIAssistant({ script, onClose }: AIAssistantProps) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
     }
   }, [messages])
+
+  const sendMessage = async (messageContent: string) => {
+    if (!messageContent.trim() || isLoading) return
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: messageContent,
+      timestamp: new Date(),
+    }
+
+    setMessages((prev) => [...prev, userMessage])
+    setInput("")
+    setIsLoading(true)
+
+    try {
+      // Prepare context about the script
+      const scriptContext = `
+Current Screenplay Context:
+Title: ${script.title}
+Number of scenes: ${script.scenes.length}
+Characters mentioned: ${extractCharacters(script.content).join(", ") || "None yet"}
+
+Recent script content:
+${script.content.slice(-1000)} // Last 1000 characters
+
+Scene headings:
+${script.scenes.map((scene) => scene.heading).join("\n")}
+      `.trim()
+
+      const { text } = await generateText({
+        model: openai("gpt-4o"),
+        system: `You are an expert screenwriting assistant. You help writers develop professional screenplays by providing creative suggestions, improving dialogue, developing characters, and offering plot ideas. 
+
+Key guidelines:
+- Always be encouraging and constructive
+- Provide specific, actionable suggestions
+- Reference the user's existing script content when relevant
+- Maintain the writer's creative control - suggest, don't dictate
+- Follow industry-standard screenplay formatting when providing examples
+- Keep responses concise but helpful
+- Focus on story, character, and dialogue improvement
+
+You have access to the current screenplay context and should reference it in your responses when relevant.`,
+        prompt: `${scriptContext}
+
+User question: ${messageContent}
+
+Please provide helpful, specific advice based on the screenplay context above.`,
+      })
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: text,
+        timestamp: new Date(),
+      }
+
+      setMessages((prev) => [...prev, assistantMessage])
+    } catch (error) {
+      console.error("Error generating AI response:", error)
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content:
+          "I'm sorry, I encountered an error while processing your request. Please try again or rephrase your question.",
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const extractCharacters = (content: string): string[] => {
     const lines = content.split("\n")
@@ -107,11 +180,11 @@ export function AIAssistant({ script, onClose }: AIAssistantProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("User input submitted:", input)
+    sendMessage(input)
   }
 
   const handlePresetClick = (prompt: string) => {
-    console.log("Preset clicked:", prompt)
+    sendMessage(prompt)
   }
 
   return (
@@ -119,11 +192,21 @@ export function AIAssistant({ script, onClose }: AIAssistantProps) {
       {/* Header */}
       <div className="border-b bg-white p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-purple-600" />
-          <h3 className="font-semibold">AI Assistant</h3>
+          <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-blue-600" />
+          </div>
+          <h3 className="font-semibold text-blue-600">AI Assistant</h3>
         </div>
         <Button variant="ghost" size="sm" onClick={onClose}>
           <X className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {/* Chat History Button */}
+      <div className="p-4 border-b bg-white">
+        <Button variant="outline" size="sm" className="w-full bg-transparent">
+          <MessageSquare className="w-4 h-4 mr-2" />
+          View chat history
         </Button>
       </div>
 
@@ -178,36 +261,70 @@ export function AIAssistant({ script, onClose }: AIAssistantProps) {
         </div>
       </ScrollArea>
 
-      {/* Input */}
-      <div className="border-t bg-white p-4">
+      {/* Conversation Suggestions */}
+      <div className="border-t bg-white p-4 space-y-3">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Continue last conversation</span>
+            <Button variant="ghost" size="sm">
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-blue-600">Give me dialogue for scene 2</span>
+            <Button variant="ghost" size="sm">
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-blue-600">Help resolve the love triangle</span>
+            <Button variant="ghost" size="sm">
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-blue-600">Estimate how long it will take</span>
+            <Button variant="ghost" size="sm">
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your script, characters, plot..."
+            placeholder="Ask a question..."
             disabled={isLoading}
             className="flex-1"
           />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
+          <Button type="submit" disabled={isLoading || !input.trim()} className="bg-blue-600 hover:bg-blue-700">
             <Send className="w-4 h-4" />
           </Button>
         </form>
-
-        {script.scenes.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            <Badge variant="secondary" className="text-xs">
-              {script.scenes.length} scenes
-            </Badge>
-            {extractCharacters(script.content)
-              .slice(0, 3)
-              .map((character) => (
-                <Badge key={character} variant="outline" className="text-xs">
-                  {character}
-                </Badge>
-              ))}
-          </div>
-        )}
       </div>
     </div>
   )
+}
+
+// Placeholder for backend function
+type GenerateTextParams = {
+  model: string
+  system: string
+  prompt: string
+}
+
+async function generateText(_: GenerateTextParams): Promise<{ text: string }> {
+  // Simulate a short delay and return a canned response
+  console.log(_)
+  return new Promise((resolve) =>
+    setTimeout(() => resolve({ text: "This is a placeholder AI response. Connect your backend to enable real suggestions." }), 700)
+  )
+}
+
+// Placeholder for OpenAI model function
+function openai(model: string): string {
+  // Return a placeholder model name
+  console.log(`Using model: ${model}`)
+  return "placeholder-model"
 }
