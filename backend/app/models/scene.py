@@ -1,0 +1,109 @@
+from datetime import datetime
+from uuid import UUID, uuid4
+from typing import Dict, List, Any, Optional
+from sqlalchemy import ForeignKey, Integer, String, Text, DateTime
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
+
+from app.db.base import Base
+
+class Scene(Base):
+    """
+    Scene model representing a scene within a script.
+    """
+    __tablename__ = 'scenes'
+
+    # Columns
+    scene_id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid4,
+        index=True,
+        unique=True,
+        nullable=False
+    )
+    
+    script_id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey('scripts.script_id', ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
+    
+    position: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        index=True
+    )
+    
+    scene_heading: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        default=""
+    )
+    
+    content_blocks: Mapped[Dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict
+    )
+    
+    summary: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True
+    )
+    
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+    
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+    
+    # Relationships
+    script: Mapped['Script'] = relationship(
+        'Script',
+        back_populates='scenes',
+        lazy='selectin'
+    )
+    
+    embedding: Mapped['SceneEmbedding'] = relationship(
+        'SceneEmbedding',
+        back_populates='scene',
+        uselist=False,
+        cascade='all, delete-orphan',
+        lazy='selectin'
+    )
+    
+    # Version history
+    versions: Mapped[List['SceneVersion']] = relationship(
+        'SceneVersion',
+        back_populates='scene',
+        cascade='all, delete-orphan',
+        lazy='selectin',
+        order_by='desc(SceneVersion.created_at)'
+    )
+    
+    def __repr__(self) -> str:
+        return f"<Scene {self.scene_heading[:30]}...>"
+    
+    def to_dict(self) -> dict:
+        """Convert Scene instance to dictionary."""
+        return {
+            'scene_id': str(self.scene_id),
+            'script_id': str(self.script_id),
+            'position': self.position,
+            'scene_heading': self.scene_heading,
+            'content_blocks': self.content_blocks,
+            'summary': self.summary,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
