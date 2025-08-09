@@ -1,11 +1,12 @@
 from datetime import datetime
-from typing import List
+from typing import List, TYPE_CHECKING
 from uuid import UUID, uuid4
+
 from sqlalchemy import String, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
-from app.db.base import Base
+from app.models.base import Base
 
 class User(Base):
     """

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import health_router, auth_router
+from app.routers import health_router, auth_router, script_router
 from app.firebase.config import initialize_firebase
 
 # Initialize Firebase
@@ -24,6 +24,7 @@ app.add_middleware(
 # Include routers
 app.include_router(health_router.router, prefix="/api", tags=["health"])
 app.include_router(auth_router.router, prefix="/api")
+app.include_router(script_router.router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn

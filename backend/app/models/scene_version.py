@@ -1,12 +1,17 @@
 from datetime import datetime
+from typing import Optional, List, TYPE_CHECKING, cast
 from uuid import UUID, uuid4
-from typing import Optional, List
-from sqlalchemy import ForeignKey, LargeBinary, DateTime, Index
+
+from sqlalchemy import ForeignKey, LargeBinary, DateTime, Index, select, desc
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.sql import func
 
-from app.db.base import Base
+from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.scene import Scene  # noqa: F401
 
 class SceneVersion(Base):
     """
@@ -69,7 +74,7 @@ class SceneVersion(Base):
         }
     
     @classmethod
-    def create_version(cls, scene_id: UUID, yjs_update: bytes):
+    def create_version(cls, scene_id: UUID, yjs_update: bytes) -> 'SceneVersion':
         """Helper to create a new version."""
         return cls(
             scene_id=scene_id,
@@ -77,22 +82,34 @@ class SceneVersion(Base):
         )
     
     @classmethod
-    def get_latest_version(cls, session, scene_id: UUID):
-        """Get the most recent version for a scene."""
-        from sqlalchemy import desc
-        
-        return session.query(cls)\
-            .filter_by(scene_id=scene_id)\
-            .order_by(desc(cls.created_at))\
-            .first()
+    async def get_latest_version(
+        cls, 
+        session: AsyncSession, 
+        scene_id: UUID
+    ) -> Optional['SceneVersion']:
+        """Get the most recent version for a scene asynchronously."""
+        stmt = (
+            select(cls)
+            .where(cls.scene_id == scene_id)
+            .order_by(desc(cls.created_at))
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        return result.scalars().first()
     
     @classmethod
-    def get_version_history(cls, session, scene_id: UUID, limit: int = 10):
-        """Get version history for a scene, most recent first."""
-        from sqlalchemy import desc
-        
-        return session.query(cls)\
-            .filter_by(scene_id=scene_id)\
-            .order_by(desc(cls.created_at))\
-            .limit(limit)\
-            .all()
+    async def get_version_history(
+        cls, 
+        session: AsyncSession, 
+        scene_id: UUID, 
+        limit: int = 10
+    ) -> List['SceneVersion']:
+        """Get version history for a scene, most recent first, asynchronously."""
+        stmt = (
+            select(cls)
+            .where(cls.scene_id == scene_id)
+            .order_by(desc(cls.created_at))
+            .limit(limit)
+        )
+        result = await session.execute(stmt)
+        return list(result.scalars().all())

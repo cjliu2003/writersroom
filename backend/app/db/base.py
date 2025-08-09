@@ -1,64 +1,60 @@
 import os
-from sqlalchemy import create_engine, event
+from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from typing import Generator
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 import logging
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Get database URL from environment
-SQLALCHEMY_DATABASE_URL = os.getenv('DB_URL')
-if not SQLALCHEMY_DATABASE_URL:
-    raise ValueError("DB_URL environment variable is not set")
+# Get async database URL from environment
+DB_URL_ASYNC = os.getenv('DB_URL_ASYNC')
+if not DB_URL_ASYNC:
+    raise ValueError("DB_URL_ASYNC environment variable is not set")
 
 # Configure logging
 logging.basicConfig()
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-# Create database engine
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+# Create async engine
+engine = create_async_engine(
+    DB_URL_ASYNC,
+    echo=True,
+    future=True,
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
     pool_recycle=300,
     pool_timeout=30,
-    echo=True  # Enable SQL query logging
+    poolclass=NullPool if 'test' in DB_URL_ASYNC else None
 )
 
-# Enable vector extension on connection
-@event.listens_for(engine, 'connect')
-def on_connect(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute('CREATE EXTENSION IF NOT EXISTS vector')
-    dbapi_connection.commit()
-    cursor.close()
-
-# Also ensure the extension is created when the engine first connects
-with engine.connect() as conn:
-    conn.execute('CREATE EXTENSION IF NOT EXISTS vector')
-    conn.commit()
-
-# Create session factory
-SessionLocal = sessionmaker(
-    autocommit=False,
+# Create async session factory
+async_session_maker = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
     autoflush=False,
-    bind=engine
+    autocommit=False
 )
 
 # Base class for models
 Base = declarative_base()
 
-def get_db() -> Generator:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
-    Dependency function that yields database sessions.
+    Dependency function that yields async database sessions.
     Handles session lifecycle including proper closing of the session.
     """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    async with async_session_maker() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()

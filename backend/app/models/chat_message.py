@@ -1,21 +1,28 @@
 from datetime import datetime
 from enum import Enum
+from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from uuid import UUID, uuid4
-from typing import Optional, Dict, Any, List
+
 from sqlalchemy import ForeignKey, Text, JSON, DateTime, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.sql import func
-from sqlalchemy_utils.types.vector import VectorType
+from pgvector.sqlalchemy import Vector
 
-from app.db.base import Base
+from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.chat_conversation import ChatConversation  # noqa: F401
 
 class MessageRole(str, Enum):
+    """Role of the message sender in the conversation."""
     USER = "user"
     ASSISTANT = "assistant"
     SYSTEM = "system"
 
+
 class MessageSender(str, Enum):
+    """Type of message sender."""
     USER = "user"
     ASSISTANT = "assistant"
 
@@ -48,7 +55,7 @@ class ChatMessage(Base):
     )
     
     # For backward compatibility
-    role: Mapped[MessageRole] = mapped_column(
+    role: Mapped[Optional[MessageRole]] = mapped_column(
         nullable=True,
         index=True
     )
@@ -60,7 +67,7 @@ class ChatMessage(Base):
     
     # Vector embedding of the message content (1536 dimensions for OpenAI's text-embedding-ada-002)
     embedding_vector: Mapped[Optional[List[float]]] = mapped_column(
-        VectorType(1536, zero_vector='zero'),
+        Vector(1536),
         nullable=True
     )
     
@@ -72,10 +79,12 @@ class ChatMessage(Base):
         index=True
     )
     
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    # Message metadata (avoid shadowing built-in 'metadata')
+    message_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSON,
         nullable=True,
-        default=dict
+        default=dict,
+        name='metadata'  # Keep the column name as 'metadata' in the database
     )
     
     created_at: Mapped[datetime] = mapped_column(
@@ -93,7 +102,9 @@ class ChatMessage(Base):
     )
     
     def __repr__(self) -> str:
-        return f"<ChatMessage {self.role}: {self.content[:50]}...>"
+        role = self.role.value if self.role else 'unknown'
+        content_preview = (self.content[:50] + '...') if len(self.content) > 50 else self.content
+        return f"<ChatMessage {role}: {content_preview}>"
     
     def to_dict(self) -> dict:
         """Convert ChatMessage instance to dictionary."""

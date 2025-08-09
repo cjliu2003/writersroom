@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from sqlalchemy.sql import func
 
-from app.db.base import Base
+from app.models.base import Base
 
 class Script(Base):
     """
@@ -48,16 +48,32 @@ class Script(Base):
     )
     
     created_at: Mapped[datetime] = mapped_column(
-        type_=datetime,
+        DateTime(timezone=True),
         server_default=func.now(),
         nullable=False
     )
     
     updated_at: Mapped[datetime] = mapped_column(
-        type_=datetime,
+        DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False
+    )
+    
+    # File paths for FDX import/export and PDF export
+    imported_fdx_path: Mapped[Optional[str]] = mapped_column(
+        String,
+        nullable=True
+    )
+    
+    exported_fdx_path: Mapped[Optional[str]] = mapped_column(
+        String,
+        nullable=True
+    )
+    
+    exported_pdf_path: Mapped[Optional[str]] = mapped_column(
+        String,
+        nullable=True
     )
     
     # Relationships
@@ -110,5 +126,8 @@ class Script(Base):
             'current_version': self.current_version,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'imported_fdx_path': self.imported_fdx_path,
+            'exported_fdx_path': self.exported_fdx_path,
+            'exported_pdf_path': self.exported_pdf_path,
             'owner': self.owner.to_dict() if self.owner else None
         }

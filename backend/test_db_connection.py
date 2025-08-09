@@ -6,10 +6,10 @@ def test_connection():
     # Load environment variables
     load_dotenv()
     
-    # Get database URL
-    db_url = os.getenv('DB_URL')
+    # Get sync database URL
+    db_url = os.getenv('DB_URL_SYNC')
     if not db_url:
-        print("Error: DB_URL not found in environment variables")
+        print("Error: DB_URL_SYNC not found in environment variables")
         return False
     
     try:

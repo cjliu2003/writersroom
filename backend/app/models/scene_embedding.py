@@ -6,10 +6,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
-# Import vector type after setting up the extension
-from sqlalchemy_utils.types.vector import VectorType
+# Import vector type from pgvector
+from pgvector.sqlalchemy import Vector
 
-from app.db.base import Base
+from app.models.base import Base
 
 class SceneEmbedding(Base):
     """
@@ -44,8 +44,8 @@ class SceneEmbedding(Base):
     )
     
     # Vector embedding (1536 dimensions for OpenAI's text-embedding-ada-002)
-    embedding: Mapped[VectorType] = mapped_column(
-        VectorType(1536),
+    embedding: Mapped[list[float]] = mapped_column(
+        Vector(1536),
         nullable=False
     )
     
