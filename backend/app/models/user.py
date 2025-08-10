@@ -24,6 +24,11 @@ class User(Base):
         nullable=False
     )
     
+    # Alias 'id' to point to 'user_id' for backward compatibility
+    @property
+    def id(self):
+        return self.user_id
+    
     firebase_uid: Mapped[str] = mapped_column(
         String(255),
         unique=True,

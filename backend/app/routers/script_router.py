@@ -12,7 +12,7 @@ from app.models.script import Script
 from app.models.script_collaborator import ScriptCollaborator, CollaboratorRole
 from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse
 from app.auth.dependencies import get_current_user
-from app.db.session import get_db
+from app.db.base import get_db
 
 router = APIRouter(prefix="/scripts", tags=["Scripts"])
 

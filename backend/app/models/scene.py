@@ -87,6 +87,15 @@ class Scene(Base):
         order_by='desc(SceneVersion.created_at)'
     )
     
+    # Embedding relationship
+    embedding = relationship(
+        'SceneEmbedding',
+        back_populates='scene',
+        uselist=False,  # one-to-one relationship
+        cascade='all, delete-orphan',
+        lazy='selectin'
+    )
+    
     def __repr__(self) -> str:
         return f"<Scene {self.scene_heading[:30]}...>"
     

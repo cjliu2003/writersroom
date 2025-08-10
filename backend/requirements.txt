@@ -10,3 +10,4 @@ pgvector==0.2.3
 asyncpg
 sqlalchemy-utils
 sqlalchemy-vector==0.2.0
+greenlet

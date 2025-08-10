@@ -1,37 +1,16 @@
-from datetime import datetime
-from typing import Any, Optional
-from uuid import uuid4
+from typing import Any
 
-from sqlalchemy import Column, DateTime, func
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import Mapped, mapped_column
 
 
 @as_declarative()
 class Base:
-    """Base class for all database models."""
+    """Base class for all database models.
     
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), 
-        primary_key=True, 
-        default=lambda: str(uuid4())
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=False
-    )
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    This base class provides common functionality for all models, but does not define
+    any columns. Each model is responsible for defining its own columns, ensuring that
+    the model matches the actual database schema.
+    """
 
     # Generate __tablename__ automatically
     @declared_attr
