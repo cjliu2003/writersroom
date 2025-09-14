@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script" Template="No" Version="12.0">
+  <Content>
+    <Title>Malformed Scene Test</Title>
+    <Paragraph Type="Scene Heading">
+      <Text>Ext. Silk road - night</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>First scene action.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>INT.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>This should not create a phantom scene.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>int. morgue – base reality - NIGHT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Second real scene action.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>INT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Another potential phantom scene.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>Black.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Final scene.</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script" Template="No" Version="12.0">
+  <Content>
+    <Title>Partial Sluglines Test</Title>
+    <Paragraph Type="Scene Heading">
+      <Text>INT.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>This action should be preserved with the partial slugline above.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>EXT.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>This action should also be preserved.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>INT. OFFICE - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Full slugline with action.</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>

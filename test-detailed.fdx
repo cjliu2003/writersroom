@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script" Template="No" Version="12.0">
+  <Content>
+    <Title>Detailed Test Script</Title>
+    <Paragraph Type="Scene Heading">
+      <Text>EXT. SILK ROAD - NIGHT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Ancient trade routes stretch into darkness. Wind howls across empty desert.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS (V.O.)</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>((male))</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>This is where it all began.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>EXT. BACKYARD - BASE REALITY - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Suburban backyard. Children's toys scattered on the grass.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SARAH</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Mom, can we go inside now?</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>FLASH TO:</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>BLACK.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Complete darkness. Only the sound of breathing.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>INT. HOSPITAL ROOM - CONTINUOUS</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Medical equipment beeps softly. Monitors show vital signs.</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script" Template="No" Version="12.0">
+  <Content>
+    <Title>Test 1 - Proper Full Slugline</Title>
+    <Paragraph Type="Scene Heading">
+      <Text>INT. SAM'S APARTMENT - BASE REALITY - NIGHT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Over the shoulder shot of SAM'S INFANT SON.</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script" Template="No" Version="12.0">
+  <Content>
+    <Title>Test Script - Complete</Title>
+    <Paragraph Type="Scene Heading">
+      <Text>INT. COFFEE SHOP - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>JOHN, 30s, sits at a small table reading a newspaper. The coffee shop is busy with morning customers.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>JOHN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I can't believe this is happening.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>MARY, 20s, enters the coffee shop and spots John. She walks over quickly.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>MARY</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>John! I've been looking everywhere for you.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>JOHN</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>looking up from his paper</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Mary? What are you doing here?</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>EXT. PARK - LATER</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>John and Mary walk through the park, deep in conversation. The sun filters through the trees.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>JOHN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>This changes everything we thought we knew.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>MARY</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>looking around nervously</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>We have to tell someone.</Text>
+    </Paragraph>
+    <Paragraph Type="Transition">
+      <Text>FADE OUT.</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>

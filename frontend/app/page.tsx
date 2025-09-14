@@ -1,380 +1,346 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Search, SlidersHorizontal, Plus, FileText, Folder, MessageSquare, Star, Trash2, User } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Upload, FileText, CheckCircle, AlertCircle, Plus, Folder, Clock, Eye } from "lucide-react"
 import { useRouter } from "next/navigation"
+
+interface UploadResult {
+  success: boolean
+  title?: string
+  sceneCount?: number
+  sluglines?: string[]
+  error?: string
+  projectId?: string
+}
 
 interface Project {
   id: string
   title: string
-  lastEdited: string
-  pages: number
-  folders: number
-  chats: number
-  starred: boolean
+  sceneCount: number
+  lastModified: Date
+  status: 'draft' | 'in-progress' | 'completed'
 }
 
 export default function HomePage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLogin, setIsLogin] = useState(true)
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [newProjectTitle, setNewProjectTitle] = useState("Untitled Script")
-  const [newProjectDescription, setNewProjectDescription] = useState("In a galaxy far, far away...")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: "1",
-      title: "Silk_Road_v2",
-      lastEdited: "2 days ago",
-      pages: 120,
-      folders: 6,
-      chats: 9,
-      starred: false,
-    },
-    {
-      id: "2",
-      title: "The Last Stand",
-      lastEdited: "5 days ago",
-      pages: 17,
-      folders: 2,
-      chats: 3,
-      starred: false,
-    },
-    {
-      id: "3",
-      title: "Echoes of Tomorrow",
-      lastEdited: "2 weeks ago",
-      pages: 24,
-      folders: 6,
-      chats: 2,
-      starred: false,
-    },
-    {
-      id: "4",
-      title: "Sunset Downtown",
-      lastEdited: "3 weeks ago",
-      pages: 6,
-      folders: 1,
-      chats: 2,
-      starred: false,
-    },
-    {
-      id: "5",
-      title: "The Grandma 4",
-      lastEdited: "2 years ago",
-      pages: 67,
-      folders: 4,
-      chats: 5,
-      starred: false,
-    },
-  ])
+  const [isDragging, setIsDragging] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [showToast, setShowToast] = useState(false)
   const router = useRouter()
 
+  // Mock project data - in real app, fetch from backend
   useEffect(() => {
-    const auth = localStorage.getItem("screenwriter-auth")
-    if (auth) {
-      setIsAuthenticated(true)
-    }
+    setProjects([
+      {
+        id: '1',
+        title: 'The Last Stand',
+        sceneCount: 24,
+        lastModified: new Date('2024-01-15'),
+        status: 'in-progress'
+      },
+      {
+        id: '2', 
+        title: 'Midnight Runner',
+        sceneCount: 18,
+        lastModified: new Date('2024-01-10'),
+        status: 'draft'
+      }
+    ])
   }, [])
 
-  const handleAuth = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (email && password) {
-      localStorage.setItem("screenwriter-auth", JSON.stringify({ email }))
-      setIsAuthenticated(true)
+  const handleFileUpload = async (file: File) => {
+    console.log("📥 Upload triggered")
+    console.log("Uploaded file name:", file.name)
+    console.log("File size:", file.size, "bytes")
+
+    if (!file.name.toLowerCase().endsWith('.fdx')) {
+      setUploadResult({
+        success: false,
+        error: 'Please upload a .fdx file'
+      })
+      return
+    }
+
+    setIsUploading(true)
+    setUploadResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('fdx', file)
+
+      console.log("🌐 Sending upload request to /api/fdx/import...")
+      const response = await fetch('/api/fdx/import', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+      console.log("✅ FDX Parse Success:")
+      console.log("Parsed title:", result.title)
+      console.log("Scene count:", result.sceneCount)
+      console.log("Sluglines:", result.sluglines)
+      console.log("Project ID:", result.projectId)
+
+      setUploadResult(result)
+
+      if (result.success) {
+        console.log('✅ FDX Upload successful:', result)
+
+        // Show success toast
+        setShowToast(true)
+        setTimeout(() => setShowToast(false), 3000)
+
+        // Add new project to list
+        const newProject: Project = {
+          id: result.projectId || Date.now().toString(),
+          title: result.title || file.name.replace('.fdx', ''),
+          sceneCount: result.sceneCount || 0,
+          lastModified: new Date(),
+          status: 'draft'
+        }
+        setProjects(prev => [newProject, ...prev])
+
+        // Store project info in localStorage as backup for editor
+        const scriptForEditor = {
+          id: result.projectId,
+          title: result.title,
+          scenes: result.sluglines?.map((slug: string, index: number) => ({
+            id: index.toString(),
+            heading: slug,
+            content: '' // Will be populated from backend
+          })) || [],
+          content: '', // Will be populated from backend
+          createdAt: new Date().toISOString()
+        }
+        localStorage.setItem(`project-${result.projectId}`, JSON.stringify(scriptForEditor))
+        console.log('💾 Stored project backup in localStorage:', result.projectId)
+
+        // Navigate to editor with projectId after brief delay
+        setTimeout(() => {
+          console.log('🚀 Navigating to editor with projectId:', result.projectId)
+          router.push(`/editor?projectId=${result.projectId}`)
+        }, 2000)
+      }
+    } catch (error) {
+      setUploadResult({
+        success: false,
+        error: 'Upload failed. Please try again.'
+      })
+    } finally {
+      setIsUploading(false)
     }
   }
 
-  const handleCreateProject = () => {
-    const newProject = {
-      id: Date.now().toString(),
-      title: newProjectTitle,
-      scenes: [],
-      content: "",
-      description: newProjectDescription,
-      createdAt: new Date().toISOString(),
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      handleFileUpload(file)
     }
-    localStorage.setItem("current-script", JSON.stringify(newProject))
-    router.push("/editor")
+  }
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDragging(false)
+    
+    const file = event.dataTransfer.files[0]
+    if (file && file.name.toLowerCase().endsWith('.fdx')) {
+      handleFileUpload(file)
+    }
+  }
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const items = Array.from(event.dataTransfer.items)
+    const hasFdxFile = items.some(item => 
+      item.kind === 'file' && item.type === '' && 
+      event.dataTransfer.files[0]?.name?.toLowerCase().endsWith('.fdx')
+    )
+    if (hasFdxFile || event.dataTransfer.files[0]?.name?.toLowerCase().endsWith('.fdx')) {
+      setIsDragging(true)
+    }
+  }
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+      setIsDragging(false)
+    }
   }
 
   const openProject = (projectId: string) => {
-    // For demo purposes, create a sample script based on project
-    const project = projects.find((p) => p.id === projectId)
-    if (!project) return
+    router.push(`/editor?projectId=${projectId}`)
+  }
 
-    const sampleScript = {
-      id: projectId,
-      title: project.title,
-      scenes: [
-        {
-          id: "1",
-          heading: "EXT. GRASSY FIELD - BASE REALITY - DAY - MEMORY",
-          content: "A young Ella (6, carefree) runs through a yard. A home-video. A memory.",
-        },
-      ],
-      content: `EXT. GRASSY FIELD - BASE REALITY - DAY - MEMORY
-
-A young Ella (6, carefree) runs through a yard. A home-video. A memory.
-
-                    SAM (V.O.)
-          Hey Atlas...
-
-The girl stops. Picks a flower. Smells it.
-
-                    SAM (V.O.)
-          Do you believe in God?
-
-                                        CUT TO:
-
-EXT. CLIFFSIDE OCEAN VIEW - RECURSE - DAY
-
-A girl stands center frame. Black hoodie. Hood up. She overlooks the ocean. In one hand: a small flower. The one from before. In the other: an iPad, hidden behind her back.
-
-                    ATLAS (V.O.)
-          I do...
-
-After a moment, she drops the flower. Brings the iPad forward. Taps the screen.
-
-The world shifts. To night. To sunset. She's still. The world warping around her. She hesitates.
-
-                    SAM (V.O.)
-          You think God can see us in here?
-
-She taps again. The world turns anime. Then black and white.
-
-                    ELLA
-                    (beat)
-          Reset.
-
-The world dissolves — replaced by a glowing grid stretching to the horizon. A blueprint of something not yet built.
-
-                    ELLA (CONT'D)
-          Hmm.
-
-                                        CUT TO:
-
-INT. SAM'S APARTMENT - BASE REALITY - DAY
-
-Over the shoulder shot of Sam holding his infant son. Applying a cream to thin scars on his son's scalp...`,
-      createdAt: new Date().toISOString(),
+  const getStatusColor = (status: Project['status']) => {
+    switch (status) {
+      case 'completed': return 'bg-green-500/20 text-green-400'
+      case 'in-progress': return 'bg-blue-500/20 text-blue-400'
+      default: return 'bg-gray-500/20 text-gray-400'
     }
-    localStorage.setItem("current-script", JSON.stringify(sampleScript))
-    router.push("/editor")
   }
 
-  const toggleStar = (projectId: string) => {
-    setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, starred: !p.starred } : p)))
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+    })
   }
-
-  const deleteProject = (projectId: string) => {
-    setProjects((prev) => prev.filter((p) => p.id !== projectId))
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6">
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold">WritersRoom</h1>
-              <p className="text-gray-600">Professional screenwriting meets AI assistance</p>
-            </div>
-            <form onSubmit={handleAuth} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                {isLogin ? "Sign In" : "Sign Up"}
-              </Button>
-              <Button type="button" variant="ghost" className="w-full" onClick={() => setIsLogin(!isLogin)}>
-                {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  const filteredProjects = projects.filter((project) => project.title.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">My Scripts</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Not Signed In</span>
-            <Button variant="ghost" size="sm">
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
+    <>
+      {/* Drag and Drop Overlay */}
+      {isDragging && (
+        <div className="fixed inset-0 z-50 bg-blue-600/20 backdrop-blur-sm border-4 border-dashed border-blue-400 flex items-center justify-center">
+          <div className="text-center">
+            <Upload className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+            <p className="text-2xl font-semibold text-blue-400">Drop FDX file to import</p>
+            <p className="text-blue-300">Release to upload your screenplay</p>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Controls */}
-      <div className="px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search Scripts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-80"
-              />
+      {/* Success Toast */}
+      {showToast && uploadResult?.success && (
+        <div className="fixed top-4 right-4 z-40 bg-green-900/90 backdrop-blur border border-green-700 rounded-lg p-4 shadow-lg">
+          <div className="flex items-center gap-2 text-green-400">
+            <CheckCircle className="w-5 h-5" />
+            <div>
+              <p className="font-medium">Script uploaded successfully!</p>
+              <p className="text-sm text-green-300">Opening project...</p>
             </div>
-            <Button variant="outline" size="sm">
-              <SlidersHorizontal className="w-4 h-4 mr-2" />
-              Sort
-            </Button>
           </div>
-          <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            New Script
-          </Button>
         </div>
-      </div>
+      )}
 
-      {/* Projects Grid */}
-      <div className="px-6 pb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProjects.map((project) => (
-            <Card key={project.id} className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4">
-                <div onClick={() => openProject(project.id)}>
-                  <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
-                  <p className="text-sm text-gray-600 mb-4">Last edited {project.lastEdited}</p>
+      <div 
+        className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-white mb-4">
+              WritersRoom
+            </h1>
+            <p className="text-slate-300 text-xl">
+              Professional screenwriting meets AI assistance
+            </p>
+          </div>
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <FileText className="w-4 h-4" />
-                      <span>{project.pages} pages</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Folder className="w-4 h-4" />
-                      <span>{project.folders} folders</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <MessageSquare className="w-4 h-4" />
-                      <span>{project.chats} chats</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      toggleStar(project.id)
-                    }}
-                  >
-                    <Star
-                      className={`w-4 h-4 ${project.starred ? "fill-yellow-400 text-yellow-400" : "text-gray-400"}`}
-                    />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      deleteProject(project.id)
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 text-gray-400" />
-                  </Button>
-                </div>
+          {/* Project Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            {/* Upload a Script Button */}
+            <Card className={`border-2 border-dashed transition-all duration-200 cursor-pointer hover:scale-[1.02] ${
+              isDragging 
+                ? 'border-blue-400 bg-blue-50/10 shadow-lg shadow-blue-500/20' 
+                : 'border-slate-600 bg-slate-800/50 hover:border-slate-500 hover:bg-slate-800/70'
+            } backdrop-blur`}>
+              <CardContent className="p-6 text-center">
+                <input
+                  type="file"
+                  accept=".fdx"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="fdx-file-upload"
+                  disabled={isUploading}
+                />
+                <Button
+                  onClick={() => document.getElementById('fdx-file-upload')?.click()}
+                  variant="ghost"
+                  disabled={isUploading}
+                  className="h-auto flex flex-col items-center space-y-3 w-full p-6 hover:bg-transparent text-slate-300 hover:text-white"
+                >
+                  {isUploading ? (
+                    <>
+                      <div className="w-12 h-12 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                      <span className="text-sm">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-12 h-12 rounded-lg bg-blue-600/20 flex items-center justify-center">
+                        <Upload className="w-6 h-6 text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold">Upload a Script</p>
+                        <p className="text-xs text-slate-400">Drop FDX file or click</p>
+                      </div>
+                    </>
+                  )}
+                </Button>
               </CardContent>
             </Card>
-          ))}
 
-          {/* New Project Card */}
-          <Card
-            className="border-2 border-dashed border-blue-300 hover:border-blue-400 transition-colors cursor-pointer"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <CardContent className="p-4 flex flex-col items-center justify-center h-full min-h-[200px]">
-              <div className="w-12 h-12 rounded-full border-2 border-dashed border-blue-400 flex items-center justify-center mb-4">
-                <Plus className="w-6 h-6 text-blue-600" />
+            {/* New Project Button */}
+            <Card className="border-slate-700 bg-slate-800/50 backdrop-blur hover:bg-slate-800/70 transition-all duration-200 cursor-pointer hover:scale-[1.02]">
+              <CardContent className="p-6 text-center">
+                <Button
+                  onClick={() => router.push('/editor')}
+                  variant="ghost"
+                  className="h-auto flex flex-col items-center space-y-3 w-full p-6 hover:bg-transparent text-slate-300 hover:text-white"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-purple-600/20 flex items-center justify-center">
+                    <Plus className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Start New Script</p>
+                    <p className="text-xs text-slate-400">Create from scratch</p>
+                  </div>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Project Tiles */}
+            {projects.map((project) => (
+              <Card 
+                key={project.id}
+                className="border-slate-700 bg-slate-800/50 backdrop-blur hover:bg-slate-800/70 transition-all duration-200 cursor-pointer hover:scale-[1.02]"
+                onClick={() => openProject(project.id)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <FileText className="w-8 h-8 text-slate-400 flex-shrink-0" />
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
+                      {project.status.replace('-', ' ')}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <h3 className="text-white font-semibold text-lg mb-2 truncate">{project.title}</h3>
+                  <div className="space-y-1 text-sm text-slate-400">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      <span>{project.sceneCount} scenes</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      <span>{formatDate(project.lastModified)}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Error Display */}
+          {uploadResult && !uploadResult.success && (
+            <div className="max-w-md mx-auto mb-8">
+              <div className="flex items-center gap-2 text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-800">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Upload Failed</p>
+                  <p className="text-sm">{uploadResult.error}</p>
+                </div>
               </div>
-              <span className="text-blue-600 font-medium">New Script</span>
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Create New Script Modal */}
-      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">Create New Script</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Project Title</Label>
-              <Input
-                id="title"
-                value={newProjectTitle}
-                onChange={(e) => setNewProjectTitle(e.target.value)}
-                placeholder="Untitled Script"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Project Description</Label>
-              <Textarea
-                id="description"
-                value={newProjectDescription}
-                onChange={(e) => setNewProjectDescription(e.target.value)}
-                placeholder="In a galaxy far, far away..."
-                rows={3}
-              />
-            </div>
-            <div className="flex gap-3 pt-4">
-              <Button onClick={handleCreateProject} className="flex-1 bg-blue-600 hover:bg-blue-700">
-                Create
-              </Button>
-              <Button variant="outline" onClick={() => setShowCreateModal(false)} className="flex-1">
-                Back
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+    </>
   )
 }

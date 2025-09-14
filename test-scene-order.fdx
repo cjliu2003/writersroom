@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script" Template="No" Version="12.0">
+  <Content>
+    <Title>Scene Order Test</Title>
+    <Paragraph Type="Scene Heading">
+      <Text>SCENE 1: INT. OFFICE - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>First scene action.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>SCENE 2: EXT. PARK - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Second scene action.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>SCENE 3: INT. CAR - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Third scene action.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>SCENE 4: EXT. BEACH - SUNSET</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Fourth scene action.</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>
