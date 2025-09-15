@@ -103,20 +103,36 @@ export default function HomePage() {
         }
         setProjects(prev => [newProject, ...prev])
 
-        // Store project info in localStorage as backup for editor
+        // Store full project data in localStorage for fallback when backend is down
+        const fullContentString = result.screenplayElements ? JSON.stringify(result.screenplayElements) : ''
+
         const scriptForEditor = {
           id: result.projectId,
           title: result.title,
           scenes: result.sluglines?.map((slug: string, index: number) => ({
             id: index.toString(),
             heading: slug,
-            content: '' // Will be populated from backend
+            content: fullContentString // Store full content for fallback
           })) || [],
-          content: '', // Will be populated from backend
-          createdAt: new Date().toISOString()
+          content: fullContentString, // Store full parsed screenplay elements
+          createdAt: new Date().toISOString(),
+          backendAvailable: false // Will be set to true if backend storage succeeds
         }
+
+        // Also store as "lastParsedProject" for easy fallback access
+        const fallbackProject = {
+          projectId: result.projectId,
+          title: result.title,
+          scenes: result.screenplayElements || [],
+          sluglines: result.sluglines || [],
+          timestamp: new Date().toISOString()
+        }
+
         localStorage.setItem(`project-${result.projectId}`, JSON.stringify(scriptForEditor))
-        console.log('💾 Stored project backup in localStorage:', result.projectId)
+        localStorage.setItem('lastParsedProject', JSON.stringify(fallbackProject))
+
+        console.log('💾 Stored full project data in localStorage:', result.projectId)
+        console.log('💾 Stored fallback project with', result.screenplayElements?.length || 0, 'elements')
 
         // Navigate to editor with projectId after brief delay
         setTimeout(() => {

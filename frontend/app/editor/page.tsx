@@ -22,6 +22,7 @@ function EditorPageContent() {
   const [isOutlineOpen, setIsOutlineOpen] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date>(new Date())
   const [isLoading, setIsLoading] = useState(true)
+  const [isOfflineMode, setIsOfflineMode] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -85,19 +86,58 @@ function EditorPageContent() {
           }
         } catch (error) {
           console.error('❌ Editor: Failed to load script from memory backend:', error)
+          setIsOfflineMode(true)
         }
       }
-      
+
+      // Enhanced fallback system when backend is down
+      console.log('🔄 Backend unavailable, using localStorage fallback...')
+      setIsOfflineMode(true)
+
+      // Try lastParsedProject first (most recent FDX upload)
+      const lastParsedProject = localStorage.getItem('lastParsedProject')
+      if (lastParsedProject && projectId) {
+        try {
+          const parsed = JSON.parse(lastParsedProject)
+          if (parsed.projectId === projectId && parsed.scenes && parsed.scenes.length > 0) {
+            console.log('✅ Found lastParsedProject with', parsed.scenes.length, 'elements')
+
+            const fallbackScript: Script = {
+              id: parsed.projectId,
+              title: parsed.title || 'Imported Script',
+              scenes: parseScenes(JSON.stringify(parsed.scenes)),
+              content: JSON.stringify(parsed.scenes),
+              createdAt: parsed.timestamp || new Date().toISOString()
+            }
+
+            console.log('🔄 OFFLINE MODE: Loading script with', fallbackScript.scenes.length, 'scenes')
+            setScript(fallbackScript)
+            setIsLoading(false)
+            return
+          }
+        } catch (error) {
+          console.warn('Failed to parse lastParsedProject:', error)
+        }
+      }
+
       // Fallback to project-specific localStorage
       const projectSpecificKey = `project-${projectId}`
       const savedScript = localStorage.getItem(projectSpecificKey)
       if (savedScript) {
         const parsedScript = JSON.parse(savedScript)
-        console.log("🧠 Fallback: Updating editor from project-specific localStorage...")
+        console.log("🧠 Project fallback: Updating editor from project-specific localStorage...")
         console.log("Using key:", projectSpecificKey)
         console.log("Stored script title:", parsedScript.title)
-        console.log("Stored scene count:", parsedScript.scenes?.length || 0)
-        console.log("First stored slugline:", parsedScript.scenes?.[0]?.heading || 'No scenes')
+        console.log("Content length:", parsedScript.content?.length || 0)
+
+        // If we have full content, use it
+        if (parsedScript.content && parsedScript.content.length > 50) {
+          console.log("✅ Found full content in project localStorage")
+          setScript(parsedScript)
+          setIsLoading(false)
+          return
+        }
+
         setScript(parsedScript)
       } else {
         console.log("❌ No project-specific localStorage found for key:", projectSpecificKey)
@@ -516,8 +556,20 @@ function EditorPageContent() {
         </Button>
       </div>
 
-      {/* Main Content Area - starts below both headers */}
-      <div className="pt-[112px] w-full flex">
+      {/* Offline Mode Banner */}
+      {isOfflineMode && (
+        <div className="fixed top-[112px] left-0 right-0 z-30 bg-amber-500/90 backdrop-blur border-b border-amber-600 px-6 py-2">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-amber-900">
+            <span className="text-lg">⚠️</span>
+            <span className="font-medium text-sm">
+              Offline Mode: Memory backend not connected. Changes will be saved locally only.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content Area - starts below both headers and banner */}
+      <div className={`${isOfflineMode ? 'pt-[150px]' : 'pt-[112px]'} w-full flex`}>
         {/* Left Sidebar - Scene Outline */}
         {isOutlineOpen && (
           <div className="w-96 transition-all duration-300">
