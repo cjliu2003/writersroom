@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, FileText, CheckCircle, AlertCircle, Plus, Folder, Clock, Eye } from "lucide-react"
 import { useRouter } from "next/navigation"
+import DragOverlay from "@/components/DragOverlay"
+import LoadingOverlay from "@/components/LoadingOverlay"
 
 interface UploadResult {
   success: boolean
@@ -26,9 +28,9 @@ interface Project {
 export default function HomePage() {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isParsing, setIsParsing] = useState(false)
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
-  const [showToast, setShowToast] = useState(false)
   const router = useRouter()
 
   // Mock project data - in real app, fetch from backend
@@ -42,13 +44,56 @@ export default function HomePage() {
         status: 'in-progress'
       },
       {
-        id: '2', 
+        id: '2',
         title: 'Midnight Runner',
         sceneCount: 18,
         lastModified: new Date('2024-01-10'),
         status: 'draft'
       }
     ])
+  }, [])
+
+  // Simple window-level drag detection
+  useEffect(() => {
+    let dragCounter = 0
+
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault()
+      dragCounter++
+      if (dragCounter === 1) {
+        setIsDragging(true)
+      }
+    }
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault()
+      dragCounter--
+      if (dragCounter === 0) {
+        setIsDragging(false)
+      }
+    }
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault()
+    }
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault()
+      dragCounter = 0
+      setIsDragging(false)
+    }
+
+    window.addEventListener('dragenter', handleDragEnter)
+    window.addEventListener('dragleave', handleDragLeave)
+    window.addEventListener('dragover', handleDragOver)
+    window.addEventListener('drop', handleDrop)
+
+    return () => {
+      window.removeEventListener('dragenter', handleDragEnter)
+      window.removeEventListener('dragleave', handleDragLeave)
+      window.removeEventListener('dragover', handleDragOver)
+      window.removeEventListener('drop', handleDrop)
+    }
   }, [])
 
   const handleFileUpload = async (file: File) => {
@@ -65,6 +110,7 @@ export default function HomePage() {
     }
 
     setIsUploading(true)
+    setIsParsing(true)
     setUploadResult(null)
 
     try {
@@ -88,10 +134,6 @@ export default function HomePage() {
 
       if (result.success) {
         console.log('✅ FDX Upload successful:', result)
-
-        // Show success toast
-        setShowToast(true)
-        setTimeout(() => setShowToast(false), 3000)
 
         // Add new project to list
         const newProject: Project = {
@@ -134,19 +176,19 @@ export default function HomePage() {
         console.log('💾 Stored full project data in localStorage:', result.projectId)
         console.log('💾 Stored fallback project with', result.screenplayElements?.length || 0, 'elements')
 
-        // Navigate to editor with projectId after brief delay
-        setTimeout(() => {
-          console.log('🚀 Navigating to editor with projectId:', result.projectId)
-          router.push(`/editor?projectId=${result.projectId}`)
-        }, 2000)
+        // Navigate to editor immediately after parsing completes
+        // Keep loading overlay visible during navigation
+        console.log('🚀 Navigating to editor with projectId:', result.projectId)
+        router.push(`/editor?projectId=${result.projectId}`)
+        // Note: isUploading stays true to keep loading overlay visible during navigation
       }
     } catch (error) {
       setUploadResult({
         success: false,
         error: 'Upload failed. Please try again.'
       })
-    } finally {
       setIsUploading(false)
+      setIsParsing(false)
     }
   }
 
@@ -159,30 +201,12 @@ export default function HomePage() {
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
-    setIsDragging(false)
-    
+    event.stopPropagation()
+    console.log('🎯 File dropped on drop zone')
+
     const file = event.dataTransfer.files[0]
     if (file && file.name.toLowerCase().endsWith('.fdx')) {
       handleFileUpload(file)
-    }
-  }
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    const items = Array.from(event.dataTransfer.items)
-    const hasFdxFile = items.some(item => 
-      item.kind === 'file' && item.type === '' && 
-      event.dataTransfer.files[0]?.name?.toLowerCase().endsWith('.fdx')
-    )
-    if (hasFdxFile || event.dataTransfer.files[0]?.name?.toLowerCase().endsWith('.fdx')) {
-      setIsDragging(true)
-    }
-  }
-
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
-      setIsDragging(false)
     }
   }
 
@@ -208,19 +232,17 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Drag and Drop Overlay */}
-      {isDragging && (
-        <div className="fixed inset-0 z-50 bg-blue-600/20 backdrop-blur-sm border-4 border-dashed border-blue-400 flex items-center justify-center">
-          <div className="text-center">
-            <Upload className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-            <p className="text-2xl font-semibold text-blue-400">Drop FDX file to import</p>
-            <p className="text-blue-300">Release to upload your screenplay</p>
-          </div>
-        </div>
-      )}
+      {/* Enhanced Drag and Drop Overlay */}
+      <DragOverlay isVisible={isDragging} />
 
-      {/* Success Toast */}
-      {showToast && uploadResult?.success && (
+      {/* Loading Overlay */}
+      <LoadingOverlay
+        isVisible={isParsing}
+        title={uploadResult?.title || "Processing your screenplay"}
+      />
+
+      {/* Success Toast - Disabled in favor of full-screen loading overlay */}
+      {/* {showToast && uploadResult?.success && (
         <div className="fixed top-4 right-4 z-40 bg-green-900/90 backdrop-blur border border-green-700 rounded-lg p-4 shadow-lg">
           <div className="flex items-center gap-2 text-green-400">
             <CheckCircle className="w-5 h-5" />
@@ -230,13 +252,11 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
-      <div 
+      <div
         className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6"
         onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
       >
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -253,8 +273,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
             {/* Upload a Script Button */}
             <Card className={`border-2 border-dashed transition-all duration-200 cursor-pointer hover:scale-[1.02] ${
-              isDragging 
-                ? 'border-blue-400 bg-blue-50/10 shadow-lg shadow-blue-500/20' 
+              isDragging
+                ? 'border-purple-400 bg-purple-50/10 ring-4 ring-purple-400 shadow-lg shadow-purple-500/20'
                 : 'border-slate-600 bg-slate-800/50 hover:border-slate-500 hover:bg-slate-800/70'
             } backdrop-blur`}>
               <CardContent className="p-6 text-center">
@@ -274,8 +294,8 @@ export default function HomePage() {
                 >
                   {isUploading ? (
                     <>
-                      <div className="w-12 h-12 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                      <span className="text-sm">Uploading...</span>
+                      <div className="w-12 h-12 border-2 border-blue-600/50 border-t-blue-600 rounded-full animate-spin" />
+                      <span className="text-sm opacity-60">Processing...</span>
                     </>
                   ) : (
                     <>
