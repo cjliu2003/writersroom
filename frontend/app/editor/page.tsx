@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Scene, Script } from '@/types/screenplay'
 import { SceneMemory } from '../../../shared/types'
 import { markOpened } from '@/lib/projectRegistry'
+import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs'
 
 interface MemoryScene extends SceneMemory {
   themes: string[]
@@ -19,8 +20,8 @@ interface MemoryScene extends SceneMemory {
 
 function EditorPageContent() {
   const [script, setScript] = useState<Script | null>(null)
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false)
-  const [isOutlineOpen, setIsOutlineOpen] = useState(false)
+  const [isAssistantOpen, setIsAssistantOpen] = useState(true)
+  const [isOutlineOpen, setIsOutlineOpen] = useState(true)
   const [lastSaved, setLastSaved] = useState<Date>(new Date())
   const [isLoading, setIsLoading] = useState(true)
   const [isOfflineMode, setIsOfflineMode] = useState(false)
@@ -29,16 +30,56 @@ function EditorPageContent() {
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [currentSceneInView, setCurrentSceneInView] = useState<string>('')
 
+  // Load layout preferences on mount
+  useEffect(() => {
+    const prefs = loadLayoutPrefs();
+    setIsOutlineOpen(prefs.sceneListVisible);
+    setIsAssistantOpen(prefs.assistantVisible);
+  }, []);
+
+  // Save layout preferences when sidebar states change
+  useEffect(() => {
+    const prefs: EditorLayoutPrefs = {
+      sceneListVisible: isOutlineOpen,
+      assistantVisible: isAssistantOpen
+    };
+    saveLayoutPrefs(prefs);
+  }, [isOutlineOpen, isAssistantOpen]);
+
   useEffect(() => {
     const loadScript = async () => {
       setIsLoading(true)
       
       // Check if we have a projectId from the URL
       const projectId = searchParams.get('projectId')
-      
+      const isNewScript = searchParams.get('new') === 'true'
+
       if (projectId) {
         // Mark project as opened in the registry
         markOpened(projectId)
+
+        // Handle new script creation
+        if (isNewScript) {
+          console.log('🆕 Creating new blank script for projectId:', projectId)
+
+          // Get project title from registry
+          const projects = JSON.parse(localStorage.getItem('wr.projects') || '[]')
+          const project = projects.find((p: any) => p.projectId === projectId)
+          const title = project?.title || 'Untitled Script'
+
+          const newScript: Script = {
+            id: projectId,
+            title: title,
+            scenes: [],
+            content: '',
+            createdAt: new Date().toISOString()
+          }
+
+          setScript(newScript)
+          localStorage.setItem(`project-${projectId}`, JSON.stringify(newScript))
+          setIsLoading(false)
+          return
+        }
 
         // Load from memory backend
         console.log('🔄 Editor: Loading project from memory backend:', projectId)
