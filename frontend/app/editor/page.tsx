@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 import { Scene, Script } from '@/types/screenplay'
 import { SceneMemory } from '../../../shared/types'
+import { markOpened } from '@/lib/projectRegistry'
 
 interface MemoryScene extends SceneMemory {
   themes: string[]
@@ -36,6 +37,9 @@ function EditorPageContent() {
       const projectId = searchParams.get('projectId')
       
       if (projectId) {
+        // Mark project as opened in the registry
+        markOpened(projectId)
+
         // Load from memory backend
         console.log('🔄 Editor: Loading project from memory backend:', projectId)
         try {

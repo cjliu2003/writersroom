@@ -10,6 +10,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import memoryRoutes from './routes/memory';
+import { registerProject, listProjects, deleteProject } from './api/projects';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,6 +34,11 @@ app.get('/api/health', (_req, res) => {
 
 // API Routes
 app.use('/api/memory', memoryRoutes);
+
+// Project Registry Routes
+app.post('/api/projects/register', registerProject);
+app.get('/api/projects/list', listProjects);
+app.delete('/api/projects/:projectId', deleteProject);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -58,6 +64,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Writersroom Backend API running on port ${PORT}`);
   console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
   console.log(`💾 Memory API: http://localhost:${PORT}/api/memory/*`);
+  console.log(`📁 Projects API: http://localhost:${PORT}/api/projects/*`);
 });
 
 export default app;

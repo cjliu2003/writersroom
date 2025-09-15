@@ -7,6 +7,7 @@ import { Upload, FileText, CheckCircle, AlertCircle, Plus, Folder, Clock, Eye } 
 import { useRouter } from "next/navigation"
 import DragOverlay from "@/components/DragOverlay"
 import LoadingOverlay from "@/components/LoadingOverlay"
+import { listProjects, upsertProject, mirrorToBackend, type ProjectSummary } from "@/lib/projectRegistry"
 
 interface UploadResult {
   success: boolean
@@ -33,24 +34,39 @@ export default function HomePage() {
   const [projects, setProjects] = useState<Project[]>([])
   const router = useRouter()
 
-  // Mock project data - in real app, fetch from backend
+  // Load projects from localStorage on mount
   useEffect(() => {
-    setProjects([
-      {
-        id: '1',
-        title: 'The Last Stand',
-        sceneCount: 24,
-        lastModified: new Date('2024-01-15'),
-        status: 'in-progress'
-      },
-      {
-        id: '2',
-        title: 'Midnight Runner',
-        sceneCount: 18,
-        lastModified: new Date('2024-01-10'),
-        status: 'draft'
-      }
-    ])
+    const savedProjects = listProjects()
+
+    if (savedProjects.length > 0) {
+      // Convert saved projects to display format
+      const displayProjects = savedProjects.map(p => ({
+        id: p.projectId,
+        title: p.title,
+        sceneCount: p.sceneCount,
+        lastModified: new Date(p.lastOpenedAt || p.updatedAt || p.createdAt),
+        status: p.status as 'draft' | 'in-progress' | 'completed'
+      }))
+      setProjects(displayProjects)
+    } else {
+      // Show sample projects if no real projects exist
+      setProjects([
+        {
+          id: '1',
+          title: 'The Last Stand',
+          sceneCount: 24,
+          lastModified: new Date('2024-01-15'),
+          status: 'in-progress'
+        },
+        {
+          id: '2',
+          title: 'Midnight Runner',
+          sceneCount: 18,
+          lastModified: new Date('2024-01-10'),
+          status: 'draft'
+        }
+      ])
+    }
   }, [])
 
   // Simple window-level drag detection
@@ -135,15 +151,40 @@ export default function HomePage() {
       if (result.success) {
         console.log('✅ FDX Upload successful:', result)
 
-        // Add new project to list
-        const newProject: Project = {
-          id: result.projectId || Date.now().toString(),
+        // Save to project registry
+        const projectSummary: ProjectSummary = {
+          projectId: result.projectId || Date.now().toString(),
           title: result.title || file.name.replace('.fdx', ''),
           sceneCount: result.sceneCount || 0,
+          status: 'draft',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+
+        // Save to localStorage
+        upsertProject(projectSummary)
+
+        // Optional: Mirror to backend (fire-and-forget)
+        mirrorToBackend(projectSummary)
+
+        // Add new project to display list (optimistic update)
+        const newProject: Project = {
+          id: projectSummary.projectId,
+          title: projectSummary.title,
+          sceneCount: projectSummary.sceneCount,
           lastModified: new Date(),
           status: 'draft'
         }
-        setProjects(prev => [newProject, ...prev])
+
+        // Filter out sample projects if this is the first real project
+        setProjects(prev => {
+          const hasSampleProjects = prev.some(p => p.id === '1' || p.id === '2')
+          if (hasSampleProjects && listProjects().length === 1) {
+            // Replace samples with first real project
+            return [newProject]
+          }
+          return [newProject, ...prev]
+        })
 
         // Store full project data in localStorage for fallback when backend is down
         const fullContentString = result.screenplayElements ? JSON.stringify(result.screenplayElements) : ''
