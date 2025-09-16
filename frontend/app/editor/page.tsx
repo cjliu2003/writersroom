@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react"
 import { ScreenplayEditor } from "@/components/screenplay-editor"
-import { AIAssistant } from "@/components/ai-assistant"
+import { AIChatbot } from "@/components/ai-chatbot"
 import { SceneDescriptions } from "@/components/scene-descriptions"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -25,6 +25,7 @@ function EditorPageContent() {
   const [lastSaved, setLastSaved] = useState<Date>(new Date())
   const [isLoading, setIsLoading] = useState(true)
   const [isOfflineMode, setIsOfflineMode] = useState(false)
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -55,6 +56,7 @@ function EditorPageContent() {
       const isNewScript = searchParams.get('new') === 'true'
 
       if (projectId) {
+        setCurrentProjectId(projectId)
         // Mark project as opened in the registry
         markOpened(projectId)
 
@@ -92,8 +94,22 @@ function EditorPageContent() {
             const result = await response.json()
             console.log('📊 Editor: Backend response:', result)
             if (result.success && result.data && result.data.length > 0) {
-              // Convert memory scenes to script format
+              // Convert memory scenes to script format and sort by sequence index
               const memoryScenes: MemoryScene[] = result.data
+
+              // Sort scenes by the first element's sequence index to preserve original order
+              memoryScenes.sort((a, b) => {
+                try {
+                  const aElements = a.fullContent ? JSON.parse(a.fullContent) : []
+                  const bElements = b.fullContent ? JSON.parse(b.fullContent) : []
+                  const aIndex = aElements[0]?.metadata?.sequenceIndex || aElements[0]?.sequenceIndex || 0
+                  const bIndex = bElements[0]?.metadata?.sequenceIndex || bElements[0]?.sequenceIndex || 0
+                  return aIndex - bIndex
+                } catch (error) {
+                  console.warn('Error sorting scenes by sequence index:', error)
+                  return 0
+                }
+              })
               console.log('🎬 Editor: Found', memoryScenes.length, 'scenes in memory')
               console.log('📝 Editor: First scene fullContent length:', memoryScenes[0]?.fullContent?.length || 'no fullContent')
 
@@ -125,9 +141,31 @@ function EditorPageContent() {
               return
             } else {
               console.log('❌ Editor: No scenes found in backend response')
+              console.warn("⚠️ Script has no scenes, initializing empty script")
+
+              // Get project title from registry
+              const projects = JSON.parse(localStorage.getItem('wr.projects') || '[]')
+              const project = projects.find((p: any) => p.projectId === projectId)
+              const title = project?.title || 'Untitled Script'
+
+              const emptyScript: Script = {
+                id: projectId,
+                title: title,
+                scenes: [],
+                content: '',
+                createdAt: new Date().toISOString()
+              }
+
+              setScript(emptyScript)
+              localStorage.setItem(`project-${projectId}`, JSON.stringify(emptyScript))
+              setIsLoading(false)
+              return
             }
           } else {
             console.log('❌ Editor: Backend response not OK:', response.status, response.statusText)
+            // Backend responded but with error status - this is a backend issue, trigger offline mode
+            setIsOfflineMode(true)
+            // Continue to fallback logic without setting isLoading false here
           }
         } catch (error) {
           console.error('❌ Editor: Failed to load script from memory backend:', error)
@@ -136,8 +174,10 @@ function EditorPageContent() {
       }
 
       // Enhanced fallback system when backend is down
-      console.log('🔄 Backend unavailable, using localStorage fallback...')
-      setIsOfflineMode(true)
+      if (!script) {  // Only fallback if no script has been loaded yet
+        console.log('🔄 Backend unavailable, using localStorage fallback...')
+        console.warn('⚠️ Offline Mode triggered: backend unavailable or unreachable')
+        setIsOfflineMode(true)
 
       // Try lastParsedProject first (most recent FDX upload)
       const lastParsedProject = localStorage.getItem('lastParsedProject')
@@ -197,8 +237,15 @@ function EditorPageContent() {
         }
       }
       setIsLoading(false)
+      }  // End of if (!script) condition
+
+      // Fallback: Ensure loading always resolves
+      if (isLoading) {
+        console.warn('⚠️ Loading state fallback triggered - ensuring spinner stops')
+        setIsLoading(false)
+      }
     }
-    
+
     loadScript()
   }, [router, searchParams])
 
@@ -623,6 +670,7 @@ function EditorPageContent() {
               editorContent={script.content}
               currentSceneInView={currentSceneInView}
               onSceneSelect={() => {}}
+              projectId={currentProjectId || undefined}
             />
           </div>
         )}
@@ -656,7 +704,7 @@ function EditorPageContent() {
         {/* Right Sidebar - AI Assistant */}
         {isAssistantOpen && (
           <div className="w-96 transition-all duration-300">
-            <AIAssistant script={script} onClose={() => setIsAssistantOpen(false)} />
+            <AIChatbot projectId={currentProjectId || undefined} isVisible={true} />
           </div>
         )}
       </div>
