@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script" Template="No" Version="12.0">
+  <Content>
+    <Title>Debug Scene Test</Title>
+    <Paragraph Type="Scene Heading">
+      <Text>INT. Bob's BAZAAR - silk road</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>A mystical marketplace filled with wonders.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>FADE TO BLACK</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Complete darkness envelops the screen.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>FLASH TO:
+The memory fades.
+CUT TO:</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <Text>EXT. FIELD - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Open grasslands stretch to the horizon.</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft DocumentType="Script" Template="No" Version="1">
+  <Content>
+    <Paragraph Type="Scene Heading">
+      <Text>EXT. SILK ROAD - NIGHT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The first scene at the silk road. A caravan moves slowly through the desert.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>MERCHANT 1</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>We must reach the oasis by dawn.</Text>
+    </Paragraph>
+
+    <Paragraph Type="Scene Heading">
+      <Text>INT. TATTOO ROOM - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The first tattoo room scene. Bright lights illuminate the space.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>TATTOO ARTIST</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>This will take about three hours.</Text>
+    </Paragraph>
+
+    <Paragraph Type="Scene Heading">
+      <Text>EXT. SILK ROAD - NIGHT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The second scene at the silk road. Different location, same time. Guards patrol the entrance.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>GUARD CAPTAIN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No one passes without inspection!</Text>
+    </Paragraph>
+
+    <Paragraph Type="Scene Heading">
+      <Text>INT. TATTOO ROOM - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The second tattoo room scene. A different angle shows more equipment.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CLIENT</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Is this going to hurt?</Text>
+    </Paragraph>
+
+    <Paragraph Type="Scene Heading">
+      <Text>EXT. SILK ROAD - NIGHT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The third scene at the silk road. Later that night. The moon is high.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>MERCHANT 2</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>The journey continues at first light.</Text>
+    </Paragraph>
+
+    <Paragraph Type="Scene Heading">
+      <Text>INT. DIFFERENT LOCATION - MORNING</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>A unique scene to verify non-duplicate scenes are preserved.</Text>
+    </Paragraph>
+
+    <Paragraph Type="Scene Heading">
+      <Text>INT. TATTOO ROOM - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The third tattoo room scene. Work continues on an elaborate design.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>TATTOO ARTIST</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Almost done with the outline.</Text>
+    </Paragraph>
+
+    <Paragraph Type="Scene Heading">
+      <Text>EXT. SILK ROAD - NIGHT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The fourth scene at the silk road. Dawn approaches on the horizon.</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>

@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Save, Home, FileText, Eye, HelpCircle } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+import ErrorBoundary from "@/components/ErrorBoundary"
 
 import { Scene, Script } from '@/types/screenplay'
 import { SceneMemory } from '../../../shared/types'
 import { markOpened } from '@/lib/projectRegistry'
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs'
+import { useChunkRetry } from '@/hooks/useChunkRetry'
 
 interface MemoryScene extends SceneMemory {
   themes: string[]
@@ -26,10 +28,14 @@ function EditorPageContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [isOfflineMode, setIsOfflineMode] = useState(false)
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [currentSceneInView, setCurrentSceneInView] = useState<string>('')
+
+  // Enable chunk retry mechanism
+  useChunkRetry()
 
   // Load layout preferences on mount
   useEffect(() => {
@@ -50,6 +56,7 @@ function EditorPageContent() {
   useEffect(() => {
     const loadScript = async () => {
       setIsLoading(true)
+      setError(null)
       
       // Check if we have a projectId from the URL
       const projectId = searchParams.get('projectId')
@@ -83,56 +90,97 @@ function EditorPageContent() {
           return
         }
 
-        // Load from memory backend
-        console.log('🔄 Editor: Loading project from memory backend:', projectId)
+        // Load from snapshot backend (atomic storage)
+        console.log('🔄 Editor: Loading project from snapshot backend:', projectId)
         try {
           const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
-          console.log('🌐 Editor: Fetching from:', `${BACKEND_API_URL}/memory/all?projectId=${projectId}`)
-          const response = await fetch(`${BACKEND_API_URL}/memory/all?projectId=${projectId}`)
+
+          // First try the new snapshot endpoint
+          console.log('📸 Editor: Fetching from snapshot:', `${BACKEND_API_URL}/projects/${projectId}/snapshot`)
+          let response = await fetch(`${BACKEND_API_URL}/projects/${projectId}/snapshot`)
+
+          let memoryScenes: MemoryScene[] = []
 
           if (response.ok) {
+            // Use snapshot data
             const result = await response.json()
-            console.log('📊 Editor: Backend response:', result)
-            if (result.success && result.data && result.data.length > 0) {
-              // Convert memory scenes to script format and sort by sequence index
-              const memoryScenes: MemoryScene[] = result.data
+            console.log('✅ Editor: Snapshot loaded successfully')
+            if (result.success && result.data) {
+              const snapshot = result.data
+              memoryScenes = snapshot.scenes || []
+              console.log(`   📊 Snapshot version: ${snapshot.version}`)
+              console.log(`   🎬 Scene count: ${memoryScenes.length}`)
+              console.log(`   📝 Title: ${snapshot.title}`)
+            }
+          } else if (response.status === 404) {
+            // Fallback to old memory/all endpoint for backward compatibility
+            console.log('⚠️ No snapshot found, falling back to memory/all endpoint')
+            response = await fetch(`${BACKEND_API_URL}/memory/all?projectId=${projectId}`)
 
-              // Sort scenes by the first element's sequence index to preserve original order
-              memoryScenes.sort((a, b) => {
+            if (response.ok) {
+              const result = await response.json()
+              console.log('📊 Editor: Memory backend response:', result)
+              if (result.success && result.data) {
+                memoryScenes = result.data
+              }
+            } else {
+              console.log("❌ Backend response not OK", response.status, response.statusText)
+              setIsOfflineMode(true)
+            }
+          } else {
+            console.log("❌ Backend response not OK", response.status, response.statusText)
+            setIsOfflineMode(true)
+          }
+
+          if (memoryScenes.length > 0) {
+              // Sort scenes by sequence index with robust error handling
+              const scenesWithIndex = memoryScenes.map((scene, originalIndex) => {
+                let sequenceIndex = originalIndex // fallback to original order
+
                 try {
-                  const aElements = a.fullContent ? JSON.parse(a.fullContent) : []
-                  const bElements = b.fullContent ? JSON.parse(b.fullContent) : []
-                  const aIndex = aElements[0]?.metadata?.sequenceIndex || aElements[0]?.sequenceIndex || 0
-                  const bIndex = bElements[0]?.metadata?.sequenceIndex || bElements[0]?.sequenceIndex || 0
-                  return aIndex - bIndex
+                  if (scene.fullContent) {
+                    const elements = JSON.parse(scene.fullContent)
+                    if (Array.isArray(elements) && elements.length > 0) {
+                      // Check multiple possible locations for sequence index
+                      const firstElement = elements[0]
+                      sequenceIndex = firstElement?.metadata?.sequenceIndex
+                        || firstElement?.sequenceIndex
+                        || elements.find(el => el.metadata?.sequenceIndex !== undefined)?.metadata?.sequenceIndex
+                        || elements.find(el => el.sequenceIndex !== undefined)?.sequenceIndex
+                        || originalIndex
+                    }
+                  }
                 } catch (error) {
-                  console.warn('Error sorting scenes by sequence index:', error)
-                  return 0
+                  console.warn(`Error parsing sequence index for scene "${scene.slugline}":`, error)
                 }
-              })
-              console.log('🎬 Editor: Found', memoryScenes.length, 'scenes in memory')
-              console.log('📝 Editor: First scene fullContent length:', memoryScenes[0]?.fullContent?.length || 'no fullContent')
 
-              const scriptContent = convertMemoryScenesToScript(memoryScenes)
+                return { scene, sequenceIndex, originalIndex }
+              })
+
+              // Sort by sequence index, fallback to original order
+              scenesWithIndex.sort((a, b) => {
+                if (a.sequenceIndex !== b.sequenceIndex) {
+                  return a.sequenceIndex - b.sequenceIndex
+                }
+                return a.originalIndex - b.originalIndex // Stable sort fallback
+              })
+
+              const sortedScenes = scenesWithIndex.map(item => item.scene)
+
+              console.log('Scene ordering loaded:', sortedScenes.length, 'scenes')
+
+              const scriptContent = convertMemoryScenesToScript(sortedScenes)
               const scenes = parseScenes(scriptContent)
 
               const newScript: Script = {
                 id: projectId,
-                title: extractTitleFromScenes(memoryScenes) || 'Untitled Script',
+                title: extractTitleFromScenes(sortedScenes) || 'Untitled Script',
                 scenes: scenes,
                 content: scriptContent,
                 createdAt: new Date().toISOString()
               }
 
-              console.log('✅ UPLOAD COMPLETE — updating editor with new screenplay:')
-              console.log('Project title:', newScript.title)
-              console.log('Scene count:', newScript.scenes.length)
-              console.log('Content length:', newScript.content.length)
-              console.log('First few elements of content:', scriptContent.substring(0, 200) + '...')
-
-              console.log("🧠 Updating editor with new screenplay...")
-              console.log("Scene count:", newScript.scenes.filter((s: any) => s.heading).length)
-              console.log("First slugline:", newScript.scenes[0]?.heading || 'No first scene')
+              console.log('Script loaded:', newScript.title, '-', newScript.scenes.length, 'scenes')
 
               setScript(newScript)
               // Also save to localStorage for future editing
@@ -161,22 +209,16 @@ function EditorPageContent() {
               setIsLoading(false)
               return
             }
-          } else {
-            console.log('❌ Editor: Backend response not OK:', response.status, response.statusText)
-            // Backend responded but with error status - this is a backend issue, trigger offline mode
-            setIsOfflineMode(true)
-            // Continue to fallback logic without setting isLoading false here
-          }
         } catch (error) {
-          console.error('❌ Editor: Failed to load script from memory backend:', error)
+          console.error('Editor: Failed to load script from memory backend:', error)
           setIsOfflineMode(true)
         }
       }
 
       // Enhanced fallback system when backend is down
       if (!script) {  // Only fallback if no script has been loaded yet
-        console.log('🔄 Backend unavailable, using localStorage fallback...')
-        console.warn('⚠️ Offline Mode triggered: backend unavailable or unreachable')
+        console.log('Backend unavailable, using localStorage fallback...')
+        console.warn('Offline Mode triggered: backend unavailable or unreachable')
         setIsOfflineMode(true)
 
       // Try lastParsedProject first (most recent FDX upload)
@@ -246,7 +288,11 @@ function EditorPageContent() {
       }
     }
 
-    loadScript()
+    loadScript().catch((err) => {
+      console.error('Critical error loading script:', err)
+      setError('Failed to load script. Please try refreshing the page.')
+      setIsLoading(false)
+    })
   }, [router, searchParams])
 
   // Log script changes for debugging
@@ -427,23 +473,28 @@ function EditorPageContent() {
   }
 
   const handleContentChange = (content: string) => {
-    if (!script) return
+    try {
+      if (!script) return
 
-    const updatedScript = { ...script, content }
+      const updatedScript = { ...script, content }
 
-    // Parse scenes from content
-    const scenes = parseScenes(content)
-    updatedScript.scenes = scenes
+      // Parse scenes from content
+      const scenes = parseScenes(content)
+      updatedScript.scenes = scenes
 
-    setScript(updatedScript)
+      setScript(updatedScript)
 
-    // Auto-save with debounce
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
+      // Auto-save with debounce
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+      saveTimeoutRef.current = setTimeout(() => {
+        saveScript(updatedScript)
+      }, 1000)
+    } catch (error) {
+      console.error('Error handling content change:', error)
+      setError('Error updating script content. Your changes may not be saved.')
     }
-    saveTimeoutRef.current = setTimeout(() => {
-      saveScript(updatedScript)
-    }, 1000)
   }
 
   const parseScenes = (content: string): Scene[] => {
@@ -536,6 +587,32 @@ function EditorPageContent() {
     return scenes
   }
 
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="text-center max-w-md p-8">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Script</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="space-y-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => router.push("/")}
+              className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading || !script) {
     return (
@@ -714,15 +791,17 @@ function EditorPageContent() {
 
 export default function EditorPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading script...</p>
+    <ErrorBoundary>
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen bg-gray-100">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading script...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <EditorPageContent />
-    </Suspense>
+      }>
+        <EditorPageContent />
+      </Suspense>
+    </ErrorBoundary>
   )
 }

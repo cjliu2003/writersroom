@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script" Template="No" Version="12.0">
+  <Content>
+    <Title>Test 2 - Action After Dialogue</Title>
+    <Paragraph Type="Scene Heading">
+      <Text>INT. OFFICE - DAY</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SENATOR</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>There's a camera in every head in the country!</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Shot of FBI DIRECTOR ISAIAH SHAW (60s, deep-set eyes).</Text>
+    </Paragraph>
+  </Content>
+</FinalDraft>

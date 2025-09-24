@@ -1,0 +1,89 @@
+{
+  "timestamp": "2025-09-22T22:45:31.691Z",
+  "groundTruthFile": "sr_first_look_final.fdx",
+  "expectedSceneCount": 53,
+  "stages": {
+    "stage1_parser": {
+      "sceneCount": 53,
+      "sluglines": [
+        "Ext. Silk road - night",
+        "ExT. backyard - BASE REALITY - day - memory",
+        "Ext. CLIFFSIDE ocean view - Silk Road - sunset",
+        "Int. Sam'S APARTMENT - base reality - night",
+        "Int.",
+        "int. morgue – base reality - NIGHT",
+        "INT. Jail – base reality - NIGHT",
+        "INT.",
+        "ext. hedge - silk road - night",
+        "Int. threshold - silk road",
+        "int.",
+        "Ext. dirt field - base reaLITY - day",
+        "Int. InTERROGATION ROOM – base reality - NIGHT",
+        "Int.",
+        "int. Empty room - silk road - afternoon",
+        "Ext. MEADOW - silk road - day",
+        "Int.",
+        "int. Somewhere - Silk Road - night",
+        "Int. tactical room - Silk road – night",
+        "INT. the archive – Silk Road - NIGHT",
+        "INT.",
+        "Int. SwingeRS CLUB hallway - Silk Road - night",
+        "Ext. Grassy FIELD - silk ROAD - night",
+        "Ext. Field - base reality - day",
+        "Int.",
+        "int. Bob’s BAZAAR - silk road",
+        "INT. tattoo room - base reality",
+        "int. ELEVATOR - base reality - night",
+        "Int. Tattoo room - base reality",
+        "Int. Tactical room - silk road",
+        "INT. TATTOO ROOM - silk road - night",
+        "Int. SwINGERS CLUB hallway - silk ROAD - night",
+        "Int. AbANDONED ANIMAL HOSPITAL - baSE REALITY – night",
+        "int. bathroom - SILK ROAD",
+        "Int. dining room - memory - day",
+        "int. bathroom - SILK ROAD - continuous",
+        "Ext. Porch - memory -  day",
+        "int. bathroom - SILK ROAD - conTINUOUS",
+        "Int. Sam'S BEDROOM - base REALITY – night",
+        "Int. police cruiser - SILK ROAD - night",
+        "EXT. Halo house - silk road - DAY",
+        "Int. the aRCHIVE – Silk Road - night",
+        "Int. Tattoo room - silk road - night",
+        "int. hospital - base reality - night",
+        "Int. Sam’s bedroom - base reality - night",
+        "Int. TACTICAL ROOM - Silk road - NIGHT",
+        "Int. Abandoned cps bUILDING - base reality - day",
+        "Int. visitation booth - base REALITY",
+        "int. Club - SILK ROAD - night",
+        "Int. visitation BOOTH - base reality",
+        "Ext. Silk road - night",
+        "Black.",
+        "EXT. Silk road - night"
+      ],
+      "errors": []
+    },
+    "stage2_memoryWrite": {
+      "attemptedWrites": 53,
+      "successfulWrites": 43,
+      "failedWrites": [],
+      "errors": []
+    },
+    "stage3_storedState": {
+      "backendScenes": 0,
+      "localStorageScenes": 0,
+      "errors": [
+        "BACKEND_API_URL is not defined"
+      ]
+    },
+    "stage4_editorHydration": {
+      "loadedScenes": 0,
+      "errors": []
+    }
+  },
+  "sceneTracking": {
+    "missingAtStage2": [],
+    "missingAtStage3": [],
+    "missingAtStage4": []
+  },
+  "conclusion": "Stage 2→3: Memory write operations failing"
+}

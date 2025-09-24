@@ -1,0 +1,55 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - heading "WritersRoom" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Professional screenwriting meets AI assistance
+    - generic [ref=e8]:
+      - button "Upload a Script Drop FDX file or click" [ref=e11]:
+        - generic [ref=e12]:
+          - img
+        - generic [ref=e13]:
+          - paragraph [ref=e14]: Upload a Script
+          - paragraph [ref=e15]: Drop FDX file or click
+      - button "Start New Script Create from scratch" [ref=e18]:
+        - generic [ref=e19]:
+          - img
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: Start New Script
+          - paragraph [ref=e22]: Create from scratch
+      - generic [ref=e23] [cursor=pointer]:
+        - generic [ref=e25] [cursor=pointer]:
+          - img [ref=e26] [cursor=pointer]
+          - generic [ref=e29] [cursor=pointer]:
+            - generic [ref=e30] [cursor=pointer]: in progress
+            - button [ref=e31]:
+              - img
+        - generic [ref=e32] [cursor=pointer]:
+          - heading "The Last Stand" [level=3] [ref=e33] [cursor=pointer]
+          - generic [ref=e34] [cursor=pointer]:
+            - generic [ref=e35] [cursor=pointer]:
+              - img [ref=e36] [cursor=pointer]
+              - generic [ref=e39] [cursor=pointer]: 24 scenes
+            - generic [ref=e40] [cursor=pointer]:
+              - img [ref=e41] [cursor=pointer]
+              - generic [ref=e44] [cursor=pointer]: Jan 14, 2024
+      - generic [ref=e45] [cursor=pointer]:
+        - generic [ref=e47] [cursor=pointer]:
+          - img [ref=e48] [cursor=pointer]
+          - generic [ref=e51] [cursor=pointer]:
+            - generic [ref=e52] [cursor=pointer]: draft
+            - button [ref=e53]:
+              - img
+        - generic [ref=e54] [cursor=pointer]:
+          - heading "Midnight Runner" [level=3] [ref=e55] [cursor=pointer]
+          - generic [ref=e56] [cursor=pointer]:
+            - generic [ref=e57] [cursor=pointer]:
+              - img [ref=e58] [cursor=pointer]
+              - generic [ref=e61] [cursor=pointer]: 18 scenes
+            - generic [ref=e62] [cursor=pointer]:
+              - img [ref=e63] [cursor=pointer]
+              - generic [ref=e66] [cursor=pointer]: Jan 9, 2024
+```
