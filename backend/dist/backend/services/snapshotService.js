@@ -9,6 +9,15 @@ class SnapshotService {
         console.log(`   Version: ${data.version}`);
         console.log(`   Scene Count: ${data.scenes.length}`);
         console.log(`   Elements Count: ${data.elements?.length || 0}`);
+        if (data.scenes.length > 0) {
+            console.log(`   First Scene: ${data.scenes[0].slugline || 'No slugline'}`);
+            console.log(`   Last Scene: ${data.scenes[data.scenes.length - 1].slugline || 'No slugline'}`);
+            const sluglines = data.scenes.map(s => s.slugline);
+            const uniqueSlugs = new Set(sluglines);
+            if (uniqueSlugs.size < sluglines.length) {
+                console.log(`   ⚠️ Duplicate sluglines detected: ${sluglines.length - uniqueSlugs.size} duplicates`);
+            }
+        }
         const totalWords = data.scenes.reduce((sum, scene) => sum + (scene.wordCount || 0), 0);
         const totalTokens = data.scenes.reduce((sum, scene) => sum + (scene.tokens || 0), 0);
         const indexedScenes = data.scenes.map((scene, index) => ({
@@ -38,6 +47,7 @@ class SnapshotService {
         console.log(`   Total scenes: ${snapshot.scenes.length}`);
         console.log(`   Total words: ${totalWords}`);
         console.log(`   Total tokens: ${totalTokens}`);
+        console.log(`   ✅ Snapshot upload complete. Scenes saved: ${snapshot.scenes.length}`);
         const verification = projectSnapshots.get(projectId);
         if (verification && verification.scenes.length === data.scenes.length) {
             console.log(`   🔍 VERIFIED: All ${data.scenes.length} scenes persisted`);
@@ -59,6 +69,7 @@ class SnapshotService {
         console.log(`   Version: ${snapshot.version}`);
         console.log(`   Scene Count: ${snapshot.scenes.length}`);
         console.log(`   Last Updated: ${snapshot.metadata.updatedAt}`);
+        console.log(`   ✅ Snapshot loaded. Scenes retrieved: ${snapshot.scenes.length}`);
         return snapshot;
     }
     static updateMetadata(projectId, metadata) {

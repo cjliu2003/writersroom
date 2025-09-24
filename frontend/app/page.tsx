@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Upload, FileText, AlertCircle, Plus, Clock, Eye, X, Trash } from "lucide-react"
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import DragOverlay from "@/components/DragOverlay"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import { listProjects, upsertProject, removeProject, mirrorToBackend, type ProjectSummary } from "@/lib/projectRegistry"
+import { uploadFdxFile } from "@/lib/api"
 
 interface UploadResult {
   success: boolean
@@ -36,6 +37,9 @@ export default function HomePage() {
   const [newScriptTitle, setNewScriptTitle] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const hasUploadedRef = useRef(false) // StrictMode double-invoke guard
   const router = useRouter()
 
   // Load projects from localStorage on mount
@@ -117,33 +121,62 @@ export default function HomePage() {
   }, [])
 
   const handleFileUpload = async (file: File) => {
+    // StrictMode double-invoke guard
+    if (hasUploadedRef.current) {
+      console.log('🚫 Duplicate upload prevented by StrictMode guard')
+      return
+    }
+    hasUploadedRef.current = true
+
     console.log("📥 Upload triggered")
     console.log("Uploaded file name:", file.name)
     console.log("File size:", file.size, "bytes")
 
+    // Cancel any previous upload
+    if (abortControllerRef.current) {
+      console.log('📋 Canceling previous upload...')
+      abortControllerRef.current.abort()
+    }
+
+    // Validate file type
     if (!file.name.toLowerCase().endsWith('.fdx')) {
+      const error = 'Please upload a .fdx file'
+      setUploadError(error)
       setUploadResult({
         success: false,
-        error: 'Please upload a .fdx file'
+        error
       })
+      hasUploadedRef.current = false // Allow retry
       return
     }
 
+    // Validate file size (50MB limit)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
+    if (file.size > MAX_FILE_SIZE) {
+      const error = 'File too large. Please upload a file smaller than 50MB.'
+      setUploadError(error)
+      setUploadResult({
+        success: false,
+        error
+      })
+      hasUploadedRef.current = false // Allow retry
+      return
+    }
+
+    // Reset state and start upload
     setIsUploading(true)
     setIsParsing(true)
     setUploadResult(null)
+    setUploadError(null)
+
+    // Create new abort controller for this upload
+    abortControllerRef.current = new AbortController()
 
     try {
-      const formData = new FormData()
-      formData.append('fdx', file)
+      console.log("🌐 Uploading FDX to Express backend (port 3003)...")
 
-      console.log("🌐 Sending upload request to /api/fdx/import...")
-      const response = await fetch('/api/fdx/import', {
-        method: 'POST',
-        body: formData,
-      })
+      const result = await uploadFdxFile(file)
 
-      const result = await response.json()
       console.log("✅ FDX Parse Success:")
       console.log("Parsed title:", result.title)
       console.log("Scene count:", result.sceneCount)
@@ -204,7 +237,7 @@ export default function HomePage() {
             })) || [],
             content: fullContentString, // Store full parsed screenplay elements
             createdAt: new Date().toISOString(),
-            backendAvailable: false // Will be set to true if backend storage succeeds
+            backendAvailable: true // Backend storage succeeded
           }
 
           // Also store as "lastParsedProject" for easy fallback access
@@ -232,12 +265,41 @@ export default function HomePage() {
         // Note: isUploading stays true to keep loading overlay visible during navigation
       }
     } catch (error) {
+      console.error('❌ Upload failed:', error)
+
+      // Handle different error types
+      let errorMessage = 'Upload failed. Please try again.'
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Upload was canceled.'
+          console.log('📋 Upload canceled by user or new upload')
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'Upload timed out. Please check your connection and try again.'
+        } else if (error.message.includes('404')) {
+          errorMessage = 'Backend service not available. Please check if the server is running on port 3003.'
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Server error occurred. Please try again in a moment.'
+        } else {
+          errorMessage = error.message
+        }
+      }
+
+      setUploadError(errorMessage)
       setUploadResult({
         success: false,
-        error: 'Upload failed. Please try again.'
+        error: errorMessage
       })
-      setIsUploading(false)
-      setIsParsing(false)
+
+      // Re-enable upload controls only if not aborted
+      if (!(error instanceof Error && error.name === 'AbortError')) {
+        setIsUploading(false)
+        setIsParsing(false)
+        hasUploadedRef.current = false
+      }
+    } finally {
+      // Clear the abort controller
+      abortControllerRef.current = null
     }
   }
 
@@ -401,15 +463,30 @@ export default function HomePage() {
                   disabled={isUploading}
                 />
                 <Button
-                  onClick={() => document.getElementById('fdx-file-upload')?.click()}
+                  onClick={() => {
+                    if (isUploading && abortControllerRef.current) {
+                      // Cancel upload if currently uploading
+                      abortControllerRef.current.abort()
+                      setIsUploading(false)
+                      setIsParsing(false)
+                      hasUploadedRef.current = false
+                      setUploadError('Upload canceled')
+                    } else {
+                      // Start new upload
+                      document.getElementById('fdx-file-upload')?.click()
+                    }
+                  }}
                   variant="ghost"
-                  disabled={isUploading}
+                  disabled={false} // Always enabled for cancel functionality
                   className="h-auto flex flex-col items-center space-y-3 w-full p-6 hover:bg-transparent text-slate-300 hover:text-white"
                 >
                   {isUploading ? (
                     <>
                       <div className="w-12 h-12 border-2 border-blue-600/50 border-t-blue-600 rounded-full animate-spin" />
-                      <span className="text-sm opacity-60">Processing...</span>
+                      <span className="text-sm opacity-60">
+                        {isParsing ? 'Processing...' : 'Uploading...'}
+                      </span>
+                      <span className="text-xs opacity-40 mt-1">Click to cancel</span>
                     </>
                   ) : (
                     <>
@@ -487,15 +564,66 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Error Display */}
-          {uploadResult && !uploadResult.success && (
+          {/* Enhanced Error Display */}
+          {((uploadResult && !uploadResult.success) || uploadError) && (
             <div className="max-w-md mx-auto mb-8">
-              <div className="flex items-center gap-2 text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-800">
+              <div className="flex items-center gap-3 text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-800">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <div>
+                <div className="flex-1">
                   <p className="font-medium">Upload Failed</p>
-                  <p className="text-sm">{uploadResult.error}</p>
+                  <p className="text-sm">{uploadError || uploadResult?.error}</p>
+                  {uploadError && uploadError.includes('port 3003') && (
+                    <p className="text-xs mt-1 text-red-300">
+                      Make sure the Express backend is running with: <code>npm run dev</code>
+                    </p>
+                  )}
                 </div>
+                <Button
+                  onClick={() => {
+                    setUploadError(null)
+                    setUploadResult(null)
+                    hasUploadedRef.current = false // Allow retry
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-400 hover:text-red-300 hover:bg-red-800/20"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="text-center mt-3 flex gap-2 justify-center">
+                <Button
+                  onClick={() => {
+                    setUploadError(null)
+                    setUploadResult(null)
+                    hasUploadedRef.current = false // Allow retry
+                    document.getElementById('fdx-file-upload')?.click()
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="text-red-400 border-red-800 hover:bg-red-900/20"
+                  disabled={isUploading}
+                >
+                  Try Again
+                </Button>
+                {isUploading && (
+                  <Button
+                    onClick={() => {
+                      if (abortControllerRef.current) {
+                        abortControllerRef.current.abort()
+                        setIsUploading(false)
+                        setIsParsing(false)
+                        hasUploadedRef.current = false
+                        setUploadError('Upload canceled')
+                      }
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-400 hover:text-slate-300"
+                  >
+                    Cancel Upload
+                  </Button>
+                )}
               </div>
             </div>
           )}

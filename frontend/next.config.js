@@ -53,6 +53,25 @@ const nextConfig = {
   // Enable source maps in development only
   productionBrowserSourceMaps: false,
 
+  // API rewrites for development - proxy certain routes to Express backend
+  async rewrites() {
+    return [
+      // Proxy API routes that don't exist in Next.js to Express backend
+      {
+        source: '/api/memory/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3003'}/api/memory/:path*`,
+      },
+      {
+        source: '/api/projects/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3003'}/api/projects/:path*`,
+      },
+      {
+        source: '/health',
+        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3003'}/api/health`,
+      },
+    ];
+  },
+
   // Remove standalone output for now to fix build issues
   // output: 'standalone',
 };

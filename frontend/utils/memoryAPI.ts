@@ -5,7 +5,7 @@
  * Replaces direct memory access with HTTP calls to the backend.
  */
 
-import { 
+import {
   SceneMemory,
   MemoryStats,
   UpdateSceneMemoryRequest,
@@ -16,15 +16,17 @@ import {
   APIResponse
 } from '../../shared/types';
 
-// API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import { API_BASE_URL, apiFetch } from '@/lib/api';
+
+// Removed duplicate API configuration - now using centralized config from @/lib/api
 
 /**
  * Generic API request handler with error handling
+ * Uses centralized apiFetch utility
  */
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const defaultOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
@@ -33,18 +35,18 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
   };
 
   try {
-    const response = await fetch(url, { ...defaultOptions, ...options });
-    
+    const response = await apiFetch(url, { ...defaultOptions, ...options });
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    
+
     if (!data.success) {
       throw new Error(data.message || 'API request failed');
     }
-    
+
     return data;
   } catch (error) {
     console.error('API request failed:', error);
@@ -214,7 +216,7 @@ export class MemoryAPI {
    */
   static async healthCheck(): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/health`, {
+      const response = await apiFetch(`${API_BASE_URL}/health`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });

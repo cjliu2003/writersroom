@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Store summary in backend memory service
-    const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+    const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3003'
     const memoryResponse = await fetch(`${BACKEND_API_URL}/memory/update`, {
       method: 'POST',
       headers: {

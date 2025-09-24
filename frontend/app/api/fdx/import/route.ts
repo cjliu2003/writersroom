@@ -639,7 +639,7 @@ export async function POST(request: NextRequest) {
     // Store scenes in the backend using ATOMIC SNAPSHOT
     if (parseResult.scenes && parseResult.projectId) {
       try {
-        const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+        const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3003'
 
         console.log(`\n🚀 ATOMIC SNAPSHOT STORAGE:`)
         console.log(`   Project ID: ${parseResult.projectId}`)
@@ -729,7 +729,7 @@ export async function POST(request: NextRequest) {
           // Verify storage by retrieving the snapshot
           try {
             console.log(`\n🔍 VERIFYING SNAPSHOT...`)
-            const verifyResponse = await fetch(`${BACKEND_API_URL}/projects/${parseResult.projectId}/snapshot`)
+            const verifyResponse = await fetch(`${BACKEND_API_URL}/api/projects/${parseResult.projectId}/snapshot`)
 
             if (verifyResponse.ok) {
               const verifyResult = await verifyResponse.json()
@@ -760,7 +760,7 @@ export async function POST(request: NextRequest) {
           console.log(`   🔄 Attempting fallback storage...`)
           try {
             // Store a minimal version
-            const fallbackResponse = await fetch(`${BACKEND_API_URL}/projects/${parseResult.projectId}/snapshot`, {
+            const fallbackResponse = await fetch(`${BACKEND_API_URL}/api/projects/${parseResult.projectId}/snapshot`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

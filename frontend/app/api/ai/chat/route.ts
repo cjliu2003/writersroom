@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Load project context if requested
     if (includeScenes) {
       try {
-        const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+        const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3003'
         const scenesResponse = await fetch(`${BACKEND_API_URL}/memory/recent?projectId=${projectId}&count=10`)
 
         if (scenesResponse.ok) {

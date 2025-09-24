@@ -103,7 +103,9 @@ export function removeProject(projectId: string): void {
  */
 export async function mirrorToBackend(project: ProjectSummary): Promise<void> {
   try {
-    await fetch('http://localhost:3001/api/projects/register', {
+    // Use centralized API configuration
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3003'
+    await fetch(`${API_BASE_URL}/api/projects/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(project)

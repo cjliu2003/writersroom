@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "PORT=3102 next dev",
+    "dev": "next dev",
     "build": "next build",
-    "start": "PORT=3102 next start",
+    "start": "next start",
     "lint": "next lint",
     "test": "jest",
     "test:unit": "jest __tests__/unit",

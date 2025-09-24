@@ -13,6 +13,7 @@ import ErrorBoundary from "@/components/ErrorBoundary"
 import { Scene, Script } from '@/types/screenplay'
 import { SceneMemory } from '../../../shared/types'
 import { markOpened } from '@/lib/projectRegistry'
+import { API_BASE_URL, apiFetch } from '@/lib/api'
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs'
 import { useChunkRetry } from '@/hooks/useChunkRetry'
 
@@ -57,7 +58,7 @@ function EditorPageContent() {
     const loadScript = async () => {
       setIsLoading(true)
       setError(null)
-      
+
       // Check if we have a projectId from the URL
       const projectId = searchParams.get('projectId')
       const isNewScript = searchParams.get('new') === 'true'
@@ -93,11 +94,11 @@ function EditorPageContent() {
         // Load from snapshot backend (atomic storage)
         console.log('🔄 Editor: Loading project from snapshot backend:', projectId)
         try {
-          const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+          const API_PATH = '/api'
 
           // First try the new snapshot endpoint
-          console.log('📸 Editor: Fetching from snapshot:', `${BACKEND_API_URL}/projects/${projectId}/snapshot`)
-          let response = await fetch(`${BACKEND_API_URL}/projects/${projectId}/snapshot`)
+          console.log('📸 Editor: Fetching from snapshot:', `${API_BASE_URL}${API_PATH}/projects/${projectId}/snapshot`)
+          let response = await apiFetch(`${API_BASE_URL}${API_PATH}/projects/${projectId}/snapshot`)
 
           let memoryScenes: MemoryScene[] = []
 
@@ -115,7 +116,7 @@ function EditorPageContent() {
           } else if (response.status === 404) {
             // Fallback to old memory/all endpoint for backward compatibility
             console.log('⚠️ No snapshot found, falling back to memory/all endpoint')
-            response = await fetch(`${BACKEND_API_URL}/memory/all?projectId=${projectId}`)
+            response = await apiFetch(`${API_BASE_URL}${API_PATH}/memory/all?projectId=${projectId}`)
 
             if (response.ok) {
               const result = await response.json()
@@ -295,14 +296,12 @@ function EditorPageContent() {
     })
   }, [router, searchParams])
 
-  // Log script changes for debugging
+  // Helper functions moved outside useEffect to avoid dependency warnings
+
+  // Track script loading for error handling
   useEffect(() => {
     if (script) {
-      console.log("📦 Props passed to ScreenplayEditor:")
-      console.log("Content type:", typeof script.content)
-      console.log("Content length:", script.content?.length || 'undefined')
-      console.log("Script title:", script.title)
-      console.log("Script scenes count:", script.scenes?.length || 0)
+      // Script loaded successfully - could add analytics here if needed
     }
   }, [script])
 

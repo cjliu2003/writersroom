@@ -20,7 +20,7 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const scrollViewportRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Load conversation history from localStorage
@@ -47,8 +47,8 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+    if (scrollViewportRef.current) {
+      scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight
     }
   }, [messages])
 
@@ -119,8 +119,8 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-          <div className="space-y-4">
+        <ScrollArea className="h-full p-4">
+          <div className="space-y-4" ref={scrollViewportRef}>
             {messages.length === 0 ? (
               <div className="p-6 text-center">
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 shadow-sm">
