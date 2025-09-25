@@ -119,8 +119,16 @@ class FDXParser:
         text = cls._extract_text_content(paragraph)
         if not text.strip():
             return None
+            
+        # Direct handling for Scene Heading elements - CRITICAL FIX
+        if xml_type == 'Scene Heading':
+            print(f"DIRECT SCENE HEADING FOUND: {text[:30]}...")
+            return ScreenplayElement(
+                type=ScreenplayBlockType.SCENE_HEADING,
+                text=text.upper()
+            )
         
-        # Classify element
+        # Classify other element types
         element_data = cls._classify_element(xml_type, text)
         if not element_data:
             return None
@@ -241,14 +249,16 @@ class FDXParser:
             if is_scene_heading:
                 scene_heading_count += 1
                 print(f"FOUND SCENE HEADING #{scene_heading_count}: {element.text[:50]}...")
-                # Save previous scene if exists
-                if current_scene:
-                    current_scene.summary = cls._generate_summary(current_content)
-                    current_scene.tokens = cls._estimate_tokens(' '.join(current_content))
-                    current_scene.word_count = cls._count_words(' '.join(current_content))
+                
+                # Important fix: Always save previous scene, even if it only had a scene heading
+                # This ensures we don't miss scenes when there are adjacent scene headings
+                if current_scene is not None:  # Changed from 'if current_scene:'
+                    current_scene.summary = cls._generate_summary(current_content) if current_content else "Empty scene"
+                    current_scene.tokens = cls._estimate_tokens(' '.join(current_content)) if current_content else 0
+                    current_scene.word_count = cls._count_words(' '.join(current_content)) if current_content else 0
                     current_scene.characters = list(current_characters)
-                    current_scene.themes = cls._extract_themes(current_content)
-                    current_scene.full_content = '\n'.join(current_content)
+                    current_scene.themes = cls._extract_themes(current_content) if current_content else []
+                    current_scene.full_content = '\n'.join(current_content) if current_content else element.text
                     current_scene.content_blocks = current_elements.copy()
                     scenes.append(current_scene)
                 

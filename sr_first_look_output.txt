@@ -1,0 +1,840 @@
+[
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Ext. Silk road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_0",
+        "sceneIndex": 0,
+        "characters": [
+            "SAM"
+        ],
+        "summary": "Shot of AGENT SAM PATRICK CARTER (20’s, ex-military) and SPECIAL AGENT ATLAS111 (30s, perfect, more designed than born). Sam in focus smoking. Atlas f...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 80,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 56,
+        "fullContent": "Ext. Silk road - night\nShot of AGENT SAM PATRICK CARTER (20’s, ex-military) and SPECIAL AGENT ATLAS111 (30s, perfect, more designed than born). Sam in focus smoking. Atlas foreground in shadow.\nSAM\nAtlas...\nSam looks up.\nSAM\nYou still believe in God?\nWe focus on Atlas. He places a glowing tab on his tongue...\nFLASH TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "ExT. backyard - BASE REALITY - day - memory",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_1",
+        "sceneIndex": 1,
+        "characters": [
+            "ATLAS (V.O.)"
+        ],
+        "summary": "A young ELLA GRAY (6, carefree) runs through a yard holding a dandelion. A home-video. A memory. ATLAS (V.O.) (male)",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 43,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 33,
+        "fullContent": "ExT. backyard - BASE REALITY - day - memory\nA young ELLA GRAY (6, carefree) runs through a yard holding a dandelion. A home-video. A memory.\nATLAS (V.O.)\n(male)\nI do.\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Ext. CLIFFSIDE ocean view - Silk Road - sunset",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_2",
+        "sceneIndex": 2,
+        "characters": [
+            "SAM (V.O.)",
+            "ELLA"
+        ],
+        "summary": "Ella (18) stands before a glowing ocean and a golden sky. She wears a black hoodie. Hood up. She holds the dandelion from the memory. Blows it free. D...",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 102,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 77,
+        "fullContent": "Ext. CLIFFSIDE ocean view - Silk Road - sunset\nElla (18) stands before a glowing ocean and a golden sky. She wears a black hoodie. Hood up. She holds the dandelion from the memory. Blows it free. Drops the stem.\nSAM (V.O.)\nYou think God can see us in here?\nELLA\n(beat)\nReset.\nThe world dissolves — replaced by a glowing grid stretching to the horizon. A blueprint of something not yet built.\nELLA\nHmm.\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. Sam'S APARTMENT - base reality - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_3",
+        "sceneIndex": 3,
+        "characters": [
+            "DIRECTOR SHAW",
+            "SENATOR"
+        ],
+        "summary": "Over the shoulder shot of SAM’S INFANT SON. Sam is holding him. He has thin scars on his scalp. SENATOR There’s a camera in every head in the country!",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 93,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 65,
+        "fullContent": "Int. Sam'S APARTMENT - base reality - night\nOver the shoulder shot of SAM’S INFANT SON. Sam is holding him. He has thin scars on his scalp.\nSENATOR\nThere’s a camera in every head in the country!\nSENATOR LEWIS\nSENATOR\nSo why can’t we find my daughter?!\nShot of FBI DIRECTOR ISAIAH SHAW (60s, deep-set eyes, coffee-stained teeth)...\nDIRECTOR SHAW\nWe’re searching on all levels.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. morgue – base reality - NIGHT",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_4",
+        "sceneIndex": 4,
+        "characters": [
+            "DIRECTOR SHAW (V.O.)"
+        ],
+        "summary": "Sam circles the table. A body lays still beneath a sheet. DIRECTOR SHAW (V.O.) Drone sweeps in Base Reality...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 47,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 33,
+        "fullContent": "int. morgue – base reality - NIGHT\nSam circles the table. A body lays still beneath a sheet.\nDIRECTOR SHAW (V.O.)\nDrone sweeps in Base Reality...\nSam removes the sheet, revealing a corpse.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "INT. Jail – base reality - NIGHT",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_5",
+        "sceneIndex": 5,
+        "characters": [
+            "DIRECTOR SHAW (V.O.)"
+        ],
+        "summary": "We’re over RICHARD HUGHES’s shoulder. Suddenly, Atlas (male) spawns in. DIRECTOR SHAW (V.O.) Signal tracing in Augmented...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 76,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 50,
+        "fullContent": "INT. Jail – base reality - NIGHT\nWe’re over RICHARD HUGHES’s shoulder. Suddenly, Atlas (male) spawns in.\nDIRECTOR SHAW (V.O.)\nSignal tracing in Augmented...\nSam leans back. Takes a breath. A small ring of light flashes on his temple.\nDIRECTOR SHAW (V.O.)\nAnd Agents embedded in VR...\nHe falls unconscious.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "ext. hedge - silk road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_6",
+        "sceneIndex": 6,
+        "characters": [
+            "DIRECTOR SHAW (V.O.)"
+        ],
+        "summary": "Shot of DIRECTOR SHAW (V.O.) Dark Web.",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 17,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 14,
+        "fullContent": "ext. hedge - silk road - night\nShot of\nDIRECTOR SHAW (V.O.)\nDark Web.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. threshold - silk road",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_7",
+        "sceneIndex": 7,
+        "characters": [
+            "DIRECTOR SHAW (V.O.)",
+            "DIRECTOR SHAW",
+            "DIRECTOR SHAW (O.S.)"
+        ],
+        "summary": "Atlas (male) at the center of frame in a long, shadowed corridor. At its end, a square of light, a window into a city of neon and silk. DIRECTOR SHAW ...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 98,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 74,
+        "fullContent": "Int. threshold - silk road\nAtlas (male) at the center of frame in a long, shadowed corridor. At its end, a square of light, a window into a city of neon and silk.\nDIRECTOR SHAW (V.O.)\n(beat)\nSilk Road.\nAtlas steps towards it...\nCUT TO:\nShaw continues...\nDIRECTOR SHAW\nOur best are on this...\nHe turns. We cut to Sam. Sat at the edge of the table.\nDIRECTOR SHAW (O.S.)\nAgent Sam Patrick Carter.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Ext. dirt field - base reaLITY - day",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_8",
+        "sceneIndex": 8,
+        "characters": [
+            "DIRECTOR SHAW (V.O.)"
+        ],
+        "summary": "Sam walking in tactical gear holding his M4. DIRECTOR SHAW (V.O.) Ex spec ops.",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 28,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 22,
+        "fullContent": "Ext. dirt field - base reaLITY - day\nSam walking in tactical gear holding his M4.\nDIRECTOR SHAW (V.O.)\nEx spec ops.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. InTERROGATION ROOM – base reality - NIGHT",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_9",
+        "sceneIndex": 9,
+        "characters": [
+            "CAMILA",
+            "DIRECTOR SHAW (V.O.)"
+        ],
+        "summary": "Sam looms over Richard. Dog tags visible. He digs through his pocket. DIRECTOR SHAW (V.O.) Awarded the Medal of Valor by taking down the Schoolyard St...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 145,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 98,
+        "fullContent": "Int. InTERROGATION ROOM – base reality - NIGHT\nSam looms over Richard. Dog tags visible. He digs through his pocket.\nDIRECTOR SHAW (V.O.)\nAwarded the Medal of Valor by taking down the Schoolyard Stalker.\nHe places a signet ring on the table. Richard looks up.\nCUT TO:\nSam and AGENT CAMILA CARVER walk the hallway...\nCAMILA\nThe VR surface web’s all regulated. Silk Road isn’t. Same name and Tor backbone as the first dark-web market. Only difference... Now it’s got a body.\n(beat)\nYou’re a strong behavioral scientist. But in Base Reality. Behavior’s contained. In there...\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. Empty room - silk road - afternoon",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_10",
+        "sceneIndex": 10,
+        "characters": [
+            "CAMILA (V.O.)"
+        ],
+        "summary": "Over the shoulder shot of Atlas (male). We move from the left of Sam’s shoulder the the right. CAMILA (V.O.) Your skin...",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 57,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 41,
+        "fullContent": "int. Empty room - silk road - afternoon\nOver the shoulder shot of Atlas (male). We move from the left of Sam’s shoulder the the right.\nCAMILA (V.O.)\nYour skin...\nWhile we’re behind Sam’s head. Atlas shifts. Same eyes. Same clothes.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Ext. MEADOW - silk road - day",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_11",
+        "sceneIndex": 11,
+        "characters": [
+            "CAMILA",
+            "CAMILA (V.O.)"
+        ],
+        "summary": "Atlas (female) wears a white silk robe. She walks a white silk path through the meadow. CAMILA (V.O.) Your environment...",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 61,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 44,
+        "fullContent": "Ext. MEADOW - silk road - day\nAtlas (female) wears a white silk robe. She walks a white silk path through the meadow.\nCAMILA (V.O.)\nYour environment...\nCUT TO:\nCamila stops at the end of the hall. Turns to Sam.\nCAMILA\nEverything... is behavior.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. Somewhere - Silk Road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_12",
+        "sceneIndex": 12,
+        "characters": [
+            "DIRECTOR SHAW (V.O.)"
+        ],
+        "summary": "Atlas (male) stares into the distance. His blue eyes glow. DIRECTOR SHAW (V.O.) The primary on this is Special Agent Atlas One-Eleven.",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 42,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 29,
+        "fullContent": "int. Somewhere - Silk Road - night\nAtlas (male) stares into the distance. His blue eyes glow.\nDIRECTOR SHAW (V.O.)\nThe primary on this is Special Agent Atlas One-Eleven.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. tactical room - Silk road – night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_13",
+        "sceneIndex": 13,
+        "characters": [
+            "DIRECTOR SHAW (V.O.)"
+        ],
+        "summary": "Atlas (female) works at a multi-monitor desktop setup. Three curved monitors on her desk. A dozen screens float in DIRECTOR SHAW (V.O.) Founder of the...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 55,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 37,
+        "fullContent": "Int. tactical room - Silk road – night\nAtlas (female) works at a multi-monitor desktop setup. Three curved monitors on her desk. A dozen screens float in\nDIRECTOR SHAW (V.O.)\nFounder of the Cyber Behavioral Science Unit...",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "INT. the archive – Silk Road - NIGHT",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_14",
+        "sceneIndex": 14,
+        "characters": [
+            "DIRECTOR SHAW",
+            "SAM",
+            "DIRECTOR SHAW (V.O.)",
+            "SENATOR"
+        ],
+        "summary": "Down shot of Atlas (male) cross-legged at the center of a rainbow ring of memory tabs. Their glow illuminates him. DIRECTOR SHAW (V.O.) Invented ‘Skin...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 112,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 76,
+        "fullContent": "INT. the archive – Silk Road - NIGHT\nDown shot of Atlas (male) cross-legged at the center of a rainbow ring of memory tabs. Their glow illuminates him.\nDIRECTOR SHAW (V.O.)\nInvented ‘Skin Profiling’ and ‘Synthetic Scene Deconstruction.’\nCUT TO:\nWhitmore\nSENATOR\nAtlas111? What kind of name is that? Where the hell is he?\nDIRECTOR SHAW\nHis identities classified.\nSam places a folder on the table between them.\nSAM\n(beat)\nNot a meetings type.\nFLASH TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. SwingeRS CLUB hallway - Silk Road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_15",
+        "sceneIndex": 15,
+        "characters": [],
+        "summary": "Smoke. Strobe lights. Bodies writhe. Wet with sweat. Hands reach for Atlas (male). He pushes through. Unfazed.",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 39,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 26,
+        "fullContent": "Int. SwingeRS CLUB hallway - Silk Road - night\nSmoke. Strobe lights. Bodies writhe. Wet with sweat. Hands reach for Atlas (male). He pushes through. Unfazed.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Ext. Grassy FIELD - silk ROAD - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_16",
+        "sceneIndex": 16,
+        "characters": [],
+        "summary": "Atlas (female) falls. Face covered in cuts. She slides her hand in her pocket. Removes",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 31,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 23,
+        "fullContent": "Ext. Grassy FIELD - silk ROAD - night\nAtlas (female) falls. Face covered in cuts. She slides her hand in her pocket. Removes",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Ext. Field - base reality - day",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_17",
+        "sceneIndex": 17,
+        "characters": [
+            "SAM",
+            "CAMILA",
+            "ATLAS"
+        ],
+        "summary": "Gunshots in the distance. Sam aims his sniper. Atlas (female) wanders in the open. ATLAS Get down. They’re gonna see you.",
+        "tone": null,
+        "themeTags": [
+            "action"
+        ],
+        "tokens": 80,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 55,
+        "fullContent": "Ext. Field - base reality - day\nGunshots in the distance. Sam aims his sniper. Atlas (female) wanders in the open.\nATLAS\nGet down. They’re gonna see you.\nSAM\n(whispering)\nFuck off. You get down.\nATLAS\nWhy?\n(beat)\nI’m a ghost.\nCamila paces by Lila’s skin. Standing motionless.\nCAMILA\nLast week, this mesh was identified...",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. Bob’s BAZAAR - silk road",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_18",
+        "sceneIndex": 18,
+        "characters": [
+            "CAMILA (V.O.)"
+        ],
+        "summary": "Two girls emote on the stairs framing the runway. Lila walks the runway. Waves at Sam. CAMILA (V.O.) ...at a skin-bazaar on Silk Road. We traced the n...",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 62,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 45,
+        "fullContent": "int. Bob’s BAZAAR - silk road\nTwo girls emote on the stairs framing the runway. Lila walks the runway. Waves at Sam.\nCAMILA (V.O.)\n...at a skin-bazaar on Silk Road. We traced the node cluster...\nSam inspects a paper price tag attached as an earring.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "INT. tattoo room - base reality",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_19",
+        "sceneIndex": 19,
+        "characters": [
+            "CAMILA (V.O.)"
+        ],
+        "summary": "JACK THE SHIPPER fiddles with his tattoo gun. He wears a plague doctor mask and a medical apron with just boxers beneath. CAMILA (V.O.) ...to a user: ...",
+        "tone": null,
+        "themeTags": [
+            "action"
+        ],
+        "tokens": 50,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 34,
+        "fullContent": "INT. tattoo room - base reality\nJACK THE SHIPPER fiddles with his tattoo gun. He wears a plague doctor mask and a medical apron with just boxers beneath.\nCAMILA (V.O.)\n...to a user: DrFrankEpstein911.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. ELEVATOR - base reality - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_20",
+        "sceneIndex": 20,
+        "characters": [
+            "CAMILA (V.O.)"
+        ],
+        "summary": "Lila enters an elevator. A man hustles in wearing a medical mask and sunglasses. The doors shut. CAMILA (V.O.) Leads the largest trafficking operation...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 68,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 46,
+        "fullContent": "int. ELEVATOR - base reality - night\nLila enters an elevator. A man hustles in wearing a medical mask and sunglasses. The doors shut.\nCAMILA (V.O.)\nLeads the largest trafficking operation we’ve seen to date...\nHe catches up. Suffocates her with a chloroform cloth. She falls.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. Tattoo room - base reality",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_21",
+        "sceneIndex": 21,
+        "characters": [
+            "CAMILA (V.O.)",
+            "ELLA"
+        ],
+        "summary": "Jack looms over Ella in the wheelchair, holding a tattoo gun. CAMILA (V.O.) Some agents took to calling him",
+        "tone": null,
+        "themeTags": [
+            "action"
+        ],
+        "tokens": 60,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 43,
+        "fullContent": "Int. Tattoo room - base reality\nJack looms over Ella in the wheelchair, holding a tattoo gun.\nCAMILA (V.O.)\nSome agents took to calling him\n‘Jack the Shipper...’\nELLA\nNo- please- please! No!!\nHe presses the tattoo gun to her face. She shrieks.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. Tactical room - silk road",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_22",
+        "sceneIndex": 22,
+        "characters": [
+            "SAM"
+        ],
+        "summary": "Sam shouts at Atlas (female). SAM The auction ends in 22 hours! How the fuck are we gonna find her?!",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 32,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 26,
+        "fullContent": "Int. Tactical room - silk road\nSam shouts at Atlas (female).\nSAM\nThe auction ends in 22 hours! How the fuck are we gonna find her?!",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "INT. TATTOO ROOM - silk road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_23",
+        "sceneIndex": 23,
+        "characters": [
+            "LILA",
+            "SAM"
+        ],
+        "summary": "Lila lunges for the edge of the cage. LILA You have to help please! Don’t let them-",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 45,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 36,
+        "fullContent": "INT. TATTOO ROOM - silk road - night\nLila lunges for the edge of the cage.\nLILA\nYou have to help please! Don’t let them-\nLila disappears. Sam shrieks.\nSAM\nAtlas! We lost her!\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. SwINGERS CLUB hallway - silk ROAD - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_24",
+        "sceneIndex": 24,
+        "characters": [
+            "ATLAS (V.O.)"
+        ],
+        "summary": "Atlas (male) stands at the center of a long hallway. Each panel on the walls glows a bright red. On the frame at the end of the hall, written in black...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 77,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 59,
+        "fullContent": "Int. SwINGERS CLUB hallway - silk ROAD - night\nAtlas (male) stands at the center of a long hallway. Each panel on the walls glows a bright red. On the frame at the end of the hall, written in black marker across the top reads: Dr. Mind.\nATLAS (V.O.)\n(male)\nBy finding Jack...\nAtlas knocks. The hall falls dark.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. AbANDONED ANIMAL HOSPITAL - baSE REALITY – night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_25",
+        "sceneIndex": 25,
+        "characters": [
+            "SAM",
+            "CAMILA (V.O.)"
+        ],
+        "summary": "Sam turns on his flashlight. Six furry-suited bodies lie in heaps. Unconscious. Masks askew. Massive litter-boxes lay with the bodies. The floor cover...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 125,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 83,
+        "fullContent": "Int. AbANDONED ANIMAL HOSPITAL - baSE REALITY – night\nSam turns on his flashlight. Six furry-suited bodies lie in heaps. Unconscious. Masks askew. Massive litter-boxes lay with the bodies. The floor covered with dog-food and feces.\nSam watches. One twitches.\nSAM\nFreeze!!\nThey run through the hall. Turn through a doorway.\nCAMILA (V.O.)\nRemember Sam...\nSam tackles the furry. Pins him.\nCAMILA (V.O.)\nNo one walks the Silk Road and comes out unscathed.\nSam unleashes. Beating the furry to a pulp.\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. bathroom - SILK ROAD",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_26",
+        "sceneIndex": 26,
+        "characters": [
+            "SAM (V.O.)"
+        ],
+        "summary": "Atlas (male) stares into a broken mirror, holding himself up against the sink. He digs through his pocket. Frantic. Removes a blue sheet of memory tab...",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 57,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 40,
+        "fullContent": "int. bathroom - SILK ROAD\nAtlas (male) stares into a broken mirror, holding himself up against the sink. He digs through his pocket. Frantic. Removes a blue sheet of memory tabs.\nSAM (V.O.)\nYou’re dosing?!\nHe takes one...\nFLASH TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. dining room - memory - day",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_27",
+        "sceneIndex": 27,
+        "characters": [],
+        "summary": "DAD lifts us in the air. The whole room is pink. We giggle. Staring down at him. He spins us around. FLASH TO:",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 35,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 30,
+        "fullContent": "Int. dining room - memory - day\nDAD lifts us in the air. The whole room is pink. We giggle. Staring down at him. He spins us around.\nFLASH TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. bathroom - SILK ROAD - continuous",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_28",
+        "sceneIndex": 28,
+        "characters": [
+            "ATLAS (V.O.)"
+        ],
+        "summary": "Atlas (male) tears at the packet. Sliding down the wall. ATLAS (V.O.) (male)",
+        "tone": null,
+        "themeTags": [
+            "drama"
+        ],
+        "tokens": 48,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 33,
+        "fullContent": "int. bathroom - SILK ROAD - continuous\nAtlas (male) tears at the packet. Sliding down the wall.\nATLAS (V.O.)\n(male)\nRelax. They’re just memories...\nHe peels off another tab. Takes it...\nFLASH TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Ext. Porch - memory -  day",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_29",
+        "sceneIndex": 29,
+        "characters": [
+            "MOM"
+        ],
+        "summary": "MOM wipes a cut on our knee. She kisses it. MOM It’ll be okay now. I promise.",
+        "tone": null,
+        "themeTags": [
+            "romance"
+        ],
+        "tokens": 28,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 25,
+        "fullContent": "Ext. Porch - memory -  day\nMOM wipes a cut on our knee. She kisses it.\nMOM\nIt’ll be okay now. I promise.\nFLASH TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. bathroom - SILK ROAD - conTINUOUS",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_30",
+        "sceneIndex": 30,
+        "characters": [],
+        "summary": "Atlas (male) lays on the floor. He takes a deep breath. The good memories pinned to his chest. CUT TO:",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 35,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 27,
+        "fullContent": "int. bathroom - SILK ROAD - conTINUOUS\nAtlas (male) lays on the floor. He takes a deep breath. The good memories pinned to his chest.\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. Sam'S BEDROOM - base REALITY – night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_31",
+        "sceneIndex": 31,
+        "characters": [
+            "LAUREN"
+        ],
+        "summary": "LAUREN (20’s, a tired young mother) holds her infant son. LAUREN Stay safe tough guy.",
+        "tone": null,
+        "themeTags": [
+            "romance",
+            "suspense"
+        ],
+        "tokens": 53,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 38,
+        "fullContent": "Int. Sam'S BEDROOM - base REALITY – night\nLAUREN (20’s, a tired young mother) holds her infant son.\nLAUREN\nStay safe tough guy.\n(beat)\nAnd remember. You’re a dad now too...\nSam nods. Kisses her forehead.\nFLASH TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. police cruiser - SILK ROAD - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_32",
+        "sceneIndex": 32,
+        "characters": [
+            "SAM (V.O.)",
+            "CAMILA (V.O.)"
+        ],
+        "summary": "Sam and HOPE (early 20’s, blonde, synthetic-perfection) sit in the car. We pan to the front where SAM (V.O.) You’re a virus.",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 76,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 55,
+        "fullContent": "Int. police cruiser - SILK ROAD - night\nSam and HOPE (early 20’s, blonde, synthetic-perfection) sit in the car. We pan to the front where\nSAM (V.O.)\nYou’re a virus.\nSam smirks. Grips the wheel. Hope waves the flag.\nCAMILA (V.O.)\nBlackout in three... two... one...\nHope waves the flag. Sam peels out.\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "EXT. Halo house - silk road - DAY",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_33",
+        "sceneIndex": 33,
+        "characters": [
+            "HOPE"
+        ],
+        "summary": "Hope’s arms are wrapped around Sam. She wears a wedding dress. Veil pulled back. She looks up at him. Seductive. Predatory. HOPE I’m whatever you want...",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 65,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 49,
+        "fullContent": "EXT. Halo house - silk road - DAY\nHope’s arms are wrapped around Sam. She wears a wedding dress. Veil pulled back. She looks up at him. Seductive. Predatory.\nHOPE\nI’m whatever you want me to be...\nShot of Sam’s hands. He twist his wedding ring behind her back.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. the aRCHIVE – Silk Road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_34",
+        "sceneIndex": 34,
+        "characters": [
+            "ATLAS"
+        ],
+        "summary": "Atlas (male) collapses in Sam’s arms. Fracturing. ATLAS He’s wearing her.",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 29,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 21,
+        "fullContent": "Int. the aRCHIVE – Silk Road - night\nAtlas (male) collapses in Sam’s arms. Fracturing.\nATLAS\nHe’s wearing her.\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. Tattoo room - silk road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_35",
+        "sceneIndex": 35,
+        "characters": [
+            "ATLAS (V.O.)"
+        ],
+        "summary": "Ella sits in the wheelchair in the basement room. The tattoos on her face read: ATLAS (V.O.) (male, tearful)",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 41,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 30,
+        "fullContent": "Int. Tattoo room - silk road - night\nElla sits in the wheelchair in the basement room. The tattoos on her face read:\nATLAS (V.O.)\n(male, tearful)\nHe’s wearing Ella.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. hospital - base reality - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_36",
+        "sceneIndex": 36,
+        "characters": [
+            "SAM",
+            "ATLAS"
+        ],
+        "summary": "Atlas (female) and Sam in the hospital hallway. SAM You want me to trust you? I don’t know shit about you! Who even are you?",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 51,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 41,
+        "fullContent": "int. hospital - base reality - night\nAtlas (female) and Sam in the hospital hallway.\nSAM\nYou want me to trust you? I don’t know shit about you! Who even are you?\nATLAS\n(beat)\nWhoever I need to be...\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. Sam’s bedroom - base reality - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_37",
+        "sceneIndex": 37,
+        "characters": [
+            "LAUREN"
+        ],
+        "summary": "Sam on the floor. Sleepless. Lauren stands above him. Hope seduces, wrapping her arms around Lauren who’s blind to Hope’s presence. LAUREN It’s all in...",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 54,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 38,
+        "fullContent": "Int. Sam’s bedroom - base reality - night\nSam on the floor. Sleepless. Lauren stands above him. Hope seduces, wrapping her arms around Lauren who’s blind to Hope’s presence.\nLAUREN\nIt’s all in your head, Sammy.\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. TACTICAL ROOM - Silk road - NIGHT",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_38",
+        "sceneIndex": 38,
+        "characters": [
+            "SAM",
+            "ATLAS"
+        ],
+        "summary": "Atlas (female) shouts at Sam. ATLAS The profile’s wrong!",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 33,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 25,
+        "fullContent": "Int. TACTICAL ROOM - Silk road - NIGHT\nAtlas (female) shouts at Sam.\nATLAS\nThe profile’s wrong!\nSAM\nWho the hell have we been hunting?",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. Abandoned cps bUILDING - base reality - day",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_39",
+        "sceneIndex": 39,
+        "characters": [
+            "SAM"
+        ],
+        "summary": "Sam is thrown to the ground by a SWAT officer. Face pinned. Screaming. SAM Get off of her!!",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 35,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 27,
+        "fullContent": "Int. Abandoned cps bUILDING - base reality - day\nSam is thrown to the ground by a SWAT officer. Face pinned. Screaming.\nSAM\nGet off of her!!",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. visitation booth - base REALITY",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_40",
+        "sceneIndex": 40,
+        "characters": [
+            "SAM"
+        ],
+        "summary": "Sam stares through the glass. Fist clenched. SAM No. No!!",
+        "tone": null,
+        "themeTags": [],
+        "tokens": 30,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 21,
+        "fullContent": "Int. visitation booth - base REALITY\nSam stares through the glass. Fist clenched.\nSAM\nNo. No!!\nHe slams the table. Screams.",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "int. Club - SILK ROAD - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_41",
+        "sceneIndex": 41,
+        "characters": [
+            "SAM (V.O.)"
+        ],
+        "summary": "Sam wrestles Atlas (male) for the memory tabs. SAM (V.O.) He’s a monster!",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 25,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 20,
+        "fullContent": "int. Club - SILK ROAD - night\nSam wrestles Atlas (male) for the memory tabs.\nSAM (V.O.)\nHe’s a monster!",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Int. visitation BOOTH - base reality",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_42",
+        "sceneIndex": 42,
+        "characters": [
+            "SAM (V.O.)"
+        ],
+        "summary": "Shot of Edmund Reed - cleft face - broken glasses, shrouded in shadow. SAM (V.O.) You let him wear the badge!!",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 38,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 29,
+        "fullContent": "Int. visitation BOOTH - base reality\nShot of Edmund Reed - cleft face - broken glasses, shrouded in shadow.\nSAM (V.O.)\nYou let him wear the badge!!\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "Ext. Silk road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_43",
+        "sceneIndex": 43,
+        "characters": [
+            "ATLAS (V.O.)",
+            "ATLAS"
+        ],
+        "summary": "Atlas (male) puts his hand on Sam’s shoulder. Leans in... ATLAS If God created the Earth.",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 54,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 42,
+        "fullContent": "Ext. Silk road - night\nAtlas (male) puts his hand on Sam’s shoulder. Leans in...\nATLAS\nIf God created the Earth.\nShot of Sam. He looks up.\nCUT TO:\nBLACK.\nATLAS (V.O.)\n(male)\nWhy’d he choose to stay in Heaven?\nCUT TO:",
+        "projectTitle": "sr_first_look_final"
+    },
+    {
+        "projectId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f",
+        "slugline": "EXT. Silk road - night",
+        "sceneId": "16e4c89e-b52e-400a-b6cf-b5ee6bd43b6f_44",
+        "sceneIndex": 44,
+        "characters": [],
+        "summary": "Tokyo by way of dream logic. Alive. Impossible. Watching. Wide shot of the city. We move through it. SUPER: SILK ROAD. CUT TO BLACK.:",
+        "tone": null,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 39,
+        "timestamp": "2025-09-25T19:24:13.306098",
+        "wordCount": 29,
+        "fullContent": "EXT. Silk road - night\nTokyo by way of dream logic. Alive. Impossible. Watching. Wide shot of the city. We move through it.\nSUPER: SILK ROAD.\nCUT TO BLACK.:",
+        "projectTitle": "sr_first_look_final"
+    }
+]
