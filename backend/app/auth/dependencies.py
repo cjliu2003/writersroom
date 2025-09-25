@@ -11,6 +11,7 @@ from sqlalchemy import select
 # HTTP Bearer token security scheme
 security = HTTPBearer()
 
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db)
@@ -62,7 +63,6 @@ async def get_current_user(
             # Use standard ORM query now that Base model is fixed
             from sqlalchemy import select
             stmt = select(User).where(User.firebase_uid == firebase_uid)
-            
             result = await db.execute(stmt)
             user = result.scalar_one_or_none()
             print(f"DEBUG: User lookup result: {'Found' if user else 'Not found'}")

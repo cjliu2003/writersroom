@@ -19,10 +19,11 @@ class SupabaseStorageService:
     
     def __init__(self):
         self.supabase_url = os.getenv("SUPABASE_URL")
-        self.supabase_key = os.getenv("SUPABASE_ANON_KEY")
+        # Use service role key for server-side operations to bypass RLS
+        self.supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
         
         if not self.supabase_url or not self.supabase_key:
-            raise ValueError("SUPABASE_URL and SUPABASE_ANON_KEY must be set in environment variables")
+            raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY) must be set in environment variables")
         
         self.client: Client = create_client(self.supabase_url, self.supabase_key)
         self.bucket_name = os.getenv("SUPABASE_BUCKET_NAME", "fdx-files")
@@ -68,11 +69,19 @@ class SupabaseStorageService:
                 }
             )
             
-            if response.status_code != 200:
-                logger.error(f"Failed to upload file: {response}")
+            # Check if upload was successful
+            # Supabase upload response structure varies, check for error
+            if hasattr(response, 'error') and response.error:
+                logger.error(f"Failed to upload file: {response.error}")
                 raise HTTPException(
                     status_code=500, 
-                    detail=f"Failed to upload file: {response.get('error', 'Unknown error')}"
+                    detail=f"Failed to upload file: {response.error}"
+                )
+            elif isinstance(response, dict) and 'error' in response:
+                logger.error(f"Failed to upload file: {response['error']}")
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Failed to upload file: {response['error']}"
                 )
             
             # Get public URL

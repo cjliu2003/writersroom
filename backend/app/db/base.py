@@ -1,26 +1,36 @@
-import os
+import os, ssl, logging, certifi
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.pool import NullPool
-import logging
-from dotenv import load_dotenv
+from sqlalchemy.orm import declarative_base  # <- preferred import in SA 2.x
 
-# Load environment variables
-load_dotenv()
-
-# Get async database URL from environment
+# ENV
+DB_HOST = os.getenv('DB_HOST')                # e.g. aws-0-us-west-1.pooler.supabase.com
+DB_PORT = os.getenv('DB_PORT', '5432')        # session pooler is usually 5432 (not 6543 for transaction pooler)
+DB_USER = os.getenv('DB_USER')                # e.g. postgres.<PROJECT_REF>
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_NAME = os.getenv('DB_NAME', 'postgres')
 DB_URL_ASYNC = os.getenv('DB_URL_ASYNC')
-if not DB_URL_ASYNC:
-    raise ValueError("DB_URL_ASYNC environment variable is not set")
 
-# Configure logging
-logging.basicConfig()
+if not ((DB_HOST and DB_PORT and DB_USER and DB_PASSWORD and DB_NAME) or DB_URL_ASYNC):
+    raise ValueError("Database connection parameters or DB_URL_ASYNC must be set")
+
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-# Create async engine
+# Build URL
+if DB_HOST and DB_PORT and DB_USER and DB_PASSWORD and DB_NAME:
+    # Session pooler supports prepared statements, so we can use a clean URL
+    connection_url = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+else:
+    # Use legacy URL as-is
+    connection_url = DB_URL_ASYNC
+
+# Create async engine - session pooler supports prepared statements
+ssl_ctx = ssl.create_default_context()
+ssl_ctx.check_hostname = False
+ssl_ctx.verify_mode = ssl.CERT_NONE
+
 engine = create_async_engine(
-    DB_URL_ASYNC,
+    connection_url,
     echo=True,
     future=True,
     pool_pre_ping=True,
@@ -28,26 +38,22 @@ engine = create_async_engine(
     max_overflow=10,
     pool_recycle=300,
     pool_timeout=30,
-    poolclass=NullPool if 'test' in DB_URL_ASYNC else None
+    connect_args={
+        "ssl": ssl_ctx,
+        "statement_cache_size": 0,  # Disable prepared statement cache for pooler compatibility
+    },
 )
 
-# Create async session factory
 async_session_maker = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
     autoflush=False,
-    autocommit=False
 )
 
-# Base class for models
 Base = declarative_base()
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """
-    Dependency function that yields async database sessions.
-    Handles session lifecycle including proper closing of the session.
-    """
     async with async_session_maker() as session:
         try:
             yield session

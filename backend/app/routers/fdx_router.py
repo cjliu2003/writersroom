@@ -53,9 +53,9 @@ async def upload_fdx_file(
         file_content_str = file_content.decode('utf-8')
         
         # Parse FDX content
-        logger.info(f"Parsing FDX file: {file.filename}")
+        print(f"Parsing FDX file: {file.filename}")
         parsed_result = FDXParser.parse_fdx_content(file_content_str, file.filename)
-        
+        print("PARSED FDX CONTENT: ", parsed_result)
         # Create new script in database
         new_script = Script(
             title=parsed_result.title,
@@ -67,7 +67,7 @@ async def upload_fdx_file(
         await db.flush()  # Get the script_id
         
         # Upload file to Supabase storage
-        logger.info(f"Uploading file to Supabase storage")
+        print(f"Uploading file to Supabase storage")
         # Reset file position for upload
         await file.seek(0)
         file_info = await storage_service.upload_fdx_file(
@@ -80,7 +80,7 @@ async def upload_fdx_file(
         new_script.imported_fdx_path = file_info["file_path"]
         
         # Create scenes in database
-        logger.info(f"Creating {len(parsed_result.scenes)} scenes in database")
+        print(f"Creating {len(parsed_result.scenes)} scenes in database")
         db_scenes = []
         
         for position, scene_data in enumerate(parsed_result.scenes):
@@ -138,7 +138,7 @@ async def upload_fdx_file(
             )
             scene_schemas.append(scene_schema)
         
-        logger.info(f"Successfully processed FDX file: {file.filename}")
+        print(f"Successfully processed FDX file: {file.filename}")
         
         return FDXUploadResponse(
             success=True,
@@ -150,7 +150,7 @@ async def upload_fdx_file(
         )
         
     except ValueError as e:
-        logger.error(f"FDX parsing error: {str(e)}")
+        print(f"FDX parsing error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid FDX file: {str(e)}"
@@ -174,7 +174,7 @@ async def parse_fdx_content(
     Parse FDX content without creating a script (for preview/validation).
     """
     try:
-        logger.info("Parsing FDX content for preview")
+        print("Parsing FDX content for preview")
         parsed_result = FDXParser.parse_fdx_content(request.content, request.filename)
         
         # Convert to response schemas
@@ -219,13 +219,13 @@ async def parse_fdx_content(
         )
         
     except ValueError as e:
-        logger.error(f"FDX parsing error: {str(e)}")
+        print(f"FDX parsing error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid FDX content: {str(e)}"
         )
     except Exception as e:
-        logger.error(f"Unexpected error during FDX parsing: {str(e)}")
+        print(f"Unexpected error during FDX parsing: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to parse FDX content: {str(e)}"
@@ -285,7 +285,7 @@ async def get_script_scenes(
         return scene_data
         
     except Exception as e:
-        logger.error(f"Error retrieving script scenes: {str(e)}")
+        print(f"Error retrieving script scenes: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve scenes: {str(e)}"

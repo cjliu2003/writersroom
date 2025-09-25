@@ -2,6 +2,14 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
+load_dotenv()
+host = os.getenv('DB_HOST')
+port = os.getenv('DB_PORT')
+user = os.getenv('DB_USER')
+password = os.getenv('DB_PASSWORD')
+dbname = os.getenv('DB_NAME')
+
+
 def test_connection():
     # Load environment variables
     load_dotenv()
@@ -24,5 +32,22 @@ def test_connection():
         print(f"Error connecting to database: {e}")
         return False
 
+def test_connection2():
+    import psycopg2
+    conn = psycopg2.connect(
+        host=host,
+        port=port,
+        user=user,
+        password=password,
+        dbname=dbname,
+        sslmode="require",
+    )
+    with conn.cursor() as cur:
+        cur.execute("select 1;")
+        print(cur.fetchone())
+    conn.close()
 if __name__ == "__main__":
-    test_connection()
+    #test_connection()
+    test_connection2()
+
+

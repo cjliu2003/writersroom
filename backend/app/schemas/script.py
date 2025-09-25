@@ -4,6 +4,7 @@ Request and response schemas for script endpoints
 from typing import Optional, List
 from uuid import UUID
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 
 class ScriptCreate(BaseModel):
@@ -28,11 +29,14 @@ class ScriptResponse(BaseModel):
     title: str
     description: Optional[str] = None
     current_version: int
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
     imported_fdx_path: Optional[str] = None
     exported_fdx_path: Optional[str] = None
     exported_pdf_path: Optional[str] = None
     
     class Config:
         from_attributes = True
+        json_encoders = {
+            datetime: lambda dt: dt.isoformat()
+        }

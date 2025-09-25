@@ -9,6 +9,13 @@ import DragOverlay from "@/components/DragOverlay"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import { listProjects, upsertProject, removeProject, mirrorToBackend, type ProjectSummary } from "@/lib/projectRegistry"
 
+// Simple auth function - you'll need to implement proper Firebase auth
+async function getAuthToken(): Promise<string> {
+  // TODO: Implement Firebase auth token retrieval
+  // For now, return empty string - you'll need to add Firebase auth
+  return ''
+}
+
 interface UploadResult {
   success: boolean
   title?: string
@@ -137,18 +144,22 @@ export default function HomePage() {
       const formData = new FormData()
       formData.append('fdx', file)
 
-      console.log("🌐 Sending upload request to /api/fdx/import...")
-      const response = await fetch('/api/fdx/import', {
+      console.log("🌐 Sending upload request to FastAPI backend...")
+      const response = await fetch('http://localhost:8000/api/fdx/upload', {
         method: 'POST',
         body: formData,
+        // TODO: Add authentication headers when Firebase auth is implemented
+        // headers: {
+        //   'Authorization': `Bearer ${await getAuthToken()}`
+        // }
       })
 
       const result = await response.json()
       console.log("✅ FDX Parse Success:")
       console.log("Parsed title:", result.title)
-      console.log("Scene count:", result.sceneCount)
-      console.log("Sluglines:", result.sluglines)
-      console.log("Project ID:", result.projectId)
+      console.log("Scene count:", result.scene_count)
+      console.log("Script ID:", result.script_id)
+      console.log("Scenes:", result.scenes)
 
       setUploadResult(result)
 
@@ -157,9 +168,9 @@ export default function HomePage() {
 
         // Save to project registry
         const projectSummary: ProjectSummary = {
-          projectId: result.projectId || Date.now().toString(),
+          projectId: result.script_id || Date.now().toString(),
           title: result.title || file.name.replace('.fdx', ''),
-          sceneCount: result.sceneCount || 0,
+          sceneCount: result.scene_count || 0,
           status: 'draft',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
@@ -190,45 +201,38 @@ export default function HomePage() {
           return [newProject, ...prev]
         })
 
-        // Only store localStorage fallback if we have actual content
-        if (result.screenplayElements && result.screenplayElements.length > 0) {
-          const fullContentString = JSON.stringify(result.screenplayElements)
-
+        // Store project data for editor access
+        if (result.scenes && result.scenes.length > 0) {
           const scriptForEditor = {
-            id: result.projectId,
+            id: result.script_id,
             title: result.title,
-            scenes: result.sluglines?.map((slug: string, index: number) => ({
+            scenes: result.scenes.map((scene: any, index: number) => ({
               id: index.toString(),
-              heading: slug,
-              content: fullContentString // Store full content for fallback
-            })) || [],
-            content: fullContentString, // Store full parsed screenplay elements
+              heading: scene.slugline,
+              content: scene.full_content,
+              summary: scene.summary,
+              characters: scene.characters,
+              themes: scene.themes,
+              tokens: scene.tokens,
+              word_count: scene.word_count
+            })),
+            content: JSON.stringify(result.scenes),
             createdAt: new Date().toISOString(),
-            backendAvailable: false // Will be set to true if backend storage succeeds
+            backendAvailable: true // Data is now stored in FastAPI backend
           }
 
-          // Also store as "lastParsedProject" for easy fallback access
-          const fallbackProject = {
-            projectId: result.projectId,
-            title: result.title,
-            scenes: result.screenplayElements,
-            sluglines: result.sluglines || [],
-            timestamp: new Date().toISOString()
-          }
+          localStorage.setItem(`project-${result.script_id}`, JSON.stringify(scriptForEditor))
 
-          localStorage.setItem(`project-${result.projectId}`, JSON.stringify(scriptForEditor))
-          localStorage.setItem('lastParsedProject', JSON.stringify(fallbackProject))
-
-          console.log('💾 Stored full project data in localStorage:', result.projectId)
-          console.log('💾 Stored fallback project with', result.screenplayElements.length, 'elements')
+          console.log('💾 Stored project data in localStorage:', result.script_id)
+          console.log('💾 Project stored with', result.scenes.length, 'scenes')
         } else {
-          console.log('⚠️ No screenplay elements to store in localStorage fallback')
+          console.log('⚠️ No scenes data received from backend')
         }
 
         // Navigate to editor immediately after parsing completes
         // Keep loading overlay visible during navigation
-        console.log('🚀 Navigating to editor with projectId:', result.projectId)
-        router.push(`/editor?projectId=${result.projectId}`)
+        console.log('🚀 Navigating to editor with scriptId:', result.script_id)
+        router.push(`/editor?projectId=${result.script_id}`)
         // Note: isUploading stays true to keep loading overlay visible during navigation
       }
     } catch (error) {
