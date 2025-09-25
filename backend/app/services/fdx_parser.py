@@ -112,9 +112,8 @@ class FDXParser:
     @classmethod
     def _parse_paragraph(cls, paragraph: ET.Element) -> Optional[ScreenplayElement]:
         """Parse a single FDX paragraph into a screenplay element."""
-        # Get paragraph type
-        type_elem = paragraph.find('Type')
-        xml_type = type_elem.text if type_elem is not None else 'Action'
+        # Get paragraph type directly from the attribute
+        xml_type = paragraph.get('Type', 'Action')
         
         # Extract text content
         text = cls._extract_text_content(paragraph)
@@ -125,6 +124,8 @@ class FDXParser:
         element_data = cls._classify_element(xml_type, text)
         if not element_data:
             return None
+        
+        print(f"Parsed element type: {xml_type} -> {element_data['type']}, text: {text[:30]}...")
         
         return ScreenplayElement(
             type=ScreenplayBlockType(element_data['type']),
@@ -186,8 +187,9 @@ class FDXParser:
             
             return {'type': 'scene_heading', 'text': text}
         
-        # Handle other element types
+        # Handle other element types (using the exact types from FDX)
         type_mapping = {
+            # Standard FDX types (using their exact names)
             'Action': {'type': 'action', 'text': text},
             'Character': {'type': 'character', 'text': text.upper()},
             'Dialogue': {'type': 'dialogue', 'text': text},
@@ -198,8 +200,17 @@ class FDXParser:
             'Transition': {
                 'type': 'transition', 
                 'text': text.upper() + ('' if text.endswith(':') else ':')
-            }
+            },
+            'Scene Heading': {'type': 'scene_heading', 'text': text.upper()},
+            'Shot': {'type': 'shot', 'text': text},
+            'Cast List': {'type': 'cast_list', 'text': text},
+            'General': {'type': 'general', 'text': text},
+            'Note': {'type': 'note', 'text': text},
+            'Act Break': {'type': 'new_act', 'text': text},
+            'End of Act': {'type': 'end_of_act', 'text': text},
         }
+        
+        print(f"Mapping element type: {xml_type} -> {type_mapping.get(xml_type, {'type': 'action', 'text': text})['type']}")
         
         if xml_type in type_mapping:
             return type_mapping[xml_type]
@@ -216,9 +227,20 @@ class FDXParser:
         current_content: List[str] = []
         current_characters: set = set()
         current_elements: List[ScreenplayElement] = []
+        scene_heading_count = 0
         
-        for element in elements:
-            if element.type == ScreenplayBlockType.SCENE_HEADING:
+        print(f"\nTotal elements to process: {len(elements)}")
+        
+        for i, element in enumerate(elements):
+            # Print debugging info
+            print(f"Element {i}: Type={element.type}, Text={element.text[:30]}...")
+            
+            # Scene heading can be either 'scene_heading' or stored as the enum value
+            is_scene_heading = element.type == ScreenplayBlockType.SCENE_HEADING or element.type.value == 'scene_heading'
+            
+            if is_scene_heading:
+                scene_heading_count += 1
+                print(f"FOUND SCENE HEADING #{scene_heading_count}: {element.text[:50]}...")
                 # Save previous scene if exists
                 if current_scene:
                     current_scene.summary = cls._generate_summary(current_content)
@@ -264,6 +286,23 @@ class FDXParser:
             current_scene.full_content = '\n'.join(current_content)
             current_scene.content_blocks = current_elements.copy()
             scenes.append(current_scene)
+        
+        print(f"\nFINAL COUNTS:")
+        print(f"Total scene headings found in XML: {scene_heading_count}")
+        print(f"Total scenes created: {len(scenes)}")
+        if scene_heading_count != len(scenes):
+            print(f"WARNING: MISMATCH - {scene_heading_count - len(scenes)} scene headings were not processed correctly")
+            
+            # Let's check if any adjacent scene headings might be the issue
+            adjacent_scene_headings = 0
+            for i in range(1, len(elements)):
+                if (elements[i-1].type == ScreenplayBlockType.SCENE_HEADING or elements[i-1].type.value == 'scene_heading') and \
+                   (elements[i].type == ScreenplayBlockType.SCENE_HEADING or elements[i].type.value == 'scene_heading'):
+                    adjacent_scene_headings += 1
+                    print(f"Found adjacent scene headings: {elements[i-1].text[:30]} followed by {elements[i].text[:30]}")
+            
+            if adjacent_scene_headings > 0:
+                print(f"Found {adjacent_scene_headings} instances of adjacent scene headings")
         
         return scenes
     
