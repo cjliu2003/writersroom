@@ -2,12 +2,28 @@ import { getCurrentUserToken } from './firebase';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
+// Small fetch helper with timeout to avoid indefinite hangs in UI
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & { timeoutMs?: number } = {}) {
+  const { timeoutMs = 15000, ...rest } = init
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const res = await fetch(input, { ...rest, signal: controller.signal })
+    return res
+  } finally {
+    clearTimeout(id)
+  }
+}
+
 // Helper function to make authenticated API requests
 export async function authenticatedFetch(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
   const token = await getCurrentUserToken();
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[api] requesting', `${API_BASE_URL}${endpoint}`, 'token?', !!token)
+  }
   
   if (!token) {
     throw new Error('No authentication token available');
@@ -19,9 +35,10 @@ export async function authenticatedFetch(
     ...options.headers,
   };
 
-  return fetch(`${API_BASE_URL}${endpoint}`, {
+  return fetchWithTimeout(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
+    timeoutMs: 15000,
   });
 }
 
@@ -110,17 +127,78 @@ export async function uploadFDXFile(file: File): Promise<FDXUploadResponse> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API_BASE_URL}/fdx/upload`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/fdx/upload`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
     },
     body: formData,
+    timeoutMs: 30000,
   });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.detail || 'Failed to upload FDX file');
+  }
+
+  return response.json();
+}
+
+// AI-related API functions
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp?: string;
+}
+
+export interface SceneSummaryRequest {
+  script_id: string;
+  scene_index: number;
+  slugline: string;
+  scene_text: string;
+}
+
+export interface SceneSummaryResponse {
+  success: boolean;
+  summary?: string;
+  error?: string;
+}
+
+export interface ChatRequest {
+  script_id: string;
+  messages: ChatMessage[];
+  include_scenes?: boolean;
+}
+
+export interface ChatResponse {
+  success: boolean;
+  message?: ChatMessage;
+  error?: string;
+}
+
+export async function generateSceneSummary(request: SceneSummaryRequest): Promise<SceneSummaryResponse> {
+  const response = await authenticatedFetch('/ai/scene-summary', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to generate scene summary');
+  }
+
+  return response.json();
+}
+
+export async function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
+  const response = await authenticatedFetch('/ai/chat', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to send chat message');
   }
 
   return response.json();

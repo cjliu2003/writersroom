@@ -52,6 +52,15 @@ function EditorPageContent() {
   }, [isOutlineOpen, isAssistantOpen]);
 
   useEffect(() => {
+    let cancelled = false
+    // Fail-safe: clear loading after 20s no matter what
+    const failSafe = setTimeout(() => {
+      if (!cancelled) {
+        console.warn('Fail-safe timeout reached, clearing loading state')
+        setIsLoading(false)
+      }
+    }, 20000)
+
     const loadScript = async () => {
       setIsLoading(true)
       setError(null)
@@ -90,6 +99,7 @@ function EditorPageContent() {
 
         // Load scenes from FastAPI backend
         try {
+          console.log('Editor: fetching scenes from backend for project', projectId)
           const backendScenes = await getScriptScenes(projectId)
 
           if (!backendScenes || backendScenes.length === 0) {
@@ -130,6 +140,8 @@ function EditorPageContent() {
           setError('Failed to load script from server.')
           setIsLoading(false)
           return
+        } finally {
+          console.log('Editor: backend fetch sequence finished')
         }
       }
 
@@ -141,7 +153,14 @@ function EditorPageContent() {
       console.error('Critical error loading script:', err)
       setError('Failed to load script. Please try refreshing the page.')
       setIsLoading(false)
+    }).finally(() => {
+      clearTimeout(failSafe)
     })
+
+    return () => {
+      cancelled = true
+      clearTimeout(failSafe)
+    }
   }, [router, searchParams])
 
   // Log script changes for debugging

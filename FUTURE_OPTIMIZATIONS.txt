@@ -1,0 +1,145 @@
+WritersRoom - Future Optimizations & Changes
+=============================================
+
+## 1. Backend Save API (HIGH PRIORITY)
+Replace localStorage-only saves with server persistence:
+
+### Backend Implementation:
+- Add PUT /api/scripts/{script_id}/content
+- Request schema: { elements: ScreenplayElementSchema[], title?: string }
+- Server logic:
+  * Split elements by scene_heading boundaries
+  * Recalculate word_count/tokens per scene
+  * Update scene.position to match sequence
+  * Store scene.full_content as JSON string of scene elements
+  * Store scene.content_blocks as typed array
+  * Optionally create SceneVersion for version history
+  * Update script.updated_at timestamp
+
+### Frontend Implementation:
+- Add saveScriptContent(scriptId, elements) to lib/api.ts
+- Replace localStorage saveScript() in app/editor/page.tsx
+- Add debounced auto-save (1-2s delay) in ScreenplayEditor onChange
+- Update "Saved HH:MM:SS" UI feedback
+- Add error handling and retry logic for failed saves
+- Keep local "dirty" flag to indicate unsaved changes
+
+## 2. Unified Content Endpoint (OPTIONAL)
+Simplify editor data loading:
+
+### Backend:
+- Add GET /api/scripts/{id}/content
+- Returns single ScreenplayElement[] array (server concatenates scene headings + contentBlocks)
+- Eliminates frontend assembly logic
+- Single source of truth for editor content shape
+
+### Benefits:
+- Cleaner frontend code
+- Server controls exact content format
+- Easier to add content transformations/filters
+
+## 3. AI Integration Migration (MEDIUM PRIORITY)
+Move AI features from Next.js API routes to FastAPI backend:
+
+### Current State:
+- components/scene-descriptions.tsx calls /api/ai/scene-summary (Next.js route)
+- Client-side AI processing
+
+### Target State:
+- POST /api/ai/scene-summary with { script_id, scene_index, slugline, scene_text }
+- Store summaries in database (scenes table or separate scene_summaries table)
+- Key summaries by script_id + scene_index for persistence
+- Frontend calls backend route and renders returned summary
+
+### Additional AI Endpoints:
+- POST /api/ai/character-analysis
+- POST /api/ai/prop-tracking  
+- POST /api/ai/theme-extraction
+- POST /api/ai/chat (for writing assistant)
+
+## 4. Legacy Code Cleanup (LOW PRIORITY)
+Remove deprecated in-memory pipeline code:
+
+### Files/Imports to Remove:
+- Any remaining '../../../shared/types' imports
+- Memory/snapshot API code paths
+- Local project registry (offline-only workflows)
+- Unused FDX parsing utilities on frontend
+- Old scene extraction logic that duplicates backend functionality
+
+### Search Patterns:
+- grep -r "shared/types" frontend/
+- grep -r "memory/all" frontend/
+- grep -r "snapshot" frontend/
+- grep -r "projectRegistry" frontend/
+
+## 5. Performance Optimizations
+
+### Caching:
+- Cache page calculations on server (optional)
+- Add Redis for scene summaries and AI responses
+- Implement proper HTTP caching headers
+
+### Database:
+- Add indexes on frequently queried fields (script_id, position, owner_id)
+- Consider read replicas for heavy query workloads
+- Optimize scene content_blocks JSONB queries
+
+### Frontend:
+- Implement virtual scrolling for very long scripts
+- Add progressive loading for large documents
+- Optimize re-renders in ScreenplayEditor
+
+## 6. Deployment & Infrastructure
+
+### Environment Variables:
+- Add Supabase configuration for file storage:
+  * SUPABASE_URL
+  * SUPABASE_ANON_KEY
+  * SUPABASE_SERVICE_ROLE_KEY
+- Ensure all Firebase and DB URLs are configured per existing memory
+
+### Monitoring:
+- Add logging for save operations
+- Track AI API usage and costs
+- Monitor database query performance
+- Add error tracking (Sentry, etc.)
+
+## 7. User Experience Enhancements
+
+### Editor Features:
+- Real-time collaboration (WebSocket-based)
+- Version history UI (browse SceneVersion records)
+- Export to PDF/FDX from backend
+- Import from other formats (Fountain, etc.)
+
+### AI Features:
+- Character consistency checking
+- Plot structure analysis
+- Dialogue style suggestions
+- Automatic scene summaries on content change
+
+## 8. Security & Access Control
+
+### Current State:
+- Firebase authentication
+- Basic owner/collaborator permissions
+
+### Enhancements:
+- Granular permissions (read/write/admin per script)
+- Audit logging for script changes
+- Rate limiting on AI endpoints
+- Input validation and sanitization
+
+## Implementation Priority:
+1. Backend Save API (enables proper persistence)
+2. AI Migration (reduces Next.js complexity)
+3. Legacy Cleanup (improves maintainability)
+4. Performance Optimizations (as needed for scale)
+5. UX Enhancements (feature-driven)
+
+## Notes:
+- Keep calculatePageBreaks on frontend (provides immediate visual feedback)
+- Maintain backward compatibility during migrations
+- Test thoroughly with existing FDX uploads
+- Consider feature flags for gradual rollouts

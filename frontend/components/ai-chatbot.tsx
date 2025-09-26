@@ -4,12 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { MessageCircle, Send, Loader2, Sparkles } from "lucide-react"
-
-interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-  timestamp?: string
-}
+import { sendChatMessage, type ChatMessage } from "@/lib/api"
 
 interface AIChatbotProps {
   projectId?: string
@@ -66,24 +61,16 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          projectId,
-          messages: [...messages, userMessage],
-          includeScenes: true
-        })
+      const response = await sendChatMessage({
+        script_id: projectId,
+        messages: [...messages, userMessage],
+        include_scenes: true
       })
 
-      const data = await response.json()
-
-      if (data.success && data.message) {
-        setMessages(prev => [...prev, data.message])
+      if (response.success && response.message) {
+        setMessages(prev => [...prev, response.message!])
       } else {
-        throw new Error(data.error || 'Failed to get response')
+        throw new Error(response.error || 'Failed to get response')
       }
     } catch (error) {
       console.error('Chat error:', error)

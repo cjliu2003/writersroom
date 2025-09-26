@@ -208,7 +208,8 @@ async def get_script_scenes(
                 "timestamp": scene.created_at.isoformat() if scene.created_at else None,
                 "wordCount": scene.word_count or 0,
                 "fullContent": scene.full_content,
-                "projectTitle": script.title
+                "projectTitle": script.title, 
+                "contentBlocks": scene.content_blocks,
             }
             scene_data.append(scene_dict)
         

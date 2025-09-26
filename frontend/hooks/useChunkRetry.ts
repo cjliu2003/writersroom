@@ -58,7 +58,8 @@ export function preloadCriticalChunks() {
   const criticalPaths = [
     '/_next/static/chunks/webpack.js',
     '/_next/static/chunks/main-app.js',
-    '/_next/static/chunks/app/layout.js'
+    '/_next/static/chunks/app/layout.js',
+    '/_next/static/chunks/app-pages-internals.js'
   ]
 
   criticalPaths.forEach(path => {

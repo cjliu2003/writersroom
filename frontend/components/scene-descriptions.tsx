@@ -6,6 +6,7 @@ import { FileText, Clock, Sparkles, Loader2 } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { extractScenesFromEditor, parseEditorContent } from "@/utils/scene-extraction"
 import type { SceneDescription } from "@/utils/scene-extraction"
+import { generateSceneSummary } from "@/lib/api"
 
 interface Scene {
   id: string
@@ -53,49 +54,38 @@ export function SceneDescriptions({ scenes, editorContent, onSceneSelect, curren
       // Fall back to empty state on error
       setSceneDescriptions([])
     } finally {
-      setIsProcessing(false)
     }
   }, [editorContent, scenes])
 
-  // Debounced useEffect to watch editor content changes
+  // Update scenes when editor content changes
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      updateScenes()
-    }, 300) // 300ms debounce as specified
-
-    return () => clearTimeout(timeoutId)
+    updateScenes()
   }, [updateScenes])
 
   // Generate AI summary for a scene
   const generateAISummary = async (scene: SceneDescription) => {
-    if (!projectId || loadingSummaries.has(scene.slugline)) return
+    if (!projectId) return
 
     setLoadingSummaries(prev => new Set(prev).add(scene.slugline))
 
     try {
-      const response = await fetch('/api/ai/scene-summary', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          projectId,
-          sceneId: scene.id.toString(),
-          sceneContent: scene.sceneText,
-          slugline: scene.slugline
-        })
+      const response = await generateSceneSummary({
+        script_id: projectId,
+        scene_index: scene.id - 1, // Convert to 0-based index
+        slugline: scene.slugline,
+        scene_text: scene.sceneText
       })
 
-      const data = await response.json()
-
-      if (data.success && data.summary) {
+      if (response.success && response.summary) {
         setAiSummaries(prev => ({
           ...prev,
-          [scene.slugline]: data.summary
+          [scene.slugline]: response.summary!
         }))
+      } else {
+        throw new Error(response.error || 'Failed to generate summary')
       }
     } catch (error) {
-      console.error('Failed to generate AI summary:', error)
+      console.error('Error generating AI summary:', error)
     } finally {
       setLoadingSummaries(prev => {
         const newSet = new Set(prev)
@@ -105,6 +95,7 @@ export function SceneDescriptions({ scenes, editorContent, onSceneSelect, curren
     }
   }
 
+  // Calculate total runtime
   const totalRuntime = sceneDescriptions.reduce((total, scene) => {
     // Only count completed scenes in total runtime
     if (scene.isInProgress) return total
