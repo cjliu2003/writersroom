@@ -11,14 +11,12 @@ import { useRouter, useSearchParams } from "next/navigation"
 import ErrorBoundary from "@/components/ErrorBoundary"
 
 import { Scene, Script } from '@/types/screenplay'
-import { SceneMemory } from '../../../shared/types'
+import { getScriptScenes, type BackendScene } from '@/lib/api'
 import { markOpened } from '@/lib/projectRegistry'
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs'
 import { useChunkRetry } from '@/hooks/useChunkRetry'
 
-interface MemoryScene extends SceneMemory {
-  themes: string[]
-}
+// Removed legacy MemoryScene/shared types — backend is the single source of truth
 
 function EditorPageContent() {
   const [script, setScript] = useState<Script | null>(null)
@@ -90,202 +88,53 @@ function EditorPageContent() {
           return
         }
 
-        // Load from snapshot backend (atomic storage)
-        console.log('🔄 Editor: Loading project from snapshot backend:', projectId)
+        // Load scenes from FastAPI backend
         try {
-          const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+          const backendScenes = await getScriptScenes(projectId)
 
-          // First try the new snapshot endpoint
-          console.log('📸 Editor: Fetching from snapshot:', `${BACKEND_API_URL}/projects/${projectId}/snapshot`)
-          let response = await fetch(`${BACKEND_API_URL}/projects/${projectId}/snapshot`)
-
-          let memoryScenes: MemoryScene[] = []
-
-          if (response.ok) {
-            // Use snapshot data
-            const result = await response.json()
-            console.log('✅ Editor: Snapshot loaded successfully')
-            if (result.success && result.data) {
-              const snapshot = result.data
-              memoryScenes = snapshot.scenes || []
-              console.log(`   📊 Snapshot version: ${snapshot.version}`)
-              console.log(`   🎬 Scene count: ${memoryScenes.length}`)
-              console.log(`   📝 Title: ${snapshot.title}`)
+          if (!backendScenes || backendScenes.length === 0) {
+            console.warn('No scenes returned for script, initializing empty script')
+            const emptyScript: Script = {
+              id: projectId,
+              title: 'Untitled Script',
+              scenes: [],
+              content: '',
+              createdAt: new Date().toISOString()
             }
-          } else if (response.status === 404) {
-            // Fallback to old memory/all endpoint for backward compatibility
-            console.log('⚠️ No snapshot found, falling back to memory/all endpoint')
-            response = await fetch(`${BACKEND_API_URL}/memory/all?projectId=${projectId}`)
-
-            if (response.ok) {
-              const result = await response.json()
-              console.log('📊 Editor: Memory backend response:', result)
-              if (result.success && result.data) {
-                memoryScenes = result.data
-              }
-            } else {
-              console.log("❌ Backend response not OK", response.status, response.statusText)
-              setIsOfflineMode(true)
-            }
-          } else {
-            console.log("❌ Backend response not OK", response.status, response.statusText)
-            setIsOfflineMode(true)
-          }
-
-          if (memoryScenes.length > 0) {
-              // Sort scenes by sequence index with robust error handling
-              const scenesWithIndex = memoryScenes.map((scene, originalIndex) => {
-                let sequenceIndex = originalIndex // fallback to original order
-
-                try {
-                  if (scene.fullContent) {
-                    const elements = JSON.parse(scene.fullContent)
-                    if (Array.isArray(elements) && elements.length > 0) {
-                      // Check multiple possible locations for sequence index
-                      const firstElement = elements[0]
-                      sequenceIndex = firstElement?.metadata?.sequenceIndex
-                        || firstElement?.sequenceIndex
-                        || elements.find(el => el.metadata?.sequenceIndex !== undefined)?.metadata?.sequenceIndex
-                        || elements.find(el => el.sequenceIndex !== undefined)?.sequenceIndex
-                        || originalIndex
-                    }
-                  }
-                } catch (error) {
-                  console.warn(`Error parsing sequence index for scene "${scene.slugline}":`, error)
-                }
-
-                return { scene, sequenceIndex, originalIndex }
-              })
-
-              // Sort by sequence index, fallback to original order
-              scenesWithIndex.sort((a, b) => {
-                if (a.sequenceIndex !== b.sequenceIndex) {
-                  return a.sequenceIndex - b.sequenceIndex
-                }
-                return a.originalIndex - b.originalIndex // Stable sort fallback
-              })
-
-              const sortedScenes = scenesWithIndex.map(item => item.scene)
-
-              console.log('Scene ordering loaded:', sortedScenes.length, 'scenes')
-
-              const scriptContent = convertMemoryScenesToScript(sortedScenes)
-              const scenes = parseScenes(scriptContent)
-
-              const newScript: Script = {
-                id: projectId,
-                title: extractTitleFromScenes(sortedScenes) || 'Untitled Script',
-                scenes: scenes,
-                content: scriptContent,
-                createdAt: new Date().toISOString()
-              }
-
-              console.log('Script loaded:', newScript.title, '-', newScript.scenes.length, 'scenes')
-
-              setScript(newScript)
-              // Also save to localStorage for future editing
-              localStorage.setItem("current-script", JSON.stringify(newScript))
-              setIsLoading(false)
-              return
-            } else {
-              console.log('❌ Editor: No scenes found in backend response')
-              console.warn("⚠️ Script has no scenes, initializing empty script")
-
-              // Get project title from registry
-              const projects = JSON.parse(localStorage.getItem('wr.projects') || '[]')
-              const project = projects.find((p: any) => p.projectId === projectId)
-              const title = project?.title || 'Untitled Script'
-
-              const emptyScript: Script = {
-                id: projectId,
-                title: title,
-                scenes: [],
-                content: '',
-                createdAt: new Date().toISOString()
-              }
-
-              setScript(emptyScript)
-              localStorage.setItem(`project-${projectId}`, JSON.stringify(emptyScript))
-              setIsLoading(false)
-              return
-            }
-        } catch (error) {
-          console.error('Editor: Failed to load script from memory backend:', error)
-          setIsOfflineMode(true)
-        }
-      }
-
-      // Enhanced fallback system when backend is down
-      if (!script) {  // Only fallback if no script has been loaded yet
-        console.log('Backend unavailable, using localStorage fallback...')
-        console.warn('Offline Mode triggered: backend unavailable or unreachable')
-        setIsOfflineMode(true)
-
-      // Try lastParsedProject first (most recent FDX upload)
-      const lastParsedProject = localStorage.getItem('lastParsedProject')
-      if (lastParsedProject && projectId) {
-        try {
-          const parsed = JSON.parse(lastParsedProject)
-          if (parsed.projectId === projectId && parsed.scenes && parsed.scenes.length > 0) {
-            console.log('✅ Found lastParsedProject with', parsed.scenes.length, 'elements')
-
-            const fallbackScript: Script = {
-              id: parsed.projectId,
-              title: parsed.title || 'Imported Script',
-              scenes: parseScenes(JSON.stringify(parsed.scenes)),
-              content: JSON.stringify(parsed.scenes),
-              createdAt: parsed.timestamp || new Date().toISOString()
-            }
-
-            console.log('🔄 OFFLINE MODE: Loading script with', fallbackScript.scenes.length, 'scenes')
-            setScript(fallbackScript)
+            setScript(emptyScript)
+            localStorage.setItem(`project-${projectId}`, JSON.stringify(emptyScript))
             setIsLoading(false)
             return
           }
+
+          // Build ScreenplayElements from backend data
+          const elements = buildElementsFromBackendScenes(backendScenes)
+          const content = JSON.stringify(elements)
+          const scenes = parseScenes(content)
+
+          const title = backendScenes[0]?.projectTitle || 'Untitled Script'
+          const assembled: Script = {
+            id: projectId,
+            title,
+            scenes,
+            content,
+            createdAt: new Date().toISOString()
+          }
+
+          setScript(assembled)
+          localStorage.setItem('current-script', JSON.stringify(assembled))
+          setIsLoading(false)
+          return
         } catch (error) {
-          console.warn('Failed to parse lastParsedProject:', error)
-        }
-      }
-
-      // Fallback to project-specific localStorage
-      const projectSpecificKey = `project-${projectId}`
-      const savedScript = localStorage.getItem(projectSpecificKey)
-      if (savedScript) {
-        const parsedScript = JSON.parse(savedScript)
-        console.log("🧠 Project fallback: Updating editor from project-specific localStorage...")
-        console.log("Using key:", projectSpecificKey)
-        console.log("Stored script title:", parsedScript.title)
-        console.log("Content length:", parsedScript.content?.length || 0)
-
-        // If we have full content, use it
-        if (parsedScript.content && parsedScript.content.length > 50) {
-          console.log("✅ Found full content in project localStorage")
-          setScript(parsedScript)
+          console.error('Editor: Failed to load script scenes from backend:', error)
+          setError('Failed to load script from server.')
           setIsLoading(false)
           return
         }
-
-        setScript(parsedScript)
-      } else {
-        console.log("❌ No project-specific localStorage found for key:", projectSpecificKey)
-        // Fallback to generic current-script for backward compatibility
-        const genericScript = localStorage.getItem("current-script")
-        if (genericScript) {
-          const parsedScript = JSON.parse(genericScript)
-          console.log("🧠 Using generic localStorage fallback...")
-          setScript(parsedScript)
-        } else {
-          router.push("/")
-        }
       }
+
+      // No projectId in URL
       setIsLoading(false)
-      }  // End of if (!script) condition
-
-      // Fallback: Ensure loading always resolves
-      if (isLoading) {
-        console.warn('⚠️ Loading state fallback triggered - ensuring spinner stops')
-        setIsLoading(false)
-      }
     }
 
     loadScript().catch((err) => {
@@ -306,78 +155,47 @@ function EditorPageContent() {
     }
   }, [script])
 
-  const extractTitleFromScenes = (memoryScenes: MemoryScene[]): string | null => {
-    // Use stored projectTitle from FDX import, without scene count
-    if (memoryScenes.length > 0 && memoryScenes[0].projectTitle) {
-      return memoryScenes[0].projectTitle
-    }
-    return null
-  }
+  // Title is derived from backendScenes[0].projectTitle when available
 
-  const convertMemoryScenesToScript = (memoryScenes: MemoryScene[]): string => {
-    const allScreenplayElements: any[] = []
+  const buildElementsFromBackendScenes = (backendScenes: BackendScene[]): any[] => {
+    const all: any[] = []
+    // Ensure deterministic order
+    const sorted = [...backendScenes].sort((a, b) => a.sceneIndex - b.sceneIndex)
 
-    memoryScenes.forEach((scene) => {
-      // Use fullContent if available (from FDX import), otherwise fall back to constructed content
-      if (scene.fullContent) {
-        // Parse the fullContent back into ScreenplayElements
-        const elements = parseFullContentToElements(scene.fullContent)
-        allScreenplayElements.push(...elements)
-      } else {
-        // Fallback: construct content from scene data
-        // Add scene heading
-        allScreenplayElements.push({
-          type: 'scene_heading',
-          children: [{ text: scene.slugline }],
-          id: `scene_${Date.now()}_${Math.random()}`,
-          metadata: {
-            timestamp: new Date().toISOString(),
-            uuid: crypto.randomUUID()
-          }
-        })
+    sorted.forEach((s) => {
+      // Scene heading first
+      all.push({
+        type: 'scene_heading',
+        children: [{ text: s.slugline }],
+        id: `scene_${s.sceneIndex}_${Date.now()}_${Math.random()}`,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          uuid: crypto.randomUUID()
+        }
+      })
 
-        // Add scene summary as action
-        if (scene.summary) {
-          allScreenplayElements.push({
-            type: 'action',
-            children: [{ text: scene.summary }],
-            id: `action_${Date.now()}_${Math.random()}`,
-            metadata: {
+      // Prefer typed blocks from backend
+      if (s.contentBlocks && Array.isArray(s.contentBlocks) && s.contentBlocks.length > 0) {
+        s.contentBlocks.forEach((b, idx) => {
+          if (!b || !b.type) return
+          if (b.type === 'scene_heading') return // avoid duplicating headings
+          all.push({
+            type: b.type,
+            children: [{ text: (b.text ?? '').toString() }],
+            id: `el_${s.sceneIndex}_${idx}_${Math.random()}`,
+            metadata: b.metadata ?? {
               timestamp: new Date().toISOString(),
               uuid: crypto.randomUUID()
             }
           })
-        }
-
-        // Add characters as dialogue placeholders if available
-        if (scene.characters && scene.characters.length > 0) {
-          scene.characters.forEach(character => {
-            allScreenplayElements.push({
-              type: 'character',
-              children: [{ text: character.toUpperCase() }],
-              id: `char_${Date.now()}_${Math.random()}`,
-              metadata: {
-                timestamp: new Date().toISOString(),
-                uuid: crypto.randomUUID()
-              }
-            })
-
-            allScreenplayElements.push({
-              type: 'dialogue',
-              children: [{ text: '(dialogue)' }],
-              id: `dialogue_${Date.now()}_${Math.random()}`,
-              metadata: {
-                timestamp: new Date().toISOString(),
-                uuid: crypto.randomUUID()
-              }
-            })
-          })
-        }
+        })
+      } else if (s.fullContent) {
+        const els = parseFullContentToElements(s.fullContent)
+        all.push(...els)
       }
     })
 
-    // Return as JSON string that the editor expects
-    return JSON.stringify(allScreenplayElements)
+    return all
   }
 
   const parseFullContentToElements = (fullContent: string): any[] => {
