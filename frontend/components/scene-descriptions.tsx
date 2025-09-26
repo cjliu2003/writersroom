@@ -35,6 +35,7 @@ export function SceneDescriptions({ scenes, editorContent, onSceneSelect, curren
       const fallbackDescriptions: SceneDescription[] = scenes.map((scene, index) => ({
         id: index + 1,
         slugline: scene.heading,
+        isInProgress: false,
         sceneText: scene.content,
         summary: scene.content.trim() ? "Scene contains dialogue and action." : "Scene in progress...",
         tokenCount: Math.ceil(scene.content.split(/\s+/).length * 1.3),
