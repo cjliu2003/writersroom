@@ -1,0 +1,50 @@
+# Backend-only pinned dependencies for WritersRoom
+# Generated: 2025-09-28
+
+# Core API
+fastapi==0.109.2
+uvicorn==0.27.1
+starlette==0.36.3
+
+# Database & ORM
+SQLAlchemy==2.0.28
+psycopg2-binary==2.9.9      # Alembic migrations (sync)
+asyncpg==0.29.0             # Async driver for app runtime
+SQLAlchemy-Utils==0.41.1
+greenlet==3.0.1
+alembic==1.13.1
+
+# Vector support
+pgvector==0.2.3
+# Note: SQLAlchemy integration is provided by the pgvector package itself
+# Usage: from pgvector.sqlalchemy import Vector
+
+# Config & validation
+python-dotenv==1.0.1
+pydantic==2.11.7
+pydantic-settings==2.2.1
+
+# Auth
+firebase-admin==6.2.0
+
+# Storage (Supabase for FDX, etc.)
+supabase==2.20.0            # supabase-py client
+storage3==2.20.0            # supabase storage client used by supabase-py
+
+# HTTP & utilities
+httpx==0.26.0               # Async HTTP client for external calls
+python-multipart==0.0.20    # File uploads
+aiofiles==23.2.1            # Async file IO
+tenacity==9.0.0             # Retries
+
+# Rate limiting & middleware
+slowapi==0.1.8              # Rate limiting for FastAPI
+
+# Observability (optional but recommended)
+structlog==24.1.0
+sentry-sdk==1.39.2
+
+# Testing (optional)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0

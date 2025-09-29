@@ -52,6 +52,35 @@ Acceptance criteria
 - P1: No data loss on navigation; explicit save no longer required. Simple offline edits sync when online.
 - P2: Two users can edit the same scene without conflicts; presence cursors visible.
 
+## Phase 1.5 — Version History (Docs-style timeline)
+Why now: pairs naturally with Autosave P1 and sets the foundation for richer diffs after Yjs (P2). We ship a basic, reliable version history first, then enhance it once realtime CRDT is in place.
+
+### Scope (Basic, pre‑Yjs)
+- Snapshot on save (debounced) per scene. Store author, timestamp, and serialized blocks.
+- Script-level "named versions" (manual checkpoints) that capture all scene snapshots at a moment in time.
+- UI: Version History panel with timeline, per-scene snapshot list, preview, and "Restore".
+- Retention policy: keep every snapshot for the last 24h, hourly snapshots for 7 days, daily snapshots thereafter. Named versions are pinned indefinitely.
+
+### Data model
+- `scene_snapshots(id, scene_id, author_id, created_at, source, content_json, hash, diff_from_snapshot_id NULL)`
+- `script_versions(id, script_id, author_id, created_at, label, snapshot_ids[])`
+- Continue to use `scene_versions` table for Yjs updates later; Version History will unify with it in the enhanced phase.
+
+### APIs
+- `GET /api/scenes/{scene_id}/versions` (list snapshots)
+- `GET /api/scenes/{scene_id}/versions/{snapshot_id}` (fetch snapshot)
+- `POST /api/scenes/{scene_id}/versions/{snapshot_id}/restore` (restore)
+- `POST /api/scripts/{script_id}/versions` (create named version)
+- `GET /api/scripts/{script_id}/versions` (list named versions)
+
+### Enhanced (post‑Yjs)
+- After Phase 1 P2, add compacted diffs from Yjs updates, more granular timeline, and visual diffs.
+- Background compaction to roll up Yjs updates into periodic snapshots.
+
+Acceptance criteria
+- Users can browse scene history, view snapshots, restore prior versions, and create/restore named script versions.
+- Retention policy enforced; named versions are preserved.
+
 ## Phase 2 — RAG Chatbot (context at scale)
 ### Ingestion & Embeddings
 - **Scene embeddings**: Persist in `scene_embeddings` (exists). Only re-embed changed scenes.
@@ -156,17 +185,21 @@ Use for source FDX uploads and raw file versions; parse → DB. Keep file to all
    - Styling fixed, missing deps installed, docs refreshed.
 2. **Phase 1 – Autosave P1** (1–2 weeks)
    - Debounced per‑scene save, offline queue, save indicator, endpoint + basic versioning.
-3. **Phase 2 – RAG P1** (2–3 weeks)
+3. **Phase 1.5 – Version History (Basic)** (1 week)
+   - Scene-level snapshots on save; script-level named versions; restore UI; retention policy.
+4. **Phase 2 – RAG P1** (2–3 weeks)
    - Embeddings pipeline, hybrid retrieval, context assembler, streaming chat endpoints.
-4. **Phase 3 – Autotracking P1** (2 weeks)
+5. **Phase 3 – Autotracking P1** (2 weeks)
    - Background extraction for summaries/props/characters/themes; basic sidebars.
-5. **Phase 1 – Autosave P2 (Realtime/Yjs)** (2–3 weeks)
+6. **Phase 1 – Autosave P2 (Realtime/Yjs)** (2–3 weeks)
    - WebSocket + Yjs updates; persist to `scene_versions`; presence cursors.
-6. **Phase 4 – Chat History** (1 week)
+7. **Phase 1.5 – Version History (Enhanced)** (1 week)
+   - Integrate Yjs diffs, compaction, visual diffs; unify snapshot + update timeline.
+8. **Phase 4 – Chat History** (1 week)
    - Sessions, rolling summaries, pins.
-7. **Phase 5 – Permissions** (1 week)
+9. **Phase 5 – Permissions** (1 week)
    - Roles enforced across API and UI.
-8. **Phase 7/8 – Observability & Security** (ongoing)
+10. **Phase 7/8 – Observability & Security** (ongoing)
    - Sentry, metrics, rate limits.
 
 ## Acceptance Criteria by Theme
@@ -175,6 +208,7 @@ Use for source FDX uploads and raw file versions; parse → DB. Keep file to all
 - **Autotracking**: Derived data updates within 60s; user corrections stick.
 - **Chat history**: Long sessions remain coherent; token usage bounded.
 - **Permissions**: Role enforcement validated by integration tests.
+- **Version history**: Users can view a timeline of snapshots per scene and named script versions, diff/preview, and restore. Post‑Yjs, timeline shows granular changes with compaction.
 
 ## Open Questions
 - When to migrate to a dedicated worker (Celery/RQ) vs. FastAPI BackgroundTasks?

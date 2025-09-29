@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useMemo, useState, useEffect } from "react"
+import React, { useCallback, useMemo, useState, useEffect, useRef } from "react"
 import { createEditor, Descendant, Editor, Transforms, Range, Element, Text } from "slate"
 import { Slate, Editable, withReact, RenderElementProps, RenderLeafProps } from "slate-react"
 import { withHistory } from "slate-history"
@@ -96,7 +96,7 @@ interface ScreenplayEditorProps {
 }
 
 
-export function ScreenplayEditor({ content, onChange, onCurrentBlockTypeChange }: ScreenplayEditorProps) {
+export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBlockTypeChange }: ScreenplayEditorProps) {
   const initialValue = useMemo(() => {
     if (content) {
       try {
@@ -142,6 +142,14 @@ export function ScreenplayEditor({ content, onChange, onCurrentBlockTypeChange }
   const editor = useMemo(() => withScreenplayEditor(withHistory(withReact(createEditor()))), [])
   const [isEditorReady, setIsEditorReady] = useState(false)
   const [editorKey, setEditorKey] = useState(0) // Force re-render when needed
+  // Track last emitted scene UUID to avoid redundant onSceneChange emissions
+  const lastSceneUuidRef = useRef<string | null>(null)
+  // Track current block type in a ref to avoid effect churn
+  const currentBlockTypeRef = useRef<ScreenplayBlockType | null>(currentBlockType)
+
+  useEffect(() => {
+    currentBlockTypeRef.current = currentBlockType
+  }, [currentBlockType])
 
   // Update editor when content prop changes (for FDX uploads)
   useEffect(() => {
@@ -333,9 +341,33 @@ export function ScreenplayEditor({ content, onChange, onCurrentBlockTypeChange }
               anchor.path.length > 0 && focus.path.length > 0) {
             
             const type = getCurrentBlockType(editor)
-            if (type && type !== currentBlockType) {
+            if (type && type !== currentBlockTypeRef.current) {
+              currentBlockTypeRef.current = type
               setCurrentBlockType(type)
               onCurrentBlockTypeChange?.(type)
+            }
+
+            // Detect the current scene by scanning backward to the nearest scene_heading
+            try {
+              const [match] = Editor.nodes(editor, { match: n => isScreenplayElement(n) })
+              if (match) {
+                const [, path] = match as any
+                const topIndex = Array.isArray(path) && path.length > 0 ? path[0] : 0
+                for (let i = topIndex; i >= 0; i--) {
+                  const node = editor.children[i] as any
+                  if (node && (node as any).type === 'scene_heading') {
+                    const uuid: string | undefined = (node as any)?.metadata?.uuid
+                    // Only emit when the scene actually changes
+                    if (uuid && uuid !== lastSceneUuidRef.current) {
+                      lastSceneUuidRef.current = uuid
+                      onSceneChange?.(uuid)
+                    }
+                    break
+                  }
+                }
+              }
+            } catch (e) {
+              // ignore scene detection errors
             }
           }
         }
@@ -361,7 +393,7 @@ export function ScreenplayEditor({ content, onChange, onCurrentBlockTypeChange }
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange)
     }
-  }, [editor, currentBlockType, onCurrentBlockTypeChange, isEditorReady])
+  }, [editor, onCurrentBlockTypeChange, onSceneChange, isEditorReady])
 
   // Handle auto-conversion logic (define before handleKeyDown)
   const handleAutoConversion = useCallback(() => {

@@ -1,7 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef, Suspense } from "react"
+import { useState, useEffect, useRef, Suspense, useCallback } from "react"
+import { ScreenplayEditorWithAutosave } from "@/components/screenplay-editor-with-autosave"
 import { ScreenplayEditor } from "@/components/screenplay-editor"
+import { useAuth } from "@/contexts/AuthContext"
 import { AIChatbot } from "@/components/ai-chatbot"
 import { SceneDescriptions } from "@/components/scene-descriptions"
 import { Button } from "@/components/ui/button"
@@ -27,13 +29,38 @@ function EditorPageContent() {
   const [isOfflineMode, setIsOfflineMode] = useState(false)
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [currentSceneVersion, setCurrentSceneVersion] = useState(0)
+  const [sceneVersions, setSceneVersions] = useState<Record<string, number>>({})
+  const [authToken, setAuthToken] = useState<string>("") // Set from AuthContext token
+  const [autosaveEnabled, setAutosaveEnabled] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [currentSceneInView, setCurrentSceneInView] = useState<string>('')
+  const { user, isLoading: authLoading, getToken, signIn } = useAuth()
 
   // Enable chunk retry mechanism
   useChunkRetry()
+
+  // Auth token and autosave enablement via AuthContext
+  useEffect(() => {
+    let cancelled = false
+    const fetchToken = async () => {
+      try {
+        const token = await getToken()
+        if (cancelled) return
+        setAuthToken(token || "")
+        setAutosaveEnabled(!!token)
+      } catch (e) {
+        console.warn('Failed to fetch auth token from context:', e)
+        if (cancelled) return
+        setAuthToken("")
+        setAutosaveEnabled(false)
+      }
+    }
+    fetchToken()
+    return () => { cancelled = true }
+  }, [user, getToken])
 
   // Load layout preferences on mount
   useEffect(() => {
@@ -101,6 +128,7 @@ function EditorPageContent() {
         try {
           console.log('Editor: fetching scenes from backend for project', projectId)
           const backendScenes = await getScriptScenes(projectId)
+          console.log('🎬 Backend scenes response:', backendScenes?.slice(0, 2)) // Log first 2 scenes
 
           if (!backendScenes || backendScenes.length === 0) {
             console.warn('No scenes returned for script, initializing empty script')
@@ -129,6 +157,24 @@ function EditorPageContent() {
             scenes,
             content,
             createdAt: new Date().toISOString()
+          }
+
+          // Build map of scene UUID -> version from backend
+          const versionMap: Record<string, number> = {}
+          for (const s of backendScenes as any[]) {
+            const uuid = (s as any).sceneUUID
+            const ver = (s as any).version
+            if (uuid) versionMap[uuid] = typeof ver === 'number' ? ver : 0
+          }
+          setSceneVersions(versionMap)
+
+          // Set initial scene in view and its version
+          const firstSceneId = scenes?.[0]?.id
+          if (firstSceneId) {
+            setCurrentSceneInView(firstSceneId)
+            setCurrentSceneVersion(versionMap[firstSceneId] ?? 0)
+          } else {
+            setCurrentSceneVersion(0)
           }
 
           setScript(assembled)
@@ -189,7 +235,8 @@ function EditorPageContent() {
         id: `scene_${s.sceneIndex}_${Date.now()}_${Math.random()}`,
         metadata: {
           timestamp: new Date().toISOString(),
-          uuid: crypto.randomUUID()
+          // Use server-provided scene UUID for correct autosave targeting
+          uuid: (s as any).sceneUUID
         }
       })
 
@@ -321,18 +368,35 @@ function EditorPageContent() {
 
       setScript(updatedScript)
 
-      // Auto-save with debounce
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
+      // If autosave is disabled, use local storage with debounce
+      if (!autosaveEnabled) {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current)
+        }
+        saveTimeoutRef.current = setTimeout(() => {
+          saveScript(updatedScript)
+        }, 1000)
       }
-      saveTimeoutRef.current = setTimeout(() => {
-        saveScript(updatedScript)
-      }, 1000)
+      // Note: When autosave is enabled, saving is handled by ScreenplayEditorWithAutosave
     } catch (error) {
       console.error('Error handling content change:', error)
       setError('Error updating script content. Your changes may not be saved.')
     }
   }
+
+  const handleVersionUpdate = useCallback((newVersion: number) => {
+    const sceneId = currentSceneInView
+    if (!sceneId) return
+    // Only move version forward; ignore stale or duplicate reports
+    setSceneVersions(prev => {
+      const prevV = prev[sceneId] ?? 0
+      if (newVersion <= prevV) return prev
+      return { ...prev, [sceneId]: newVersion }
+    })
+    setCurrentSceneVersion(prev => (newVersion > prev ? newVersion : prev))
+    setLastSaved(new Date())
+    console.log('Scene version updated to:', newVersion)
+  }, [currentSceneInView])
 
   const parseScenes = (content: string): Scene[] => {
     const scenes: Scene[] = []
@@ -343,38 +407,45 @@ function EditorPageContent() {
       if (Array.isArray(elements)) {
         let currentSceneElements: any[] = []
         let currentSceneHeading = ""
-        let sceneId = 1
+        // Will be set from scene_heading metadata.uuid when available
+        let sceneId = ""
 
         elements.forEach(element => {
           if (element.type === 'scene_heading') {
             // Save previous scene if it exists - REMOVED LENGTH CHECK
             if (currentSceneHeading) {
               const sceneContent = JSON.stringify(currentSceneElements)
-              scenes.push({
-                id: sceneId.toString(),
-                heading: currentSceneHeading,
-                content: sceneContent,
-              })
-              sceneId++
+              if (sceneId) {
+                scenes.push({
+                  id: sceneId, // Only use backend-provided UUID
+                  heading: currentSceneHeading,
+                  content: sceneContent,
+                })
+              }
             }
 
             // Start new scene
             currentSceneHeading = element.children[0].text
             currentSceneElements = [element]
+            // Derive scene ID from heading metadata if present
+            const headingUuid = (element as any)?.metadata?.uuid as string | undefined
+            sceneId = headingUuid || ""
           } else {
             // Add to current scene
             currentSceneElements.push(element)
           }
         })
 
-        // Add the last scene - REMOVED LENGTH CHECK
+        // Add the last scene - only if we have a valid scene UUID
         if (currentSceneHeading) {
           const sceneContent = JSON.stringify(currentSceneElements)
-          scenes.push({
-            id: sceneId.toString(),
-            heading: currentSceneHeading,
-            content: sceneContent,
-          })
+          if (sceneId) {
+            scenes.push({
+              id: sceneId,
+              heading: currentSceneHeading,
+              content: sceneContent,
+            })
+          }
         }
 
         return scenes
@@ -387,7 +458,8 @@ function EditorPageContent() {
     const lines = content.split("\n")
     let currentSceneContent = ""
     let currentSceneHeading = ""
-    let sceneId = 1
+    // No backend UUID available in legacy text parsing
+    let sceneId = ""
 
     for (const line of lines) {
       const trimmedLine = line.trim()
@@ -396,12 +468,12 @@ function EditorPageContent() {
       if (trimmedLine.match(/^(INT\.|EXT\.)/i)) {
         // Save previous scene if it exists
         if (currentSceneHeading) {
+          // Without a backend UUID, we skip assigning an ID used for autosave
           scenes.push({
-            id: sceneId.toString(),
+            id: "",
             heading: currentSceneHeading,
             content: currentSceneContent.trim(),
           })
-          sceneId++
         }
 
         // Start new scene
@@ -415,7 +487,7 @@ function EditorPageContent() {
     // Add the last scene
     if (currentSceneHeading) {
       scenes.push({
-        id: sceneId.toString(),
+        id: sceneId,  // May be empty in legacy path without backend UUID
         heading: currentSceneHeading,
         content: currentSceneContent.trim(),
       })
@@ -424,6 +496,15 @@ function EditorPageContent() {
     return scenes
   }
 
+  // Memoized handler to avoid re-registering selection listeners downstream
+  const handleEditorSceneChange = useCallback((sceneId: string) => {
+    if (!sceneId) return
+    // Ignore redundant updates to prevent render loops
+    if (sceneId === currentSceneInView) return
+    setCurrentSceneInView(sceneId)
+    // Sync version for the newly selected scene
+    setCurrentSceneVersion(sceneVersions[sceneId] ?? 0)
+  }, [currentSceneInView, sceneVersions])
 
   if (error) {
     return (
@@ -461,6 +542,25 @@ function EditorPageContent() {
       </div>
     )
   }
+
+  // Accept autosave only when we have a valid server-provided scene UUID
+  const isUuid = (s: string | undefined | null): s is string => !!s && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(s)
+  const resolvedSceneId = (() => {
+    const candidate = currentSceneInView || script.scenes?.[0]?.id
+    return isUuid(candidate) ? candidate : undefined
+  })()
+  const canAutosave = autosaveEnabled && !!authToken && !!resolvedSceneId
+
+  // Debug logging for autosave gating
+  console.log('🔍 Autosave Debug:', {
+    autosaveEnabled,
+    hasToken: !!authToken,
+    currentSceneInView,
+    firstSceneId: script.scenes?.[0]?.id,
+    resolvedSceneId,
+    canAutosave,
+    sceneIds: script.scenes?.map(s => s.id)
+  })
 
   const sceneNumbers = script.scenes.map((_: Scene, index: number) => index + 1)
 
@@ -607,11 +707,57 @@ function EditorPageContent() {
                   : '100vw' // None open: full width
             }}
           >
-            <ScreenplayEditor
-              content={script.content}
-              onChange={handleContentChange}
-              onSceneChange={setCurrentSceneInView}
-            />
+            {canAutosave ? (
+              <ScreenplayEditorWithAutosave
+                sceneId={resolvedSceneId as string}
+                initialVersion={currentSceneVersion}
+                content={script.content}
+                authToken={authToken}
+                onChange={handleContentChange}
+                onSceneChange={handleEditorSceneChange}
+                onVersionUpdate={handleVersionUpdate}
+                showAutosaveIndicator={true}
+                compactIndicator={false}
+                autosaveOptions={{
+                  debounceMs: 3000, // Increased from 1500ms to reduce frequency
+                  maxWaitMs: 5000,
+                  maxRetries: 3,
+                  enableOfflineQueue: true
+                }}
+              />
+            ) : (
+              <div className="space-y-4">
+                {/* Authentication status banner */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600">🔒</span>
+                      <div>
+                        <h3 className="font-medium text-blue-800">Sign In for Autosave</h3>
+                        <p className="text-sm text-blue-700">
+                          Sign in to enable automatic saving and collaboration features.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={async () => { await signIn() }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      disabled={authLoading}
+                      size="sm"
+                    >
+                      Sign In
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Regular editor without autosave */}
+                <ScreenplayEditor
+                  content={script.content}
+                  onChange={handleContentChange}
+                  onSceneChange={handleEditorSceneChange}
+                />
+              </div>
+            )}
           </div>
         </div>
 

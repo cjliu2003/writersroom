@@ -12,6 +12,8 @@ from app.models.base import Base
 if TYPE_CHECKING:
     from app.models.script import Script  # noqa: F401
     from app.models.scene_version import SceneVersion  # noqa: F401
+    from app.models.scene_snapshot import SceneSnapshot  # noqa: F401
+    from app.models.user import User  # noqa: F401
 
 class Scene(Base):
     """Scene model representing a scene within a script."""
@@ -102,6 +104,20 @@ class Scene(Base):
         nullable=False
     )
     
+    # Version counter for compare-and-swap
+    version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0
+    )
+    
+    # User who last updated this scene
+    updated_by: Mapped[Optional[UUID]] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey('users.user_id'),
+        nullable=True
+    )
+    
     # Relationships
     script: Mapped['Script'] = relationship(
         'Script',
@@ -109,13 +125,29 @@ class Scene(Base):
         lazy='selectin'
     )
     
-    # Version history
+    # User who last updated this scene
+    last_editor: Mapped['User'] = relationship(
+        'User',
+        foreign_keys=[updated_by],
+        lazy='selectin'
+    )
+    
+    # Version history (Yjs updates)
     versions: Mapped[List['SceneVersion']] = relationship(
         'SceneVersion',
         back_populates='scene',
         cascade='all, delete-orphan',
         lazy='selectin',
         order_by='desc(SceneVersion.created_at)'
+    )
+    
+    # Snapshots (for autosave and version history)
+    snapshots: Mapped[List['SceneSnapshot']] = relationship(
+        'SceneSnapshot',
+        back_populates='scene',
+        cascade='all, delete-orphan',
+        lazy='selectin',
+        order_by='desc(SceneSnapshot.saved_at)'
     )
     
     # Embedding relationship
@@ -144,6 +176,8 @@ class Scene(Base):
             'tokens': self.tokens or 0,
             'word_count': self.word_count or 0,
             'full_content': self.full_content,
+            'version': self.version,
+            'updated_by': str(self.updated_by) if self.updated_by else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

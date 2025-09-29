@@ -1,7 +1,7 @@
 import { ScreenplayElement } from "@/types/screenplay";
 
 export type SceneDescription = {
-  id: number;
+  id: number;  // Sequential numeric ID for UI ordering only
   slugline: string;
   sceneText: string;
   summary: string;
@@ -47,6 +47,7 @@ export function extractScenesFromEditor(value: ScreenplayElement[] | null | unde
     const text = buffer.join(" ").trim();
     const tokens = computeTokens(wordCount(text));
     const runtime = computeRuntime(tokens);
+    // Generate sequential numeric ID for display
     const id = scenes.length + 1;
     scenes.push({
       id,
@@ -96,7 +97,7 @@ export function sceneMemoryToDescription(memory: any, id: number, isInProgress: 
   return {
     id,
     slugline,
-    sceneText: "", // memory format doesn’t store full text
+    sceneText: "", // memory format doesn't store full text
     summary: summary || "Scene in progress...",
     tokenCount: tokens,
     runtime,

@@ -33,7 +33,7 @@ export function SceneDescriptions({ scenes, editorContent, onSceneSelect, curren
     if (!editorContent) {
       // Fall back to scenes prop if no editor content
       const fallbackDescriptions: SceneDescription[] = scenes.map((scene, index) => ({
-        id: index + 1,
+        id: index + 1, // purely for display ordering; not used for autosave
         slugline: scene.heading,
         isInProgress: false,
         sceneText: scene.content,
@@ -66,13 +66,12 @@ export function SceneDescriptions({ scenes, editorContent, onSceneSelect, curren
   // Generate AI summary for a scene
   const generateAISummary = async (scene: SceneDescription) => {
     if (!projectId) return
-
     setLoadingSummaries(prev => new Set(prev).add(scene.slugline))
 
     try {
       const response = await generateSceneSummary({
         script_id: projectId,
-        scene_index: scene.id - 1, // Convert to 0-based index
+        scene_index: typeof scene.id === 'number' ? scene.id - 1 : 0, // Fallback to 0
         slugline: scene.slugline,
         scene_text: scene.sceneText
       })

@@ -55,7 +55,7 @@ local_settings.py
 
 # Frontend
 # ###################
-# Node and dependency folders
+# Node and dependency folder
 node_modules/
 
 # Next.js build output
@@ -76,3 +76,14 @@ yarn-error.log*
 
 
 
+
+# Python virtual environment
+bin/
+include/
+pyvenv.cfg
+.python-version
+
+# Additional Python virtual environment patterns
+*/bin/
+*/include/
+*/pyvenv.cfg
