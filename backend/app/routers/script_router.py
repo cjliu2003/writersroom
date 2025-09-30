@@ -198,7 +198,12 @@ async def get_script_scenes(
             scene_dict = {
                 "projectId": str(script_id),
                 "slugline": scene.scene_heading,
+                # Legacy sceneId kept for compatibility with older clients
                 "sceneId": f"{script_id}_{scene.position}",
+                # Real database UUID for this scene (use this for writes/autosave)
+                "sceneUUID": str(scene.scene_id),
+                # Current version for optimistic concurrency
+                "version": scene.version,
                 "sceneIndex": scene.position,
                 "characters": scene.characters or [],
                 "summary": scene.summary or "",

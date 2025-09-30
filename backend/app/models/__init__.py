@@ -14,6 +14,8 @@ from app.models.script_collaborator import ScriptCollaborator, CollaboratorRole
 from app.models.chat_message import ChatMessage, MessageRole
 from app.models.scene import Scene
 from app.models.scene_version import SceneVersion
+from app.models.scene_snapshot import SceneSnapshot
+from app.models.scene_write_op import SceneWriteOp
 from app.models.chat_conversation import ChatConversation
 from app.models.scene_embedding import SceneEmbedding
 
@@ -28,6 +30,8 @@ __all__ = [
     'Script',
     'Scene',
     'SceneVersion',
+    'SceneSnapshot',
+    'SceneWriteOp',
     'SceneEmbedding',
     'ScriptCollaborator',
     'ChatConversation',
