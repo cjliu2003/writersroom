@@ -122,7 +122,6 @@ class FDXParser:
             
         # Direct handling for Scene Heading elements - CRITICAL FIX
         if xml_type == 'Scene Heading':
-            print(f"DIRECT SCENE HEADING FOUND: {text[:30]}...")
             return ScreenplayElement(
                 type=ScreenplayBlockType.SCENE_HEADING,
                 text=text.upper()
@@ -133,8 +132,6 @@ class FDXParser:
         if not element_data:
             return None
         
-        print(f"Parsed element type: {xml_type} -> {element_data['type']}, text: {text[:30]}...")
-        
         return ScreenplayElement(
             type=ScreenplayBlockType(element_data['type']),
             text=element_data['text']
@@ -142,24 +139,36 @@ class FDXParser:
     
     @classmethod
     def _extract_text_content(cls, paragraph: ET.Element) -> str:
-        """Extract text content from paragraph element."""
-        text_elem = paragraph.find('Text')
-        if text_elem is None:
+        """Extract text content from paragraph element.
+        
+        CRITICAL: FDX files can have multiple <Text> elements in a single paragraph,
+        often used for formatting (e.g., <Text AdornmentStyle="-1"> for bold/italic).
+        We must concatenate ALL <Text> elements to avoid losing content.
+        """
+        # Find ALL <Text> elements within the paragraph
+        text_elements = paragraph.findall('Text')
+        if not text_elements:
             return ""
         
-        # Handle different text structures
-        if text_elem.text:
-            return text_elem.text.strip()
-        
-        # Handle nested text elements
+        # Concatenate text from all <Text> elements
         text_parts = []
-        for child in text_elem:
-            if child.text:
-                text_parts.append(child.text)
-            if child.tail:
-                text_parts.append(child.tail)
+        for text_elem in text_elements:
+            # Get the direct text content of this <Text> element
+            if text_elem.text:
+                text_parts.append(text_elem.text)
+            
+            # Get text from any nested elements and their tails
+            for child in text_elem:
+                if child.text:
+                    text_parts.append(child.text)
+                if child.tail:
+                    text_parts.append(child.tail)
         
-        return ' '.join(text_parts).strip()
+        # Join and normalize whitespace
+        full_text = ''.join(text_parts)
+        # Normalize multiple spaces to single space
+        full_text = re.sub(r'\s+', ' ', full_text)
+        return full_text.strip()
     
     @classmethod
     def _classify_element(cls, xml_type: str, text: str) -> Optional[Dict[str, str]]:
@@ -218,8 +227,6 @@ class FDXParser:
             'End of Act': {'type': 'end_of_act', 'text': text},
         }
         
-        print(f"Mapping element type: {xml_type} -> {type_mapping.get(xml_type, {'type': 'action', 'text': text})['type']}")
-        
         if xml_type in type_mapping:
             return type_mapping[xml_type]
         
@@ -237,18 +244,12 @@ class FDXParser:
         current_elements: List[ScreenplayElement] = []
         scene_heading_count = 0
         
-        print(f"\nTotal elements to process: {len(elements)}")
-        
         for i, element in enumerate(elements):
-            # Print debugging info
-            print(f"Element {i}: Type={element.type}, Text={element.text[:30]}...")
-            
             # Scene heading can be either 'scene_heading' or stored as the enum value
             is_scene_heading = element.type == ScreenplayBlockType.SCENE_HEADING or element.type.value == 'scene_heading'
             
             if is_scene_heading:
                 scene_heading_count += 1
-                print(f"FOUND SCENE HEADING #{scene_heading_count}: {element.text[:50]}...")
                 
                 # Important fix: Always save previous scene, even if it only had a scene heading
                 # This ensures we don't miss scenes when there are adjacent scene headings
@@ -296,23 +297,6 @@ class FDXParser:
             current_scene.full_content = '\n'.join(current_content)
             current_scene.content_blocks = current_elements.copy()
             scenes.append(current_scene)
-        
-        print(f"\nFINAL COUNTS:")
-        print(f"Total scene headings found in XML: {scene_heading_count}")
-        print(f"Total scenes created: {len(scenes)}")
-        if scene_heading_count != len(scenes):
-            print(f"WARNING: MISMATCH - {scene_heading_count - len(scenes)} scene headings were not processed correctly")
-            
-            # Let's check if any adjacent scene headings might be the issue
-            adjacent_scene_headings = 0
-            for i in range(1, len(elements)):
-                if (elements[i-1].type == ScreenplayBlockType.SCENE_HEADING or elements[i-1].type.value == 'scene_heading') and \
-                   (elements[i].type == ScreenplayBlockType.SCENE_HEADING or elements[i].type.value == 'scene_heading'):
-                    adjacent_scene_headings += 1
-                    print(f"Found adjacent scene headings: {elements[i-1].text[:30]} followed by {elements[i].text[:30]}")
-            
-            if adjacent_scene_headings > 0:
-                print(f"Found {adjacent_scene_headings} instances of adjacent scene headings")
         
         return scenes
     

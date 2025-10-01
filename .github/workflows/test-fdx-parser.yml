@@ -1,0 +1,142 @@
+name: FDX Parser Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/app/services/fdx_parser.py'
+      - 'backend/tests/test_fdx_*.py'
+      - 'test_assets/*.fdx'
+      - 'parsedFdxScenes.txt'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/app/services/fdx_parser.py'
+      - 'backend/tests/test_fdx_*.py'
+      - 'test_assets/*.fdx'
+      - 'parsedFdxScenes.txt'
+
+jobs:
+  test-content-preservation:
+    name: Critical - Content Preservation Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        cd backend
+        pip install -r requirements_new.txt
+    
+    - name: Run Critical Content Preservation Tests
+      run: |
+        cd backend
+        pytest tests/test_fdx_content_preservation.py -v --tb=short
+      # These tests MUST pass - fail the build if they don't
+      continue-on-error: false
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: content-preservation-results
+        path: backend/.pytest_cache/
+
+  test-full-suite:
+    name: Full Test Suite
+    runs-on: ubuntu-latest
+    needs: test-content-preservation  # Only run if critical tests pass
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        cd backend
+        pip install -r requirements_new.txt
+    
+    - name: Run Ground Truth Tests
+      run: |
+        cd backend
+        pytest tests/test_fdx_parser_ground_truth.py -v
+    
+    - name: Run Invariant Tests
+      run: |
+        cd backend
+        pytest tests/test_fdx_parser_invariants.py -v
+    
+    - name: Run Edge Case Tests
+      run: |
+        cd backend
+        pytest tests/test_fdx_parser_edge_cases.py -v
+    
+    - name: Generate Coverage Report
+      run: |
+        cd backend
+        pytest --cov=app.services.fdx_parser --cov-report=html --cov-report=term
+    
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: backend/htmlcov/
+    
+    - name: Check Coverage Threshold
+      run: |
+        cd backend
+        pytest --cov=app.services.fdx_parser --cov-fail-under=90
+
+  test-all-fdx-files:
+    name: Test All FDX Assets
+    runs-on: ubuntu-latest
+    needs: test-content-preservation
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        cd backend
+        pip install -r requirements_new.txt
+    
+    - name: List FDX Test Files
+      run: |
+        echo "Testing FDX files:"
+        ls -lh test_assets/*.fdx
+    
+    - name: Test All FDX Files
+      run: |
+        cd backend
+        pytest tests/ -k "fdx_file" -v --tb=short
+    
+    - name: Generate Test Summary
+      if: always()
+      run: |
+        cd backend
+        pytest tests/ --collect-only -q | tee test-summary.txt
+    
+    - name: Upload Test Summary
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-summary
+        path: backend/test-summary.txt
