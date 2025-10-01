@@ -1,9 +1,9 @@
 [
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_0",
-        "sceneUUID": "1e176039-a3d8-43a9-b956-e4eebbb26c21",
+        "sceneId": "test-project-id_0",
+        "sceneUUID": "test-uuid-0000",
         "version": 0,
         "sceneIndex": 0,
         "characters": [
@@ -68,10 +68,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. BACKYARD - BASE REALITY - DAY - MEMORY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_1",
-        "sceneUUID": "1021a75e-7016-46bf-b51d-19543ec9e997",
+        "sceneId": "test-project-id_1",
+        "sceneUUID": "test-uuid-0001",
         "version": 0,
         "sceneIndex": 1,
         "characters": [
@@ -119,10 +119,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. CLIFFSIDE OCEAN VIEW - SILK ROAD - SUNSET",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_2",
-        "sceneUUID": "af69d2ea-6b26-4357-8cfc-1fd614457561",
+        "sceneId": "test-project-id_2",
+        "sceneUUID": "test-uuid-0002",
         "version": 0,
         "sceneIndex": 2,
         "characters": [
@@ -196,24 +196,24 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. SAM'S APARTMENT - BASE REALITY - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_3",
-        "sceneUUID": "c5ac2a95-6605-4cfa-a599-66be06122d01",
+        "sceneId": "test-project-id_3",
+        "sceneUUID": "test-uuid-0003",
         "version": 0,
         "sceneIndex": 3,
         "characters": [
-            "SENATOR"
+            "SENATOR WHITMORE (V.O.)"
         ],
-        "summary": "Over the shoulder shot of SAM’S INFANT SON. Sam is holding him. He has thin scars on his scalp. SENATOR There’s a camera in every head in the country!",
+        "summary": "Over the shoulder shot of SAM’S INFANT SON. Sam is holding him. He has thin scars on his scalp. SENATOR WHITMORE (V.O.) There’s a camera in every head...",
         "tone": null,
         "themeTags": [
             "suspense"
         ],
-        "tokens": 48,
+        "tokens": 52,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 37,
-        "fullContent": "INT. SAM'S APARTMENT - BASE REALITY - NIGHT\nOver the shoulder shot of SAM’S INFANT SON. Sam is holding him. He has thin scars on his scalp.\nSENATOR\nThere’s a camera in every head in the country!",
+        "wordCount": 39,
+        "fullContent": "INT. SAM'S APARTMENT - BASE REALITY - NIGHT\nOver the shoulder shot of SAM’S INFANT SON. Sam is holding him. He has thin scars on his scalp.\nSENATOR WHITMORE (V.O.)\nThere’s a camera in every head in the country!",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
@@ -227,7 +227,7 @@
                 "metadata": null
             },
             {
-                "text": "SENATOR",
+                "text": "SENATOR WHITMORE (V.O.)",
                 "type": "character",
                 "metadata": null
             },
@@ -239,37 +239,39 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
-        "slugline": "INT.",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_4",
-        "sceneUUID": "9a19b65a-67ed-41cc-81c5-3124f4f0aa4c",
+        "projectId": "test-project-id",
+        "slugline": "INT. CBAU BRIEFING ROOM - BASE REALITY – NIGHT",
+        "sceneId": "test-project-id_4",
+        "sceneUUID": "test-uuid-0004",
         "version": 0,
         "sceneIndex": 4,
         "characters": [
-            "SENATOR",
+            "SENATOR WHITMORE",
             "DIRECTOR SHAW"
         ],
-        "summary": "SENATOR LEWIS SENATOR So why can’t we find my daughter?!",
+        "summary": "SENATOR LEWIS WHITMORE (50s, weary) paces beside a 3D rendering of LILA WHITMORE, standing motionless. Eye’s white. Indistinguishable from the real gi...",
         "tone": null,
-        "themeTags": [],
-        "tokens": 46,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 94,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 29,
-        "fullContent": "INT.\nSENATOR LEWIS\nSENATOR\nSo why can’t we find my daughter?!\nShot of FBI DIRECTOR ISAIAH SHAW (60s, deep-set eyes, coffee-stained teeth)...\nDIRECTOR SHAW\nWe’re searching on all levels.",
+        "wordCount": 58,
+        "fullContent": "INT. CBAU BRIEFING ROOM - BASE REALITY – NIGHT\nSENATOR LEWIS WHITMORE (50s, weary) paces beside a 3D rendering of LILA WHITMORE, standing motionless. Eye’s white. Indistinguishable from the real girl.\nSENATOR WHITMORE\nSo why can’t we find my daughter?!\nShot of FBI DIRECTOR ISAIAH SHAW (60s, deep-set eyes, coffee-stained teeth)...\nDIRECTOR SHAW\nWe’re searching on all levels.",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
-                "text": "INT.",
+                "text": "INT. CBAU BRIEFING ROOM - BASE REALITY – NIGHT",
                 "type": "scene_heading",
                 "metadata": null
             },
             {
-                "text": "SENATOR LEWIS",
+                "text": "SENATOR LEWIS WHITMORE (50s, weary) paces beside a 3D rendering of LILA WHITMORE, standing motionless. Eye’s white. Indistinguishable from the real girl.",
                 "type": "action",
                 "metadata": null
             },
             {
-                "text": "SENATOR",
+                "text": "SENATOR WHITMORE",
                 "type": "character",
                 "metadata": null
             },
@@ -296,10 +298,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. MORGUE – BASE REALITY - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_5",
-        "sceneUUID": "29a27025-893a-4000-a896-d661851a1dc2",
+        "sceneId": "test-project-id_5",
+        "sceneUUID": "test-uuid-0005",
         "version": 0,
         "sceneIndex": 5,
         "characters": [
@@ -344,10 +346,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. JAIL – BASE REALITY - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_6",
-        "sceneUUID": "85c7ae85-ccdf-4438-8eb5-fe963f238ff6",
+        "sceneId": "test-project-id_6",
+        "sceneUUID": "test-uuid-0006",
         "version": 0,
         "sceneIndex": 6,
         "characters": [
@@ -387,10 +389,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
-        "slugline": "INT.",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_7",
-        "sceneUUID": "8b871ce4-9b66-4872-9361-77ce319792d4",
+        "projectId": "test-project-id",
+        "slugline": "INT. CBAU CUBICLE ROOM – BASE REALITY – MORNING",
+        "sceneId": "test-project-id_7",
+        "sceneUUID": "test-uuid-0007",
         "version": 0,
         "sceneIndex": 7,
         "characters": [
@@ -399,14 +401,14 @@
         "summary": "Sam leans back. Takes a breath. A small ring of light flashes on his temple. DIRECTOR SHAW (V.O.) And Agents embedded in VR...",
         "tone": null,
         "themeTags": [],
-        "tokens": 38,
+        "tokens": 49,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 27,
-        "fullContent": "INT.\nSam leans back. Takes a breath. A small ring of light flashes on his temple.\nDIRECTOR SHAW (V.O.)\nAnd Agents embedded in VR...\nHe falls unconscious.",
+        "wordCount": 35,
+        "fullContent": "INT. CBAU CUBICLE ROOM – BASE REALITY – MORNING\nSam leans back. Takes a breath. A small ring of light flashes on his temple.\nDIRECTOR SHAW (V.O.)\nAnd Agents embedded in VR...\nHe falls unconscious.",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
-                "text": "INT.",
+                "text": "INT. CBAU CUBICLE ROOM – BASE REALITY – MORNING",
                 "type": "scene_heading",
                 "metadata": null
             },
@@ -433,24 +435,24 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. HEDGE - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_8",
-        "sceneUUID": "ca87f255-e3a8-4a1b-9d52-4f0c6903287a",
+        "sceneId": "test-project-id_8",
+        "sceneUUID": "test-uuid-0008",
         "version": 0,
         "sceneIndex": 8,
         "characters": [
             "DIRECTOR SHAW (V.O.)"
         ],
-        "summary": "Shot of DIRECTOR SHAW (V.O.) Dark Web.",
+        "summary": "Shot of PREYBOY. His wolf costume hangs off him in filthy tatters. His mask is matted and cracked. His left eye visible through a tear. DIRECTOR SHAW ...",
         "tone": null,
         "themeTags": [
             "suspense"
         ],
-        "tokens": 17,
+        "tokens": 49,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 14,
-        "fullContent": "EXT. HEDGE - SILK ROAD - NIGHT\nShot of\nDIRECTOR SHAW (V.O.)\nDark Web.",
+        "wordCount": 37,
+        "fullContent": "EXT. HEDGE - SILK ROAD - NIGHT\nShot of PREYBOY. His wolf costume hangs off him in filthy tatters. His mask is matted and cracked. His left eye visible through a tear.\nDIRECTOR SHAW (V.O.)\nDark Web.",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
@@ -459,7 +461,7 @@
                 "metadata": null
             },
             {
-                "text": "Shot of",
+                "text": "Shot of PREYBOY. His wolf costume hangs off him in filthy tatters. His mask is matted and cracked. His left eye visible through a tear.",
                 "type": "action",
                 "metadata": null
             },
@@ -476,10 +478,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. THRESHOLD - SILK ROAD",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_9",
-        "sceneUUID": "abbc2df4-6c33-4f8e-bdcc-78b5193e6dba",
+        "sceneId": "test-project-id_9",
+        "sceneUUID": "test-uuid-0009",
         "version": 0,
         "sceneIndex": 9,
         "characters": [
@@ -534,10 +536,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
-        "slugline": "INT.",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_10",
-        "sceneUUID": "249188c0-41b8-4d01-ae57-93cbe0b764f6",
+        "projectId": "test-project-id",
+        "slugline": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT",
+        "sceneId": "test-project-id_10",
+        "sceneUUID": "test-uuid-0010",
         "version": 0,
         "sceneIndex": 10,
         "characters": [
@@ -546,15 +548,17 @@
         ],
         "summary": "Shaw continues... DIRECTOR SHAW Our best are on this...",
         "tone": null,
-        "themeTags": [],
-        "tokens": 40,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 51,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 30,
-        "fullContent": "INT.\nShaw continues...\nDIRECTOR SHAW\nOur best are on this...\nHe turns. We cut to Sam. Sat at the edge of the table.\nDIRECTOR SHAW (O.S.)\nAgent Sam Patrick Carter.",
+        "wordCount": 38,
+        "fullContent": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT\nShaw continues...\nDIRECTOR SHAW\nOur best are on this...\nHe turns. We cut to Sam. Sat at the edge of the table.\nDIRECTOR SHAW (O.S.)\nAgent Sam Patrick Carter.",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
-                "text": "INT.",
+                "text": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT",
                 "type": "scene_heading",
                 "metadata": null
             },
@@ -591,10 +595,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. DIRT FIELD - BASE REALITY - DAY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_11",
-        "sceneUUID": "324fd49e-cf35-4622-8445-f9d3eb64cc08",
+        "sceneId": "test-project-id_11",
+        "sceneUUID": "test-uuid-0011",
         "version": 0,
         "sceneIndex": 11,
         "characters": [
@@ -632,10 +636,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. INTERROGATION ROOM – BASE REALITY - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_12",
-        "sceneUUID": "9902f8d6-789a-4803-be1f-796d84c4471b",
+        "sceneId": "test-project-id_12",
+        "sceneUUID": "test-uuid-0012",
         "version": 0,
         "sceneIndex": 12,
         "characters": [
@@ -685,10 +689,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
-        "slugline": "INT.",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_13",
-        "sceneUUID": "7c519033-8ee8-40f8-9fdd-02bc2c2ae0d2",
+        "projectId": "test-project-id",
+        "slugline": "INT. CBAU HALLWAY - BASE REALITY - DAY",
+        "sceneId": "test-project-id_13",
+        "sceneUUID": "test-uuid-0013",
         "version": 0,
         "sceneIndex": 13,
         "characters": [
@@ -699,14 +703,14 @@
         "themeTags": [
             "suspense"
         ],
-        "tokens": 79,
+        "tokens": 87,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 52,
-        "fullContent": "INT.\nSam and AGENT CAMILA CARVER walk the hallway...\nCAMILA\nThe VR surface web’s all regulated. Silk Road isn’t. Same name and Tor backbone as the first dark-web market. Only difference... Now it’s got a body.\n(beat)\nYou’re a strong behavioral scientist. But in Base Reality. Behavior’s contained. In there...\nCUT TO:",
+        "wordCount": 59,
+        "fullContent": "INT. CBAU HALLWAY - BASE REALITY - DAY\nSam and AGENT CAMILA CARVER walk the hallway...\nCAMILA\nThe VR surface web’s all regulated. Silk Road isn’t. Same name and Tor backbone as the first dark-web market. Only difference... Now it’s got a body.\n(beat)\nYou’re a strong behavioral scientist. But in Base Reality. Behavior’s contained. In there...\nCUT TO:",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
-                "text": "INT.",
+                "text": "INT. CBAU HALLWAY - BASE REALITY - DAY",
                 "type": "scene_heading",
                 "metadata": null
             },
@@ -743,10 +747,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. EMPTY ROOM - SILK ROAD - AFTERNOON",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_14",
-        "sceneUUID": "cba61647-4196-4539-b0cd-a9853a637196",
+        "sceneId": "test-project-id_14",
+        "sceneUUID": "test-uuid-0014",
         "version": 0,
         "sceneIndex": 14,
         "characters": [
@@ -755,10 +759,10 @@
         "summary": "Over the shoulder shot of Atlas (male). We move from the left of Sam’s shoulder the the right. CAMILA (V.O.) Your skin...",
         "tone": null,
         "themeTags": [],
-        "tokens": 57,
+        "tokens": 63,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 41,
-        "fullContent": "INT. EMPTY ROOM - SILK ROAD - AFTERNOON\nOver the shoulder shot of Atlas (male). We move from the left of Sam’s shoulder the the right.\nCAMILA (V.O.)\nYour skin...\nWhile we’re behind Sam’s head. Atlas shifts. Same eyes. Same clothes.",
+        "wordCount": 45,
+        "fullContent": "INT. EMPTY ROOM - SILK ROAD - AFTERNOON\nOver the shoulder shot of Atlas (male). We move from the left of Sam’s shoulder the the right.\nCAMILA (V.O.)\nYour skin...\nWhile we’re behind Sam’s head. Atlas shifts. Same eyes. Same clothes. But a female face...",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
@@ -782,17 +786,17 @@
                 "metadata": null
             },
             {
-                "text": "While we’re behind Sam’s head. Atlas shifts. Same eyes. Same clothes.",
+                "text": "While we’re behind Sam’s head. Atlas shifts. Same eyes. Same clothes. But a female face...",
                 "type": "action",
                 "metadata": null
             }
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. MEADOW - SILK ROAD - DAY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_15",
-        "sceneUUID": "a3e4d0f2-b26c-4db3-9b64-9c98730cc7cf",
+        "sceneId": "test-project-id_15",
+        "sceneUUID": "test-uuid-0015",
         "version": 0,
         "sceneIndex": 15,
         "characters": [
@@ -835,10 +839,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
-        "slugline": "INT.",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_16",
-        "sceneUUID": "20269451-e9a5-47b3-9add-64a175416ed7",
+        "projectId": "test-project-id",
+        "slugline": "INT. CBAU HALLWAY - BASE REALITY - CONTINUOUS",
+        "sceneId": "test-project-id_16",
+        "sceneUUID": "test-uuid-0016",
         "version": 0,
         "sceneIndex": 16,
         "characters": [
@@ -847,14 +851,14 @@
         "summary": "Camila stops at the end of the hall. Turns to Sam. CAMILA Everything... is behavior.",
         "tone": null,
         "themeTags": [],
-        "tokens": 22,
+        "tokens": 32,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 16,
-        "fullContent": "INT.\nCamila stops at the end of the hall. Turns to Sam.\nCAMILA\nEverything... is behavior.",
+        "wordCount": 23,
+        "fullContent": "INT. CBAU HALLWAY - BASE REALITY - CONTINUOUS\nCamila stops at the end of the hall. Turns to Sam.\nCAMILA\nEverything... is behavior.",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
-                "text": "INT.",
+                "text": "INT. CBAU HALLWAY - BASE REALITY - CONTINUOUS",
                 "type": "scene_heading",
                 "metadata": null
             },
@@ -876,10 +880,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. SOMEWHERE - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_17",
-        "sceneUUID": "49768b6c-08c1-40e5-90a9-6f4663590596",
+        "sceneId": "test-project-id_17",
+        "sceneUUID": "test-uuid-0017",
         "version": 0,
         "sceneIndex": 17,
         "characters": [
@@ -919,24 +923,24 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. TACTICAL ROOM - SILK ROAD – NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_18",
-        "sceneUUID": "3e6f5988-4285-44a8-98cd-d84250f84d4b",
+        "sceneId": "test-project-id_18",
+        "sceneUUID": "test-uuid-0018",
         "version": 0,
         "sceneIndex": 18,
         "characters": [
             "DIRECTOR SHAW (V.O.)"
         ],
-        "summary": "Atlas (female) works at a multi-monitor desktop setup. Three curved monitors on her desk. A dozen screens float in DIRECTOR SHAW (V.O.) Founder of the...",
+        "summary": "Atlas (female) works at a multi-monitor desktop setup. Three curved monitors on her desk. A dozen screens float in AR space around her. DIRECTOR SHAW ...",
         "tone": null,
         "themeTags": [
             "suspense"
         ],
-        "tokens": 55,
+        "tokens": 60,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 37,
-        "fullContent": "INT. TACTICAL ROOM - SILK ROAD – NIGHT\nAtlas (female) works at a multi-monitor desktop setup. Three curved monitors on her desk. A dozen screens float in\nDIRECTOR SHAW (V.O.)\nFounder of the Cyber Behavioral Science Unit...",
+        "wordCount": 41,
+        "fullContent": "INT. TACTICAL ROOM - SILK ROAD – NIGHT\nAtlas (female) works at a multi-monitor desktop setup. Three curved monitors on her desk. A dozen screens float in AR space around her.\nDIRECTOR SHAW (V.O.)\nFounder of the Cyber Behavioral Science Unit...",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
@@ -945,7 +949,7 @@
                 "metadata": null
             },
             {
-                "text": "Atlas (female) works at a multi-monitor desktop setup. Three curved monitors on her desk. A dozen screens float in",
+                "text": "Atlas (female) works at a multi-monitor desktop setup. Three curved monitors on her desk. A dozen screens float in AR space around her.",
                 "type": "action",
                 "metadata": null
             },
@@ -962,10 +966,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. THE ARCHIVE – SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_19",
-        "sceneUUID": "dafbdc8c-b313-4d99-ab61-6e76a29739ec",
+        "sceneId": "test-project-id_19",
+        "sceneUUID": "test-uuid-0019",
         "version": 0,
         "sceneIndex": 19,
         "characters": [
@@ -1010,38 +1014,40 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
-        "slugline": "INT.",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_20",
-        "sceneUUID": "02c30ea6-55e6-4506-88d5-72c11576c322",
+        "projectId": "test-project-id",
+        "slugline": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT",
+        "sceneId": "test-project-id_20",
+        "sceneUUID": "test-uuid-0020",
         "version": 0,
         "sceneIndex": 20,
         "characters": [
-            "SENATOR",
-            "SAM",
-            "DIRECTOR SHAW"
+            "SENATOR WHITMORE",
+            "DIRECTOR SHAW",
+            "SAM"
         ],
-        "summary": "Whitmore SENATOR Atlas111? What kind of name is that? Where the hell is he?",
+        "summary": "Whitmore waves his arms. SENATOR WHITMORE Atlas111? What kind of name is that? Where the hell is he?",
         "tone": null,
-        "themeTags": [],
-        "tokens": 52,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 69,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 37,
-        "fullContent": "INT.\nWhitmore\nSENATOR\nAtlas111? What kind of name is that? Where the hell is he?\nDIRECTOR SHAW\nHis identities classified.\nSam places a folder on the table between them.\nSAM\n(beat)\nNot a meetings type.\nFLASH TO:",
+        "wordCount": 49,
+        "fullContent": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT\nWhitmore waves his arms.\nSENATOR WHITMORE\nAtlas111? What kind of name is that? Where the hell is he?\nDIRECTOR SHAW\nHis identities classified.\nSam places a folder on the table between them.\nSAM\n(beat)\nNot a meetings type.\nFLASH TO:",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
-                "text": "INT.",
+                "text": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT",
                 "type": "scene_heading",
                 "metadata": null
             },
             {
-                "text": "Whitmore",
+                "text": "Whitmore waves his arms.",
                 "type": "action",
                 "metadata": null
             },
             {
-                "text": "SENATOR",
+                "text": "SENATOR WHITMORE",
                 "type": "character",
                 "metadata": null
             },
@@ -1088,10 +1094,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. SWINGERS CLUB HALLWAY - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_21",
-        "sceneUUID": "40480192-3cd0-49e6-938b-d52e8ab162be",
+        "sceneId": "test-project-id_21",
+        "sceneUUID": "test-uuid-0021",
         "version": 0,
         "sceneIndex": 21,
         "characters": [],
@@ -1119,22 +1125,22 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. GRASSY FIELD - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_22",
-        "sceneUUID": "08839546-d276-4ba4-80ad-69160f8b9aa6",
+        "sceneId": "test-project-id_22",
+        "sceneUUID": "test-uuid-0022",
         "version": 0,
         "sceneIndex": 22,
         "characters": [],
-        "summary": "Atlas (female) falls. Face covered in cuts. She slides her hand in her pocket. Removes",
+        "summary": "Atlas (female) falls. Face covered in cuts. She slides her hand in her pocket. Removes a full katana. Lunges off screen.",
         "tone": null,
         "themeTags": [
             "suspense"
         ],
-        "tokens": 31,
+        "tokens": 39,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 23,
-        "fullContent": "EXT. GRASSY FIELD - SILK ROAD - NIGHT\nAtlas (female) falls. Face covered in cuts. She slides her hand in her pocket. Removes",
+        "wordCount": 29,
+        "fullContent": "EXT. GRASSY FIELD - SILK ROAD - NIGHT\nAtlas (female) falls. Face covered in cuts. She slides her hand in her pocket. Removes a full katana. Lunges off screen.",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
@@ -1143,17 +1149,17 @@
                 "metadata": null
             },
             {
-                "text": "Atlas (female) falls. Face covered in cuts. She slides her hand in her pocket. Removes",
+                "text": "Atlas (female) falls. Face covered in cuts. She slides her hand in her pocket. Removes a full katana. Lunges off screen.",
                 "type": "action",
                 "metadata": null
             }
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. FIELD - BASE REALITY - DAY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_23",
-        "sceneUUID": "a8a5d111-4214-4bee-ad53-be5e3679c828",
+        "sceneId": "test-project-id_23",
+        "sceneUUID": "test-uuid-0023",
         "version": 0,
         "sceneIndex": 23,
         "characters": [
@@ -1229,10 +1235,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
-        "slugline": "INT.",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_24",
-        "sceneUUID": "aabb5a5d-3ff6-45c7-a90d-5faadcc63f31",
+        "projectId": "test-project-id",
+        "slugline": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT",
+        "sceneId": "test-project-id_24",
+        "sceneUUID": "test-uuid-0024",
         "version": 0,
         "sceneIndex": 24,
         "characters": [
@@ -1240,15 +1246,17 @@
         ],
         "summary": "Camila paces by Lila’s skin. Standing motionless. CAMILA Last week, this mesh was identified...",
         "tone": null,
-        "themeTags": [],
-        "tokens": 25,
+        "themeTags": [
+            "suspense"
+        ],
+        "tokens": 35,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 15,
-        "fullContent": "INT.\nCamila paces by Lila’s skin. Standing motionless.\nCAMILA\nLast week, this mesh was identified...",
+        "wordCount": 23,
+        "fullContent": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT\nCamila paces by Lila’s skin. Standing motionless.\nCAMILA\nLast week, this mesh was identified...",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
-                "text": "INT.",
+                "text": "INT. CBAU BRIEFING ROOM - BASE REALITY - NIGHT",
                 "type": "scene_heading",
                 "metadata": null
             },
@@ -1270,10 +1278,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. BOB’S BAZAAR - SILK ROAD",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_25",
-        "sceneUUID": "3f7feb90-ed22-44a7-b4dd-7d669556c246",
+        "sceneId": "test-project-id_25",
+        "sceneUUID": "test-uuid-0025",
         "version": 0,
         "sceneIndex": 25,
         "characters": [
@@ -1316,10 +1324,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. TATTOO ROOM - BASE REALITY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_26",
-        "sceneUUID": "77960594-c280-4498-804e-a81d4250838d",
+        "sceneId": "test-project-id_26",
+        "sceneUUID": "test-uuid-0026",
         "version": 0,
         "sceneIndex": 26,
         "characters": [
@@ -1359,10 +1367,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. ELEVATOR - BASE REALITY - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_27",
-        "sceneUUID": "4167d461-8f46-4885-a319-95600175ca28",
+        "sceneId": "test-project-id_27",
+        "sceneUUID": "test-uuid-0027",
         "version": 0,
         "sceneIndex": 27,
         "characters": [
@@ -1407,10 +1415,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. TATTOO ROOM - BASE REALITY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_28",
-        "sceneUUID": "40ba576e-8621-45a1-84be-e9d5910f5c27",
+        "sceneId": "test-project-id_28",
+        "sceneUUID": "test-uuid-0028",
         "version": 0,
         "sceneIndex": 28,
         "characters": [
@@ -1471,10 +1479,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. TACTICAL ROOM - SILK ROAD",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_29",
-        "sceneUUID": "1ed01a4e-bbd4-4d79-86aa-a025d24e6249",
+        "sceneId": "test-project-id_29",
+        "sceneUUID": "test-uuid-0029",
         "version": 0,
         "sceneIndex": 29,
         "characters": [
@@ -1512,15 +1520,15 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. TATTOO ROOM - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_30",
-        "sceneUUID": "327c1fb1-1f1a-4df7-b03f-a5e7e6aea3e8",
+        "sceneId": "test-project-id_30",
+        "sceneUUID": "test-uuid-0030",
         "version": 0,
         "sceneIndex": 30,
         "characters": [
-            "LILA",
-            "SAM"
+            "SAM",
+            "LILA"
         ],
         "summary": "Lila lunges for the edge of the cage. LILA You have to help please! Don’t let them-",
         "tone": null,
@@ -1576,10 +1584,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. SWINGERS CLUB HALLWAY - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_31",
-        "sceneUUID": "a8630768-336f-4829-9a56-ca4f3fcecdb1",
+        "sceneId": "test-project-id_31",
+        "sceneUUID": "test-uuid-0031",
         "version": 0,
         "sceneIndex": 31,
         "characters": [
@@ -1629,10 +1637,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. ABANDONED ANIMAL HOSPITAL - BASE REALITY – NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_32",
-        "sceneUUID": "51168b56-3a35-49fb-8f38-0acbd53eeea0",
+        "sceneId": "test-project-id_32",
+        "sceneUUID": "test-uuid-0032",
         "version": 0,
         "sceneIndex": 32,
         "characters": [
@@ -1644,10 +1652,10 @@
         "themeTags": [
             "suspense"
         ],
-        "tokens": 125,
+        "tokens": 134,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 83,
-        "fullContent": "INT. ABANDONED ANIMAL HOSPITAL - BASE REALITY – NIGHT\nSam turns on his flashlight. Six furry-suited bodies lie in heaps. Unconscious. Masks askew. Massive litter-boxes lay with the bodies. The floor covered with dog-food and feces.\nSam watches. One twitches.\nSAM\nFreeze!!\nThey run through the hall. Turn through a doorway.\nCAMILA (V.O.)\nRemember Sam...\nSam tackles the furry. Pins him.\nCAMILA (V.O.)\nNo one walks the Silk Road and comes out unscathed.\nSam unleashes. Beating the furry to a pulp.\nCUT TO:",
+        "wordCount": 89,
+        "fullContent": "INT. ABANDONED ANIMAL HOSPITAL - BASE REALITY – NIGHT\nSam turns on his flashlight. Six furry-suited bodies lie in heaps. Unconscious. Masks askew. Massive litter-boxes lay with the bodies. The floor covered with dog-food and feces.\nSam watches. One twitches. It’s PreyBoy. He takes off running.\nSAM\nFreeze!!\nThey run through the hall. Turn through a doorway.\nCAMILA (V.O.)\nRemember Sam...\nSam tackles the furry. Pins him.\nCAMILA (V.O.)\nNo one walks the Silk Road and comes out unscathed.\nSam unleashes. Beating the furry to a pulp.\nCUT TO:",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
@@ -1661,7 +1669,7 @@
                 "metadata": null
             },
             {
-                "text": "Sam watches. One twitches.",
+                "text": "Sam watches. One twitches. It’s PreyBoy. He takes off running.",
                 "type": "action",
                 "metadata": null
             },
@@ -1718,10 +1726,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. BATHROOM - SILK ROAD",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_33",
-        "sceneUUID": "49e46188-e789-459f-bb79-61ea414b2ad0",
+        "sceneId": "test-project-id_33",
+        "sceneUUID": "test-uuid-0033",
         "version": 0,
         "sceneIndex": 33,
         "characters": [
@@ -1769,10 +1777,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. DINING ROOM - MEMORY - DAY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_34",
-        "sceneUUID": "7986213f-08f4-486e-96f2-950b3ac9e15f",
+        "sceneId": "test-project-id_34",
+        "sceneUUID": "test-uuid-0034",
         "version": 0,
         "sceneIndex": 34,
         "characters": [],
@@ -1803,10 +1811,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. BATHROOM - SILK ROAD - CONTINUOUS",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_35",
-        "sceneUUID": "134a0518-6f13-4615-8e41-7def2973dc01",
+        "sceneId": "test-project-id_35",
+        "sceneUUID": "test-uuid-0035",
         "version": 0,
         "sceneIndex": 35,
         "characters": [
@@ -1861,10 +1869,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
-        "slugline": "EXT. PORCH - MEMORY -  DAY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_36",
-        "sceneUUID": "ef8c6f6e-9839-4900-aed0-91e0e536c71c",
+        "projectId": "test-project-id",
+        "slugline": "EXT. PORCH - MEMORY - DAY",
+        "sceneId": "test-project-id_36",
+        "sceneUUID": "test-uuid-0036",
         "version": 0,
         "sceneIndex": 36,
         "characters": [
@@ -1878,11 +1886,11 @@
         "tokens": 28,
         "timestamp": "2025-09-29T16:03:43.740806",
         "wordCount": 25,
-        "fullContent": "EXT. PORCH - MEMORY -  DAY\nMOM wipes a cut on our knee. She kisses it.\nMOM\nIt’ll be okay now. I promise.\nFLASH TO:",
+        "fullContent": "EXT. PORCH - MEMORY - DAY\nMOM wipes a cut on our knee. She kisses it.\nMOM\nIt’ll be okay now. I promise.\nFLASH TO:",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
-                "text": "EXT. PORCH - MEMORY -  DAY",
+                "text": "EXT. PORCH - MEMORY - DAY",
                 "type": "scene_heading",
                 "metadata": null
             },
@@ -1909,10 +1917,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. BATHROOM - SILK ROAD - CONTINUOUS",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_37",
-        "sceneUUID": "d2d5f1ba-6417-4d25-85c0-d2a426ed2cc9",
+        "sceneId": "test-project-id_37",
+        "sceneUUID": "test-uuid-0037",
         "version": 0,
         "sceneIndex": 37,
         "characters": [],
@@ -1943,10 +1951,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. SAM'S BEDROOM - BASE REALITY – NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_38",
-        "sceneUUID": "3715f276-fa3f-4d9a-a077-daa84b77b4ad",
+        "sceneId": "test-project-id_38",
+        "sceneUUID": "test-uuid-0038",
         "version": 0,
         "sceneIndex": 38,
         "characters": [
@@ -2007,25 +2015,25 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. POLICE CRUISER - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_39",
-        "sceneUUID": "d5913160-7514-4a3c-8943-05dce7319cdf",
+        "sceneId": "test-project-id_39",
+        "sceneUUID": "test-uuid-0039",
         "version": 0,
         "sceneIndex": 39,
         "characters": [
             "CAMILA (V.O.)",
             "SAM (V.O.)"
         ],
-        "summary": "Sam and HOPE (early 20’s, blonde, synthetic-perfection) sit in the car. We pan to the front where SAM (V.O.) You’re a virus.",
+        "summary": "Sam and HOPE (early 20’s, blonde, synthetic-perfection) sit in the car. We pan to the front where another Hope walks the road. Stopping at the center ...",
         "tone": null,
         "themeTags": [
             "suspense"
         ],
-        "tokens": 76,
+        "tokens": 96,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 55,
-        "fullContent": "INT. POLICE CRUISER - SILK ROAD - NIGHT\nSam and HOPE (early 20’s, blonde, synthetic-perfection) sit in the car. We pan to the front where\nSAM (V.O.)\nYou’re a virus.\nSam smirks. Grips the wheel. Hope waves the flag.\nCAMILA (V.O.)\nBlackout in three... two... one...\nHope waves the flag. Sam peels out.\nCUT TO:",
+        "wordCount": 68,
+        "fullContent": "INT. POLICE CRUISER - SILK ROAD - NIGHT\nSam and HOPE (early 20’s, blonde, synthetic-perfection) sit in the car. We pan to the front where another Hope walks the road. Stopping at the center holding a checkered flag.\nSAM (V.O.)\nYou’re a virus.\nSam smirks. Grips the wheel. Hope waves the flag.\nCAMILA (V.O.)\nBlackout in three... two... one...\nHope waves the flag. Sam peels out.\nCUT TO:",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
@@ -2034,7 +2042,7 @@
                 "metadata": null
             },
             {
-                "text": "Sam and HOPE (early 20’s, blonde, synthetic-perfection) sit in the car. We pan to the front where",
+                "text": "Sam and HOPE (early 20’s, blonde, synthetic-perfection) sit in the car. We pan to the front where another Hope walks the road. Stopping at the center holding a checkered flag.",
                 "type": "action",
                 "metadata": null
             },
@@ -2076,10 +2084,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. HALO HOUSE - SILK ROAD - DAY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_40",
-        "sceneUUID": "da023566-889e-4d2f-a42e-b1dbdb8af7f2",
+        "sceneId": "test-project-id_40",
+        "sceneUUID": "test-uuid-0040",
         "version": 0,
         "sceneIndex": 40,
         "characters": [
@@ -2122,10 +2130,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. THE ARCHIVE – SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_41",
-        "sceneUUID": "ccb7f152-01c4-4e69-9c38-bacf5eafbdc0",
+        "sceneId": "test-project-id_41",
+        "sceneUUID": "test-uuid-0041",
         "version": 0,
         "sceneIndex": 41,
         "characters": [
@@ -2170,24 +2178,24 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. TATTOO ROOM - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_42",
-        "sceneUUID": "7a8a8683-441c-46ca-96e6-cee8c4032cb9",
+        "sceneId": "test-project-id_42",
+        "sceneUUID": "test-uuid-0042",
         "version": 0,
         "sceneIndex": 42,
         "characters": [
             "ATLAS (V.O.)"
         ],
-        "summary": "Ella sits in the wheelchair in the basement room. The tattoos on her face read: ATLAS (V.O.) (male, tearful)",
+        "summary": "Ella sits in the wheelchair in the basement room. The tattoos on her face read: Flower Gurl. Little Silk. She slices her thigh. Over and over. ATLAS (...",
         "tone": null,
         "themeTags": [
             "suspense"
         ],
-        "tokens": 41,
+        "tokens": 56,
         "timestamp": "2025-09-29T16:03:43.740806",
-        "wordCount": 30,
-        "fullContent": "INT. TATTOO ROOM - SILK ROAD - NIGHT\nElla sits in the wheelchair in the basement room. The tattoos on her face read:\nATLAS (V.O.)\n(male, tearful)\nHe’s wearing Ella.",
+        "wordCount": 41,
+        "fullContent": "INT. TATTOO ROOM - SILK ROAD - NIGHT\nElla sits in the wheelchair in the basement room. The tattoos on her face read: Flower Gurl. Little Silk. She slices her thigh. Over and over.\nATLAS (V.O.)\n(male, tearful)\nHe’s wearing Ella.",
         "projectTitle": "sr_first_look_final",
         "contentBlocks": [
             {
@@ -2196,7 +2204,7 @@
                 "metadata": null
             },
             {
-                "text": "Ella sits in the wheelchair in the basement room. The tattoos on her face read:",
+                "text": "Ella sits in the wheelchair in the basement room. The tattoos on her face read: Flower Gurl. Little Silk. She slices her thigh. Over and over.",
                 "type": "action",
                 "metadata": null
             },
@@ -2218,10 +2226,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. HOSPITAL - BASE REALITY - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_43",
-        "sceneUUID": "87f97b5f-6403-4ffd-889d-10752d5eadbb",
+        "sceneId": "test-project-id_43",
+        "sceneUUID": "test-uuid-0043",
         "version": 0,
         "sceneIndex": 43,
         "characters": [
@@ -2282,10 +2290,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. SAM’S BEDROOM - BASE REALITY - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_44",
-        "sceneUUID": "3f355ae0-4146-421f-a423-cdec484a8ed3",
+        "sceneId": "test-project-id_44",
+        "sceneUUID": "test-uuid-0044",
         "version": 0,
         "sceneIndex": 44,
         "characters": [
@@ -2330,10 +2338,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. TACTICAL ROOM - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_45",
-        "sceneUUID": "432f8c02-9042-4fc4-a0dc-00f832d80455",
+        "sceneId": "test-project-id_45",
+        "sceneUUID": "test-uuid-0045",
         "version": 0,
         "sceneIndex": 45,
         "characters": [
@@ -2384,10 +2392,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. ABANDONED CPS BUILDING - BASE REALITY - DAY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_46",
-        "sceneUUID": "9daeb399-cea2-41e3-94e8-da498e0e6609",
+        "sceneId": "test-project-id_46",
+        "sceneUUID": "test-uuid-0046",
         "version": 0,
         "sceneIndex": 46,
         "characters": [
@@ -2425,10 +2433,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. VISITATION BOOTH - BASE REALITY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_47",
-        "sceneUUID": "b876c399-cbe8-4c8f-9f25-d7b67300e0d1",
+        "sceneId": "test-project-id_47",
+        "sceneUUID": "test-uuid-0047",
         "version": 0,
         "sceneIndex": 47,
         "characters": [
@@ -2471,10 +2479,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. CLUB - SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_48",
-        "sceneUUID": "1578a256-f167-4460-9427-e266b48b677d",
+        "sceneId": "test-project-id_48",
+        "sceneUUID": "test-uuid-0048",
         "version": 0,
         "sceneIndex": 48,
         "characters": [
@@ -2514,10 +2522,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "INT. VISITATION BOOTH - BASE REALITY",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_49",
-        "sceneUUID": "54ed24e5-a34b-4553-a838-8aaae1634887",
+        "sceneId": "test-project-id_49",
+        "sceneUUID": "test-uuid-0049",
         "version": 0,
         "sceneIndex": 49,
         "characters": [
@@ -2562,10 +2570,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_50",
-        "sceneUUID": "d26ae28d-7d33-4918-b1cb-77010f675176",
+        "sceneId": "test-project-id_50",
+        "sceneUUID": "test-uuid-0050",
         "version": 0,
         "sceneIndex": 50,
         "characters": [
@@ -2615,10 +2623,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "BLACK.",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_51",
-        "sceneUUID": "ea72bb02-6e5d-4af1-9ae3-0a7fdadce1bb",
+        "sceneId": "test-project-id_51",
+        "sceneUUID": "test-uuid-0051",
         "version": 0,
         "sceneIndex": 51,
         "characters": [
@@ -2661,10 +2669,10 @@
         ]
     },
     {
-        "projectId": "0f1787c6-3b29-42e5-b0e4-578735b74987",
+        "projectId": "test-project-id",
         "slugline": "EXT. SILK ROAD - NIGHT",
-        "sceneId": "0f1787c6-3b29-42e5-b0e4-578735b74987_52",
-        "sceneUUID": "89dd58db-39fc-4795-9954-d58082b2affd",
+        "sceneId": "test-project-id_52",
+        "sceneUUID": "test-uuid-0052",
         "version": 0,
         "sceneIndex": 52,
         "characters": [],
