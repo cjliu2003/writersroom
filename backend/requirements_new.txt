@@ -48,3 +48,9 @@ sentry-sdk==1.39.2
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
+
+# WebSocket and Real-time Collaboration
+websockets==13.1
+redis==5.0.1
+aioredis==2.0.1
+y-py==0.6.2         # Python Yjs CRDT bindings
