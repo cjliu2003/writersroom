@@ -14,8 +14,8 @@ from app.models.user import User
 from app.models.script import Script
 from app.models.scene import Scene
 from app.schemas.fdx import (
-    FDXUploadResponse, 
-    FDXParseRequest, 
+    FDXUploadResponse,
+    FDXParseRequest,
     FDXParseResponse,
     SceneDataSchema,
     ScreenplayElementSchema,
@@ -24,8 +24,12 @@ from app.schemas.fdx import (
 from app.auth.dependencies import get_current_user
 from app.db.base import get_db
 from app.services.fdx_parser import FDXParser, ParsedFDXResult
+from app.services.fdx_exporter import FDXExporter
 from app.services.supabase_storage import storage_service
 import logging
+import tempfile
+import os
+from fastapi.responses import FileResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/fdx", tags=["FDX"])
@@ -229,6 +233,123 @@ async def parse_fdx_content(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to parse FDX content: {str(e)}"
+        )
+
+
+@router.get("/export/{script_id}")
+async def export_fdx(
+    script_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Export a script as a Final Draft (.fdx) file.
+
+    Generates a valid Final Draft XML file from the script's scenes and returns it
+    as a downloadable file. The exported file can be opened in Final Draft or
+    re-imported into WritersRoom.
+
+    Args:
+        script_id: UUID of the script to export
+        current_user: Authenticated user (must be script owner)
+        db: Database session
+
+    Returns:
+        FileResponse with the generated .fdx file
+
+    Raises:
+        404: Script not found
+        403: User does not own the script
+        500: Export generation failed
+    """
+    try:
+        # Fetch the script
+        result = await db.execute(
+            select(Script).where(Script.script_id == script_id)
+        )
+        script = result.scalar_one_or_none()
+
+        if not script:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Script with ID {script_id} not found"
+            )
+
+        # Verify ownership
+        if script.owner_id != current_user.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to export this script"
+            )
+
+        # Fetch all scenes for the script, ordered by position
+        scenes_result = await db.execute(
+            select(Scene)
+            .where(Scene.script_id == script_id)
+            .order_by(Scene.position)
+        )
+        scenes = scenes_result.scalars().all()
+
+        if not scenes or len(scenes) == 0:
+            logger.warning(f"Script {script_id} has no scenes, generating empty FDX")
+
+        logger.info(f"Exporting script '{script.title}' with {len(scenes)} scenes")
+
+        # Generate FDX XML content
+        fdx_content = FDXExporter.generate_fdx(script, list(scenes))
+
+        # Create a temporary file for the FDX content
+        # Using delete=False so we can return it before deletion
+        temp_file = tempfile.NamedTemporaryFile(
+            mode='w',
+            suffix='.fdx',
+            delete=False,
+            encoding='utf-8'
+        )
+
+        try:
+            # Write the FDX content
+            temp_file.write(fdx_content)
+            temp_file.flush()
+            temp_file.close()
+
+            # Sanitize filename (remove special characters)
+            safe_title = "".join(
+                c for c in script.title
+                if c.isalnum() or c in (' ', '-', '_')
+            ).strip()
+            safe_title = safe_title or "script"
+            filename = f"{safe_title}.fdx"
+
+            # Optional: Upload to Supabase and save the path
+            # This would require modifying storage_service to support FDX upload
+            # For now, we'll skip this and just return the file
+
+            # Return the file as a download
+            return FileResponse(
+                path=temp_file.name,
+                filename=filename,
+                media_type="application/xml",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{filename}"'
+                },
+                background=None  # File will be cleaned up by OS temp cleaner
+            )
+
+        except Exception as write_error:
+            # Clean up temp file on error
+            if os.path.exists(temp_file.name):
+                os.unlink(temp_file.name)
+            raise write_error
+
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during FDX export: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to export FDX file: {str(e)}"
         )
 
 

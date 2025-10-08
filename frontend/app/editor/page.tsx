@@ -8,12 +8,12 @@ import { AIChatbot } from "@/components/ai-chatbot"
 import { SceneDescriptions } from "@/components/scene-descriptions"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Save, Home, FileText, Eye, HelpCircle } from "lucide-react"
+import { Save, Home, FileText, Eye, HelpCircle, Download } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import ErrorBoundary from "@/components/ErrorBoundary"
 
 import { Scene, Script } from '@/types/screenplay'
-import { getScriptScenes, type BackendScene } from '@/lib/api'
+import { getScriptScenes, exportFDXFile, type BackendScene } from '@/lib/api'
 import { markOpened } from '@/lib/projectRegistry'
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs'
 import { useChunkRetry } from '@/hooks/useChunkRetry'
@@ -33,6 +33,8 @@ function EditorPageContent() {
   const [sceneVersions, setSceneVersions] = useState<Record<string, number>>({})
   const [authToken, setAuthToken] = useState<string>("") // Set from AuthContext token
   const [autosaveEnabled, setAutosaveEnabled] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const [exportError, setExportError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -356,6 +358,33 @@ function EditorPageContent() {
     setLastSaved(new Date())
   }
 
+  const handleExportFDX = async () => {
+    if (!currentProjectId) {
+      setExportError('No script loaded.');
+      return;
+    }
+    setIsExporting(true);
+    setExportError(null);
+
+    try {
+      const blob = await exportFDXFile(currentProjectId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${script?.title || 'script'}.fdx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      console.log('Export successful');
+    } catch (e: any) {
+      setExportError(e?.message || 'Export failed. Please try again.');
+      console.error('FDX export failed:', e);
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   const handleContentChange = (content: string) => {
     try {
       if (!script) return
@@ -607,14 +636,24 @@ function EditorPageContent() {
             <span className="text-xs text-gray-500 hidden sm:inline">
               Saved {lastSaved.toLocaleTimeString()}
             </span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => saveScript(script)}
               className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md px-3 py-1"
             >
               <Save className="w-4 h-4 mr-1" />
               Save
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isExporting}
+              onClick={handleExportFDX}
+              className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-4 h-4 mr-1" />
+              {isExporting ? 'Exporting...' : 'Export'}
             </Button>
           </div>
         </div>
@@ -670,6 +709,22 @@ function EditorPageContent() {
             <span className="font-medium text-sm">
               Offline Mode: Memory backend not connected. Changes will be saved locally only.
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Export Error Banner */}
+      {exportError && (
+        <div className="fixed top-20 right-6 z-50 max-w-md">
+          <div className="flex items-center gap-2 text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-800 shadow-lg">
+            <span className="font-medium">Export Failed</span>
+            <span className="text-sm">{exportError}</span>
+            <button
+              onClick={() => setExportError(null)}
+              className="ml-auto text-red-400 hover:text-red-300 font-bold text-xl leading-none"
+            >
+              ×
+            </button>
           </div>
         </div>
       )}
