@@ -19,7 +19,7 @@ import {
   isScreenplayElement
 } from "@/utils/screenplay-utils"
 import * as Y from 'yjs'
-import { withYjs, YjsEditor } from '@slate-yjs/core'
+import { withYjs, YjsEditor, SyncElement, toSharedType } from 'slate-yjs'
 
 // Custom editor wrapper to handle Slate edge cases
 const withScreenplayEditor = (editor: Editor) => {
@@ -147,28 +147,44 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
   const [value, setValue] = useState<Descendant[]>(initialValue)
   const [isElementSettingsOpen, setIsElementSettingsOpen] = useState(false)
   const [currentBlockType, setCurrentBlockType] = useState<ScreenplayBlockType | null>('scene_heading')
-  const baseEditor = useMemo(() => withScreenplayEditor(withHistory(withReact(createEditor()))), [])
   const editor = useMemo(() => {
+    // Build the base Slate editor first
+    let e = withScreenplayEditor(withHistory(withReact(createEditor())))
+    // Wrap with slate-yjs if collaboration is enabled
     if (collaboration?.doc) {
       try {
-        const sharedType = collaboration.doc.get('content', Y.XmlFragment) as any
-        return withYjs(baseEditor as any, sharedType)
-      } catch (e) {
-        console.warn('[ScreenplayEditor] Failed to init Yjs binding, falling back to local editor', e)
-        return baseEditor
+        const sharedType = collaboration.doc.getArray<SyncElement>('content') as any
+        e = withYjs(e as any, sharedType)
+      } catch (err) {
+        console.warn('[ScreenplayEditor] Failed to init slate-yjs binding, continuing without Yjs', err)
       }
     }
-    return baseEditor
-  }, [baseEditor, collaboration?.doc])
-  
-  // Connect/disconnect Yjs binding. We avoid manual seeding and let the binding
-  // sync the existing editor value into the shared type when empty.
+    return e as Editor
+  }, [collaboration?.doc])
+
+
+  // Seed once (if empty) by writing directly to the shared Y.Array via toSharedType
+  // slate-yjs does not expose connect/disconnect; it syncs automatically
   useEffect(() => {
     if (!collaboration?.doc) return
     try {
-      YjsEditor.connect(editor as any)
+      // Ensure editor and shared type are in sync
+      try { (YjsEditor as any).synchronizeValue?.(editor as any) } catch {}
+      const sharedType = collaboration.doc.getArray<SyncElement>('content') as any
+      const meta = collaboration.doc.getMap('wr_meta') as any
+      const alreadySeeded = !!meta.get('seeded')
+      if ((sharedType as any).length === 0 && !alreadySeeded) {
+        const nodesToSeed = Array.isArray(value) && value.length > 0 ? value : initialValue
+        if (Array.isArray(nodesToSeed) && nodesToSeed.length > 0) {
+          collaboration.doc.transact(() => {
+            toSharedType(sharedType, nodesToSeed as any)
+            meta.set('seeded', true)
+          })
+          console.log('[ScreenplayEditor] Seeded Y.Doc with initial content via toSharedType')
+        }
+      }
     } catch {}
-    return () => { try { YjsEditor.disconnect(editor as any) } catch {} }
+    return () => { try { (YjsEditor as any).destroy?.(editor as any) } catch {} }
   }, [editor, collaboration?.doc])
   const [isEditorReady, setIsEditorReady] = useState(false)
   const [editorKey, setEditorKey] = useState(0) // Force re-render when needed
@@ -461,21 +477,19 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
   // Handle value changes
   const handleChange = useCallback((newValue: Descendant[]) => {
     try {
-      // When collaborating via Yjs, ignore remote-origin changes to avoid heavy re-renders
+      // For collaboration, determine if this change originated locally
+      let isLocalChange = true
       if (isCollaborative) {
-        let local = true
         try {
           if (typeof (YjsEditor as any).isLocal === 'function') {
-            local = (YjsEditor as any).isLocal(editor as any)
+            isLocalChange = (YjsEditor as any).isLocal(editor as any)
           }
         } catch {}
-        // Only skip when we can positively identify the change as remote
-        if (!local) return
       }
       // Validate that newValue is not empty and has valid structure
       if (newValue && Array.isArray(newValue) && newValue.length > 0) {
         setValue(newValue)
-        if (onChange) {
+        if (onChange && isLocalChange) {
           // For now, export as JSON string - can be customized later
           onChange(JSON.stringify(newValue))
         }
@@ -494,7 +508,7 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
           }
         ]
         setValue(fallbackValue)
-        if (onChange) {
+        if (onChange && isLocalChange) {
           onChange(JSON.stringify(fallbackValue))
         }
       }

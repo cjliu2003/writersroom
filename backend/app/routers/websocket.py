@@ -359,7 +359,7 @@ async def scene_collaboration_websocket(
                             while offset < len(msg):
                                 sub_type, offset = _read_var_uint(msg, offset)
                                 if sub_type == SYNC_STEP1:
-                                    # Read state vector
+                                    # Read state vector from client
                                     sv, offset = _read_var_uint8array(msg, offset)
                                     update = Y.encode_state_as_update(ydoc, sv)
                                     # Build SyncStep2 reply: [messageSync][syncStep2][update]
@@ -368,6 +368,15 @@ async def scene_collaboration_websocket(
                                     await websocket.send_bytes(reply)
                                     print(f">>> REPLIED SYNCSTEP2 ({len(reply)} bytes)")
                                     logger.info(f"Replied with SyncStep2 ({len(update)} bytes)")
+                                    
+                                    # Now prompt the client to send its missing updates to server
+                                    # This completes the symmetric handshake so server learns client state
+                                    sv_server = Y.encode_state_vector(ydoc)
+                                    step1_payload = _write_var_uint(SYNC_STEP1) + _write_var_uint8array(sv_server)
+                                    step1_msg = _write_var_uint(MESSAGE_SYNC) + step1_payload
+                                    await websocket.send_bytes(step1_msg)
+                                    print(f">>> SENT SYNCSTEP1 to client ({len(step1_msg)} bytes)")
+                                    logger.info(f"Sent SyncStep1 to client to request its state ({len(sv_server)} bytes state vector)")
                                 elif sub_type == SYNC_STEP2 or sub_type == SYNC_UPDATE:
                                     upd, offset = _read_var_uint8array(msg, offset)
                                     # Apply update to server doc
@@ -380,11 +389,26 @@ async def scene_collaboration_websocket(
                                         await db.commit()
                                     except Exception as e:
                                         logger.error(f"Error persisting Yjs update for scene {scene_id}: {e}")
-                                    # Broadcast update (only forward 'update' messages to others)
-                                    if sub_type == SYNC_UPDATE:
+                                    
+                                    # Broadcast update to other clients
+                                    # For SYNC_STEP2 (initial state), repackage as SYNC_UPDATE for peers
+                                    # For SYNC_UPDATE (incremental), forward as-is
+                                    if sub_type == SYNC_STEP2:
+                                        # Repackage as SYNC_UPDATE so other clients apply it incrementally
+                                        bcast_payload = _write_var_uint(SYNC_UPDATE) + _write_var_uint8array(upd)
+                                        bcast_msg = _write_var_uint(MESSAGE_SYNC) + bcast_payload
+                                        await websocket_manager.broadcast_to_room(scene_id, bcast_msg, exclude_websocket=websocket)
+                                        if redis_manager:
+                                            await redis_manager.publish_update(scene_id, bcast_msg, user_id)
+                                        print(f">>> BROADCASTED SYNC_STEP2 as SYNC_UPDATE to peers ({len(bcast_msg)} bytes)")
+                                        logger.info(f"Broadcasted SYNC_STEP2 update to {websocket_manager.get_room_count(scene_id) - 1} peer(s)")
+                                    elif sub_type == SYNC_UPDATE:
+                                        # Forward incremental update as-is
                                         await websocket_manager.broadcast_to_room(scene_id, msg, exclude_websocket=websocket)
                                         if redis_manager:
                                             await redis_manager.publish_update(scene_id, msg, user_id)
+                                        print(f">>> BROADCASTED SYNC_UPDATE to peers")
+                                        logger.info(f"Broadcasted SYNC_UPDATE to {websocket_manager.get_room_count(scene_id) - 1} peer(s)")
                                 else:
                                     logger.warning(f"Unknown sync submessage type: {sub_type}")
                                     break

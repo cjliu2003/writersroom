@@ -137,6 +137,15 @@ export function useYjsCollaboration({
       
       providerRef.current = newProvider;
       setProvider(newProvider);
+      
+      // Debug: Log Y.Doc updates to ensure local edits produce updates
+      const handleDocUpdate = (update: Uint8Array, origin: any) => {
+        try {
+          const otype = typeof origin === 'string' ? origin : (origin?.constructor?.name || typeof origin)
+          console.log('[YjsCollaboration] doc.update', { bytes: update?.length, origin: otype });
+        } catch {}
+      };
+      doc.on('update', handleDocUpdate);
       // Get awareness instance
       const awarenessInstance = newProvider.awareness;
       // Ensure local awareness state is set so local client is counted
@@ -263,6 +272,7 @@ export function useYjsCollaboration({
       // Cleanup function
       cleanupRef.current = () => {
         console.log('[YjsCollaboration] Cleaning up...');
+        try { doc.off('update', handleDocUpdate) } catch {}
         
         // Clear local awareness state so other clients remove us
         try {

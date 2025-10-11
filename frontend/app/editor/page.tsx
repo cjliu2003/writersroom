@@ -124,6 +124,19 @@ function EditorPageContent() {
           return
         }
 
+        // Wait for auth token before fetching from backend
+        // This prevents "No authentication token available" errors on refresh
+        if (!authToken && !authLoading) {
+          console.log('⏳ Waiting for auth token before loading script...')
+          setIsLoading(false)
+          return
+        }
+
+        if (authLoading) {
+          console.log('⏳ Auth still loading, waiting...')
+          return
+        }
+
         // Load scenes from FastAPI backend
         try {
           console.log('Editor: fetching scenes from backend for project', projectId)
@@ -207,7 +220,7 @@ function EditorPageContent() {
       cancelled = true
       clearTimeout(failSafe)
     }
-  }, [router, searchParams])
+  }, [router, searchParams, authToken, authLoading])
 
   // Log script changes for debugging
   useEffect(() => {
