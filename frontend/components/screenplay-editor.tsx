@@ -18,6 +18,8 @@ import {
   getCurrentBlockType,
   isScreenplayElement
 } from "@/utils/screenplay-utils"
+import * as Y from 'yjs'
+import { withYjs, YjsEditor } from '@slate-yjs/core'
 
 // Custom editor wrapper to handle Slate edge cases
 const withScreenplayEditor = (editor: Editor) => {
@@ -93,10 +95,16 @@ interface ScreenplayEditorProps {
   onChange?: (content: string) => void
   onSceneChange?: (currentScene: string) => void
   onCurrentBlockTypeChange?: (type: ScreenplayBlockType | null) => void
+  // Optional Yjs collaboration props. When provided, the editor syncs via Yjs.
+  collaboration?: {
+    doc: Y.Doc
+    awareness?: any
+  }
 }
 
 
-export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBlockTypeChange }: ScreenplayEditorProps) {
+export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBlockTypeChange, collaboration }: ScreenplayEditorProps) {
+  const isCollaborative = !!collaboration?.doc
   const initialValue = useMemo(() => {
     if (content) {
       try {
@@ -139,7 +147,29 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
   const [value, setValue] = useState<Descendant[]>(initialValue)
   const [isElementSettingsOpen, setIsElementSettingsOpen] = useState(false)
   const [currentBlockType, setCurrentBlockType] = useState<ScreenplayBlockType | null>('scene_heading')
-  const editor = useMemo(() => withScreenplayEditor(withHistory(withReact(createEditor()))), [])
+  const baseEditor = useMemo(() => withScreenplayEditor(withHistory(withReact(createEditor()))), [])
+  const editor = useMemo(() => {
+    if (collaboration?.doc) {
+      try {
+        const sharedType = collaboration.doc.get('content', Y.XmlFragment) as any
+        return withYjs(baseEditor as any, sharedType)
+      } catch (e) {
+        console.warn('[ScreenplayEditor] Failed to init Yjs binding, falling back to local editor', e)
+        return baseEditor
+      }
+    }
+    return baseEditor
+  }, [baseEditor, collaboration?.doc])
+  
+  // Connect/disconnect Yjs binding. We avoid manual seeding and let the binding
+  // sync the existing editor value into the shared type when empty.
+  useEffect(() => {
+    if (!collaboration?.doc) return
+    try {
+      YjsEditor.connect(editor as any)
+    } catch {}
+    return () => { try { YjsEditor.disconnect(editor as any) } catch {} }
+  }, [editor, collaboration?.doc])
   const [isEditorReady, setIsEditorReady] = useState(false)
   const [editorKey, setEditorKey] = useState(0) // Force re-render when needed
   // Track last emitted scene UUID to avoid redundant onSceneChange emissions
@@ -153,6 +183,8 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
 
   // Update editor when content prop changes (for FDX uploads)
   useEffect(() => {
+    // When collaborating via Yjs, the editor state is driven by Yjs.
+    if (collaboration?.doc) return
     if (content) {
       console.log('🎬 useEffect: content prop changed')
       console.log('Content type:', typeof content)
@@ -217,6 +249,8 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
 
   // Update value when content prop changes
   React.useEffect(() => {
+    // Ignore prop-driven content updates during collaboration to avoid loops
+    if (collaboration?.doc) return
     if (content) {
       try {
         const parsedContent = JSON.parse(content)
@@ -239,7 +273,7 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
         console.warn('Failed to update content:', error)
       }
     }
-  }, [content, value])
+  }, [content, value, collaboration?.doc])
 
   // Initialize editor selection when ready
   React.useEffect(() => {
@@ -427,6 +461,17 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
   // Handle value changes
   const handleChange = useCallback((newValue: Descendant[]) => {
     try {
+      // When collaborating via Yjs, ignore remote-origin changes to avoid heavy re-renders
+      if (isCollaborative) {
+        let local = true
+        try {
+          if (typeof (YjsEditor as any).isLocal === 'function') {
+            local = (YjsEditor as any).isLocal(editor as any)
+          }
+        } catch {}
+        // Only skip when we can positively identify the change as remote
+        if (!local) return
+      }
       // Validate that newValue is not empty and has valid structure
       if (newValue && Array.isArray(newValue) && newValue.length > 0) {
         setValue(newValue)
@@ -473,6 +518,8 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
 
   // Calculate pages using FDX format
   const pages = React.useMemo(() => {
+    // Skip expensive page calculations during collaboration to keep typing responsive
+    if (isCollaborative) return { pages: [{ number: 1, elements: [], lines: 0 }] }
     try {
       if (!value || value.length === 0) {
         return { pages: [{ number: 1, elements: [], lines: 0 }] }
@@ -482,7 +529,7 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
       console.warn('Error calculating page breaks:', error)
       return { pages: [{ number: 1, elements: [], lines: 0 }] }
     }
-  }, [value])
+  }, [value, isCollaborative])
 
   // Render screenplay elements with exact Final Draft formatting
   const renderElement = useCallback((props: RenderElementProps) => {
@@ -869,7 +916,7 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
         editor={editor}
         initialValue={value}
         onChange={handleChange}
-        key={`slate-${editorKey}-${JSON.stringify(initialValue).slice(0, 50)}`}
+        key={`slate-${editorKey}`}
       >
         {/* Final Draft Style Layout */}
         <div className="h-full flex flex-col">

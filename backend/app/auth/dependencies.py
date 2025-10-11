@@ -113,3 +113,66 @@ async def get_current_user(
             detail=detail,
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+async def verify_token_websocket(token: str) -> dict:
+    """
+    Verify Firebase token for WebSocket connections.
+    
+    Unlike get_current_user, this doesn't require HTTPBearer dependency
+    and returns the decoded token directly for WebSocket use.
+    
+    Args:
+        token: Raw JWT token string
+        
+    Returns:
+        dict: Decoded token with user information
+        
+    Raises:
+        HTTPException: If token is invalid
+    """
+    try:
+        print(f"DEBUG WS: Token received: {token[:15]}...")
+        try:
+            decoded_token = verify_firebase_token(token)
+            print(f"DEBUG WS: Token verified successfully, uid: {decoded_token.get('uid', 'not found')}")
+            print(f"DEBUG WS: Token keys: {list(decoded_token.keys())}")
+        except Exception as e:
+            print(f"DEBUG WS: Token verification failed: {str(e)}")
+            print(f"DEBUG WS: Exception type: {type(e).__name__}")
+            raise
+        
+        # Firebase Admin SDK returns 'uid' from the 'sub' field
+        # The decoded token should have 'uid' set by verify_firebase_token
+        firebase_uid = decoded_token.get('uid') or decoded_token.get('sub') or decoded_token.get('user_id')
+        print(f"DEBUG WS: Extracted firebase_uid: {firebase_uid}")
+        if not firebase_uid:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication token - missing UID"
+            )
+        
+        # Ensure 'uid' is in the returned dict for consistency
+        if 'uid' not in decoded_token:
+            decoded_token['uid'] = firebase_uid
+        
+        print(f"DEBUG WS: Returning decoded token with uid: {decoded_token.get('uid')}")
+        return decoded_token
+        
+    except Exception as e:
+        error_detail = str(e)
+        
+        if "token expired" in error_detail.lower():
+            status_code = status.HTTP_401_UNAUTHORIZED
+            detail = "Token has expired"
+        elif "invalid token" in error_detail.lower():
+            status_code = status.HTTP_401_UNAUTHORIZED
+            detail = "Invalid authentication token"
+        else:
+            status_code = status.HTTP_401_UNAUTHORIZED
+            detail = "Could not validate credentials"
+        
+        raise HTTPException(
+            status_code=status_code,
+            detail=detail
+        )

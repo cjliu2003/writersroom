@@ -12,9 +12,10 @@ from slowapi.errors import RateLimitExceeded
 # Load environment variables from .env file
 load_dotenv()
 
-from app.routers import health_router, auth_router, script_router, fdx_router, user_router, ai_router, scene_autosave_router
+from app.routers import health_router, auth_router, script_router, fdx_router, user_router, ai_router, scene_autosave_router, websocket
 from app.firebase.config import initialize_firebase
 from app.middleware.payload_size_limiter import PayloadSizeLimiter
+from app.services.redis_pubsub import initialize_redis_manager, redis_pubsub_manager
 
 # Initialize Firebase
 initialize_firebase()
@@ -67,6 +68,32 @@ app.include_router(scene_autosave_router.router, prefix="/api")
 app.include_router(fdx_router.router, prefix="/api")
 app.include_router(user_router.router, prefix="/api")
 app.include_router(ai_router.router, prefix="/api")
+app.include_router(websocket.router, prefix="/api", tags=["websocket"])
+
+# Application lifecycle events
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on application startup."""
+    # Initialize Redis for real-time collaboration
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+    try:
+        manager = initialize_redis_manager(redis_url)
+        await manager.connect()
+        print(f"✅ Redis connected at {redis_url}")
+    except Exception as e:
+        print(f"⚠️  Redis connection failed: {e}")
+        print("   Running in single-server mode (WebSocket collaboration will work locally)")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on application shutdown."""
+    # Disconnect Redis
+    if redis_pubsub_manager:
+        try:
+            await redis_pubsub_manager.disconnect()
+            print("✅ Redis disconnected")
+        except Exception as e:
+            print(f"Error disconnecting Redis: {e}")
 
 # Custom response middleware for rate limit headers
 @app.middleware("http")

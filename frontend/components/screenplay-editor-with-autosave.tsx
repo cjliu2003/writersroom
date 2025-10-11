@@ -10,6 +10,7 @@ import { useAutosave } from '../hooks/use-autosave';
 import { AutosaveIndicator } from './autosave-indicator';
 import { ConflictResolutionDialog, ConflictNotification } from './conflict-resolution-dialog';
 import type { ScreenplayBlockType } from '../types/screenplay';
+import { useYjsCollaboration } from '@/hooks/use-yjs-collaboration';
 
 interface ScreenplayEditorWithAutosaveProps {
   /** Scene ID for autosave */
@@ -59,6 +60,13 @@ export function ScreenplayEditorWithAutosave({
 }: ScreenplayEditorWithAutosaveProps) {
   const [localContent, setLocalContent] = useState(content);
   const [showConflictDialog, setShowConflictDialog] = useState(false);
+  
+  // Initialize Yjs collaboration (always on when authToken exists)
+  const { doc, awareness } = useYjsCollaboration({
+    sceneId,
+    authToken,
+    enabled: !!authToken,
+  });
 
   // Get content function for autosave hook
   const getContent = useCallback(() => localContent, [localContent]);
@@ -187,6 +195,7 @@ export function ScreenplayEditorWithAutosave({
         onChange={handleContentChange}
         onSceneChange={onSceneChange}
         onCurrentBlockTypeChange={onCurrentBlockTypeChange}
+        collaboration={doc ? { doc, awareness } : undefined}
       />
 
       {/* Conflict Resolution Dialog */}
