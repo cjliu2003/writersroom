@@ -15,6 +15,7 @@ from app.models.script_collaborator import ScriptCollaborator, CollaboratorRole
 from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse
 from app.auth.dependencies import get_current_user
 from app.db.base import get_db
+from app.services.yjs_persistence import YjsPersistence
 
 router = APIRouter(prefix="/scripts", tags=["Scripts"])
 
@@ -170,6 +171,11 @@ async def get_script_scenes(
 ):
     """
     Get all scenes for a script (compatible with Express.js memory API format).
+
+    Yjs-Primary Architecture:
+    - Prefers Yjs data if available (source='yjs')
+    - Falls back to REST snapshot if no Yjs data (source='rest')
+    - Includes metadata for transparency about data source and freshness
     """
     try:
         # Verify script access
@@ -177,13 +183,13 @@ async def get_script_scenes(
             select(Script).where(Script.script_id == script_id, Script.owner_id == current_user.user_id)
         )
         script = script_result.scalar_one_or_none()
-        
+
         if not script:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Script not found or access denied"
             )
-        
+
         # Get scenes
         scenes_result = await db.execute(
             select(Scene)
@@ -191,10 +197,38 @@ async def get_script_scenes(
             .order_by(Scene.position)
         )
         scenes = scenes_result.scalars().all()
-        
-        # Convert to Express.js compatible format
+
+        # Initialize Yjs persistence service
+        yjs_persistence = YjsPersistence(db)
+
+        # Convert to Express.js compatible format with Yjs-primary logic
         scene_data = []
         for scene in scenes:
+            # Determine content source and derive content accordingly
+            content_blocks = scene.content_blocks
+            source = "rest"
+            yjs_update_count = 0
+
+            try:
+                # Check if Yjs data exists for this scene
+                has_yjs = await yjs_persistence.has_updates(scene.scene_id)
+
+                if has_yjs:
+                    # Prefer Yjs data (PRIMARY SOURCE OF TRUTH)
+                    content_blocks = await yjs_persistence.get_scene_snapshot(scene.scene_id)
+                    yjs_update_count = await yjs_persistence.get_update_count(scene.scene_id)
+                    source = "yjs"
+                else:
+                    # Use REST snapshot (FALLBACK)
+                    content_blocks = scene.content_blocks
+                    source = scene.snapshot_source or "rest"
+
+            except Exception as yjs_error:
+                # Graceful fallback to REST snapshot on Yjs errors
+                print(f"Warning: Yjs retrieval failed for scene {scene.scene_id}, using REST snapshot: {yjs_error}")
+                content_blocks = scene.content_blocks
+                source = "rest_fallback"
+
             scene_dict = {
                 "projectId": str(script_id),
                 "slugline": scene.scene_heading,
@@ -202,7 +236,7 @@ async def get_script_scenes(
                 "sceneId": f"{script_id}_{scene.position}",
                 # Real database UUID for this scene (use this for writes/autosave)
                 "sceneUUID": str(scene.scene_id),
-                # Current version for optimistic concurrency
+                # Current version for optimistic concurrency (metadata only in Yjs-primary)
                 "version": scene.version,
                 "sceneIndex": scene.position,
                 "characters": scene.characters or [],
@@ -213,13 +247,20 @@ async def get_script_scenes(
                 "timestamp": scene.created_at.isoformat() if scene.created_at else None,
                 "wordCount": scene.word_count or 0,
                 "fullContent": scene.full_content,
-                "projectTitle": script.title, 
-                "contentBlocks": scene.content_blocks,
+                "projectTitle": script.title,
+                "contentBlocks": content_blocks,
+                # Yjs-Primary Metadata (transparency about data source)
+                "metadata": {
+                    "source": source,  # 'yjs' | 'rest' | 'migrated' | 'rest_fallback'
+                    "snapshot_at": scene.snapshot_at.isoformat() if scene.snapshot_at else None,
+                    "yjs_update_count": yjs_update_count,
+                    "last_modified": scene.updated_at.isoformat() if scene.updated_at else None
+                }
             }
             scene_data.append(scene_dict)
-        
+
         return scene_data
-        
+
     except Exception as e:
         print(f"Error retrieving script scenes: {str(e)}")
         raise HTTPException(

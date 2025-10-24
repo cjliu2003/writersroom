@@ -16,7 +16,7 @@ from y_py import YDoc
 from app.db.base import get_db
 from app.auth.dependencies import verify_token_websocket
 from app.services.websocket_manager import websocket_manager
-from app.services.redis_pubsub import get_redis_manager
+from app.services.redis_pubsub import get_redis_manager, RedisMessage
 from app.services.yjs_persistence import YjsPersistence
 from app.models.scene import Scene
 from app.models.user import User
@@ -118,6 +118,7 @@ async def scene_collaboration_websocket(
     
     user_info = None
     connection_info = None
+    ydoc: Optional[YDoc] = None
     
     try:
         # Verify JWT token
@@ -198,6 +199,7 @@ async def scene_collaboration_websocket(
         
         # Create the Yjs document and load persisted state before handling sync.
         # The client will send SyncStep1; our reply will include the persisted state.
+        # Note: keep a handle so we can destroy the doc on disconnect (y-py guidance).
         ydoc = YDoc()
         print(f">>> YJS DOCUMENT CREATED")
         persistence = YjsPersistence(db)
@@ -216,17 +218,39 @@ async def scene_collaboration_websocket(
             print(f">>> REDIS MANAGER OBTAINED")
             
             # Define callback for Redis messages
-            async def handle_redis_message(channel: str, message: bytes):
-                """Forward messages from Redis to this WebSocket."""
+            async def handle_redis_message(message: RedisMessage):
+                """Forward parsed Redis messages to this WebSocket connection."""
                 try:
-                    data = json.loads(message)
-                    sender_id = UUID(data.get("sender_id"))
-                    
-                    # Don't echo back to sender
-                    if sender_id != user_id:
-                        await websocket.send_json(data)
-                except Exception as e:
-                    logger.error(f"Error handling Redis message: {e}")
+                    print(f">>> REDIS MESSAGE RECEIVED: sender={message.sender_id}, current_user={user_id}, match={message.sender_id == user_id}")
+                    if message.sender_id and message.sender_id == user_id:
+                        print(f">>> SKIPPING ECHO: Message from same user")
+                        return
+
+                    print(f">>> FORWARDING REDIS MESSAGE to WebSocket")
+                    if message.channel_type == "updates":
+                        if not isinstance(message.payload, (bytes, bytearray)):
+                            logger.error(
+                                "Invalid update payload type from Redis for scene %s", scene_id
+                            )
+                            return
+                        await websocket.send_bytes(bytes(message.payload))
+                    elif message.channel_type == "awareness":
+                        payload = message.payload if isinstance(message.payload, dict) else {}
+                        await websocket.send_json(
+                            {
+                                "type": "awareness",
+                                "user_id": str(message.sender_id) if message.sender_id else None,
+                                "payload": payload,
+                            }
+                        )
+                    else:
+                        logger.debug(
+                            "Skipping Redis channel type %s for scene %s",
+                            message.channel_type,
+                            scene_id,
+                        )
+                except Exception as exc:
+                    logger.error("Error handling Redis message for scene %s: %s", scene_id, exc)
             
             # Subscribe to scene updates via Redis
             await redis_manager.subscribe_to_scene(scene_id, handle_redis_message)
@@ -399,6 +423,9 @@ async def scene_collaboration_websocket(
                                         bcast_msg = _write_var_uint(MESSAGE_SYNC) + bcast_payload
                                         await websocket_manager.broadcast_to_room(scene_id, bcast_msg, exclude_websocket=websocket)
                                         if redis_manager:
+                                            # CRITICAL FIX: Pass the framed message to Redis, not just raw update
+                                            # The handle_redis_message callback expects the full y-websocket frame
+                                            # to send via websocket.send_bytes()
                                             await redis_manager.publish_update(scene_id, bcast_msg, user_id)
                                         print(f">>> BROADCASTED SYNC_STEP2 as SYNC_UPDATE to peers ({len(bcast_msg)} bytes)")
                                         logger.info(f"Broadcasted SYNC_STEP2 update to {websocket_manager.get_room_count(scene_id) - 1} peer(s)")
@@ -406,6 +433,9 @@ async def scene_collaboration_websocket(
                                         # Forward incremental update as-is
                                         await websocket_manager.broadcast_to_room(scene_id, msg, exclude_websocket=websocket)
                                         if redis_manager:
+                                            # CRITICAL FIX: Pass the framed message to Redis, not just raw update
+                                            # The handle_redis_message callback expects the full y-websocket frame
+                                            # to send via websocket.send_bytes()
                                             await redis_manager.publish_update(scene_id, msg, user_id)
                                         print(f">>> BROADCASTED SYNC_UPDATE to peers")
                                         logger.info(f"Broadcasted SYNC_UPDATE to {websocket_manager.get_room_count(scene_id) - 1} peer(s)")
@@ -485,6 +515,13 @@ async def scene_collaboration_websocket(
             pass
     
     finally:
+        # Release native resources held by y-py (matches docs guidance).
+        if ydoc is not None:
+            try:
+                ydoc.destroy()
+            except Exception as destroy_err:
+                logger.debug(f"YDoc destroy failed for scene {scene_id}: {destroy_err}")
+
         # Cleanup on disconnect
         if connection_info:
             # Broadcast awareness removals for any clientIds observed from this connection

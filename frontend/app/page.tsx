@@ -294,7 +294,7 @@ export default function HomePage() {
                 <FileText className="w-8 h-8 text-purple-400" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Create New Script</h2>
-              <p className="text-slate-300">What's the title of your masterpiece?</p>
+              <p className="text-slate-300">What&apos;s the title of your masterpiece?</p>
             </div>
             <div className="mb-6">
               <input type="text" value={newScriptTitle} onChange={(e) => setNewScriptTitle(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleCreateScript(); if (e.key === 'Escape') handleCancelModal(); }} placeholder="Enter script title..." className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" autoFocus />

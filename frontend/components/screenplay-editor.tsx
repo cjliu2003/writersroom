@@ -20,6 +20,7 @@ import {
 } from "@/utils/screenplay-utils"
 import * as Y from 'yjs'
 import { withYjs, YjsEditor, SyncElement, toSharedType } from 'slate-yjs'
+import { WebsocketProvider } from 'y-websocket'
 
 // Custom editor wrapper to handle Slate edge cases
 const withScreenplayEditor = (editor: Editor) => {
@@ -98,7 +99,9 @@ interface ScreenplayEditorProps {
   // Optional Yjs collaboration props. When provided, the editor syncs via Yjs.
   collaboration?: {
     doc: Y.Doc
+    provider?: WebsocketProvider | null
     awareness?: any
+    sceneId?: string
   }
 }
 
@@ -147,6 +150,11 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
   const [value, setValue] = useState<Descendant[]>(initialValue)
   const [isElementSettingsOpen, setIsElementSettingsOpen] = useState(false)
   const [currentBlockType, setCurrentBlockType] = useState<ScreenplayBlockType | null>('scene_heading')
+  const seedContentRef = useRef<Descendant[]>(
+    Array.isArray(initialValue) && initialValue.length > 0
+      ? (initialValue as Descendant[])
+      : (value as Descendant[])
+  )
   const editor = useMemo(() => {
     // Build the base Slate editor first
     let e = withScreenplayEditor(withHistory(withReact(createEditor())))
@@ -163,29 +171,152 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
   }, [collaboration?.doc])
 
 
+  useEffect(() => {
+    if (!content) return
+    try {
+      const parsed = JSON.parse(content)
+      if (Array.isArray(parsed)) {
+        seedContentRef.current = parsed as Descendant[]
+      }
+    } catch {
+      // ignore parse errors; keep previous seed content
+    }
+  }, [content])
+
   // Seed once (if empty) by writing directly to the shared Y.Array via toSharedType
   // slate-yjs does not expose connect/disconnect; it syncs automatically
   useEffect(() => {
     if (!collaboration?.doc) return
-    try {
-      // Ensure editor and shared type are in sync
-      try { (YjsEditor as any).synchronizeValue?.(editor as any) } catch {}
-      const sharedType = collaboration.doc.getArray<SyncElement>('content') as any
-      const meta = collaboration.doc.getMap('wr_meta') as any
-      const alreadySeeded = !!meta.get('seeded')
-      if ((sharedType as any).length === 0 && !alreadySeeded) {
-        const nodesToSeed = Array.isArray(value) && value.length > 0 ? value : initialValue
-        if (Array.isArray(nodesToSeed) && nodesToSeed.length > 0) {
-          collaboration.doc.transact(() => {
-            toSharedType(sharedType, nodesToSeed as any)
-            meta.set('seeded', true)
-          })
-          console.log('[ScreenplayEditor] Seeded Y.Doc with initial content via toSharedType')
+
+    const doc = collaboration.doc
+    const provider = collaboration.provider ?? null
+    const currentSceneId = collaboration.sceneId ?? null
+
+    const sharedType = doc.getArray<SyncElement>('content') as any
+    const meta = doc.getMap('wr_meta') as any
+
+    // CRITICAL: Synchronize Slate with Yjs AFTER seeding, not before
+    // Calling synchronizeValue before the doc is seeded results in a blank editor
+    const syncEditorFromYjs = () => {
+      try {
+        (YjsEditor as any).synchronizeValue?.(editor as any)
+        console.log('[ScreenplayEditor] Synchronized Slate editor from Yjs doc')
+      } catch (err) {
+        console.warn('[ScreenplayEditor] Failed to sync editor from Yjs', err)
+      }
+    }
+
+    // CRITICAL: Listen for remote changes and sync them to Slate
+    // We must distinguish between LOCAL changes (from this editor) and REMOTE changes (from other users)
+    // - LOCAL changes: already applied by slate-yjs automatically, syncing again causes duplication
+    // - REMOTE changes: need manual sync to trigger React re-render
+    const handleDocUpdate = (update: Uint8Array, origin: any) => {
+      // Check if this is a local change from slate-yjs
+      // slate-yjs uses a Symbol as origin for local changes: Symbol(Denotes that an event originated from slate-yjs)
+      // Remote changes come from the WebSocket provider (different origin)
+      const isLocalChange = typeof origin === 'symbol' ||
+                           origin === editor ||
+                           origin?.constructor?.name === 'YjsEditor'
+
+      if (!isLocalChange) {
+        // This is a remote change - sync it to Slate to trigger React re-render
+        console.log('[ScreenplayEditor] Remote change detected, syncing to Slate')
+        syncEditorFromYjs()
+      }
+    }
+
+    // Subscribe to doc updates for remote changes
+    doc.on('update', handleDocUpdate)
+
+    const seedDocIfNeeded = () => {
+      const targetSceneId = meta.get('target_scene_id') ?? currentSceneId
+      const seededSceneId = meta.get('seeded_scene_id')
+      const sharedLength = (sharedType as any).length ?? 0
+      const alreadySeeded = !!meta.get('seeded') && (!targetSceneId || seededSceneId === targetSceneId)
+
+      if (sharedLength > 0 && alreadySeeded) {
+        // Doc already has content, just sync to editor
+        syncEditorFromYjs()
+        return
+      }
+
+      if (sharedLength > 0 && seededSceneId !== targetSceneId) {
+        try {
+          meta.set('seeded', true)
+          if (targetSceneId) {
+            meta.set('seeded_scene_id', targetSceneId)
+          }
+        } catch (err) {
+          console.warn('[ScreenplayEditor] Failed to update seeded scene metadata', err)
+        }
+        // Doc has content for different scene, sync to editor
+        syncEditorFromYjs()
+        return
+      }
+
+      if ((sharedType as any).length > 0) {
+        try {
+          meta.set('seeded', true)
+          if (targetSceneId) {
+            meta.set('seeded_scene_id', targetSceneId)
+          }
+        } catch (err) {
+          console.warn('[ScreenplayEditor] Failed to mark Y.Doc as seeded', err)
+        }
+        // Doc has content, sync to editor
+        syncEditorFromYjs()
+        return
+      }
+
+      const nodesToSeed = seedContentRef.current
+      if (!Array.isArray(nodesToSeed) || nodesToSeed.length === 0) {
+        return
+      }
+
+      doc.transact(() => {
+        toSharedType(sharedType, nodesToSeed as any)
+        meta.set('seeded', true)
+        if (targetSceneId) {
+          meta.set('seeded_scene_id', targetSceneId)
+        }
+      })
+      console.log('[ScreenplayEditor] Seeded Y.Doc with initial content via toSharedType')
+
+      // CRITICAL: Sync editor AFTER seeding the doc
+      // This ensures the editor shows the seeded content
+      syncEditorFromYjs()
+    }
+
+    const cleanupTasks: Array<() => void> = []
+
+    if (provider) {
+      const handleSynced = (event: any) => {
+        const synced = typeof event === 'boolean' ? event : !!event?.synced
+        if (synced) {
+          seedDocIfNeeded()
         }
       }
-    } catch {}
-    return () => { try { (YjsEditor as any).destroy?.(editor as any) } catch {} }
-  }, [editor, collaboration?.doc])
+
+      provider.on('synced', handleSynced)
+      cleanupTasks.push(() => provider.off('synced', handleSynced))
+
+      if ((provider as any).synced) {
+        seedDocIfNeeded()
+      }
+    } else {
+      // If we have no provider (unlikely), fall back to immediate seeding.
+      seedDocIfNeeded()
+    }
+
+    return () => {
+      // Cleanup seeding event listeners
+      doc.off('update', handleDocUpdate)
+      cleanupTasks.forEach((fn) => {
+        try { fn() } catch {}
+      })
+      try { (YjsEditor as any).destroy?.(editor as any) } catch {}
+    }
+  }, [editor, collaboration?.doc, collaboration?.provider, collaboration?.sceneId])
   const [isEditorReady, setIsEditorReady] = useState(false)
   const [editorKey, setEditorKey] = useState(0) // Force re-render when needed
   // Track last emitted scene UUID to avoid redundant onSceneChange emissions
@@ -243,7 +374,7 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
         console.warn('❌ ScreenplayEditor: Failed to parse content:', error)
       }
     }
-  }, [content])
+  }, [content, collaboration?.doc])
   
   // Check if editor is completely empty (for placeholder)
   const isEditorEmpty = useMemo(() => {
@@ -262,34 +393,6 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
       }
     })
   }, [value])
-
-  // Update value when content prop changes
-  React.useEffect(() => {
-    // Ignore prop-driven content updates during collaboration to avoid loops
-    if (collaboration?.doc) return
-    if (content) {
-      try {
-        const parsedContent = JSON.parse(content)
-        if (Array.isArray(parsedContent) && parsedContent.length > 0) {
-          // Validate the content structure
-          const validContent = parsedContent.every(node => 
-            node && 
-            typeof node === 'object' && 
-            node.children && 
-            Array.isArray(node.children) &&
-            node.children.length > 0 &&
-            node.children.every((child: CustomText) => child && typeof child.text === 'string')
-          )
-          
-          if (validContent && JSON.stringify(parsedContent) !== JSON.stringify(value)) {
-            setValue(parsedContent as ScreenplayElement[])
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to update content:', error)
-      }
-    }
-  }, [content, value, collaboration?.doc])
 
   // Initialize editor selection when ready
   React.useEffect(() => {
@@ -477,6 +580,7 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
   // Handle value changes
   const handleChange = useCallback((newValue: Descendant[]) => {
     try {
+      console.log('🟡 [editor.handleChange] Called, isCollaborative:', isCollaborative);
       // For collaboration, determine if this change originated locally
       let isLocalChange = true
       if (isCollaborative) {
@@ -486,10 +590,13 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
           }
         } catch {}
       }
+      console.log('🟡 [editor.handleChange] isLocalChange:', isLocalChange, 'elements:', newValue.length);
       // Validate that newValue is not empty and has valid structure
       if (newValue && Array.isArray(newValue) && newValue.length > 0) {
         setValue(newValue)
         if (onChange && isLocalChange) {
+          const firstText = (newValue[0] as any)?.children?.[0]?.text;
+          console.log('🟡 [editor.handleChange] Calling onChange, first text:', firstText?.substring(0, 50));
           // For now, export as JSON string - can be customized later
           onChange(JSON.stringify(newValue))
         }
@@ -528,7 +635,7 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
       ]
       setValue(fallbackValue)
     }
-  }, [onChange])
+  }, [onChange, editor, isCollaborative])
 
   // Calculate pages using FDX format
   const pages = React.useMemo(() => {

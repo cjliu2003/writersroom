@@ -1,0 +1,138 @@
+(writersRoom) (base) jacklofwall@DN0a1f8330 backend % python -m uvicorn main:app --port 8000 --reload
+INFO:     Will watch for changes in these directories: ['/Users/jacklofwall/Documents/GitHub/writersroom/backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [7777] using StatReload
+INFO:     Started server process [7779]
+INFO:     Waiting for application startup.
+✅ Redis connected at redis://localhost:6379
+✅ Snapshot scheduler started (5 minute interval)
+✅ Compaction scheduler started (24 hour interval)
+INFO:     Application startup complete.
+Error in compaction scheduler: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedFunctionError'>: operator does not exist: integer = boolean
+HINT:  No operator matches the given name and argument types. You might need to add explicit type casts.
+[SQL: SELECT scene_versions.scene_id, count(scene_versions.version_id) AS update_count 
+FROM scene_versions 
+WHERE scene_versions.created_at < $1::TIMESTAMP WITH TIME ZONE AND scene_versions.is_compacted = false AND scene_versions.compacted_by IS NULL GROUP BY scene_versions.scene_id 
+HAVING count(scene_versions.version_id) >= $2::INTEGER ORDER BY count(scene_versions.version_id) DESC 
+ LIMIT $3::INTEGER]
+[parameters: (datetime.datetime(2025, 10, 23, 18, 23, 45, 299442), 100, 50)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Error in snapshot scheduler: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedFunctionError'>: operator does not exist: integer = boolean
+HINT:  No operator matches the given name and argument types. You might need to add explicit type casts.
+[SQL: SELECT scenes.scene_id 
+FROM scenes 
+WHERE scenes.snapshot_at < $1::TIMESTAMP WITH TIME ZONE OR scenes.snapshot_at IS NULL OR scenes.yjs_derived = false 
+ LIMIT $2::INTEGER]
+[parameters: (datetime.datetime(2025, 10, 24, 18, 18, 45, 298107), 10)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+DEBUG: Authentication process started
+DEBUG: Token received: eyJhbGciOiJSUzI...
+DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: User lookup result: Found
+INFO:     127.0.0.1:54377 - "GET /api/users/me/scripts HTTP/1.1" 200 OK
+DEBUG: Authentication process started
+DEBUG: Token received: eyJhbGciOiJSUzI...
+DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: User lookup result: Found
+Warning: Yjs retrieval failed for scene 21df40cd-f78f-4d41-86c0-d03113583a66, using REST snapshot: Invalid Yjs element at index 0: expected dict, got <class 'builtins.YMap'>
+INFO:     127.0.0.1:54377 - "GET /api/scripts/70443b72-4ba9-438e-86c7-22841513e82c/scenes HTTP/1.1" 200 OK
+
+>>> WEBSOCKET ENDPOINT CALLED for scene 21df40cd-f78f-4d41-86c0-d03113583a66 <<<
+DEBUG WS: Token received: eyJhbGciOiJSUzI...
+DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
+DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+>>> TOKEN VERIFIED, user_info type: <class 'dict'>
+>>> EXTRACTING FIREBASE UID...
+>>> FIREBASE UID: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+>>> LOOKING UP USER IN DATABASE...
+>>> DATABASE QUERY EXECUTED
+>>> USER FOUND: True
+>>> USER ID: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, NAME: Jack Lofwall
+>>> ABOUT TO CONNECT WEBSOCKET
+>>> CALLING websocket_manager.connect()
+INFO:     127.0.0.1:54404 - "WebSocket /api/ws/scenes/21df40cd-f78f-4d41-86c0-d03113583a66?token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjlkMjEzMGZlZjAyNTg3ZmQ4ODYxODg2OTgyMjczNGVmNzZhMTExNjUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc1ODkxNDI5OSwidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzYxMzI5MTMxLCJleHAiOjE3NjEzMzI3MzEsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.BIuhT6dd1rO8W1iAfWKAO5zAMA_WU1iYi5u41bMiVmoHc0z1ehpTyXFYVtnwUxxsI3BdL74WlZTo53SfsCsQIv--8nQPYTPSJ_ZKuHiWdaQS29AQEE_JQxgjBFJXJUuEBV_LrhvUg6Nmdf3YOJBQ76fRAp_QeFjZJt-Zk36p-4KzmvnVxmlM3Oey0d-HTFqQdmnbu5mQ9UyiidLx2JSwgVWpigEpRXlhljel2-1Fp6mGVVodzuAL8FrhgzqiQxM8wZe7GsoENDZiv1DyIGVHVB_RoO7163Vsm2gj8r1JqV_F4-HS9DoLPT_lQa8eABYOyTBsdE8vOG0LbiwssKK0Nw" [accepted]
+>>> WEBSOCKET CONNECTED! connection_info: <app.services.websocket_manager.ConnectionInfo object at 0x117534110>
+>>> YJS DOCUMENT CREATED
+INFO:     connection open
+>>> LOADED 28 PERSISTED UPDATE(S)
+>>> SETTING UP REDIS...
+>>> REDIS MANAGER OBTAINED
+>>> SUBSCRIBED TO REDIS
+>>> ENTERING MESSAGE LOOP
+>>> REPLIED SYNCSTEP2 (3229 bytes)
+>>> SENT SYNCSTEP1 to client (11 bytes)
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> APPLIED UPDATE (type 1) size=218
+>>> BROADCASTED SYNC_STEP2 as SYNC_UPDATE to peers (222 bytes)
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> APPLIED UPDATE (type 2) size=20
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> APPLIED UPDATE (type 2) size=27
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> APPLIED UPDATE (type 2) size=27
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> APPLIED UPDATE (type 2) size=27
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+INFO:     127.0.0.1:54377 - "OPTIONS /api/scenes/21df40cd-f78f-4d41-86c0-d03113583a66 HTTP/1.1" 200 OK
+DEBUG: Authentication process started
+DEBUG: Token received: eyJhbGciOiJSUzI...
+DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: User lookup result: Found
+DEBUG: Validating access for scene 21df40cd-f78f-4d41-86c0-d03113583a66 and user 2157d1b1-b88f-4b4f-a25b-13dc50dea852
+DEBUG: Finding scene 21df40cd-f78f-4d41-86c0-d03113583a66 with script
+DEBUG: Found scene 21df40cd-f78f-4d41-86c0-d03113583a66 with script_id 70443b72-4ba9-438e-86c7-22841513e82c
+DEBUG: Found scene with ID 21df40cd-f78f-4d41-86c0-d03113583a66
+DEBUG: Found script 70443b72-4ba9-438e-86c7-22841513e82c owned by 2157d1b1-b88f-4b4f-a25b-13dc50dea852
+DEBUG: User 2157d1b1-b88f-4b4f-a25b-13dc50dea852 is script owner - access granted
+DEBUG: Beginning update for scene 21df40cd-f78f-4d41-86c0-d03113583a66, base_version=0
+DEBUG: Found scene 21df40cd-f78f-4d41-86c0-d03113583a66 with script_id 70443b72-4ba9-438e-86c7-22841513e82c
+
+⚠️  SCENE 0 UPDATE DETECTED:
+   Scene ID: 21df40cd-f78f-4d41-86c0-d03113583a66
+   Current content_blocks: 10 blocks
+   New content_blocks: 10 blocks
+   Current scene_heading: INT. COFFEE SHOP - DAY
+   New scene_heading: INT. COFFEE SHOP - DAY testtset
+
+>>> APPLIED UPDATE (type 2) size=27
+INFO:     127.0.0.1:54377 - "PATCH /api/scenes/21df40cd-f78f-4d41-86c0-d03113583a66 HTTP/1.1" 200 OK
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> APPLIED UPDATE (type 2) size=27
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> APPLIED UPDATE (type 2) size=27
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> APPLIED UPDATE (type 2) size=27
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> APPLIED UPDATE (type 2) size=27
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> APPLIED UPDATE (type 2) size=27
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> BROADCASTED SYNC_UPDATE to peers
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user
+>>> REDIS MESSAGE RECEIVED: sender=2157d1b1-b88f-4b4f-a25b-13dc50dea852, current_user=2157d1b1-b88f-4b4f-a25b-13dc50dea852, match=True
+>>> SKIPPING ECHO: Message from same user

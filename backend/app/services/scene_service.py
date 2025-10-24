@@ -182,8 +182,50 @@ class SceneService:
             self.db.add(snapshot)
             
             # Update the scene
-            scene.content_blocks = data.get("content_blocks", data.get("blocks", []))
-            scene.scene_heading = data.get("scene_heading", scene.scene_heading)
+            # IMPORTANT: Don't overwrite with empty content_blocks to prevent data loss
+            new_content_blocks = data.get("content_blocks", data.get("blocks", []))
+
+            # Log if we're updating scene 0's first scene (position 0)
+            if scene.position == 0:
+                print(f"\n⚠️  SCENE 0 UPDATE DETECTED:")
+                print(f"   Scene ID: {scene_id}")
+                print(f"   Current content_blocks: {len(scene.content_blocks) if scene.content_blocks else 0} blocks")
+                print(f"   New content_blocks: {len(new_content_blocks) if new_content_blocks else 0} blocks")
+                print(f"   Current scene_heading: {scene.scene_heading}")
+                print(f"   New scene_heading: {data.get('scene_heading', 'N/A')}\n")
+
+            # Detect placeholder/empty blocks that would corrupt real data
+            is_placeholder = False
+            if new_content_blocks and len(new_content_blocks) == 1:
+                first_block = new_content_blocks[0]
+                # Check if it's an empty placeholder block
+                if isinstance(first_block, dict):
+                    text = first_block.get("text", "").strip()
+                    block_type = first_block.get("type", "")
+                    is_placeholder = (not text or text == "") and block_type == "scene_heading"
+
+            # Check if we're about to lose real data
+            current_has_real_data = False
+            if scene.content_blocks:
+                if len(scene.content_blocks) > 1:
+                    current_has_real_data = True
+                elif len(scene.content_blocks) == 1:
+                    first_text = scene.content_blocks[0].get("text", "").strip()
+                    if first_text and first_text != "":
+                        current_has_real_data = True
+
+            if is_placeholder and current_has_real_data:
+                print(f"🛡️  PREVENTED DATA LOSS: Blocking placeholder overwrite for scene {scene_id}")
+                print(f"   Current: {len(scene.content_blocks)} blocks with real content")
+                print(f"   Attempted: 1 empty placeholder block")
+                # Don't update content_blocks or scene_heading - keep existing data
+            elif new_content_blocks or not scene.content_blocks:
+                # Only update if new data exists, or if current data is also empty
+                scene.content_blocks = new_content_blocks
+                scene.scene_heading = data.get("scene_heading", scene.scene_heading)
+            else:
+                print(f"[WARNING] Prevented overwriting scene {scene_id} content_blocks with empty data")
+
             scene.position = data.get("position", scene.position)
             scene.version = new_version
             scene.updated_by = user_id

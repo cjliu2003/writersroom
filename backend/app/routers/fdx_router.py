@@ -55,7 +55,7 @@ async def upload_fdx_file(
         # Parse FDX content
         print(f"Parsing FDX file: {file.filename}")
         parsed_result = FDXParser.parse_fdx_content(file_content_str, file.filename)
-        print("PARSED FDX CONTENT: ", parsed_result)
+        # Removed verbose parsed content logging to reduce console noise
         # Create new script in database
         new_script = Script(
             title=parsed_result.title,
@@ -82,8 +82,16 @@ async def upload_fdx_file(
         # Create scenes in database
         print(f"Creating {len(parsed_result.scenes)} scenes in database")
         db_scenes = []
-        
+
         for position, scene_data in enumerate(parsed_result.scenes):
+            # DIAGNOSTIC: Log first scene data before processing
+            if position == 0:
+                print(f"[DIAGNOSTIC] Scene 0 BEFORE processing:")
+                print(f"  slugline: {scene_data.slugline}")
+                print(f"  summary: {scene_data.summary[:100] if scene_data.summary else 'None'}")
+                print(f"  content_blocks count: {len(scene_data.content_blocks)}")
+                print(f"  full_content length: {len(scene_data.full_content) if scene_data.full_content else 0}")
+
             # Convert content blocks to JSON format for storage
             content_blocks_json = [
                 {
@@ -93,7 +101,14 @@ async def upload_fdx_file(
                 }
                 for block in scene_data.content_blocks
             ]
-            
+
+            # DIAGNOSTIC: Log first scene after JSON conversion
+            if position == 0:
+                print(f"[DIAGNOSTIC] Scene 0 AFTER JSON conversion:")
+                print(f"  content_blocks_json count: {len(content_blocks_json)}")
+                if content_blocks_json:
+                    print(f"  First block: {content_blocks_json[0]}")
+
             db_scene = Scene(
                 script_id=new_script.script_id,
                 position=position,
@@ -106,14 +121,29 @@ async def upload_fdx_file(
                 word_count=scene_data.word_count,
                 full_content=scene_data.full_content
             )
-            
+
+            # DIAGNOSTIC: Log first scene DB object before adding to session
+            if position == 0:
+                print(f"[DIAGNOSTIC] Scene 0 DB object BEFORE db.add:")
+                print(f"  scene_heading: {db_scene.scene_heading}")
+                print(f"  content_blocks: {db_scene.content_blocks}")
+                print(f"  summary: {db_scene.summary[:100] if db_scene.summary else 'None'}")
+
             db.add(db_scene)
             db_scenes.append(db_scene)
         
         # Commit all changes
         await db.commit()
         await db.refresh(new_script)
-        
+
+        # DIAGNOSTIC: Check first scene after commit
+        if db_scenes:
+            await db.refresh(db_scenes[0])
+            print(f"[DIAGNOSTIC] Scene 0 AFTER db.commit and refresh:")
+            print(f"  scene_heading: {db_scenes[0].scene_heading}")
+            print(f"  content_blocks: {db_scenes[0].content_blocks}")
+            print(f"  summary: {db_scenes[0].summary[:100] if db_scenes[0].summary else 'None'}")
+
         # Convert scenes to response format
         scene_schemas = []
         for scene_data in parsed_result.scenes:
@@ -138,8 +168,13 @@ async def upload_fdx_file(
             )
             scene_schemas.append(scene_schema)
         
-        print(f"Successfully processed FDX file: {file.filename}")
-        
+        print(f"\n{'='*80}")
+        print(f"✅ FDX UPLOAD COMPLETE: {file.filename}")
+        print(f"   Script ID: {new_script.script_id}")
+        print(f"   Scenes created: {len(parsed_result.scenes)}")
+        print(f"   First scene: {parsed_result.scenes[0].slugline if parsed_result.scenes else 'N/A'}")
+        print(f"{'='*80}\n")
+
         return FDXUploadResponse(
             success=True,
             script_id=new_script.script_id,

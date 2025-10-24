@@ -14,7 +14,7 @@ DB_URL_ASYNC = os.getenv('DB_URL_ASYNC')
 if not ((DB_HOST and DB_PORT and DB_USER and DB_PASSWORD and DB_NAME) or DB_URL_ASYNC):
     raise ValueError("Database connection parameters or DB_URL_ASYNC must be set")
 
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 # Build URL
 if DB_HOST and DB_PORT and DB_USER and DB_PASSWORD and DB_NAME:
@@ -31,7 +31,7 @@ ssl_ctx.verify_mode = ssl.CERT_NONE
 
 engine = create_async_engine(
     connection_url,
-    echo=True,
+    echo=False,  # Disable SQL query logging for cleaner output
     future=True,
     pool_pre_ping=True,
     pool_size=5,

@@ -31,6 +31,7 @@ function EditorPageContent() {
   const [error, setError] = useState<string | null>(null)
   const [currentSceneVersion, setCurrentSceneVersion] = useState(0)
   const [sceneVersions, setSceneVersions] = useState<Record<string, number>>({})
+  const [scenePositions, setScenePositions] = useState<Record<string, number>>({})  // Map sceneUUID → position
   const [authToken, setAuthToken] = useState<string>("") // Set from AuthContext token
   const [autosaveEnabled, setAutosaveEnabled] = useState(false)
   const router = useRouter()
@@ -77,6 +78,225 @@ function EditorPageContent() {
     };
     saveLayoutPrefs(prefs);
   }, [isOutlineOpen, isAssistantOpen]);
+
+  const parseFullContentToElements = useCallback((fullContent: string): any[] => {
+    try {
+      const parsed = JSON.parse(fullContent)
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type) {
+        return parsed
+      }
+    } catch (e) {
+      // ignore and fall back to legacy parsing
+    }
+
+    const lines = fullContent.split('\n')
+    const elements: any[] = []
+    let currentElement: any = null
+
+    lines.forEach(line => {
+      const trimmedLine = line.trim()
+
+      if (!trimmedLine) {
+        if (currentElement) {
+          elements.push(currentElement)
+          currentElement = null
+        }
+        return
+      }
+
+      let elementType = 'action'
+      if (trimmedLine.match(/^(INT\.|EXT\.)/i)) {
+        elementType = 'scene_heading'
+      } else if (trimmedLine.match(/^\([^)]+\)$/)) {
+        elementType = 'parenthetical'
+      } else if (trimmedLine.match(/^(FADE IN:|FADE OUT\.?|CUT TO:|DISSOLVE TO:)/i)) {
+        elementType = 'transition'
+      } else if (currentElement && (currentElement.type === 'character' || currentElement.type === 'parenthetical')) {
+        elementType = 'dialogue'
+      } else if (
+        trimmedLine === trimmedLine.toUpperCase() &&
+        trimmedLine.match(/^[A-Z][A-Z\s]*$/) &&
+        trimmedLine.length > 1 &&
+        !trimmedLine.match(/\./)
+      ) {
+        elementType = 'character'
+      }
+
+      if (currentElement && currentElement.type !== elementType) {
+        elements.push(currentElement)
+        currentElement = null
+      }
+
+      if (!currentElement) {
+        currentElement = {
+          type: elementType,
+          children: [{ text: trimmedLine }],
+          id: `element_${Date.now()}_${Math.random()}`,
+          metadata: {
+            timestamp: new Date().toISOString(),
+            uuid: crypto.randomUUID()
+          }
+        }
+      } else {
+        if (currentElement.children[0].text) {
+          currentElement.children[0].text += ' ' + trimmedLine
+        } else {
+          currentElement.children[0].text = trimmedLine
+        }
+      }
+    })
+
+    if (currentElement) {
+      elements.push(currentElement)
+    }
+
+    return elements
+  }, [])
+
+  const buildElementsFromBackendScenes = useCallback((backendScenes: BackendScene[]): any[] => {
+    const all: any[] = []
+    const sorted = [...backendScenes].sort((a, b) => a.sceneIndex - b.sceneIndex)
+
+    console.log('🔍 [buildElements] Starting with', sorted.length, 'scenes');
+
+    sorted.forEach((s) => {
+      // Ensure we have a slugline and sceneUUID
+      const slugline = s.slugline || 'UNTITLED SCENE';
+      const sceneUUID = (s as any).sceneUUID || s.sceneId || crypto.randomUUID();
+
+      console.log(`🔍 [buildElements] Scene ${s.sceneIndex}:`, {
+        slugline,
+        uuid: sceneUUID,
+        hasContentBlocks: !!s.contentBlocks,
+        contentBlocksLength: s.contentBlocks?.length,
+        contentBlocksTypes: s.contentBlocks?.map((b: any) => b?.type),
+        hasFullContent: !!s.fullContent,
+        fullContentPreview: s.fullContent?.substring(0, 100)
+      });
+
+      all.push({
+        type: 'scene_heading',
+        children: [{ text: slugline }],
+        id: `scene_${s.sceneIndex}_${Date.now()}_${Math.random()}`,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          uuid: sceneUUID,  // Database scene_id for autosave matching
+          sceneId: sceneUUID,  // Explicit field for clarity
+          position: s.sceneIndex  // Scene position for fallback matching
+        }
+      })
+
+      if (s.contentBlocks && Array.isArray(s.contentBlocks) && s.contentBlocks.length > 0) {
+        console.log(`🔍 [buildElements] Processing ${s.contentBlocks.length} contentBlocks for scene ${s.sceneIndex}`);
+        let skipped = 0;
+        let added = 0;
+        s.contentBlocks.forEach((b, idx) => {
+          if (!b || !b.type || b.type === 'scene_heading') {
+            skipped++;
+            return;
+          }
+          added++;
+          all.push({
+            type: b.type,
+            children: [{ text: (b.text ?? '').toString() }],
+            id: `el_${s.sceneIndex}_${idx}_${Math.random()}`,
+            metadata: b.metadata ?? {
+              timestamp: new Date().toISOString(),
+              uuid: crypto.randomUUID()
+            }
+          })
+        })
+        console.log(`🔍 [buildElements] Scene ${s.sceneIndex}: Added ${added} blocks, skipped ${skipped} scene_heading blocks`);
+      } else if (s.fullContent) {
+        console.log(`🔍 [buildElements] Using fullContent fallback for scene ${s.sceneIndex}`);
+        const els = parseFullContentToElements(s.fullContent)
+        console.log(`🔍 [buildElements] Parsed ${els.length} elements from fullContent`);
+        all.push(...els)
+      } else {
+        console.warn(`⚠️ [buildElements] Scene ${s.sceneIndex} has no contentBlocks and no fullContent!`);
+      }
+    })
+
+    console.log(`🔍 [buildElements] Built ${all.length} total elements`);
+    console.log(`🔍 [buildElements] First 3 elements:`, all.slice(0, 3));
+    return all
+  }, [parseFullContentToElements])
+
+  const parseScenes = useCallback((content: string): Scene[] => {
+    const scenes: Scene[] = []
+
+    try {
+      const elements = JSON.parse(content)
+      if (Array.isArray(elements)) {
+        let currentSceneElements: any[] = []
+        let currentSceneHeading = ""
+        let sceneId = ""
+
+        elements.forEach((element, idx) => {
+          if (element.type === 'scene_heading') {
+            if (currentSceneHeading) {
+              const sceneContent = JSON.stringify(currentSceneElements)
+              if (sceneId) {
+                scenes.push({ id: sceneId, heading: currentSceneHeading, content: sceneContent })
+              }
+            }
+
+            currentSceneHeading = element.children[0].text
+            currentSceneElements = [element]
+            const headingUuid = (element as any)?.metadata?.uuid as string | undefined
+            sceneId = headingUuid || ""
+
+            console.log(`🔍 [parseScenes] Scene heading #${idx}:`, {
+              heading: currentSceneHeading,
+              extractedUUID: headingUuid,
+              hasMetadata: !!(element as any)?.metadata,
+              metadataKeys: Object.keys((element as any)?.metadata || {})
+            });
+          } else {
+            currentSceneElements.push(element)
+          }
+        })
+
+        if (currentSceneHeading) {
+          const sceneContent = JSON.stringify(currentSceneElements)
+          if (sceneId) {
+            scenes.push({ id: sceneId, heading: currentSceneHeading, content: sceneContent })
+          }
+        }
+
+        console.log('🔍 [parseScenes] Final scenes array:', scenes.map(s => ({ id: s.id, heading: s.heading })));
+
+        return scenes
+      }
+    } catch (e) {
+      // fall back to legacy parsing
+    }
+
+    const lines = content.split("\n")
+    let currentSceneContent = ""
+    let currentSceneHeading = ""
+    let sceneId = ""
+
+    for (const line of lines) {
+      const trimmedLine = line.trim()
+
+      if (trimmedLine.match(/^(INT\.|EXT\.)/i)) {
+        if (currentSceneHeading) {
+          scenes.push({ id: "", heading: currentSceneHeading, content: currentSceneContent.trim() })
+        }
+        currentSceneHeading = trimmedLine
+        currentSceneContent = line + "\n"
+      } else {
+        currentSceneContent += line + "\n"
+      }
+    }
+
+    if (currentSceneHeading) {
+      scenes.push({ id: sceneId, heading: currentSceneHeading, content: currentSceneContent.trim() })
+    }
+
+    return scenes
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -172,22 +392,32 @@ function EditorPageContent() {
             createdAt: new Date().toISOString()
           }
 
-          // Build map of scene UUID -> version from backend
+          // Build map of scene UUID -> version and position from backend
           const versionMap: Record<string, number> = {}
+          const positionMap: Record<string, number> = {}
           for (const s of backendScenes as any[]) {
             const uuid = (s as any).sceneUUID
             const ver = (s as any).version
-            if (uuid) versionMap[uuid] = typeof ver === 'number' ? ver : 0
+            const pos = (s as any).sceneIndex
+            if (uuid) {
+              versionMap[uuid] = typeof ver === 'number' ? ver : 0
+              positionMap[uuid] = typeof pos === 'number' ? pos : 0
+            }
           }
           setSceneVersions(versionMap)
+          setScenePositions(positionMap)
 
           // Set initial scene in view and its version
-          const firstSceneId = scenes?.[0]?.id
+          const firstSceneId = scenes?.[0]?.id;
+          console.log('[Editor] First scene ID:', firstSceneId);
+          console.log('[Editor] Scene version map:', versionMap);
+          console.log('[Editor] Parsed scenes:', scenes.slice(0, 2));
+
           if (firstSceneId) {
-            setCurrentSceneInView(firstSceneId)
-            setCurrentSceneVersion(versionMap[firstSceneId] ?? 0)
+            setCurrentSceneInView(firstSceneId);
+            setCurrentSceneVersion(versionMap[firstSceneId] ?? 0);
           } else {
-            setCurrentSceneVersion(0)
+            setCurrentSceneVersion(0);
           }
 
           setScript(assembled)
@@ -220,7 +450,7 @@ function EditorPageContent() {
       cancelled = true
       clearTimeout(failSafe)
     }
-  }, [router, searchParams, authToken, authLoading])
+  }, [router, searchParams, authToken, authLoading, buildElementsFromBackendScenes, parseScenes])
 
   // Log script changes for debugging
   useEffect(() => {
@@ -235,167 +465,41 @@ function EditorPageContent() {
 
   // Title is derived from backendScenes[0].projectTitle when available
 
-  const buildElementsFromBackendScenes = (backendScenes: BackendScene[]): any[] => {
-    const all: any[] = []
-    // Ensure deterministic order
-    const sorted = [...backendScenes].sort((a, b) => a.sceneIndex - b.sceneIndex)
-
-    sorted.forEach((s) => {
-      // Scene heading first
-      all.push({
-        type: 'scene_heading',
-        children: [{ text: s.slugline }],
-        id: `scene_${s.sceneIndex}_${Date.now()}_${Math.random()}`,
-        metadata: {
-          timestamp: new Date().toISOString(),
-          // Use server-provided scene UUID for correct autosave targeting
-          uuid: (s as any).sceneUUID
-        }
-      })
-
-      // Prefer typed blocks from backend
-      if (s.contentBlocks && Array.isArray(s.contentBlocks) && s.contentBlocks.length > 0) {
-        s.contentBlocks.forEach((b, idx) => {
-          if (!b || !b.type) return
-          if (b.type === 'scene_heading') return // avoid duplicating headings
-          all.push({
-            type: b.type,
-            children: [{ text: (b.text ?? '').toString() }],
-            id: `el_${s.sceneIndex}_${idx}_${Math.random()}`,
-            metadata: b.metadata ?? {
-              timestamp: new Date().toISOString(),
-              uuid: crypto.randomUUID()
-            }
-          })
-        })
-      } else if (s.fullContent) {
-        const els = parseFullContentToElements(s.fullContent)
-        all.push(...els)
-      }
-    })
-
-    return all
-  }
-
-  const parseFullContentToElements = (fullContent: string): any[] => {
-    // Try to parse as JSON first (new FDX format with ScreenplayElements)
-    try {
-      const parsed = JSON.parse(fullContent)
-      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type) {
-        // This is already ScreenplayElements JSON - return as is
-        return parsed
-      }
-    } catch (e) {
-      // Not JSON, fall through to text parsing
-    }
-
-    // Legacy text parsing for old format
-    const lines = fullContent.split('\n')
-    const elements: any[] = []
-
-    let currentElement: any = null
-
-    lines.forEach(line => {
-      const trimmedLine = line.trim()
-
-      if (!trimmedLine) {
-        // Empty line - finish current element if it exists
-        if (currentElement) {
-          elements.push(currentElement)
-          currentElement = null
-        }
-        return
-      }
-
-      // Detect element type by content patterns
-      let elementType = 'action' // default
-
-      if (trimmedLine.match(/^(INT\.|EXT\.)/i)) {
-        elementType = 'scene_heading'
-      } else if (trimmedLine.match(/^\([^)]+\)$/)) {
-        // Text in parentheses = parenthetical
-        elementType = 'parenthetical'
-      } else if (trimmedLine.match(/^(FADE IN:|FADE OUT\.?|CUT TO:|DISSOLVE TO:)/i)) {
-        // Transitions - including FADE OUT.
-        elementType = 'transition'
-      } else if (currentElement && (currentElement.type === 'character' || currentElement.type === 'parenthetical')) {
-        // After a character or parenthetical = dialogue
-        elementType = 'dialogue'
-      } else if (trimmedLine === trimmedLine.toUpperCase() &&
-                 trimmedLine.match(/^[A-Z][A-Z\s]*$/) &&
-                 trimmedLine.length > 1 &&
-                 !trimmedLine.match(/\./)) {
-        // All caps, only letters and spaces, no periods = character name
-        elementType = 'character'
-      }
-
-      // If we have a current element and the type changed, save the current one
-      if (currentElement && currentElement.type !== elementType) {
-        elements.push(currentElement)
-        currentElement = null
-      }
-
-      // Create new element or append to current
-      if (!currentElement) {
-        currentElement = {
-          type: elementType,
-          children: [{ text: trimmedLine }],
-          id: `element_${Date.now()}_${Math.random()}`,
-          metadata: {
-            timestamp: new Date().toISOString(),
-            uuid: crypto.randomUUID()
-          }
-        }
-      } else {
-        // Append to current element (for multi-line content)
-        if (currentElement.children[0].text) {
-          currentElement.children[0].text += ' ' + trimmedLine
-        } else {
-          currentElement.children[0].text = trimmedLine
-        }
-      }
-    })
-
-    // Add final element if exists
-    if (currentElement) {
-      elements.push(currentElement)
-    }
-
-    return elements
-  }
-
   const saveScript = (updatedScript: Script) => {
     localStorage.setItem("current-script", JSON.stringify(updatedScript))
     setLastSaved(new Date())
   }
 
-  const handleContentChange = (content: string) => {
+  const handleContentChange = useCallback((content: string) => {
     try {
-      if (!script) return
+      // Use functional state update to avoid dependency on script
+      setScript(prev => {
+        if (!prev) return prev
 
-      const updatedScript = { ...script, content }
+        const updatedScript = { ...prev, content }
 
-      // Parse scenes from content
-      const scenes = parseScenes(content)
-      updatedScript.scenes = scenes
+        // Parse scenes from content
+        const scenes = parseScenes(content)
+        updatedScript.scenes = scenes
 
-      setScript(updatedScript)
-
-      // If autosave is disabled, use local storage with debounce
-      if (!autosaveEnabled) {
-        if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current)
+        // If autosave is disabled, use local storage with debounce
+        if (!autosaveEnabled) {
+          if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current)
+          }
+          saveTimeoutRef.current = setTimeout(() => {
+            saveScript(updatedScript)
+          }, 1000)
         }
-        saveTimeoutRef.current = setTimeout(() => {
-          saveScript(updatedScript)
-        }, 1000)
-      }
-      // Note: When autosave is enabled, saving is handled by ScreenplayEditorWithAutosave
+        // Note: When autosave is enabled, saving is handled by ScreenplayEditorWithAutosave
+
+        return updatedScript
+      })
     } catch (error) {
       console.error('Error handling content change:', error)
       setError('Error updating script content. Your changes may not be saved.')
     }
-  }
+  }, [parseScenes, autosaveEnabled])
 
   const handleVersionUpdate = useCallback((newVersion: number) => {
     const sceneId = currentSceneInView
@@ -410,104 +514,6 @@ function EditorPageContent() {
     setLastSaved(new Date())
     console.log('Scene version updated to:', newVersion)
   }, [currentSceneInView])
-
-  const parseScenes = (content: string): Scene[] => {
-    const scenes: Scene[] = []
-
-    // Try to parse as ScreenplayElements JSON first
-    try {
-      const elements = JSON.parse(content)
-      if (Array.isArray(elements)) {
-        let currentSceneElements: any[] = []
-        let currentSceneHeading = ""
-        // Will be set from scene_heading metadata.uuid when available
-        let sceneId = ""
-
-        elements.forEach(element => {
-          if (element.type === 'scene_heading') {
-            // Save previous scene if it exists - REMOVED LENGTH CHECK
-            if (currentSceneHeading) {
-              const sceneContent = JSON.stringify(currentSceneElements)
-              if (sceneId) {
-                scenes.push({
-                  id: sceneId, // Only use backend-provided UUID
-                  heading: currentSceneHeading,
-                  content: sceneContent,
-                })
-              }
-            }
-
-            // Start new scene
-            currentSceneHeading = element.children[0].text
-            currentSceneElements = [element]
-            // Derive scene ID from heading metadata if present
-            const headingUuid = (element as any)?.metadata?.uuid as string | undefined
-            sceneId = headingUuid || ""
-          } else {
-            // Add to current scene
-            currentSceneElements.push(element)
-          }
-        })
-
-        // Add the last scene - only if we have a valid scene UUID
-        if (currentSceneHeading) {
-          const sceneContent = JSON.stringify(currentSceneElements)
-          if (sceneId) {
-            scenes.push({
-              id: sceneId,
-              heading: currentSceneHeading,
-              content: sceneContent,
-            })
-          }
-        }
-
-        return scenes
-      }
-    } catch (e) {
-      // Not JSON, fall through to text parsing
-    }
-
-    // Legacy text parsing
-    const lines = content.split("\n")
-    let currentSceneContent = ""
-    let currentSceneHeading = ""
-    // No backend UUID available in legacy text parsing
-    let sceneId = ""
-
-    for (const line of lines) {
-      const trimmedLine = line.trim()
-
-      // Check if line is a scene heading (starts with INT. or EXT.)
-      if (trimmedLine.match(/^(INT\.|EXT\.)/i)) {
-        // Save previous scene if it exists
-        if (currentSceneHeading) {
-          // Without a backend UUID, we skip assigning an ID used for autosave
-          scenes.push({
-            id: "",
-            heading: currentSceneHeading,
-            content: currentSceneContent.trim(),
-          })
-        }
-
-        // Start new scene
-        currentSceneHeading = trimmedLine
-        currentSceneContent = line + "\n"
-      } else {
-        currentSceneContent += line + "\n"
-      }
-    }
-
-    // Add the last scene
-    if (currentSceneHeading) {
-      scenes.push({
-        id: sceneId,  // May be empty in legacy path without backend UUID
-        heading: currentSceneHeading,
-        content: currentSceneContent.trim(),
-      })
-    }
-
-    return scenes
-  }
 
   // Memoized handler to avoid re-registering selection listeners downstream
   const handleEditorSceneChange = useCallback((sceneId: string) => {
@@ -723,6 +729,7 @@ function EditorPageContent() {
             {canAutosave ? (
               <ScreenplayEditorWithAutosave
                 sceneId={resolvedSceneId as string}
+                scenePosition={script.scenes?.findIndex(s => s.id === resolvedSceneId) ?? 0}
                 initialVersion={currentSceneVersion}
                 content={script.content}
                 authToken={authToken}

@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 import os
+import asyncio
+from typing import Optional
 
 # Rate limiting imports
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -70,10 +72,16 @@ app.include_router(user_router.router, prefix="/api")
 app.include_router(ai_router.router, prefix="/api")
 app.include_router(websocket.router, prefix="/api", tags=["websocket"])
 
+# Background task handles
+snapshot_task: Optional[asyncio.Task] = None
+compaction_task: Optional[asyncio.Task] = None
+
 # Application lifecycle events
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on application startup."""
+    global snapshot_task, compaction_task
+
     # Initialize Redis for real-time collaboration
     redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
     try:
@@ -84,9 +92,136 @@ async def startup_event():
         print(f"⚠️  Redis connection failed: {e}")
         print("   Running in single-server mode (WebSocket collaboration will work locally)")
 
+    # Start periodic snapshot creation
+    try:
+        from app.services.yjs_snapshot_service import YjsSnapshotService
+        from app.db.base import async_session_maker
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        async def run_snapshot_scheduler():
+            """
+            Background task for periodic snapshot creation.
+
+            Creates REST snapshots from Yjs state every 5 minutes.
+            Runs indefinitely until application shutdown.
+            """
+            logger.info("Snapshot scheduler starting...")
+
+            while True:
+                try:
+                    # Create new session for each iteration
+                    async with async_session_maker() as session:
+                        service = YjsSnapshotService(session)
+
+                        # Refresh stale snapshots (scenes with Yjs updates but stale REST snapshots)
+                        refreshed = await service.refresh_stale_snapshots(
+                            max_age_minutes=5,
+                            batch_size=10
+                        )
+
+                        if refreshed > 0:
+                            logger.info(f"Snapshot scheduler: refreshed {refreshed} stale snapshot(s)")
+
+                        # Commit changes
+                        await session.commit()
+
+                except asyncio.CancelledError:
+                    logger.info("Snapshot scheduler cancelled")
+                    raise  # Re-raise to exit loop
+                except Exception as e:
+                    logger.error(f"Error in snapshot scheduler: {e}")
+                    # Continue running despite errors
+
+                # Wait 5 minutes before next run
+                await asyncio.sleep(5 * 60)
+
+        snapshot_task = asyncio.create_task(run_snapshot_scheduler())
+        print("✅ Snapshot scheduler started (5 minute interval)")
+
+    except Exception as e:
+        print(f"⚠️  Failed to start snapshot scheduler: {e}")
+        print("   Snapshots will not be automatically created")
+
+    # Start periodic compaction worker
+    try:
+        from app.tasks.yjs_compaction_worker import CompactionWorker
+        from app.db.base import async_session_maker
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        async def run_compaction_scheduler():
+            """
+            Background task for periodic Yjs update compaction.
+
+            Compacts old Yjs updates (>24h old, >100 updates) daily.
+            Runs indefinitely until application shutdown.
+            """
+            logger.info("Compaction scheduler starting...")
+
+            while True:
+                try:
+                    # Create new session for each iteration
+                    async with async_session_maker() as session:
+                        worker = CompactionWorker(session)
+
+                        # Run compaction cycle
+                        stats = await worker.run_compaction_cycle(
+                            batch_size=50,
+                            max_compactions=100
+                        )
+
+                        if stats['scenes_compacted'] > 0:
+                            logger.info(
+                                f"Compaction cycle: compacted {stats['scenes_compacted']} scene(s), "
+                                f"merged {stats['total_updates_compacted']} updates, "
+                                f"deleted {stats['updates_deleted']} old updates"
+                            )
+
+                except asyncio.CancelledError:
+                    logger.info("Compaction scheduler cancelled")
+                    raise  # Re-raise to exit loop
+                except Exception as e:
+                    logger.error(f"Error in compaction scheduler: {e}")
+                    # Continue running despite errors
+
+                # Wait 24 hours before next run (daily compaction)
+                await asyncio.sleep(24 * 60 * 60)
+
+        compaction_task = asyncio.create_task(run_compaction_scheduler())
+        print("✅ Compaction scheduler started (24 hour interval)")
+
+    except Exception as e:
+        print(f"⚠️  Failed to start compaction scheduler: {e}")
+        print("   Compaction will not run automatically")
+
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on application shutdown."""
+    global snapshot_task, compaction_task
+
+    # Cancel snapshot scheduler
+    if snapshot_task:
+        snapshot_task.cancel()
+        try:
+            await snapshot_task
+        except asyncio.CancelledError:
+            print("✅ Snapshot scheduler stopped")
+        except Exception as e:
+            print(f"Error stopping snapshot scheduler: {e}")
+
+    # Cancel compaction scheduler
+    if compaction_task:
+        compaction_task.cancel()
+        try:
+            await compaction_task
+        except asyncio.CancelledError:
+            print("✅ Compaction scheduler stopped")
+        except Exception as e:
+            print(f"Error stopping compaction scheduler: {e}")
+
     # Disconnect Redis
     if redis_pubsub_manager:
         try:

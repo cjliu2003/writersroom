@@ -17,6 +17,7 @@ export interface UseYjsCollaborationProps {
   enabled?: boolean;  // Feature flag to enable/disable collaboration
   onSyncStatusChange?: (status: SyncStatus) => void;
   onError?: (error: Error) => void;
+  onUpdate?: (update: Uint8Array, origin: any) => void;
 }
 
 export interface UseYjsCollaborationReturn {
@@ -38,6 +39,7 @@ export function useYjsCollaboration({
   enabled = true,
   onSyncStatusChange,
   onError,
+  onUpdate,
 }: UseYjsCollaborationProps): UseYjsCollaborationReturn {
   // Track connection attempts to prevent infinite loops
   const connectionAttemptsRef = useRef(0);
@@ -143,6 +145,7 @@ export function useYjsCollaboration({
         try {
           const otype = typeof origin === 'string' ? origin : (origin?.constructor?.name || typeof origin)
           console.log('[YjsCollaboration] doc.update', { bytes: update?.length, origin: otype });
+          onUpdate?.(update, origin);
         } catch {}
       };
       doc.on('update', handleDocUpdate);

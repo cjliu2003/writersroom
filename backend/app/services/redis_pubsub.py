@@ -1,11 +1,14 @@
 """
 Redis PubSub Manager for Multi-Server WebSocket Coordination
 
-Enables WebSocket messages to be broadcasted across multiple server instances
+Enables WebSocket messages to be broadcast across multiple server instances
 using Redis pub/sub channels.
 """
 
-from typing import Callable, Dict, Optional, Set
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Optional, Set
 from uuid import UUID
 import asyncio
 import logging
@@ -13,6 +16,17 @@ import json
 from redis import asyncio as aioredis
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class RedisMessage:
+    """Typed payload dispatched to websocket subscribers."""
+
+    channel: str
+    channel_type: str
+    sender_id: Optional[UUID]
+    payload: Any
+    raw: Dict[str, Any]
 
 
 class RedisPubSubManager:
@@ -38,12 +52,113 @@ class RedisPubSubManager:
         self.pubsub: Optional[aioredis.client.PubSub] = None
         
         # Track active subscriptions and their callbacks
-        self.subscriptions: Dict[str, Set[Callable]] = {}
+        self.subscriptions: Dict[str, Set[Callable[[RedisMessage], Any]]] = {}
         
         # Background task for listening to messages
         self.listen_task: Optional[asyncio.Task] = None
         
         logger.info(f"RedisPubSubManager initialized with URL: {redis_url}")
+
+    _CHANNEL_TYPES = {"updates", "awareness", "join", "leave"}
+
+    @classmethod
+    def _validate_channel_type(cls, channel_type: str) -> None:
+        if channel_type not in cls._CHANNEL_TYPES:
+            raise ValueError(f"Unsupported Redis channel type: {channel_type}")
+
+    @staticmethod
+    def _encode_bytes(data: bytes) -> str:
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError("Expected bytes-like object for encoding.")
+        return bytes(data).hex()
+
+    @staticmethod
+    def _decode_bytes(data: str) -> bytes:
+        if not isinstance(data, str):
+            raise TypeError("Expected hexadecimal string for decoding.")
+        try:
+            return bytes.fromhex(data)
+        except ValueError as exc:  # pragma: no cover - defensive logging
+            raise ValueError("Invalid hex payload.") from exc
+
+    @staticmethod
+    def _build_message(
+        channel_type: str,
+        payload: Any,
+        sender_id: Optional[UUID] = None,
+    ) -> str:
+        body: Dict[str, Any] = {"type": channel_type, "payload": payload}
+        if sender_id is not None:
+            body["sender_id"] = str(sender_id)
+        return json.dumps(body)
+
+    @classmethod
+    def decode_pubsub_message(
+        cls,
+        channel: str | bytes,
+        message: str | bytes,
+    ) -> Optional[RedisMessage]:
+        """
+        Decode a redis pub/sub payload into a structured RedisMessage instance.
+        Returns None if the payload cannot be decoded.
+        """
+        channel_name = channel.decode("utf-8") if isinstance(channel, bytes) else str(channel)
+        channel_type = channel_name.rsplit(":", 1)[-1]
+
+        try:
+            cls._validate_channel_type(channel_type)
+        except ValueError as err:
+            logger.error("Received message on unsupported channel '%s': %s", channel_name, err)
+            return None
+
+        raw_payload = message.decode("utf-8") if isinstance(message, bytes) else str(message)
+        try:
+            data = json.loads(raw_payload)
+        except json.JSONDecodeError as err:
+            logger.error("Failed to decode Redis payload on %s: %s", channel_name, err)
+            return None
+
+        message_type = data.get("type")
+        if message_type and message_type != channel_type:
+            logger.error(
+                "Channel/type mismatch on %s: expected '%s' but payload declared '%s'",
+                channel_name,
+                channel_type,
+                message_type,
+            )
+            return None
+
+        sender_id: Optional[UUID] = None
+        if sender_raw := data.get("sender_id"):
+            try:
+                sender_id = UUID(str(sender_raw))
+            except (ValueError, TypeError):
+                logger.error(
+                    "Invalid sender_id '%s' in Redis payload on %s", sender_raw, channel_name
+                )
+
+        payload = data.get("payload")
+        if channel_type == "updates":
+            if payload is None:
+                logger.error("Missing update payload on %s", channel_name)
+                return None
+            try:
+                payload = cls._decode_bytes(payload)
+            except (TypeError, ValueError) as err:
+                logger.error("Failed to decode update payload on %s: %s", channel_name, err)
+                return None
+        elif channel_type == "awareness":
+            if not isinstance(payload, dict):
+                logger.error("Awareness payload on %s must be a JSON object", channel_name)
+                return None
+
+        return RedisMessage(
+            channel=channel_name,
+            channel_type=channel_type,
+            sender_id=sender_id,
+            payload=payload,
+            raw=data,
+        )
     
     async def connect(self):
         """Establish connection to Redis."""
@@ -66,10 +181,18 @@ class RedisPubSubManager:
                 pass
         
         if self.pubsub:
-            await self.pubsub.close()
+            close_coro = getattr(self.pubsub, "aclose", None)
+            if callable(close_coro):
+                await close_coro()
+            else:  # pragma: no cover - legacy fallback
+                await self.pubsub.close()
         
         if self.redis_client:
-            await self.redis_client.close()
+            close_coro = getattr(self.redis_client, "aclose", None)
+            if callable(close_coro):
+                await close_coro()
+            else:  # pragma: no cover - legacy fallback
+                await self.redis_client.close()
         
         logger.info("Disconnected from Redis")
     
@@ -84,6 +207,7 @@ class RedisPubSubManager:
         Returns:
             Channel name string
         """
+        self._validate_channel_type(channel_type)
         return f"scene:{scene_id}:{channel_type}"
     
     async def publish_update(
@@ -104,17 +228,13 @@ class RedisPubSubManager:
             await self.connect()
         
         channel = self._get_channel_name(scene_id, "updates")
-        
-        # Wrap update with metadata
-        message = {
-            "sender_id": str(sender_id),
-            "update": update.hex()  # Convert bytes to hex string for JSON
-        }
-        
-        await self.redis_client.publish(
-            channel,
-            json.dumps(message)
+        payload = self._build_message(
+            channel_type="updates",
+            payload=self._encode_bytes(update),
+            sender_id=sender_id,
         )
+        
+        await self.redis_client.publish(channel, payload)
         
         logger.debug(f"Published update to {channel} from user {sender_id}")
     
@@ -136,16 +256,13 @@ class RedisPubSubManager:
             await self.connect()
         
         channel = self._get_channel_name(scene_id, "awareness")
-        
-        message = {
-            "sender_id": str(sender_id),
-            "awareness": awareness_data
-        }
-        
-        await self.redis_client.publish(
-            channel,
-            json.dumps(message)
+        payload = self._build_message(
+            channel_type="awareness",
+            payload=awareness_data,
+            sender_id=sender_id,
         )
+        
+        await self.redis_client.publish(channel, payload)
         
         logger.debug(f"Published awareness to {channel} from user {sender_id}")
     
@@ -167,18 +284,19 @@ class RedisPubSubManager:
             await self.connect()
         
         channel = self._get_channel_name(scene_id, event_type)
-        
-        await self.redis_client.publish(
-            channel,
-            json.dumps(user_data)
+        payload = self._build_message(
+            channel_type=event_type,
+            payload=user_data,
         )
+        
+        await self.redis_client.publish(channel, payload)
         
         logger.debug(f"Published {event_type} event to {channel}")
     
     async def subscribe_to_scene(
         self,
         scene_id: UUID,
-        callback: Callable[[str, bytes], None]
+        callback: Callable[[RedisMessage], Any]
     ):
         """
         Subscribe to all channels for a scene.
@@ -186,7 +304,7 @@ class RedisPubSubManager:
         Args:
             scene_id: UUID of the scene to subscribe to
             callback: Async function to call when messages arrive
-                     Signature: async def callback(channel: str, message: bytes)
+                     Signature: async def callback(message: RedisMessage)
         """
         if not self.redis_client:
             await self.connect()
@@ -262,19 +380,25 @@ class RedisPubSubManager:
                 if message["type"] == "message":
                     channel = message["channel"]
                     data = message["data"]
+                    parsed = self.decode_pubsub_message(channel, data)
+                    if not parsed:
+                        continue
+                    
+                    channel_name = parsed.channel
                     
                     # Dispatch to all callbacks for this channel
-                    if channel in self.subscriptions:
-                        for callback in self.subscriptions[channel]:
-                            try:
-                                if asyncio.iscoroutinefunction(callback):
-                                    await callback(channel, data)
-                                else:
-                                    callback(channel, data)
-                            except Exception as e:
-                                logger.error(
-                                    f"Error in callback for channel {channel}: {e}"
-                                )
+                    callbacks = self.subscriptions.get(channel_name, set())
+                    for callback in callbacks:
+                        try:
+                            result = callback(parsed)
+                            if asyncio.iscoroutine(result):
+                                await result
+                        except Exception as cb_err:
+                            logger.error(
+                                "Error in Redis callback for channel %s: %s",
+                                channel_name,
+                                cb_err,
+                            )
         
         except asyncio.CancelledError:
             logger.info("Redis listener task cancelled")
