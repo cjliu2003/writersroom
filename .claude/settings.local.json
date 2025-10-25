@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(alembic current:*)",
+      "Bash(alembic history:*)",
+      "Bash(python:*)",
+      "Bash(alembic stamp:*)",
+      "Bash(alembic upgrade:*)",
+      "Bash(source:*)",
+      "Bash(npm run build:*)",
+      "Bash(/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/bin/python -m pytest backend/tests/test_fdx*.py -v)",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_network_requests",
+      "Read(//Users/jacklofwall/**)",
+      "mcp__playwright__browser_navigate",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__new_page"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

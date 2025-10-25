@@ -37,7 +37,7 @@ class SceneUpdateRequest(BaseModel):
     position: int = Field(..., ge=0, description="Scene position in the script")
     scene_heading: str = Field(..., max_length=200, description="Scene heading")
     blocks: List[Dict[str, Any]] = Field(..., description="Content blocks")
-    full_content: Optional[str] = Field(None, description="Rich JSON content for proper formatting")
+    full_content: Optional[str] = Field(None, description="DEPRECATED: Plain text for search/analysis (set by FDX parser, NOT autosave)")
     updated_at_client: datetime = Field(..., description="Client timestamp when edit was made")
     base_version: int = Field(..., ge=0, description="Base version for compare-and-swap")
     op_id: UUID = Field(..., description="Client-generated operation ID for idempotency")

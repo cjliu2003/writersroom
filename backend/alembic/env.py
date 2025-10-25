@@ -29,9 +29,8 @@ DB_URL_SYNC = os.getenv('DB_URL_SYNC')
 # Set the SQLAlchemy URL using connection parameters if available
 if DB_HOST and DB_PORT and DB_USER and DB_PASSWORD and DB_NAME:
     # Use pooler connection
-    connection_url = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?ssl=require"
+    connection_url = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=require"
     config.set_main_option("sqlalchemy.url", connection_url)
-    # Set SSL mode for psycopg2
 elif DB_URL_SYNC:
     # Use legacy connection URL
     config.set_main_option("sqlalchemy.url", DB_URL_SYNC)

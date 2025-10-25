@@ -53,6 +53,7 @@ export interface AutosaveState {
   conflictData: any | null;
   error: string | null;
   retryAfter: number | null; // For rate limiting
+  isProcessingQueue: boolean; // Flag to indicate queue processing in progress
 }
 
 export interface AutosaveActions {
@@ -75,7 +76,8 @@ export function useAutosave(
   initialVersion: number,
   getContent: () => string,
   authToken: string,
-  options: AutosaveOptions = {}
+  options: AutosaveOptions = {},
+  scenePosition?: number
 ): [AutosaveState, AutosaveActions] {
   const {
     debounceMs = 1500,
@@ -92,6 +94,7 @@ export function useAutosave(
   const [conflictData, setConflictData] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retryAfter, setRetryAfter] = useState<number | null>(null);
+  const [isProcessingQueue, setIsProcessingQueue] = useState(false);
 
   // Refs for managing timers and state
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -100,6 +103,8 @@ export function useAutosave(
   const lastContentRef = useRef<string>('');
   const retryCountRef = useRef(0);
   const isOnlineRef = useRef(navigator.onLine);
+  const currentVersionRef = useRef(initialVersion);
+  const authTokenRef = useRef(authToken);
 
   // Clear all timers
   const clearTimers = useCallback(() => {
@@ -124,53 +129,65 @@ export function useAutosave(
     baseVersionOverride?: number,
     positionOverride?: number
   ): Promise<void> => {
-    if (!authToken) {
+    if (!authTokenRef.current) {
       throw new Error('No auth token available');
     }
 
-    // Extract only the current scene slice by UUID
-    const { elements, heading, position } = extractSceneSlice(content, sceneId);
+    // Extract only the current scene slice by UUID (with position hint for reliability)
+    const { elements, heading, position } = extractSceneSlice(content, sceneId, scenePosition);
     const sliceJson = JSON.stringify(elements);
     const blocks = contentToBlocks(sliceJson);
     const sceneHeading = heading || extractSceneHeading(sliceJson);
-    
+
     const request: SceneUpdateRequest = {
       position: (typeof positionOverride === 'number' ? positionOverride : position),
       scene_heading: sceneHeading,
       blocks,
-      full_content: sliceJson, // Include only the scene's rich JSON content
+      // NOTE: Do NOT send full_content from autosave
+      // - full_content is for plain text search/analysis (set by FDX parser)
+      // - Autosave sends Slate JSON which corrupts the plain text format
+      // - Backend can regenerate full_content from blocks if needed
       updated_at_client: new Date().toISOString(),
-      base_version: (typeof baseVersionOverride === 'number' ? baseVersionOverride : currentVersion),
+      base_version: (typeof baseVersionOverride === 'number' ? baseVersionOverride : currentVersionRef.current),
       op_id: opId || generateOpId()
     };
 
-    const response = await saveScene(sceneId, request, authToken, opId);
-    
-    // Update version on successful save
+    const response = await saveScene(sceneId, request, authTokenRef.current, opId);
+
+    // Update version on successful save (both state and ref)
     setCurrentVersion(response.new_version);
+    currentVersionRef.current = response.new_version;
     setLastSaved(new Date());
-  }, [sceneId, currentVersion, authToken]);
+  }, [sceneId]);
 
   // Save with error handling and offline queue
   const saveWithErrorHandling = useCallback(async (content: string, opId?: string): Promise<void> => {
     try {
-      console.log('💾 Starting save to server:', { sceneId, baseVersion: currentVersion });
+      console.log('💾 Starting save to server:', { sceneId, baseVersion: currentVersionRef.current });
       setSaveState('saving');
       setError(null);
       setConflictData(null);
-      
+
       await performSave(content, opId);
-      
+
       setSaveState('saved');
       setPendingChanges(false);
       retryCountRef.current = 0;
-      
+
       // Clear any pending saves for this scene on successful save
       if (enableOfflineQueue && isIndexedDBAvailable()) {
         await clearPendingSaves(sceneId);
       }
-      
+
     } catch (err) {
+      console.log('💥 Save failed:', {
+        error: err,
+        errorType: err?.constructor?.name,
+        isOnline: isOnlineRef.current,
+        enableOfflineQueue,
+        hasIndexedDB: isIndexedDBAvailable()
+      });
+
       if (err instanceof ConflictError) {
         // Try a one-time fast-forward to the latest server version (and position), then retry the save.
         const latestVersion = err.conflictData?.latest?.version;
@@ -179,6 +196,7 @@ export function useAutosave(
           try {
             // Adopt latest version and retry once with same opId (idempotent on server if supported)
             setCurrentVersion(latestVersion);
+            currentVersionRef.current = latestVersion;
             await performSave(content, opId, latestVersion, typeof latestPosition === 'number' ? latestPosition : undefined);
             setSaveState('saved');
             setPendingChanges(false);
@@ -222,25 +240,32 @@ export function useAutosave(
         
       } else if (!isOnlineRef.current && enableOfflineQueue && isIndexedDBAvailable()) {
         // Queue for offline processing
+        console.log('📦 Queueing save to IndexedDB:', {
+          sceneId,
+          contentLength: content.length,
+          baseVersion: currentVersionRef.current
+        });
+
         setSaveState('offline');
         setError('Offline - queued for sync');
-        
+
         const pendingSave: PendingSave = {
           id: opId || generateOpId(),
           sceneId,
           content,
-          baseVersion: currentVersion,
+          baseVersion: currentVersionRef.current,
           timestamp: Date.now(),
           retryCount: 0,
           opId: opId || generateOpId()
         };
-        
+
         await addPendingSave(pendingSave);
-        
+        console.log('✅ Save queued successfully to IndexedDB');
+
       } else {
         setSaveState('error');
         setError(err instanceof Error ? err.message : 'Save failed');
-        
+
         // Retry logic for transient errors
         if (retryCountRef.current < maxRetries) {
           retryCountRef.current++;
@@ -250,7 +275,7 @@ export function useAutosave(
         }
       }
     }
-  }, [performSave, sceneId, currentVersion, enableOfflineQueue, maxRetries]);
+  }, [performSave, sceneId, enableOfflineQueue, maxRetries]);
 
   // Debounced save function
   const debouncedSave = useCallback((overrideContent?: string) => {
@@ -307,6 +332,7 @@ export function useAutosave(
   const acceptServerVersion = useCallback(() => {
     if (conflictData) {
       setCurrentVersion(conflictData.latest.version);
+      currentVersionRef.current = conflictData.latest.version;
       setSaveState('idle');
       setConflictData(null);
       setError(null);
@@ -318,6 +344,7 @@ export function useAutosave(
     if (conflictData) {
       // Update to server version first, then save our content
       setCurrentVersion(conflictData.latest.version);
+      currentVersionRef.current = conflictData.latest.version;
       const content = getContent();
       await saveWithErrorHandling(content);
     }
@@ -330,59 +357,92 @@ export function useAutosave(
   }, [getContent, saveWithErrorHandling]);
 
   const processOfflineQueue = useCallback(async (): Promise<void> => {
-    if (!enableOfflineQueue || !isIndexedDBAvailable()) return;
-    
+    if (!enableOfflineQueue || !isIndexedDBAvailable()) {
+      console.log('⏭️ Skipping queue processing:', { enableOfflineQueue, hasIndexedDB: isIndexedDBAvailable() });
+      return;
+    }
+
     try {
       const pendingSaves = await getPendingSaves(sceneId);
-      
+      console.log('📥 Processing offline queue:', {
+        sceneId,
+        queueLength: pendingSaves.length,
+        saves: pendingSaves.map(s => ({ id: s.id, timestamp: new Date(s.timestamp).toISOString(), contentLength: s.content.length }))
+      });
+
+      if (pendingSaves.length === 0) {
+        console.log('✅ Queue empty, nothing to process');
+        return;
+      }
+
+      // Set flag to indicate queue processing is active
+      setIsProcessingQueue(true);
+
       for (const save of pendingSaves.sort((a, b) => a.timestamp - b.timestamp)) {
         try {
+          console.log('📤 Attempting to save queued item:', save.id);
           await performSave(save.content, save.opId);
           await removePendingSave(save.id);
+          setSaveState('saved');  // Update UI state to show save succeeded
+          console.log('✅ Queued save successful, removed from queue:', save.id);
         } catch (err) {
+          console.log('❌ Queued save failed:', { id: save.id, error: err });
           if (err instanceof ConflictError) {
             // Skip conflicted saves for now
+            console.log('⏭️ Skipping conflicted save:', save.id);
             continue;
           } else if (err instanceof RateLimitError) {
             // Stop processing on rate limit
+            console.log('🛑 Rate limited, stopping queue processing');
             break;
           } else {
             // Update retry count
             await updatePendingSaveRetryCount(save.id, save.retryCount + 1);
-            
+            console.log('🔄 Updated retry count:', { id: save.id, retryCount: save.retryCount + 1 });
+
             // Remove if max retries exceeded
             if (save.retryCount >= maxRetries) {
               await removePendingSave(save.id);
+              console.log('🗑️ Max retries exceeded, removed from queue:', save.id);
             }
           }
         }
       }
+      console.log('✅ Finished processing offline queue');
     } catch (err) {
-      console.error('Failed to process offline queue:', err);
+      console.error('💥 Failed to process offline queue:', err);
+    } finally {
+      // Clear flag when queue processing completes (success or failure)
+      setIsProcessingQueue(false);
     }
   }, [sceneId, performSave, enableOfflineQueue, maxRetries]);
 
   // Online/offline detection
   useEffect(() => {
     const handleOnline = () => {
+      console.log('🌐 Network ONLINE detected');
       isOnlineRef.current = true;
-      if (saveState === 'offline') {
-        processOfflineQueue();
-      }
+      // CRITICAL FIX: Always process queue on reconnect, regardless of current saveState
+      // The saveState might not be 'offline' if user was idle, but queue could still have pending saves
+      processOfflineQueue();
     };
-    
+
     const handleOffline = () => {
+      console.log('📴 Network OFFLINE detected');
       isOnlineRef.current = false;
+      // Set offline state immediately for UI feedback
+      setSaveState('offline');
+      setError('Offline - changes will be queued');
     };
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [saveState, processOfflineQueue]);
+  }, [processOfflineQueue]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -396,6 +456,7 @@ export function useAutosave(
     console.log('🔄 Autosave reset (scene change):', { sceneId, initialVersion });
     // Sync to server-provided version for the new scene
     setCurrentVersion(initialVersion);
+    currentVersionRef.current = initialVersion;
     // Reset state
     setSaveState('idle');
     setPendingChanges(false);
@@ -404,7 +465,7 @@ export function useAutosave(
     setRetryAfter(null);
     retryCountRef.current = 0;
     clearTimers();
-  }, [sceneId, clearTimers]);
+  }, [sceneId, initialVersion, clearTimers]);
 
   // If server raises the version for the current scene, adopt it without a full reset
   useEffect(() => {
@@ -420,6 +481,15 @@ export function useAutosave(
     }
   }, [sceneId]); // Only reset content baseline when scene changes, not on every getContent change
 
+  // Sync refs with state/props to prevent callback recreation
+  useEffect(() => {
+    currentVersionRef.current = currentVersion;
+  }, [currentVersion]);
+
+  useEffect(() => {
+    authTokenRef.current = authToken;
+  }, [authToken]);
+
   // Process offline queue on mount if online
   useEffect(() => {
     if (isOnlineRef.current) {
@@ -434,7 +504,8 @@ export function useAutosave(
     pendingChanges,
     conflictData,
     error,
-    retryAfter
+    retryAfter,
+    isProcessingQueue
   };
 
   const actions: AutosaveActions = {
