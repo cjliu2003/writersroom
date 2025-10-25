@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from app.models.script import Script  # noqa: F401
     from app.models.scene_version import SceneVersion  # noqa: F401
     from app.models.scene_snapshot import SceneSnapshot  # noqa: F401
+    from app.models.scene_snapshot_metadata import SceneSnapshotMetadata  # noqa: F401
     from app.models.user import User  # noqa: F401
 
 class Scene(Base):
@@ -49,10 +50,10 @@ class Scene(Base):
         default=""
     )
     
-    content_blocks: Mapped[Dict[str, Any]] = mapped_column(
+    content_blocks: Mapped[List[Dict[str, Any]]] = mapped_column(
         JSONB,
         nullable=False,
-        default=dict
+        default=list
     )
     
     summary: Mapped[Optional[str]] = mapped_column(
@@ -110,12 +111,39 @@ class Scene(Base):
         nullable=False,
         default=0
     )
-    
+
     # User who last updated this scene
     updated_by: Mapped[Optional[UUID]] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey('users.user_id'),
         nullable=True
+    )
+
+    # Yjs-Primary Metadata (Phase 2.2 additions)
+    snapshot_source: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default='rest',
+        comment='Source of snapshot: yjs, manual, import, migrated, compacted'
+    )
+
+    snapshot_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment='When this snapshot was created'
+    )
+
+    yjs_derived: Mapped[bool] = mapped_column(
+        Integer,  # SQLite doesn't have Boolean, use 0/1
+        nullable=False,
+        default=False,
+        comment='True if content_blocks derived from Yjs state'
+    )
+
+    yjs_checksum: Mapped[Optional[str]] = mapped_column(
+        String(64),
+        nullable=True,
+        comment='SHA256 checksum of Yjs state for comparison'
     )
     
     # Relationships
@@ -149,7 +177,16 @@ class Scene(Base):
         lazy='selectin',
         order_by='desc(SceneSnapshot.saved_at)'
     )
-    
+
+    # Snapshot metadata (Yjs-primary architecture)
+    snapshot_metadata: Mapped[List['SceneSnapshotMetadata']] = relationship(
+        'SceneSnapshotMetadata',
+        back_populates='scene',
+        cascade='all, delete-orphan',
+        lazy='selectin',
+        order_by='desc(SceneSnapshotMetadata.created_at)'
+    )
+
     # Embedding relationship
     embedding = relationship(
         'SceneEmbedding',

@@ -11,7 +11,7 @@ export interface SceneUpdateRequest {
     text: string;
     [key: string]: any;
   }>;
-  full_content?: string; // Rich JSON content for proper formatting
+  full_content?: string; // DEPRECATED: Plain text for search/analysis (set by FDX parser only, NOT by autosave)
   updated_at_client: string;
   base_version: number;
   op_id: string;
@@ -204,29 +204,70 @@ export function contentToBlocks(content: string): Array<{type: string, text: str
  */
 export function extractSceneSlice(
   content: string,
-  sceneUuid: string
+  sceneUuid: string,
+  scenePosition?: number
 ): { elements: any[]; heading: string; position: number } {
   try {
     const elements = JSON.parse(content);
     if (Array.isArray(elements)) {
       const headingIndexes: number[] = [];
       const headingUuids: Array<string | undefined> = [];
+      const headingSceneIds: Array<string | undefined> = [];
       for (let i = 0; i < elements.length; i++) {
         const el = elements[i];
         if (el && el.type === 'scene_heading') {
           headingIndexes.push(i);
           headingUuids.push(el?.metadata?.uuid);
+          headingSceneIds.push(el?.metadata?.sceneId);  // Database scene_id
         }
       }
 
-      let headingPos = headingUuids.findIndex(u => u === sceneUuid);
-      if (headingPos === -1) {
-        // Fallback: use first scene if uuid not found
-        headingPos = 0;
+      console.log('🔍 [extractSceneSlice] Searching for scene UUID:', sceneUuid);
+      console.log('🔍 [extractSceneSlice] Provided scene position:', scenePosition);
+      console.log('🔍 [extractSceneSlice] Available metadata.uuid values:', headingUuids.slice(0, 5));
+      console.log('🔍 [extractSceneSlice] Available metadata.sceneId values:', headingSceneIds.slice(0, 5));
+      console.log('🔍 [extractSceneSlice] Total scenes:', headingUuids.length);
+
+      let headingPos = -1;
+
+      // PRIMARY: Use scenePosition if provided and valid
+      if (typeof scenePosition === 'number' && scenePosition >= 0 && scenePosition < headingIndexes.length) {
+        headingPos = scenePosition;
+        console.log('✅ [extractSceneSlice] Using provided scene position:', headingPos);
       }
+      // FALLBACK 1: Try matching by metadata.uuid
+      else {
+        headingPos = headingUuids.findIndex(u => u === sceneUuid);
+        if (headingPos !== -1) {
+          console.log('✅ [extractSceneSlice] Found scene by metadata.uuid at position:', headingPos);
+        }
+      }
+
+      // FALLBACK 2: Try matching by metadata.sceneId
+      if (headingPos === -1) {
+        console.warn('⚠️ [extractSceneSlice] UUID not found in metadata.uuid, trying metadata.sceneId...');
+        headingPos = headingSceneIds.findIndex(sid => sid === sceneUuid);
+        if (headingPos !== -1) {
+          console.log('✅ [extractSceneSlice] Found scene by metadata.sceneId at position:', headingPos);
+        }
+      }
+
+      // FALLBACK 3: Use first scene as last resort
+      if (headingPos === -1) {
+        console.error('❌ [extractSceneSlice] Scene UUID NOT FOUND in any field!');
+        console.error('  Searched for:', sceneUuid);
+        console.error('  Available UUIDs:', headingUuids.slice(0, 3));
+        console.error('  Available sceneIds:', headingSceneIds.slice(0, 3));
+        headingPos = 0;
+        console.warn('⚠️ [extractSceneSlice] Falling back to position 0 (first scene)');
+      }
+
       const start = headingIndexes[headingPos] ?? 0;
       const end = headingIndexes[headingPos + 1] ?? elements.length;
       const slice = elements.slice(start, end);
+
+      console.log('🔍 [extractSceneSlice] Slice:', { start, end, sliceLength: slice.length });
+
       const headingEl = slice.find((el: any) => el?.type === 'scene_heading');
       const headingText =
         (headingEl?.children?.[0]?.text as string | undefined)?.trim() || 'UNTITLED SCENE';
@@ -238,6 +279,55 @@ export function extractSceneSlice(
   // Plain text fallback
   const headingText = extractSceneHeading(content);
   return { elements: [], heading: headingText, position: 0 };
+}
+
+/**
+ * Replace the screenplay elements for a given scene UUID inside the full script content.
+ * If the scene is not present, the new elements are appended to preserve edits.
+ */
+export function replaceSceneSlice(
+  content: string,
+  sceneUuid: string,
+  newElements: any[]
+): string {
+  if (!Array.isArray(newElements)) {
+    return JSON.stringify(newElements ?? []);
+  }
+
+  try {
+    const elements = JSON.parse(content);
+    if (!Array.isArray(elements)) {
+      return JSON.stringify(newElements);
+    }
+
+    const headingIndexes: number[] = [];
+    const headingUuids: Array<string | undefined> = [];
+
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      if (el && el.type === 'scene_heading') {
+        headingIndexes.push(i);
+        headingUuids.push(el?.metadata?.uuid);
+      }
+    }
+
+    const headingPos = headingUuids.findIndex((uuid) => uuid === sceneUuid);
+    const updated = elements.slice();
+
+    if (headingPos === -1) {
+      return JSON.stringify([...updated, ...newElements]);
+    }
+
+    const start = headingIndexes[headingPos] ?? updated.length;
+    const end = headingIndexes[headingPos + 1] ?? updated.length;
+    const deleteCount = Math.max(0, end - start);
+
+    updated.splice(start, deleteCount, ...newElements);
+    return JSON.stringify(updated);
+  } catch {
+    // Fall back to returning just the scene payload so offline autosave still works.
+    return JSON.stringify(newElements);
+  }
 }
 
 /**
