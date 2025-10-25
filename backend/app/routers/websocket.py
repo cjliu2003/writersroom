@@ -19,7 +19,9 @@ from app.services.websocket_manager import websocket_manager
 from app.services.redis_pubsub import get_redis_manager, RedisMessage
 from app.services.yjs_persistence import YjsPersistence
 from app.models.scene import Scene
+from app.models.scene_version import SceneVersion
 from app.models.user import User
+from sqlalchemy import select, desc
 
 logger = logging.getLogger(__name__)
 
@@ -203,10 +205,33 @@ async def scene_collaboration_websocket(
         ydoc = YDoc()
         print(f">>> YJS DOCUMENT CREATED")
         persistence = YjsPersistence(db)
+
+        # Check if REST is newer than Yjs - if so, skip loading stale Yjs updates
+        # This prevents overwriting offline changes that were saved to REST
         try:
-            applied_count = await persistence.load_persisted_updates(scene_id, ydoc)
-            print(f">>> LOADED {applied_count} PERSISTED UPDATE(S)")
-            logger.info(f"Loaded {applied_count} persisted update(s) for scene {scene_id}")
+            # Get latest Yjs update timestamp
+            yjs_stmt = (
+                select(SceneVersion.created_at)
+                .where(SceneVersion.scene_id == scene_id)
+                .order_by(desc(SceneVersion.created_at))
+                .limit(1)
+            )
+            yjs_result = await db.execute(yjs_stmt)
+            latest_yjs_update = yjs_result.scalar_one_or_none()
+
+            rest_updated_at = scene.updated_at
+
+            # If REST is newer than Yjs, skip loading old Yjs history
+            # The client's Yjs doc (seeded from REST) will be authoritative
+            if latest_yjs_update and rest_updated_at > latest_yjs_update:
+                print(f">>> REST is newer ({rest_updated_at} > {latest_yjs_update}), skipping Yjs history load")
+                print(f">>> Client's seeded state will be authoritative")
+                logger.info(f"REST newer than Yjs for scene {scene_id}, skipping persisted updates")
+            else:
+                # Load persisted Yjs updates from scene_versions table
+                applied_count = await persistence.load_persisted_updates(scene_id, ydoc)
+                print(f">>> LOADED {applied_count} PERSISTED UPDATE(S)")
+                logger.info(f"Loaded {applied_count} persisted update(s) for scene {scene_id}")
         except Exception as e:
             logger.error(f"Failed to load persisted Yjs state for scene {scene_id}: {e}")
         

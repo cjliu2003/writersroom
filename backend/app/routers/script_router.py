@@ -3,7 +3,7 @@ Script management endpoints for the WritersRoom API
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, desc
 from typing import List, Dict, Any
 
 from uuid import UUID
@@ -11,6 +11,7 @@ from uuid import UUID
 from app.models.user import User
 from app.models.script import Script
 from app.models.scene import Scene
+from app.models.scene_version import SceneVersion
 from app.models.script_collaborator import ScriptCollaborator, CollaboratorRole
 from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse
 from app.auth.dependencies import get_current_user
@@ -214,10 +215,34 @@ async def get_script_scenes(
                 has_yjs = await yjs_persistence.has_updates(scene.scene_id)
 
                 if has_yjs:
-                    # Prefer Yjs data (PRIMARY SOURCE OF TRUTH)
-                    content_blocks = await yjs_persistence.get_scene_snapshot(scene.scene_id)
-                    yjs_update_count = await yjs_persistence.get_update_count(scene.scene_id)
-                    source = "yjs"
+                    # Compare timestamps to determine which source is newer
+                    # Get latest Yjs update timestamp
+                    yjs_stmt = (
+                        select(SceneVersion.created_at)
+                        .where(SceneVersion.scene_id == scene.scene_id)
+                        .order_by(desc(SceneVersion.created_at))
+                        .limit(1)
+                    )
+                    yjs_result = await db.execute(yjs_stmt)
+                    latest_yjs_update = yjs_result.scalar_one_or_none()
+
+                    rest_updated_at = scene.updated_at
+
+                    # CRITICAL: If REST is newer than Yjs, use REST (offline saves case)
+                    # This handles the case where offline queue saved to REST but Yjs is stale
+                    if latest_yjs_update and rest_updated_at > latest_yjs_update:
+                        # REST has newer content (likely from offline queue)
+                        content_blocks = scene.content_blocks
+                        source = "rest"
+                        yjs_update_count = await yjs_persistence.get_update_count(scene.scene_id)
+                        print(f">>> Using REST content (newer than Yjs): REST={rest_updated_at} > Yjs={latest_yjs_update}")
+                    else:
+                        # Yjs data is current (PRIMARY SOURCE OF TRUTH for online editing)
+                        slate_json = await yjs_persistence.get_scene_snapshot(scene.scene_id)
+                        # Extract blocks array from {"blocks": [...]} format
+                        content_blocks = slate_json.get("blocks", [])
+                        yjs_update_count = await yjs_persistence.get_update_count(scene.scene_id)
+                        source = "yjs"
                 else:
                     # Use REST snapshot (FALLBACK)
                     content_blocks = scene.content_blocks

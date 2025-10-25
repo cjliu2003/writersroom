@@ -201,8 +201,18 @@ export function ScreenplayEditorWithAutosave({
       console.log('🔵 [handleContentChange] Reset isHandlingChange=false');
     });
 
-    if (syncStatus !== 'synced') {
+    // CRITICAL FIX: Check both syncStatus AND navigator.onLine
+    // When browser goes offline but Yjs WebSocket is still connected, syncStatus might stay 'synced'
+    // We need to trigger autosave when offline regardless of Yjs sync state to queue changes to IndexedDB
+    const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+    const shouldTriggerAutosave = syncStatus !== 'synced' || !isOnline;
+    console.log('🔵 [handleContentChange] syncStatus:', syncStatus, 'navigator.onLine:', isOnline, 'will trigger autosave?', shouldTriggerAutosave);
+
+    if (shouldTriggerAutosave) {
+      console.log('✅ [handleContentChange] Triggering autosave');
       autosaveActions.markChanged(updatedScript);
+    } else {
+      console.log('⏭️ [handleContentChange] Skipping autosave (Yjs synced and online)');
     }
   }, [onChange, autosaveActions, sceneId, syncStatus]);
 
@@ -396,6 +406,7 @@ export function ScreenplayEditorWithAutosave({
         onSceneChange={onSceneChange}
         onCurrentBlockTypeChange={onCurrentBlockTypeChange}
         collaboration={doc ? { doc, provider, awareness, sceneId } : undefined}
+        isProcessingQueue={autosaveState.isProcessingQueue}
       />
 
       {/* Conflict Resolution Dialog */}

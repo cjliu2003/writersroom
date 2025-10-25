@@ -103,10 +103,12 @@ interface ScreenplayEditorProps {
     awareness?: any
     sceneId?: string
   }
+  // Flag to indicate offline queue processing is in progress
+  isProcessingQueue?: boolean
 }
 
 
-export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBlockTypeChange, collaboration }: ScreenplayEditorProps) {
+export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBlockTypeChange, collaboration, isProcessingQueue = false }: ScreenplayEditorProps) {
   const isCollaborative = !!collaboration?.doc
   const initialValue = useMemo(() => {
     if (content) {
@@ -211,6 +213,13 @@ export function ScreenplayEditor({ content, onChange, onSceneChange, onCurrentBl
     // - LOCAL changes: already applied by slate-yjs automatically, syncing again causes duplication
     // - REMOTE changes: need manual sync to trigger React re-render
     const handleDocUpdate = (update: Uint8Array, origin: any) => {
+      // CRITICAL: Skip Yjs syncs while offline queue is processing to prevent race condition
+      // The queue might be saving REST content, and Yjs could overwrite it with stale state
+      if (isProcessingQueue) {
+        console.log('⏸️ [ScreenplayEditor] Skipping Yjs sync - queue processing in progress')
+        return
+      }
+
       // Check if this is a local change from slate-yjs
       // slate-yjs uses a Symbol as origin for local changes: Symbol(Denotes that an event originated from slate-yjs)
       // Remote changes come from the WebSocket provider (different origin)

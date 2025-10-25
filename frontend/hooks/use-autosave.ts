@@ -53,6 +53,7 @@ export interface AutosaveState {
   conflictData: any | null;
   error: string | null;
   retryAfter: number | null; // For rate limiting
+  isProcessingQueue: boolean; // Flag to indicate queue processing in progress
 }
 
 export interface AutosaveActions {
@@ -93,6 +94,7 @@ export function useAutosave(
   const [conflictData, setConflictData] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retryAfter, setRetryAfter] = useState<number | null>(null);
+  const [isProcessingQueue, setIsProcessingQueue] = useState(false);
 
   // Refs for managing timers and state
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -178,6 +180,14 @@ export function useAutosave(
       }
 
     } catch (err) {
+      console.log('💥 Save failed:', {
+        error: err,
+        errorType: err?.constructor?.name,
+        isOnline: isOnlineRef.current,
+        enableOfflineQueue,
+        hasIndexedDB: isIndexedDBAvailable()
+      });
+
       if (err instanceof ConflictError) {
         // Try a one-time fast-forward to the latest server version (and position), then retry the save.
         const latestVersion = err.conflictData?.latest?.version;
@@ -230,6 +240,12 @@ export function useAutosave(
         
       } else if (!isOnlineRef.current && enableOfflineQueue && isIndexedDBAvailable()) {
         // Queue for offline processing
+        console.log('📦 Queueing save to IndexedDB:', {
+          sceneId,
+          contentLength: content.length,
+          baseVersion: currentVersionRef.current
+        });
+
         setSaveState('offline');
         setError('Offline - queued for sync');
 
@@ -244,6 +260,7 @@ export function useAutosave(
         };
 
         await addPendingSave(pendingSave);
+        console.log('✅ Save queued successfully to IndexedDB');
 
       } else {
         setSaveState('error');
@@ -340,59 +357,92 @@ export function useAutosave(
   }, [getContent, saveWithErrorHandling]);
 
   const processOfflineQueue = useCallback(async (): Promise<void> => {
-    if (!enableOfflineQueue || !isIndexedDBAvailable()) return;
-    
+    if (!enableOfflineQueue || !isIndexedDBAvailable()) {
+      console.log('⏭️ Skipping queue processing:', { enableOfflineQueue, hasIndexedDB: isIndexedDBAvailable() });
+      return;
+    }
+
     try {
       const pendingSaves = await getPendingSaves(sceneId);
-      
+      console.log('📥 Processing offline queue:', {
+        sceneId,
+        queueLength: pendingSaves.length,
+        saves: pendingSaves.map(s => ({ id: s.id, timestamp: new Date(s.timestamp).toISOString(), contentLength: s.content.length }))
+      });
+
+      if (pendingSaves.length === 0) {
+        console.log('✅ Queue empty, nothing to process');
+        return;
+      }
+
+      // Set flag to indicate queue processing is active
+      setIsProcessingQueue(true);
+
       for (const save of pendingSaves.sort((a, b) => a.timestamp - b.timestamp)) {
         try {
+          console.log('📤 Attempting to save queued item:', save.id);
           await performSave(save.content, save.opId);
           await removePendingSave(save.id);
+          setSaveState('saved');  // Update UI state to show save succeeded
+          console.log('✅ Queued save successful, removed from queue:', save.id);
         } catch (err) {
+          console.log('❌ Queued save failed:', { id: save.id, error: err });
           if (err instanceof ConflictError) {
             // Skip conflicted saves for now
+            console.log('⏭️ Skipping conflicted save:', save.id);
             continue;
           } else if (err instanceof RateLimitError) {
             // Stop processing on rate limit
+            console.log('🛑 Rate limited, stopping queue processing');
             break;
           } else {
             // Update retry count
             await updatePendingSaveRetryCount(save.id, save.retryCount + 1);
-            
+            console.log('🔄 Updated retry count:', { id: save.id, retryCount: save.retryCount + 1 });
+
             // Remove if max retries exceeded
             if (save.retryCount >= maxRetries) {
               await removePendingSave(save.id);
+              console.log('🗑️ Max retries exceeded, removed from queue:', save.id);
             }
           }
         }
       }
+      console.log('✅ Finished processing offline queue');
     } catch (err) {
-      console.error('Failed to process offline queue:', err);
+      console.error('💥 Failed to process offline queue:', err);
+    } finally {
+      // Clear flag when queue processing completes (success or failure)
+      setIsProcessingQueue(false);
     }
   }, [sceneId, performSave, enableOfflineQueue, maxRetries]);
 
   // Online/offline detection
   useEffect(() => {
     const handleOnline = () => {
+      console.log('🌐 Network ONLINE detected');
       isOnlineRef.current = true;
-      if (saveState === 'offline') {
-        processOfflineQueue();
-      }
+      // CRITICAL FIX: Always process queue on reconnect, regardless of current saveState
+      // The saveState might not be 'offline' if user was idle, but queue could still have pending saves
+      processOfflineQueue();
     };
-    
+
     const handleOffline = () => {
+      console.log('📴 Network OFFLINE detected');
       isOnlineRef.current = false;
+      // Set offline state immediately for UI feedback
+      setSaveState('offline');
+      setError('Offline - changes will be queued');
     };
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [saveState, processOfflineQueue]);
+  }, [processOfflineQueue]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -454,7 +504,8 @@ export function useAutosave(
     pendingChanges,
     conflictData,
     error,
-    retryAfter
+    retryAfter,
+    isProcessingQueue
   };
 
   const actions: AutosaveActions = {

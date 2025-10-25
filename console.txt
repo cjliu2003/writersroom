@@ -1,187 +1,44 @@
-VM2865:1 Console was cleared
-undefined
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2321
-screenplay-editor-with-autosave.tsx:159 🔵 [handleContentChange] Content unchanged, skipping
-use-yjs-collaboration.ts:147 [YjsCollaboration] doc.update {bytes: 20, origin: 'Symbol'}
-screenplay-editor.tsx:215 [ScreenplayEditor] doc.update fired {originType: 'symbol', originConstructor: 'Symbol', originIsEditor: false, originIsProvider: false, originValue: Symbol(Denotes that an event originated from slate-yjs), …}
-screenplay-editor.tsx:228 [ScreenplayEditor] isLocalChange: false
-screenplay-editor.tsx:232 [ScreenplayEditor] 🔴 SYNCING TO SLATE (remote change)
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  t
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2322
-screenplay-editor-with-autosave.tsx:168 🔵 [handleContentChange] Parsed elements: 10 first text: INT. COFFEE SHOP - DAY test  t
-screenplay-editor-with-autosave.tsx:190 🔵 [handleContentChange] Updated script length: 4040
-screenplay-editor-with-autosave.tsx:196 🔵 [handleContentChange] Calling parent onChange, isHandlingChange=true
-page.tsx:249 🔍 [parseScenes] Scene heading #0: {heading: 'INT. COFFEE SHOP - DAY test  t', extractedUUID: 'b8d0170d-dc03-43ff-b013-f008a1687829', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:249 🔍 [parseScenes] Scene heading #10: {heading: 'EXT. PARK - LATER', extractedUUID: '063ef5b0-ba7c-4869-87ef-8cba0bbe42f5', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:267 🔍 [parseScenes] Final scenes array: (2) [{…}, {…}]
-screenplay-editor.tsx:203 [ScreenplayEditor] Synchronized Slate editor from Yjs doc
-use-yjs-collaboration.ts:147 [YjsCollaboration] doc.update {bytes: 27, origin: 'Symbol'}
-screenplay-editor.tsx:215 [ScreenplayEditor] doc.update fired {originType: 'symbol', originConstructor: 'Symbol', originIsEditor: false, originIsProvider: false, originValue: Symbol(Denotes that an event originated from slate-yjs), …}
-screenplay-editor.tsx:228 [ScreenplayEditor] isLocalChange: false
-screenplay-editor.tsx:232 [ScreenplayEditor] 🔴 SYNCING TO SLATE (remote change)
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  tt
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2323
-screenplay-editor-with-autosave.tsx:168 🔵 [handleContentChange] Parsed elements: 10 first text: INT. COFFEE SHOP - DAY test  tt
-screenplay-editor-with-autosave.tsx:190 🔵 [handleContentChange] Updated script length: 4041
-screenplay-editor-with-autosave.tsx:196 🔵 [handleContentChange] Calling parent onChange, isHandlingChange=true
-screenplay-editor.tsx:203 [ScreenplayEditor] Synchronized Slate editor from Yjs doc
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  tt
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2323
-screenplay-editor-with-autosave.tsx:159 🔵 [handleContentChange] Content unchanged, skipping
-page.tsx:249 🔍 [parseScenes] Scene heading #0: {heading: 'INT. COFFEE SHOP - DAY test  tt', extractedUUID: 'b8d0170d-dc03-43ff-b013-f008a1687829', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:249 🔍 [parseScenes] Scene heading #10: {heading: 'EXT. PARK - LATER', extractedUUID: '063ef5b0-ba7c-4869-87ef-8cba0bbe42f5', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:267 🔍 [parseScenes] Final scenes array: (2) [{…}, {…}]
-page.tsx:574 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentSceneInView: 'b8d0170d-dc03-43ff-b013-f008a1687829', firstSceneId: 'b8d0170d-dc03-43ff-b013-f008a1687829', resolvedSceneId: 'b8d0170d-dc03-43ff-b013-f008a1687829', …}
-screenplay-editor-with-autosave.tsx:283 🟢 [contentEffect] Triggered, isHandlingChange: true
-screenplay-editor-with-autosave.tsx:286 🟢 [contentEffect] Content unchanged, skipping
-page.tsx:458 📦 Props passed to ScreenplayEditor:
-page.tsx:459 Content type: string
-page.tsx:460 Content length: 4041
-page.tsx:461 Script title: test
-page.tsx:462 Script scenes count: 2
-screenplay-editor-with-autosave.tsx:201 🔵 [handleContentChange] Reset isHandlingChange=false
-screenplay-editor-with-autosave.tsx:201 🔵 [handleContentChange] Reset isHandlingChange=false
-use-yjs-collaboration.ts:147 [YjsCollaboration] doc.update {bytes: 27, origin: 'Symbol'}
-screenplay-editor.tsx:215 [ScreenplayEditor] doc.update fired {originType: 'symbol', originConstructor: 'Symbol', originIsEditor: false, originIsProvider: false, originValue: Symbol(Denotes that an event originated from slate-yjs), …}
-screenplay-editor.tsx:228 [ScreenplayEditor] isLocalChange: false
-screenplay-editor.tsx:232 [ScreenplayEditor] 🔴 SYNCING TO SLATE (remote change)
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  tet
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2324
-screenplay-editor-with-autosave.tsx:168 🔵 [handleContentChange] Parsed elements: 10 first text: INT. COFFEE SHOP - DAY test  tet
-screenplay-editor-with-autosave.tsx:190 🔵 [handleContentChange] Updated script length: 4042
-screenplay-editor-with-autosave.tsx:196 🔵 [handleContentChange] Calling parent onChange, isHandlingChange=true
-page.tsx:249 🔍 [parseScenes] Scene heading #0: {heading: 'INT. COFFEE SHOP - DAY test  tet', extractedUUID: 'b8d0170d-dc03-43ff-b013-f008a1687829', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:249 🔍 [parseScenes] Scene heading #10: {heading: 'EXT. PARK - LATER', extractedUUID: '063ef5b0-ba7c-4869-87ef-8cba0bbe42f5', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:267 🔍 [parseScenes] Final scenes array: (2) [{…}, {…}]
-screenplay-editor.tsx:203 [ScreenplayEditor] Synchronized Slate editor from Yjs doc
-use-yjs-collaboration.ts:147 [YjsCollaboration] doc.update {bytes: 27, origin: 'Symbol'}
-screenplay-editor.tsx:215 [ScreenplayEditor] doc.update fired {originType: 'symbol', originConstructor: 'Symbol', originIsEditor: false, originIsProvider: false, originValue: Symbol(Denotes that an event originated from slate-yjs), …}
-screenplay-editor.tsx:228 [ScreenplayEditor] isLocalChange: false
-screenplay-editor.tsx:232 [ScreenplayEditor] 🔴 SYNCING TO SLATE (remote change)
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  teet
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2325
-screenplay-editor-with-autosave.tsx:168 🔵 [handleContentChange] Parsed elements: 10 first text: INT. COFFEE SHOP - DAY test  teet
-screenplay-editor-with-autosave.tsx:190 🔵 [handleContentChange] Updated script length: 4043
-screenplay-editor-with-autosave.tsx:196 🔵 [handleContentChange] Calling parent onChange, isHandlingChange=true
-screenplay-editor.tsx:203 [ScreenplayEditor] Synchronized Slate editor from Yjs doc
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  teet
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2325
-screenplay-editor-with-autosave.tsx:159 🔵 [handleContentChange] Content unchanged, skipping
-page.tsx:249 🔍 [parseScenes] Scene heading #0: {heading: 'INT. COFFEE SHOP - DAY test  teet', extractedUUID: 'b8d0170d-dc03-43ff-b013-f008a1687829', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:249 🔍 [parseScenes] Scene heading #10: {heading: 'EXT. PARK - LATER', extractedUUID: '063ef5b0-ba7c-4869-87ef-8cba0bbe42f5', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:267 🔍 [parseScenes] Final scenes array: (2) [{…}, {…}]
-page.tsx:574 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentSceneInView: 'b8d0170d-dc03-43ff-b013-f008a1687829', firstSceneId: 'b8d0170d-dc03-43ff-b013-f008a1687829', resolvedSceneId: 'b8d0170d-dc03-43ff-b013-f008a1687829', …}
-screenplay-editor-with-autosave.tsx:283 🟢 [contentEffect] Triggered, isHandlingChange: true
-screenplay-editor-with-autosave.tsx:286 🟢 [contentEffect] Content unchanged, skipping
-page.tsx:458 📦 Props passed to ScreenplayEditor:
-page.tsx:459 Content type: string
-page.tsx:460 Content length: 4043
-page.tsx:461 Script title: test
-page.tsx:462 Script scenes count: 2
-screenplay-editor-with-autosave.tsx:201 🔵 [handleContentChange] Reset isHandlingChange=false
-screenplay-editor-with-autosave.tsx:201 🔵 [handleContentChange] Reset isHandlingChange=false
-use-yjs-collaboration.ts:147 [YjsCollaboration] doc.update {bytes: 27, origin: 'Symbol'}
-screenplay-editor.tsx:215 [ScreenplayEditor] doc.update fired {originType: 'symbol', originConstructor: 'Symbol', originIsEditor: false, originIsProvider: false, originValue: Symbol(Denotes that an event originated from slate-yjs), …}
-screenplay-editor.tsx:228 [ScreenplayEditor] isLocalChange: false
-screenplay-editor.tsx:232 [ScreenplayEditor] 🔴 SYNCING TO SLATE (remote change)
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  teset
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2326
-screenplay-editor-with-autosave.tsx:168 🔵 [handleContentChange] Parsed elements: 10 first text: INT. COFFEE SHOP - DAY test  teset
-screenplay-editor-with-autosave.tsx:190 🔵 [handleContentChange] Updated script length: 4044
-screenplay-editor-with-autosave.tsx:196 🔵 [handleContentChange] Calling parent onChange, isHandlingChange=true
-page.tsx:249 🔍 [parseScenes] Scene heading #0: {heading: 'INT. COFFEE SHOP - DAY test  teset', extractedUUID: 'b8d0170d-dc03-43ff-b013-f008a1687829', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:249 🔍 [parseScenes] Scene heading #10: {heading: 'EXT. PARK - LATER', extractedUUID: '063ef5b0-ba7c-4869-87ef-8cba0bbe42f5', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:267 🔍 [parseScenes] Final scenes array: (2) [{…}, {…}]
-screenplay-editor.tsx:203 [ScreenplayEditor] Synchronized Slate editor from Yjs doc
-use-yjs-collaboration.ts:147 [YjsCollaboration] doc.update {bytes: 27, origin: 'Symbol'}
-screenplay-editor.tsx:215 [ScreenplayEditor] doc.update fired {originType: 'symbol', originConstructor: 'Symbol', originIsEditor: false, originIsProvider: false, originValue: Symbol(Denotes that an event originated from slate-yjs), …}
-screenplay-editor.tsx:228 [ScreenplayEditor] isLocalChange: false
-screenplay-editor.tsx:232 [ScreenplayEditor] 🔴 SYNCING TO SLATE (remote change)
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  tesset
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2327
-screenplay-editor-with-autosave.tsx:168 🔵 [handleContentChange] Parsed elements: 10 first text: INT. COFFEE SHOP - DAY test  tesset
-screenplay-editor-with-autosave.tsx:190 🔵 [handleContentChange] Updated script length: 4045
-screenplay-editor-with-autosave.tsx:196 🔵 [handleContentChange] Calling parent onChange, isHandlingChange=true
-screenplay-editor.tsx:203 [ScreenplayEditor] Synchronized Slate editor from Yjs doc
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  tesset
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2327
-screenplay-editor-with-autosave.tsx:159 🔵 [handleContentChange] Content unchanged, skipping
-page.tsx:249 🔍 [parseScenes] Scene heading #0: {heading: 'INT. COFFEE SHOP - DAY test  tesset', extractedUUID: 'b8d0170d-dc03-43ff-b013-f008a1687829', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:249 🔍 [parseScenes] Scene heading #10: {heading: 'EXT. PARK - LATER', extractedUUID: '063ef5b0-ba7c-4869-87ef-8cba0bbe42f5', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:267 🔍 [parseScenes] Final scenes array: (2) [{…}, {…}]
-page.tsx:574 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentSceneInView: 'b8d0170d-dc03-43ff-b013-f008a1687829', firstSceneId: 'b8d0170d-dc03-43ff-b013-f008a1687829', resolvedSceneId: 'b8d0170d-dc03-43ff-b013-f008a1687829', …}
-screenplay-editor-with-autosave.tsx:283 🟢 [contentEffect] Triggered, isHandlingChange: true
-screenplay-editor-with-autosave.tsx:286 🟢 [contentEffect] Content unchanged, skipping
-page.tsx:458 📦 Props passed to ScreenplayEditor:
-page.tsx:459 Content type: string
-page.tsx:460 Content length: 4045
-page.tsx:461 Script title: test
-page.tsx:462 Script scenes count: 2
-screenplay-editor-with-autosave.tsx:201 🔵 [handleContentChange] Reset isHandlingChange=false
-screenplay-editor-with-autosave.tsx:201 🔵 [handleContentChange] Reset isHandlingChange=false
-use-yjs-collaboration.ts:147 [YjsCollaboration] doc.update {bytes: 27, origin: 'Symbol'}
-screenplay-editor.tsx:215 [ScreenplayEditor] doc.update fired {originType: 'symbol', originConstructor: 'Symbol', originIsEditor: false, originIsProvider: false, originValue: Symbol(Denotes that an event originated from slate-yjs), …}
-screenplay-editor.tsx:228 [ScreenplayEditor] isLocalChange: false
-screenplay-editor.tsx:232 [ScreenplayEditor] 🔴 SYNCING TO SLATE (remote change)
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  testset
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2328
-screenplay-editor-with-autosave.tsx:168 🔵 [handleContentChange] Parsed elements: 10 first text: INT. COFFEE SHOP - DAY test  testset
-screenplay-editor-with-autosave.tsx:190 🔵 [handleContentChange] Updated script length: 4046
-screenplay-editor-with-autosave.tsx:196 🔵 [handleContentChange] Calling parent onChange, isHandlingChange=true
-page.tsx:249 🔍 [parseScenes] Scene heading #0: {heading: 'INT. COFFEE SHOP - DAY test  testset', extractedUUID: 'b8d0170d-dc03-43ff-b013-f008a1687829', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:249 🔍 [parseScenes] Scene heading #10: {heading: 'EXT. PARK - LATER', extractedUUID: '063ef5b0-ba7c-4869-87ef-8cba0bbe42f5', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:267 🔍 [parseScenes] Final scenes array: (2) [{…}, {…}]
-screenplay-editor.tsx:203 [ScreenplayEditor] Synchronized Slate editor from Yjs doc
-use-yjs-collaboration.ts:147 [YjsCollaboration] doc.update {bytes: 27, origin: 'Symbol'}
-screenplay-editor.tsx:215 [ScreenplayEditor] doc.update fired {originType: 'symbol', originConstructor: 'Symbol', originIsEditor: false, originIsProvider: false, originValue: Symbol(Denotes that an event originated from slate-yjs), …}
-screenplay-editor.tsx:228 [ScreenplayEditor] isLocalChange: false
-screenplay-editor.tsx:232 [ScreenplayEditor] 🔴 SYNCING TO SLATE (remote change)
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  testtset
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2329
-screenplay-editor-with-autosave.tsx:168 🔵 [handleContentChange] Parsed elements: 10 first text: INT. COFFEE SHOP - DAY test  testtset
-screenplay-editor-with-autosave.tsx:190 🔵 [handleContentChange] Updated script length: 4047
-screenplay-editor-with-autosave.tsx:196 🔵 [handleContentChange] Calling parent onChange, isHandlingChange=true
-screenplay-editor.tsx:203 [ScreenplayEditor] Synchronized Slate editor from Yjs doc
-screenplay-editor.tsx:594 🟡 [editor.handleChange] Called, isCollaborative: true
-screenplay-editor.tsx:604 🟡 [editor.handleChange] isLocalChange: true elements: 10
-screenplay-editor.tsx:610 🟡 [editor.handleChange] Calling onChange, first text: INT. COFFEE SHOP - DAY test  testtset
-screenplay-editor-with-autosave.tsx:156 🔵 [handleContentChange] Called with length: 2329
-screenplay-editor-with-autosave.tsx:159 🔵 [handleContentChange] Content unchanged, skipping
-page.tsx:249 🔍 [parseScenes] Scene heading #0: {heading: 'INT. COFFEE SHOP - DAY test  testtset', extractedUUID: 'b8d0170d-dc03-43ff-b013-f008a1687829', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:249 🔍 [parseScenes] Scene heading #10: {heading: 'EXT. PARK - LATER', extractedUUID: '063ef5b0-ba7c-4869-87ef-8cba0bbe42f5', hasMetadata: true, metadataKeys: Array(4)}
-page.tsx:267 🔍 [parseScenes] Final scenes array: (2) [{…}, {…}]
-page.tsx:574 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentSceneInView: 'b8d0170d-dc03-43ff-b013-f008a1687829', firstSceneId: 'b8d0170d-dc03-43ff-b013-f008a1687829', resolvedSceneId: 'b8d0170d-dc03-43ff-b013-f008a1687829', …}
-screenplay-editor-with-autosave.tsx:283 🟢 [contentEffect] Triggered, isHandlingChange: true
-screenplay-editor-with-autosave.tsx:286 🟢 [contentEffect] Content unchanged, skipping
-page.tsx:458 📦 Props passed to ScreenplayEditor:
-page.tsx:459 Content type: string
-page.tsx:460 Content length: 4047
-page.tsx:461 Script title: test
-page.tsx:462 Script scenes count: 2
-screenplay-editor-with-autosave.tsx:201 🔵 [handleContentChange] Reset isHandlingChange=false
-screenplay-editor-with-autosave.tsx:201 🔵 [handleContentChange] Reset isHandlingChange=false
+react-dom.development.js:38560 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+background.js:53 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')
+    at background.js:53:33
+firebase.ts:33 Firebase config check: Object
+page.tsx:358 ⏳ Auth still loading, waiting...
+AuthContext.tsx:37 AuthProvider useEffect starting...
+AuthContext.tsx:46 Client side - initializing Firebase auth...
+firebase.ts:136 subscribeToAuthChanges called
+firebase.ts:149 Firebase auth available, setting up onAuthStateChanged
+firebase.ts:154 onAuthStateChanged triggered: User: jlofwall@gmail.com
+AuthContext.tsx:62 Auth state changed: User: jlofwall@gmail.com
+page.tsx:352 ⏳ Waiting for auth token before loading script...
+page.tsx:364 Editor: fetching scenes from backend for project 6334ee37-ef52-48ba-b272-f104003374c1
+api.ts:25 [api] requesting http://localhost:8000/api/scripts/6334ee37-ef52-48ba-b272-f104003374c1/scenes token? true
+:8000/api/scripts/6334ee37-ef52-48ba-b272-f104003374c1/scenes:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+app-index.js:33 Editor: Failed to load script scenes from backend: Error: Failed to retrieve scenes: cannot access local variable 'select' where it is not associated with a value
+    at getScriptScenes (api.ts:88:11)
+    at async loadScript (page.tsx:365:33)
+window.console.error @ app-index.js:33
+page.tsx:435 Editor: backend fetch sequence finished
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+api.ts:25 [api] requesting http://localhost:8000/api/users/me/scripts token? true
+page.tsx:352 ⏳ Waiting for auth token before loading script...
+page.tsx:364 Editor: fetching scenes from backend for project cc8f8126-fdd9-44cf-8e18-289926115a5d
+api.ts:25 [api] requesting http://localhost:8000/api/scripts/cc8f8126-fdd9-44cf-8e18-289926115a5d/scenes token? true
+:8000/api/scripts/cc8f8126-fdd9-44cf-8e18-289926115a5d/scenes:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+app-index.js:33 Editor: Failed to load script scenes from backend: Error: Failed to retrieve scenes: cannot access local variable 'select' where it is not associated with a value
+    at getScriptScenes (api.ts:88:11)
+    at async loadScript (page.tsx:365:33)
+window.console.error @ app-index.js:33
+page.tsx:435 Editor: backend fetch sequence finished
+hot-reloader-client.js:187 [Fast Refresh] rebuilding
+hot-reloader-client.js:44 [Fast Refresh] done in 12ms

@@ -196,10 +196,12 @@ function EditorPageContent() {
             return;
           }
           added++;
+          // Handle both flat format {type, text} and Slate format {type, children: [{text}]}
+          const textContent = b.text ?? b.children?.[0]?.text ?? '';
           all.push({
             type: b.type,
-            children: [{ text: (b.text ?? '').toString() }],
-            id: `el_${s.sceneIndex}_${idx}_${Math.random()}`,
+            children: [{ text: textContent.toString() }],
+            id: b.id ?? `el_${s.sceneIndex}_${idx}_${Math.random()}`,
             metadata: b.metadata ?? {
               timestamp: new Date().toISOString(),
               uuid: crypto.randomUUID()
