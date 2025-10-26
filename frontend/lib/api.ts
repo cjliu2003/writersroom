@@ -119,7 +119,7 @@ export interface FDXUploadResponse {
 
 export async function uploadFDXFile(file: File): Promise<FDXUploadResponse> {
   const token = await getCurrentUserToken();
-  
+
   if (!token) {
     throw new Error('No authentication token available');
   }
@@ -142,6 +142,30 @@ export async function uploadFDXFile(file: File): Promise<FDXUploadResponse> {
   }
 
   return response.json();
+}
+
+// API function for FDX export
+export async function exportFDXFile(scriptId: string): Promise<Blob> {
+  const token = await getCurrentUserToken();
+
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  const response = await fetchWithTimeout(`${API_BASE_URL}/fdx/export/${scriptId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+    timeoutMs: 30000,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to export FDX file');
+  }
+
+  return response.blob();
 }
 
 // AI-related API functions
