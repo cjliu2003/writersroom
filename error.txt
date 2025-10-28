@@ -1,0 +1,23 @@
+
+---
+
+**Unhandled Runtime Error**
+
+```
+Error: Cannot resolve a Slate point from DOM point: [object Text],1
+```
+
+**Call Stack**
+
+```
+Object.toSlatePoint
+    node_modules/slate-dom/dist/index.es.js (856:1)
+
+Object.toSlateRange
+    node_modules/slate-dom/dist/index.es.js (968:1)
+
+HTMLDivElement.eval
+    node_modules/slate-react/dist/index.es.js (2876:1)
+```
+
+---

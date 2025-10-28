@@ -1,7 +1,7 @@
 """
 Request and response schemas for script endpoints
 """
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, Field
 from datetime import datetime
@@ -34,7 +34,56 @@ class ScriptResponse(BaseModel):
     imported_fdx_path: Optional[str] = None
     exported_fdx_path: Optional[str] = None
     exported_pdf_path: Optional[str] = None
-    
+
+    class Config:
+        from_attributes = True
+        json_encoders = {
+            datetime: lambda dt: dt.isoformat()
+        }
+
+
+class ScriptWithContent(BaseModel):
+    """
+    Enhanced schema for script response with full content blocks.
+    Used for script-level editing where entire script content is loaded.
+    """
+    script_id: UUID
+    owner_id: UUID
+    title: str
+    description: Optional[str] = None
+    current_version: int
+    created_at: datetime
+    updated_at: datetime
+    imported_fdx_path: Optional[str] = None
+    exported_fdx_path: Optional[str] = None
+    exported_pdf_path: Optional[str] = None
+
+    # Script-level content for collaborative editing
+    content_blocks: Optional[List[Dict[str, Any]]] = Field(
+        None,
+        description="Full script content blocks (Slate format)"
+    )
+    version: int = Field(
+        0,
+        description="Optimistic locking version for compare-and-swap autosave"
+    )
+    updated_by: Optional[UUID] = Field(
+        None,
+        description="User who last updated the script content"
+    )
+
+    # AI-generated scene summaries for script-level editor
+    scene_summaries: Optional[Dict[str, str]] = Field(
+        None,
+        description="AI-generated summaries keyed by scene heading (slugline)"
+    )
+
+    # Metadata for migration fallback
+    content_source: str = Field(
+        "script",
+        description="Source of content: 'script' (native) or 'scenes' (rebuilt from scenes)"
+    )
+
     class Config:
         from_attributes = True
         json_encoders = {

@@ -59,7 +59,8 @@ class User(Base):
     
     # Relationships
     scripts: Mapped[List["Script"]] = relationship(
-        "Script", 
+        "Script",
+        foreign_keys="Script.owner_id",
         back_populates="owner",
         cascade="all, delete-orphan"
     )
