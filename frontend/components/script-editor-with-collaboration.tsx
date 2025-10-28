@@ -26,6 +26,7 @@ import { withHistory } from 'slate-history';
 import { withYjs, YjsEditor, toSharedType } from 'slate-yjs';
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { SceneBoundaryTracker, SceneBoundary } from '@/utils/scene-boundary-tracker';
+import { usePageBreaks, getPageNumber } from '@/hooks/use-page-breaks';
 import { ScreenplayElement, ScreenplayBlockType } from '@/types/screenplay';
 
 // Custom editor wrapper for screenplay-specific normalization
@@ -138,6 +139,9 @@ export function ScriptEditorWithCollaboration({
   const boundaryTracker = useMemo(() => new SceneBoundaryTracker(), []);
   const [sceneBoundaries, setSceneBoundaries] = useState<SceneBoundary[]>([]);
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number | null>(null);
+
+  // Page break calculation for professional page formatting
+  const { pageBreaks, totalPages, isCalculating: isCalculatingPages } = usePageBreaks(value as ScreenplayElement[]);
 
   // Editor container ref for scroll navigation
   const editorContainerRef = useRef<HTMLDivElement>(null);
@@ -673,23 +677,65 @@ export function ScriptEditorWithCollaboration({
       {/* Sync status indicator */}
       {renderSyncStatus()}
 
-      {/* Slate editor */}
-      <div className="flex-1 overflow-auto">
-        <Slate editor={editor} initialValue={value} onChange={handleChange}>
-          <Editable
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            placeholder="Start writing your screenplay..."
-            spellCheck
-            autoFocus
-            className="screenplay-content px-8 py-6 min-h-full focus:outline-none"
+      {/* Professional page layout with 8.5" x 11" pages */}
+      <div className="flex-1 overflow-auto py-8 px-4 bg-gray-100">
+        <div className="max-w-none mx-auto" style={{ position: 'relative' }}>
+          {/* Page backgrounds layer (behind editor) */}
+          {Array.from({ length: Math.max(totalPages, 1) }, (_, pageIndex) => (
+            <div
+              key={`page-bg-${pageIndex}`}
+              className="bg-white shadow-lg border border-gray-300"
+              style={{
+                position: 'absolute',
+                top: `calc(${pageIndex * 11}in + ${pageIndex * 2}rem)`,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '8.5in',
+                height: '11in',
+                zIndex: 0,
+              }}
+            >
+              {/* Page number */}
+              <div
+                className="absolute text-xs text-gray-500"
+                style={{
+                  top: '0.5in',
+                  right: '1in',
+                  fontFamily: '"Courier Prime", Courier, monospace',
+                }}
+              >
+                {pageIndex + 1}.
+              </div>
+            </div>
+          ))}
+
+          {/* Editor content layer (on top of page backgrounds) */}
+          <div
             style={{
-              fontFamily: 'Courier, monospace',
+              position: 'relative',
+              zIndex: 1,
+              width: '8.5in',
+              margin: '0 auto',
+              padding: '1in 1in 1in 1.5in',
+              paddingTop: '1.2in',
+              minHeight: `calc(${Math.max(totalPages, 1) * 11}in + ${(Math.max(totalPages, 1) - 1) * 2}rem)`,
+              fontFamily: '"Courier Prime", Courier, monospace',
               fontSize: '12pt',
-              lineHeight: '1.5',
+              lineHeight: '12pt',
             }}
-          />
-        </Slate>
+          >
+            <Slate editor={editor} initialValue={value} onChange={handleChange}>
+              <Editable
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+                placeholder="Start writing your screenplay..."
+                spellCheck
+                autoFocus
+                className="screenplay-content focus:outline-none"
+              />
+            </Slate>
+          </div>
+        </div>
       </div>
     </div>
   );

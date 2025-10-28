@@ -43,7 +43,13 @@
       "Bash(redis-cli:*)",
       "Bash(nslookup:*)",
       "Read(//private/tmp/**)",
-      "Bash(xargs basename:*)"
+      "Bash(xargs basename:*)",
+      "Bash(npm run dev:*)",
+      "Bash(PORT=3102 npm run dev:*)",
+      "WebSearch",
+      "mcp__playwright__browser_navigate_back",
+      "Bash(node -e:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
