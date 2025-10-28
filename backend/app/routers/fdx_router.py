@@ -60,13 +60,26 @@ async def upload_fdx_file(
         print(f"Parsing FDX file: {file.filename}")
         parsed_result = FDXParser.parse_fdx_content(file_content_str, file.filename)
         # Removed verbose parsed content logging to reduce console noise
-        # Create new script in database
+        # Convert all parsed elements to content_blocks format for script-level storage
+        script_content_blocks = [
+            {
+                "type": element.type.value,
+                "text": element.text,
+                "metadata": element.metadata
+            }
+            for element in parsed_result.elements
+        ]
+
+        print(f"Converted {len(parsed_result.elements)} elements to script content_blocks")
+
+        # Create new script in database with content_blocks populated
         new_script = Script(
             title=parsed_result.title,
             description=f"Imported from {file.filename}",
-            owner_id=current_user.user_id
+            owner_id=current_user.user_id,
+            content_blocks=script_content_blocks  # Populate Script.content_blocks for script-level editor
         )
-        
+
         db.add(new_script)
         await db.flush()  # Get the script_id
         
@@ -139,6 +152,14 @@ async def upload_fdx_file(
         # Commit all changes
         await db.commit()
         await db.refresh(new_script)
+
+        # DIAGNOSTIC: Verify Script.content_blocks was populated
+        print(f"[DIAGNOSTIC] Script AFTER db.commit and refresh:")
+        print(f"  script_id: {new_script.script_id}")
+        print(f"  title: {new_script.title}")
+        print(f"  content_blocks: {'None' if new_script.content_blocks is None else f'{len(new_script.content_blocks)} blocks'}")
+        if new_script.content_blocks:
+            print(f"  First block: type={new_script.content_blocks[0].get('type')}, text={new_script.content_blocks[0].get('text')[:50]}...")
 
         # DIAGNOSTIC: Check first scene after commit
         if db_scenes:

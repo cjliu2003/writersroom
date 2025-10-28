@@ -90,6 +90,31 @@ export async function getScriptScenes(scriptId: string): Promise<BackendScene[]>
   return response.json();
 }
 
+// Script content with full content blocks for script-level editing
+export interface ScriptWithContent {
+  script_id: string;
+  owner_id: string;
+  title: string;
+  description: string | null;
+  current_version: number;
+  created_at: string;
+  updated_at: string;
+  content_blocks: Array<any> | null;
+  scene_summaries?: Record<string, string> | null; // scene_heading -> summary mapping
+  version: number;
+  updated_by: string | null;
+  content_source: 'script' | 'scenes' | 'empty';
+}
+
+export async function getScriptContent(scriptId: string): Promise<ScriptWithContent> {
+  const response = await authenticatedFetch(`/scripts/${scriptId}/content`);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || `Failed to fetch content for script ${scriptId}`);
+  }
+  return response.json();
+}
+
 // API function for FDX upload
 export interface FDXUploadResponse {
   success: boolean;

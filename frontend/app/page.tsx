@@ -102,7 +102,7 @@ export default function HomePage() {
   if (!user) return <SignInPage />;
 
   // Handlers
-  const openProject = (projectId: string) => router.push(`/editor?projectId=${projectId}`);
+  const openProject = (projectId: string) => router.push(`/script-editor?scriptId=${projectId}`);
 
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
@@ -118,7 +118,7 @@ export default function HomePage() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, ...prev]);
-      router.push(`/editor?projectId=${res.script_id}`);
+      router.push(`/script-editor?scriptId=${res.script_id}`);
     } catch (e: any) {
       console.error("Upload failed:", e);
       setUploadError(e?.message || "Upload failed. Please try again.");
@@ -152,7 +152,7 @@ export default function HomePage() {
     const title = newScriptTitle.trim();
     if (!title) return;
     const projectId = `new-${Date.now()}`;
-    router.push(`/editor?projectId=${projectId}&new=true&title=${encodeURIComponent(title)}`);
+    router.push(`/script-editor?scriptId=${projectId}&new=true&title=${encodeURIComponent(title)}`);
   };
 
   const formatDate = (iso: string) => {

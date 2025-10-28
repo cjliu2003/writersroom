@@ -227,8 +227,9 @@ export function SceneDescriptions({ scenes, editorContent, onSceneSelect, curren
                                     <span className="text-[10px] text-gray-500">Generating AI summary...</span>
                                   </div>
                                 </div>
-                              ) : (
-                                <button
+                              ) : null /* AI Summary Generation - TEMPORARILY DISABLED */
+                                /* TODO: Re-enable once race condition issues are fully resolved */
+                                /* <button
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     generateAISummary(scene)
@@ -237,8 +238,8 @@ export function SceneDescriptions({ scenes, editorContent, onSceneSelect, curren
                                 >
                                   <Sparkles className="w-3 h-3" />
                                   Generate AI Summary
-                                </button>
-                              )}
+                                </button> */
+                              }
                             </div>
                           )}
                         </div>

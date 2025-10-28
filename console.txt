@@ -1,0 +1,212 @@
+VM5276:1 Console was cleared
+undefined
+use-script-autosave.ts:478 📴 [ScriptAutosave] Network OFFLINE detected
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: false}
+use-script-autosave.ts:318 ⏭️ [ScriptAutosave] Content unchanged, skipping save
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: false}
+use-script-autosave.ts:318 ⏭️ [ScriptAutosave] Content unchanged, skipping save
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-yjs-collaboration.ts:153 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'Symbol'}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: true}
+use-script-autosave.ts:325 ⏰ [ScriptAutosave] Setting up autosave timers
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-yjs-collaboration.ts:153 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'Symbol'}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: true}
+use-script-autosave.ts:325 ⏰ [ScriptAutosave] Setting up autosave timers
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-yjs-collaboration.ts:153 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'Symbol'}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: true}
+use-script-autosave.ts:325 ⏰ [ScriptAutosave] Setting up autosave timers
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-yjs-collaboration.ts:153 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'Symbol'}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: true}
+use-script-autosave.ts:325 ⏰ [ScriptAutosave] Setting up autosave timers
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-yjs-collaboration.ts:153 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'Symbol'}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: true}
+use-script-autosave.ts:325 ⏰ [ScriptAutosave] Setting up autosave timers
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-yjs-collaboration.ts:153 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'Symbol'}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: true}
+use-script-autosave.ts:325 ⏰ [ScriptAutosave] Setting up autosave timers
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-yjs-collaboration.ts:153 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'Symbol'}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: true}
+use-script-autosave.ts:325 ⏰ [ScriptAutosave] Setting up autosave timers
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-yjs-collaboration.ts:153 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'Symbol'}
+script-editor-with-collaboration.tsx:375 [ScriptEditor] handleChange called, blocks: 3317
+script-editor-with-autosave.tsx:126 🟢 [ScriptEditor] Content changed, blocks: 3317
+script-editor-with-autosave.tsx:142 🔵 [ScriptEditor] syncStatus: synced navigator.onLine: false will trigger autosave? true
+script-editor-with-autosave.tsx:145 ✅ [ScriptEditor] Triggering autosave (Yjs not synced or offline)
+use-script-autosave.ts:310 🔄 [ScriptAutosave] debouncedSave called: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, hasChanged: true}
+use-script-autosave.ts:325 ⏰ [ScriptAutosave] Setting up autosave timers
+page.tsx:236 [ScriptEditor] Content changed, blocks: 3317
+page.tsx:294 [ScriptEditor] 🔍 Autosave Debug: {autosaveEnabled: true, hasToken: true, currentScriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', canAutosave: true, currentVersion: undefined}
+use-script-autosave.ts:331 ⏰ [ScriptAutosave] Debounce timer fired, saving now
+use-script-autosave.ts:167 💾 [ScriptAutosave] Starting save: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', baseVersion: undefined, blocksCount: 3317}
+use-script-autosave.ts:188 💥 [ScriptAutosave] Save failed: {error: Error: Offline - save skipped for queueing
+    at eval (webpack-internal:///(app-pages-browser)/./h…, errorType: 'Error', isOnline: false}
+use-script-autosave.ts:261 📦 [ScriptAutosave] Queueing save to IndexedDB: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, baseVersion: undefined, reason: 'Offline - save skipped for queueing'}
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: 63ae7b60-854a-4c0a-8997-921300c9e263
+use-script-autosave.ts:282 ✅ [ScriptAutosave] Save queued successfully to IndexedDB
+use-script-autosave.ts:337 ⏰ [ScriptAutosave] Max wait timer fired, forcing save
+use-script-autosave.ts:167 💾 [ScriptAutosave] Starting save: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', baseVersion: undefined, blocksCount: 3317}
+use-script-autosave.ts:188 💥 [ScriptAutosave] Save failed: {error: Error: Offline - save skipped for queueing
+    at eval (webpack-internal:///(app-pages-browser)/./h…, errorType: 'Error', isOnline: false}
+use-script-autosave.ts:261 📦 [ScriptAutosave] Queueing save to IndexedDB: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', blocksCount: 3317, baseVersion: undefined, reason: 'Offline - save skipped for queueing'}
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: d0dd9cab-8aa3-4476-8b61-0299f51df27e
+use-script-autosave.ts:282 ✅ [ScriptAutosave] Save queued successfully to IndexedDB
+use-script-yjs-collaboration.ts:261 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: true, code: 1005, reason: '', type: 'close', …}
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: offline
+use-script-yjs-collaboration.ts:224 [ScriptYjsCollaboration] Synced: false
+use-script-yjs-collaboration.ts:206 [ScriptYjsCollaboration] Status: disconnected
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: offline
+use-script-yjs-collaboration.ts:206 [ScriptYjsCollaboration] Status: connecting
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: connecting
+y-websocket.cjs:161 WebSocket connection to 'ws://localhost:8000/api/ws/scripts/075ec941-d585-4a38-9dde-1c9ef4ab5d14?token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjdlYTA5ZDA1NzI2MmU2M2U2MmZmNzNmMDNlMDRhZDI5ZDg5Zjg5MmEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc1ODkxNDI5OSwidXNlcl9pZC...iYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.qaPNiF9KrO-rLFFDtb5gUhwODHlmKW3gu5GNwzDzGuRsPiGxjM05oC56hLboIm8bR4IlDXbr_a4jQysO6cE0a0YOD5X7hOQamjUdoydG2qh4I-HSh9sna28UheCT0kBS82BrOph6QvY56zKfj02MlkkPTovkoxJ3sgZUrITXPFM3YTLToFw7OEaV6s8fl6_873AvYfP06op4RbkrfEOVaUhkaTpOLfL-KzVKCo7Esd_G15cdoYkgzCJFa1CpIT19Pq2x2sdlUKY7uJCdnkQO6qoMbZYS37YE1Atc0Dv_SaHxt_9eI4Sh4F2YDFdtkkufEGhS6sttZdnUuhjBaLOFxw' failed: 
+setupWS @ y-websocket.cjs:161
+use-script-yjs-collaboration.ts:231 [ScriptYjsCollaboration] Connection error: Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+handleConnectionError @ use-script-yjs-collaboration.ts:231
+eval @ observable.cjs:158
+emit @ observable.cjs:158
+websocket.onerror @ y-websocket.cjs:176
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: error
+use-script-yjs-collaboration.ts:261 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: false, code: 1006, reason: '', type: 'close', …}
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: offline
+use-script-yjs-collaboration.ts:206 [ScriptYjsCollaboration] Status: connecting
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: connecting
+y-websocket.cjs:161 WebSocket connection to 'ws://localhost:8000/api/ws/scripts/075ec941-d585-4a38-9dde-1c9ef4ab5d14?token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjdlYTA5ZDA1NzI2MmU2M2U2MmZmNzNmMDNlMDRhZDI5ZDg5Zjg5MmEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc1ODkxNDI5OSwidXNlcl9pZC...iYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.qaPNiF9KrO-rLFFDtb5gUhwODHlmKW3gu5GNwzDzGuRsPiGxjM05oC56hLboIm8bR4IlDXbr_a4jQysO6cE0a0YOD5X7hOQamjUdoydG2qh4I-HSh9sna28UheCT0kBS82BrOph6QvY56zKfj02MlkkPTovkoxJ3sgZUrITXPFM3YTLToFw7OEaV6s8fl6_873AvYfP06op4RbkrfEOVaUhkaTpOLfL-KzVKCo7Esd_G15cdoYkgzCJFa1CpIT19Pq2x2sdlUKY7uJCdnkQO6qoMbZYS37YE1Atc0Dv_SaHxt_9eI4Sh4F2YDFdtkkufEGhS6sttZdnUuhjBaLOFxw' failed: 
+setupWS @ y-websocket.cjs:161
+use-script-yjs-collaboration.ts:231 [ScriptYjsCollaboration] Connection error: Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+handleConnectionError @ use-script-yjs-collaboration.ts:231
+eval @ observable.cjs:158
+emit @ observable.cjs:158
+websocket.onerror @ y-websocket.cjs:176
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: error
+use-script-yjs-collaboration.ts:261 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: false, code: 1006, reason: '', type: 'close', …}
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: offline
+use-script-yjs-collaboration.ts:206 [ScriptYjsCollaboration] Status: connecting
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: connecting
+y-websocket.cjs:161 WebSocket connection to 'ws://localhost:8000/api/ws/scripts/075ec941-d585-4a38-9dde-1c9ef4ab5d14?token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjdlYTA5ZDA1NzI2MmU2M2U2MmZmNzNmMDNlMDRhZDI5ZDg5Zjg5MmEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc1ODkxNDI5OSwidXNlcl9pZC...iYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.qaPNiF9KrO-rLFFDtb5gUhwODHlmKW3gu5GNwzDzGuRsPiGxjM05oC56hLboIm8bR4IlDXbr_a4jQysO6cE0a0YOD5X7hOQamjUdoydG2qh4I-HSh9sna28UheCT0kBS82BrOph6QvY56zKfj02MlkkPTovkoxJ3sgZUrITXPFM3YTLToFw7OEaV6s8fl6_873AvYfP06op4RbkrfEOVaUhkaTpOLfL-KzVKCo7Esd_G15cdoYkgzCJFa1CpIT19Pq2x2sdlUKY7uJCdnkQO6qoMbZYS37YE1Atc0Dv_SaHxt_9eI4Sh4F2YDFdtkkufEGhS6sttZdnUuhjBaLOFxw' failed: 
+setupWS @ y-websocket.cjs:161
+use-script-yjs-collaboration.ts:231 [ScriptYjsCollaboration] Connection error: Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+handleConnectionError @ use-script-yjs-collaboration.ts:231
+eval @ observable.cjs:158
+emit @ observable.cjs:158
+websocket.onerror @ y-websocket.cjs:176
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: error
+use-script-yjs-collaboration.ts:261 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: false, code: 1006, reason: '', type: 'close', …}
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: offline
+use-script-yjs-collaboration.ts:206 [ScriptYjsCollaboration] Status: connecting
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: connecting
+y-websocket.cjs:161 WebSocket connection to 'ws://localhost:8000/api/ws/scripts/075ec941-d585-4a38-9dde-1c9ef4ab5d14?token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjdlYTA5ZDA1NzI2MmU2M2U2MmZmNzNmMDNlMDRhZDI5ZDg5Zjg5MmEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc1ODkxNDI5OSwidXNlcl9pZC...iYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.qaPNiF9KrO-rLFFDtb5gUhwODHlmKW3gu5GNwzDzGuRsPiGxjM05oC56hLboIm8bR4IlDXbr_a4jQysO6cE0a0YOD5X7hOQamjUdoydG2qh4I-HSh9sna28UheCT0kBS82BrOph6QvY56zKfj02MlkkPTovkoxJ3sgZUrITXPFM3YTLToFw7OEaV6s8fl6_873AvYfP06op4RbkrfEOVaUhkaTpOLfL-KzVKCo7Esd_G15cdoYkgzCJFa1CpIT19Pq2x2sdlUKY7uJCdnkQO6qoMbZYS37YE1Atc0Dv_SaHxt_9eI4Sh4F2YDFdtkkufEGhS6sttZdnUuhjBaLOFxw' failed: 
+setupWS @ y-websocket.cjs:161
+use-script-yjs-collaboration.ts:231 [ScriptYjsCollaboration] Connection error: Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+handleConnectionError @ use-script-yjs-collaboration.ts:231
+eval @ observable.cjs:158
+emit @ observable.cjs:158
+websocket.onerror @ y-websocket.cjs:176
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: error
+use-script-yjs-collaboration.ts:261 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: false, code: 1006, reason: '', type: 'close', …}
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: offline
+use-script-yjs-collaboration.ts:206 [ScriptYjsCollaboration] Status: connecting
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: connecting
+y-websocket.cjs:161 WebSocket connection to 'ws://localhost:8000/api/ws/scripts/075ec941-d585-4a38-9dde-1c9ef4ab5d14?token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjdlYTA5ZDA1NzI2MmU2M2U2MmZmNzNmMDNlMDRhZDI5ZDg5Zjg5MmEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc1ODkxNDI5OSwidXNlcl9pZC...iYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.qaPNiF9KrO-rLFFDtb5gUhwODHlmKW3gu5GNwzDzGuRsPiGxjM05oC56hLboIm8bR4IlDXbr_a4jQysO6cE0a0YOD5X7hOQamjUdoydG2qh4I-HSh9sna28UheCT0kBS82BrOph6QvY56zKfj02MlkkPTovkoxJ3sgZUrITXPFM3YTLToFw7OEaV6s8fl6_873AvYfP06op4RbkrfEOVaUhkaTpOLfL-KzVKCo7Esd_G15cdoYkgzCJFa1CpIT19Pq2x2sdlUKY7uJCdnkQO6qoMbZYS37YE1Atc0Dv_SaHxt_9eI4Sh4F2YDFdtkkufEGhS6sttZdnUuhjBaLOFxw' failed: 
+setupWS @ y-websocket.cjs:161
+use-script-yjs-collaboration.ts:231 [ScriptYjsCollaboration] Connection error: Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+handleConnectionError @ use-script-yjs-collaboration.ts:231
+eval @ observable.cjs:158
+emit @ observable.cjs:158
+websocket.onerror @ y-websocket.cjs:176
+use-script-yjs-collaboration.ts:235 [ScriptYjsCollaboration] Max connection attempts reached. Stopping reconnection.
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+handleConnectionError @ use-script-yjs-collaboration.ts:235
+eval @ observable.cjs:158
+emit @ observable.cjs:158
+websocket.onerror @ y-websocket.cjs:176
+script-editor-with-autosave.tsx:207 🔄 [ScriptEditor] Yjs sync status changed: error
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+use-script-autosave.ts:471 🌐 [ScriptAutosave] Network ONLINE detected
+script-autosave-storage.ts:117 [ScriptStorage] Retrieved pending saves: 2
+use-script-autosave.ts:394 📥 [ScriptAutosave] Processing offline queue: {scriptId: '075ec941-d585-4a38-9dde-1c9ef4ab5d14', queueLength: 2}
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: 63ae7b60-854a-4c0a-8997-921300c9e263 baseVersion: undefined
+script-autosave-api.ts:176  PATCH http://localhost:8000/api/scripts/075ec941-d585-4a38-9dde-1c9ef4ab5d14 401 (Unauthorized)
+saveScript @ script-autosave-api.ts:176
+eval @ use-script-autosave.ts:153
+eval @ use-script-autosave.ts:413
+await in eval
+handleOnline @ use-script-autosave.ts:474
+use-script-autosave.ts:428 ❌ [ScriptAutosave] Queued save failed: {id: '63ae7b60-854a-4c0a-8997-921300c9e263', error: ScriptAutosaveApiError: Could not validate credentials
+    at saveScript (webpack-internal:///(app-…}
+script-autosave-storage.ts:235 [ScriptStorage] Updated retry count: 63ae7b60-854a-4c0a-8997-921300c9e263 1
+use-script-autosave.ts:446 🔄 [ScriptAutosave] Updated retry count: {id: '63ae7b60-854a-4c0a-8997-921300c9e263', retryCount: 1}
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: d0dd9cab-8aa3-4476-8b61-0299f51df27e baseVersion: undefined
+script-autosave-storage.ts:170 [ScriptStorage] Removed save: d0dd9cab-8aa3-4476-8b61-0299f51df27e
+use-script-autosave.ts:416 ✅ [ScriptAutosave] Queued save successful, removed from queue: d0dd9cab-8aa3-4476-8b61-0299f51df27e
+use-script-autosave.ts:421 🔄 [ScriptAutosave] Updating remaining queue items to baseVersion: undefined
+use-script-autosave.ts:459 ✅ [ScriptAutosave] Finished processing offline queue

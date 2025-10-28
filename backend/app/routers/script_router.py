@@ -5,15 +5,18 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, desc
 from typing import List, Dict, Any
+import logging
 
 from uuid import UUID
+
+logger = logging.getLogger(__name__)
 
 from app.models.user import User
 from app.models.script import Script
 from app.models.scene import Scene
 from app.models.scene_version import SceneVersion
 from app.models.script_collaborator import ScriptCollaborator, CollaboratorRole
-from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse
+from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse, ScriptWithContent
 from app.auth.dependencies import get_current_user
 from app.db.base import get_db
 from app.services.yjs_persistence import YjsPersistence
@@ -113,12 +116,92 @@ async def get_script(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Get a script by ID.
-    
+    Get a script by ID (basic metadata only).
+
     Requires authentication and access to the script (owner or collaborator).
+    For script-level editing with full content, use GET /scripts/{script_id}/content
     """
     script = await get_script_if_user_has_access(script_id, current_user, db)
     return script
+
+
+@router.get("/{script_id}/content", response_model=ScriptWithContent)
+async def get_script_with_content(
+    script_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get a script with full content blocks for script-level editing.
+
+    This endpoint is optimized for script-level collaborative editing:
+    - Returns content_blocks (full script content in Slate format)
+    - Returns version for optimistic locking (CAS)
+    - Includes migration fallback: rebuilds from scenes if content_blocks is null
+
+    Requires authentication and access to the script (owner or collaborator).
+    """
+    script = await get_script_if_user_has_access(script_id, current_user, db)
+
+    # Determine content source and build response
+    content_blocks = script.content_blocks
+    content_source = "script"
+
+    logger.info(f"[GET /content] Script {script_id}: content_blocks={'None' if content_blocks is None else f'{len(content_blocks)} blocks' if content_blocks else 'empty list'}")
+
+    # Migration fallback: rebuild from scenes if content_blocks is null
+    if content_blocks is None:
+        # Get all scenes ordered by position
+        scenes_result = await db.execute(
+            select(Scene)
+            .where(Scene.script_id == script_id)
+            .order_by(Scene.position)
+        )
+        scenes = scenes_result.scalars().all()
+
+        logger.info(f"[GET /content] Rebuilding from scenes: found {len(scenes)} scenes")
+
+        if scenes:
+            # Rebuild full script content from scenes
+            content_blocks = []
+            for i, scene in enumerate(scenes):
+                scene_block_count = len(scene.content_blocks) if scene.content_blocks else 0
+                logger.info(f"[GET /content] Scene {i+1}: position={scene.position}, blocks={scene_block_count}, has_content={scene.content_blocks is not None}")
+                if scene.content_blocks:
+                    content_blocks.extend(scene.content_blocks)
+
+            content_source = "scenes"
+            logger.info(f"[GET /content] Rebuilt {len(content_blocks)} total blocks from {len(scenes)} scenes")
+
+            # Optional: Store rebuilt content back to script table for future requests
+            # This can be done asynchronously or deferred to first autosave
+            # Uncomment below to store immediately:
+            # script.content_blocks = content_blocks
+            # await db.commit()
+        else:
+            # No scenes available, return empty content
+            logger.warning(f"[GET /content] No scenes found for script {script_id}, returning empty")
+            content_blocks = []
+            content_source = "empty"
+
+    # Build response with content
+    return ScriptWithContent(
+        script_id=script.script_id,
+        owner_id=script.owner_id,
+        title=script.title,
+        description=script.description,
+        current_version=script.current_version,
+        created_at=script.created_at,
+        updated_at=script.updated_at,
+        imported_fdx_path=script.imported_fdx_path,
+        exported_fdx_path=script.exported_fdx_path,
+        exported_pdf_path=script.exported_pdf_path,
+        content_blocks=content_blocks,
+        version=script.version,
+        updated_by=script.updated_by,
+        scene_summaries=script.scene_summaries,  # Include AI-generated summaries
+        content_source=content_source
+    )
 
 
 @router.patch("/{script_id}", response_model=ScriptResponse)

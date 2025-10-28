@@ -5,6 +5,7 @@ AI-powered features endpoints for the WritersRoom API
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import attributes
 from typing import List
 from uuid import UUID
 from datetime import datetime, timezone
@@ -46,30 +47,61 @@ async def generate_scene_summary(
             allow_viewer=True
         )
         
-        # Get the specific scene
-        scene_query = select(Scene).where(
-            Scene.script_id == request.script_id,
-            Scene.position == request.scene_index
-        )
-        result = await db.execute(scene_query)
-        scene = result.scalar_one_or_none()
-        
-        if not scene:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Scene at index {request.scene_index} not found"
-            )
-        
         # Generate summary using OpenAI
         summary = await openai_service.generate_scene_summary(
             slugline=request.slugline,
             scene_content=request.scene_text
         )
-        
-        # Update the scene with the generated summary
-        scene.summary = summary
-        scene.updated_at = datetime.now(timezone.utc)
+        print(f"\n🔍 [AI Summary Debug] Generated summary for '{request.slugline}'")
+        print(f"   Summary length: {len(summary)} chars")
+        print(f"   Script ID: {script.script_id}")
+        print(f"   Script has content_blocks: {script.content_blocks is not None}")
+
+        # Determine editor mode based on content_blocks (same logic as GET /content)
+        # If script.content_blocks exists → script-level editor (save to script.scene_summaries)
+        # If script.content_blocks is null → scene-level editor (save to scene.summary)
+        if script.content_blocks is not None:
+            # Script-level editor: save to script.scene_summaries
+            print(f"   Path: Script-level editor (content_blocks exists)")
+            print(f"   Before: scene_summaries = {script.scene_summaries}")
+
+            if script.scene_summaries is None:
+                script.scene_summaries = {}
+                print(f"   Initialized empty dict")
+
+            script.scene_summaries[request.slugline] = summary
+            print(f"   After mutation: scene_summaries has {len(script.scene_summaries)} entries")
+
+            # Mark the JSONB column as modified so SQLAlchemy detects the change
+            attributes.flag_modified(script, 'scene_summaries')
+            print(f"   Called flag_modified on scene_summaries")
+
+            script.updated_at = datetime.now(timezone.utc)
+        else:
+            # Scene-level editor: save to scene.summary
+            print(f"   Path: Scene-level editor (content_blocks is null)")
+
+            # Get the specific scene record
+            scene_query = select(Scene).where(
+                Scene.script_id == request.script_id,
+                Scene.position == request.scene_index
+            )
+            result = await db.execute(scene_query)
+            scene = result.scalar_one_or_none()
+
+            if not scene:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Scene at index {request.scene_index} not found"
+                )
+
+            scene.summary = summary
+            scene.updated_at = datetime.now(timezone.utc)
+            print(f"   Saved to scene.summary for Scene position {scene.position}")
+
+        print(f"   Committing to database...")
         await db.commit()
+        print(f"   ✅ Commit successful!")
         
         return SceneSummaryResponse(
             success=True,

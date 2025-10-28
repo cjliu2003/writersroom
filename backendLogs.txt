@@ -1,0 +1,8 @@
+🔍 [AI Summary Debug] Generated summary for 'INT. HALLWAY - SASKATOON POLICE DEPARTMENT – NIGHT'
+   Summary length: 375 chars
+DEBUG: User lookup result: Found
+   Path: Scene-level editor (Scene record exists)
+   Committing to database...
+INFO:     127.0.0.1:52187 - "PATCH /api/scripts/c4f92fc4-d2bf-497c-84d0-850c44689921 HTTP/1.1" 200 OK
+   ✅ Commit successful!
+INFO:     127.0.0.1:52156 - "POST /api/ai/scene-summary HTTP/1.1" 200 OK

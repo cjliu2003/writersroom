@@ -75,12 +75,52 @@ class Script(Base):
         String,
         nullable=True
     )
-    
+
+    # Script-level content and versioning (for script-level editing)
+    content_blocks: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(
+        JSONB,
+        nullable=True,
+        comment='Full script content blocks for script-level editing'
+    )
+
+    scene_summaries: Mapped[Optional[Dict[str, str]]] = mapped_column(
+        JSONB,
+        nullable=True,
+        comment='AI-generated summaries for scenes in script-level editor. Format: {scene_heading: summary_text}'
+    )
+
+    version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default='0',
+        comment='Optimistic locking version for compare-and-swap'
+    )
+
+    yjs_state: Mapped[Optional[bytes]] = mapped_column(
+        nullable=True,
+        comment='Yjs state snapshot for quick loading'
+    )
+
+    updated_by: Mapped[Optional[UUID]] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey('users.user_id'),
+        nullable=True,
+        comment='User who last updated the script'
+    )
+
     # Relationships
     owner: Mapped['User'] = relationship(
-        'User', 
+        'User',
+        foreign_keys=[owner_id],
         back_populates='scripts',
         lazy='joined'
+    )
+
+    last_editor: Mapped[Optional['User']] = relationship(
+        'User',
+        foreign_keys=[updated_by],
+        lazy='selectin'
     )
     
     collaborators: Mapped[List['ScriptCollaborator']] = relationship(
@@ -112,7 +152,16 @@ class Script(Base):
         cascade='all, delete-orphan',
         lazy='selectin'
     )
-    
+
+    # Script-level Yjs version history
+    versions: Mapped[List['ScriptVersion']] = relationship(
+        'ScriptVersion',
+        back_populates='script',
+        cascade='all, delete-orphan',
+        lazy='dynamic',
+        order_by='ScriptVersion.created_at'
+    )
+
     def __repr__(self) -> str:
         return f"<Script {self.title} (v{self.current_version})>"
     

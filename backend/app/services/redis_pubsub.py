@@ -199,16 +199,30 @@ class RedisPubSubManager:
     def _get_channel_name(self, scene_id: UUID, channel_type: str) -> str:
         """
         Generate Redis channel name for a scene.
-        
+
         Args:
             scene_id: UUID of the scene
             channel_type: Type of channel (updates, awareness, join, leave)
-            
+
         Returns:
             Channel name string
         """
         self._validate_channel_type(channel_type)
         return f"scene:{scene_id}:{channel_type}"
+
+    def _get_script_channel_name(self, script_id: UUID, channel_type: str) -> str:
+        """
+        Generate Redis channel name for a script.
+
+        Args:
+            script_id: UUID of the script
+            channel_type: Type of channel (updates, awareness, join, leave)
+
+        Returns:
+            Channel name string
+        """
+        self._validate_channel_type(channel_type)
+        return f"script:{script_id}:{channel_type}"
     
     async def publish_update(
         self, 
@@ -367,7 +381,140 @@ class RedisPubSubManager:
                     del self.subscriptions[channel]
         
         logger.info(f"Unsubscribed from scene {scene_id}")
-    
+
+    # Script-level methods (for script-level WebSocket collaboration)
+
+    async def publish_script_update(
+        self,
+        script_id: UUID,
+        update: bytes,
+        sender_id: UUID
+    ):
+        """
+        Publish a Yjs update to the script's updates channel.
+
+        Args:
+            script_id: UUID of the script
+            update: Binary Yjs update data
+            sender_id: UUID of the user who sent the update
+        """
+        if not self.redis_client:
+            await self.connect()
+
+        channel = self._get_script_channel_name(script_id, "updates")
+        payload = self._build_message(
+            channel_type="updates",
+            payload=self._encode_bytes(update),
+            sender_id=sender_id,
+        )
+
+        await self.redis_client.publish(channel, payload)
+
+        logger.debug(f"Published script update to {channel} from user {sender_id}")
+
+    async def publish_script_awareness(
+        self,
+        script_id: UUID,
+        awareness_data: dict,
+        sender_id: UUID
+    ):
+        """
+        Publish presence/awareness data to the script's awareness channel.
+
+        Args:
+            script_id: UUID of the script
+            awareness_data: Dictionary containing cursor position, selection, etc.
+            sender_id: UUID of the user
+        """
+        if not self.redis_client:
+            await self.connect()
+
+        channel = self._get_script_channel_name(script_id, "awareness")
+        payload = self._build_message(
+            channel_type="awareness",
+            payload=awareness_data,
+            sender_id=sender_id,
+        )
+
+        await self.redis_client.publish(channel, payload)
+
+        logger.debug(f"Published script awareness to {channel} from user {sender_id}")
+
+    async def subscribe_to_script(
+        self,
+        script_id: UUID,
+        callback: Callable[[RedisMessage], Any]
+    ):
+        """
+        Subscribe to all channels for a script.
+
+        Args:
+            script_id: UUID of the script to subscribe to
+            callback: Async function to call when messages arrive
+                     Signature: async def callback(message: RedisMessage)
+        """
+        if not self.redis_client:
+            await self.connect()
+
+        channels = [
+            self._get_script_channel_name(script_id, "updates"),
+            self._get_script_channel_name(script_id, "awareness"),
+            self._get_script_channel_name(script_id, "join"),
+            self._get_script_channel_name(script_id, "leave")
+        ]
+
+        # Subscribe to all channels
+        await self.pubsub.subscribe(*channels)
+
+        # Register callback
+        for channel in channels:
+            if channel not in self.subscriptions:
+                self.subscriptions[channel] = set()
+            self.subscriptions[channel].add(callback)
+
+        logger.info(f"Subscribed to script {script_id} channels")
+
+        # Start listening task if not already running
+        if not self.listen_task or self.listen_task.done():
+            self.listen_task = asyncio.create_task(self._listen_to_messages())
+
+    async def unsubscribe_from_script(
+        self,
+        script_id: UUID,
+        callback: Optional[Callable] = None
+    ):
+        """
+        Unsubscribe from script channels.
+
+        Args:
+            script_id: UUID of the script
+            callback: Optional specific callback to remove
+        """
+        if not self.pubsub:
+            return
+
+        channels = [
+            self._get_script_channel_name(script_id, "updates"),
+            self._get_script_channel_name(script_id, "awareness"),
+            self._get_script_channel_name(script_id, "join"),
+            self._get_script_channel_name(script_id, "leave")
+        ]
+
+        # Remove callback(s)
+        for channel in channels:
+            if channel in self.subscriptions:
+                if callback:
+                    self.subscriptions[channel].discard(callback)
+                else:
+                    self.subscriptions[channel].clear()
+
+                # Unsubscribe if no more callbacks
+                if not self.subscriptions[channel]:
+                    await self.pubsub.unsubscribe(channel)
+                    del self.subscriptions[channel]
+
+        logger.info(f"Unsubscribed from script {script_id}")
+
     async def _listen_to_messages(self):
         """
         Background task that listens for messages on subscribed channels
