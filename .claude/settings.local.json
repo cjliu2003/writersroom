@@ -20,7 +20,18 @@
       "Bash(brctl status:*)",
       "Bash(tmutil status:*)",
       "Bash(defaults read:*)",
-      "Bash(git config --list)"
+      "Bash(git config --list)",
+      "Bash(for i in {1..10})",
+      "Bash(do sleep 2)",
+      "Bash(git log:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git checkout:*)",
+      "Bash(if ! test -f frontend/components/SignInPage.tsx)",
+      "Bash(then echo \"DELETED at second $i\")",
+      "Bash(exit 1)",
+      "Bash(fi)",
+      "Bash(code --status:*)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []
