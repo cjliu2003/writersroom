@@ -168,80 +168,102 @@ export default function HomePage() {
       <DragOverlay isVisible={isDragging} />
       <LoadingOverlay isVisible={isParsing} title="Processing your screenplay" />
 
-      {/* Main content */}
-      <div className="min-h-screen p-6 relative z-10" onDrop={handleDrop}>
-        <div className="max-w-7xl mx-auto">
-          {/* User Menu - Top Right */}
-          <div className="absolute top-8 right-8 flex items-center gap-4 z-20">
-            <div className="flex items-center gap-2 text-slate-900 text-sm">
-              <User className="w-4 h-4" />
-              <span>{user.displayName || user.email}</span>
-            </div>
-            <Button onClick={signOut} variant="ghost" size="sm" className="text-slate-700 hover:text-slate-900 hover:bg-white/50">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Hero Header */}
-          <div className="text-center mb-16 pt-12">
-            <h1 className="text-7xl md:text-8xl font-black text-slate-900 mb-6 tracking-tight">
-              Your Scripts
+      {/* Top Navigation Bar */}
+      <div className="fixed top-0 left-0 right-0 z-30 bg-white/70 backdrop-blur-md border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-8 py-2">
+          <div className="flex items-center justify-between">
+            {/* Branding */}
+            <h1
+              className="font-black text-white uppercase tracking-wider text-lg"
+              style={{
+                textShadow: '1.65px 1.65px 3.3px rgba(0, 0, 0, 0.5), 1.1px 1.1px 2.2px rgba(0, 0, 0, 0.44)'
+              }}
+            >
+              WRITERSROOM
             </h1>
-            <p className="text-2xl md:text-3xl text-slate-700 font-light tracking-wide">
-              Where stories begin
-            </p>
-          </div>
 
-          {/* Hero Actions */}
-          <div className="max-w-4xl mx-auto mb-16">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Upload - Primary CTA */}
-              <div className={`relative transition-all duration-300 ${isDragging ? 'scale-[1.02]' : ''}`}>
-                <input type="file" accept=".fdx" onChange={handleFileSelect} className="hidden" id="fdx-upload" disabled={isUploading} />
-                <button
-                  onClick={() => document.getElementById('fdx-upload')?.click()}
-                  disabled={isUploading}
-                  className={`w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-4 rounded-2xl transition-all duration-300 hover:scale-[1.02] shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed ${isDragging ? 'border-blue-500 bg-blue-50/90 ring-4 ring-blue-500/30' : 'border-slate-300 hover:bg-white hover:border-slate-400'}`}
-                >
-                  {isUploading ? (
-                    <>
-                      <div className="w-16 h-16 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-6" />
-                      <div className="text-2xl font-bold text-slate-900 mb-2">Processing...</div>
-                      <div className="text-slate-600">Importing your screenplay</div>
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-16 h-16 text-blue-600 mx-auto mb-6" />
-                      <div className="text-2xl font-bold text-slate-900 mb-2">Upload Script</div>
-                      <div className="text-slate-600">Drop FDX file or click to browse</div>
-                    </>
-                  )}
-                </button>
+            {/* User Menu - Minimalist */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-slate-600">
+                <div className="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+                <span className="text-sm">{user.displayName || user.email}</span>
               </div>
-
-              {/* Create New - Secondary CTA */}
               <button
-                onClick={createNewScript}
-                className="w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-4 border-slate-300 rounded-2xl hover:bg-white hover:border-slate-400 transition-all duration-300 hover:scale-[1.02] shadow-2xl"
+                onClick={signOut}
+                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
               >
-                <Plus className="w-16 h-16 text-purple-600 mx-auto mb-6" />
-                <div className="text-2xl font-bold text-slate-900 mb-2">Start New Script</div>
-                <div className="text-slate-600">Create from scratch</div>
+                <LogOut className="w-4 h-4" />
+                <span className="text-sm">Sign Out</span>
               </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Scripts Section */}
-          {loadingScripts ? (
-            <div className="max-w-6xl mx-auto text-center py-16">
-              <div className="w-16 h-16 border-4 border-slate-300/50 border-t-slate-700 rounded-full animate-spin mx-auto mb-6" />
-              <p className="text-xl text-slate-700">Loading your scripts...</p>
+      {/* Main content */}
+      <div className="min-h-screen pt-12 p-6 relative z-10" onDrop={handleDrop}>
+        <div className="max-w-7xl mx-auto">
+          {/* Hidden file input - shared across all upload buttons */}
+          <input type="file" accept=".fdx" onChange={handleFileSelect} className="hidden" id="fdx-upload" disabled={isUploading} />
+
+          {/* Conditional Layout Based on Script Existence */}
+          {!loadingScripts && scripts.length === 0 ? (
+            /* Empty State - Hero Action Buttons Center Stage */
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="max-w-4xl mx-auto w-full px-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Upload - Primary CTA */}
+                  <div className={`relative transition-all duration-300 ${isDragging ? 'scale-[1.02]' : ''}`}>
+                    <button
+                      onClick={() => document.getElementById('fdx-upload')?.click()}
+                      disabled={isUploading}
+                      className={`w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-4 rounded-2xl transition-all duration-300 hover:scale-[1.02] shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed ${isDragging ? 'border-blue-500 bg-blue-50/90 ring-4 ring-blue-500/30' : 'border-slate-300 hover:bg-white hover:border-slate-400'}`}
+                    >
+                      {isUploading ? (
+                        <>
+                          <div className="w-16 h-16 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-6" />
+                          <div className="text-2xl font-bold text-slate-900 mb-2">Processing...</div>
+                          <div className="text-slate-600">Importing your screenplay</div>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-16 h-16 text-blue-600 mx-auto mb-6" />
+                          <div className="text-2xl font-bold text-slate-900 mb-2">Upload Script</div>
+                          <div className="text-slate-600">Drop FDX file or click to browse</div>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Create New - Secondary CTA */}
+                  <button
+                    onClick={createNewScript}
+                    className="w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-4 border-slate-300 rounded-2xl hover:bg-white hover:border-slate-400 transition-all duration-300 hover:scale-[1.02] shadow-2xl"
+                  >
+                    <Plus className="w-16 h-16 text-purple-600 mx-auto mb-6" />
+                    <div className="text-2xl font-bold text-slate-900 mb-2">Start New Script</div>
+                    <div className="text-slate-600">Create from scratch</div>
+                  </button>
+                </div>
+              </div>
             </div>
-          ) : scripts.length > 0 ? (
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-slate-900 mb-8">Recent Scripts</h2>
+          ) : loadingScripts ? (
+            /* Loading State */
+            <div className="min-h-[70vh] flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-slate-300/50 border-t-slate-700 rounded-full animate-spin mx-auto mb-6" />
+                <p className="text-xl text-slate-700">Loading your scripts...</p>
+              </div>
+            </div>
+          ) : (
+            /* Has Scripts - Action Buttons Integrated into Grid */
+            <div className="pt-8">
+              <h2 className="text-2xl font-semibold text-slate-700 mb-8 tracking-wide">Projects</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {scripts.slice(0, 6).map((p) => (
+                {/* Existing Scripts */}
+                {scripts.map((p) => (
                   <Card
                     key={p.script_id}
                     className="border-2 border-slate-200 bg-white/90 backdrop-blur-md shadow-xl hover:bg-white hover:border-slate-300 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-2xl"
@@ -266,25 +288,56 @@ export default function HomePage() {
                     </CardContent>
                   </Card>
                 ))}
-              </div>
-              {scripts.length > 6 && (
-                <div className="text-center mt-8">
-                  <p className="text-slate-600">
-                    Showing 6 of {scripts.length} scripts
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : null}
 
-          {/* Empty state */}
-          {!loadingScripts && scripts.length === 0 && (
-            <div className="max-w-2xl mx-auto text-center py-20">
-              <div className="w-24 h-24 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-8">
-                <FileText className="w-12 h-12 text-slate-400" />
+                {/* Upload Card - Integrated into Grid */}
+                <Card className={`border-2 border-dashed transition-all duration-300 cursor-pointer hover:scale-[1.02] ${isDragging ? 'border-blue-400 bg-blue-50/80 ring-4 ring-blue-400/30 shadow-xl' : 'border-slate-300 bg-white/80 hover:border-slate-400 hover:bg-white/95 shadow-xl'} backdrop-blur-md`}>
+                  <CardContent className="p-6 h-full flex items-center justify-center">
+                    <button
+                      onClick={() => document.getElementById('fdx-upload')?.click()}
+                      disabled={isUploading}
+                      className="w-full h-full flex flex-col items-center justify-center space-y-4 py-8 hover:bg-transparent disabled:opacity-60"
+                    >
+                      {isUploading ? (
+                        <>
+                          <div className="w-12 h-12 border-2 border-blue-600/50 border-t-blue-600 rounded-full animate-spin" />
+                          <div>
+                            <p className="font-semibold text-slate-900 mb-1">Processing...</p>
+                            <p className="text-xs text-slate-500">Importing screenplay</p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-12 h-12 rounded-lg bg-blue-600/20 flex items-center justify-center">
+                            <Upload className="w-6 h-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-900">Upload Script</p>
+                            <p className="text-xs text-slate-500">Drop FDX or click</p>
+                          </div>
+                        </>
+                      )}
+                    </button>
+                  </CardContent>
+                </Card>
+
+                {/* Create New Card - Integrated into Grid */}
+                <Card className="border-2 border-slate-300 bg-white/80 backdrop-blur-md shadow-xl hover:bg-white/95 hover:border-slate-400 transition-all duration-300 cursor-pointer hover:scale-[1.02]">
+                  <CardContent className="p-6 h-full flex items-center justify-center">
+                    <button
+                      onClick={createNewScript}
+                      className="w-full h-full flex flex-col items-center justify-center space-y-4 py-8 hover:bg-transparent"
+                    >
+                      <div className="w-12 h-12 rounded-lg bg-purple-600/20 flex items-center justify-center">
+                        <Plus className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900">Start New Script</p>
+                        <p className="text-xs text-slate-500">Create from scratch</p>
+                      </div>
+                    </button>
+                  </CardContent>
+                </Card>
               </div>
-              <h3 className="text-3xl font-bold text-slate-900 mb-4">Your creative journey begins here</h3>
-              <p className="text-xl text-slate-600">Upload your first screenplay or start writing something new</p>
             </div>
           )}
 
