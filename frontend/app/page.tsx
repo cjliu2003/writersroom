@@ -550,33 +550,54 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Cinematic WritersRoom Style */}
       {deletingScript && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50" onClick={() => setDeletingScript(null)}>
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-red-200 rounded-2xl shadow-2xl p-10 max-w-lg w-full mx-4 relative" onClick={(e) => e.stopPropagation()}>
-            <Button onClick={() => setDeletingScript(null)} variant="ghost" size="sm" className="absolute top-6 right-6 text-slate-500 hover:text-slate-900 hover:bg-slate-100">
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in duration-200"
+          onClick={() => setDeletingScript(null)}
+        >
+          <div
+            className="bg-[#ffffff]/95 backdrop-blur-sm border border-gray-200/40 rounded-3xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3)] px-10 py-8 max-w-xl w-full mx-4 animate-in zoom-in-95 fade-in duration-200 ease-out"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setDeletingScript(null)}
+              className="absolute top-5 right-5 p-1.5 text-gray-400 hover:text-gray-900 transition-colors duration-200"
+            >
               <X className="w-5 h-5" />
-            </Button>
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border-2 border-red-200">
-                <Trash2 className="w-10 h-10 text-red-600" />
+            </button>
+
+            {/* Icon and Title */}
+            <div className="flex items-start gap-4 mb-5">
+              <Trash2 className="w-6 h-6 text-gray-400 opacity-50 hover:opacity-80 transition-opacity mt-1" />
+              <div className="flex-1">
+                <h2 className="font-[family-name:var(--font-courier-prime)] text-3xl font-normal text-[#111] mb-2">
+                  Delete Script?
+                </h2>
+                <p className="font-[family-name:var(--font-courier-prime)] text-xl text-[#555] mb-3">
+                  &quot;{deletingScript.title}&quot;
+                </p>
+                <p className="text-base text-gray-500 italic font-light">
+                  This action cannot be undone.
+                </p>
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">Delete Script?</h2>
-              <p className="text-lg text-slate-600">
-                Are you sure you want to delete <span className="font-semibold text-slate-900">&quot;{deletingScript.title}&quot;</span>?
-              </p>
-              <p className="text-base text-slate-500 mt-2">This action cannot be undone.</p>
             </div>
-            <div className="flex gap-4">
-              <Button onClick={() => setDeletingScript(null)} variant="ghost" className="flex-1 py-3 text-lg font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl">
+
+            {/* Buttons */}
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={() => setDeletingScript(null)}
+                className="flex-1 px-5 py-3 text-base font-medium text-gray-700 bg-transparent border border-gray-300/50 rounded-xl hover:bg-gray-100/60 transition-all duration-200"
+              >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={handleConfirmDelete}
-                className="flex-1 py-3 text-lg font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="flex-1 px-5 py-3 text-base font-bold text-white bg-red-500/80 hover:bg-red-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
               >
                 Delete Script
-              </Button>
+              </button>
             </div>
           </div>
         </div>
