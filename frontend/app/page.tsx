@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Upload, FileText, Plus, Clock, LogOut, User, X } from "lucide-react";
 import DragOverlay from "@/components/DragOverlay";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import { MoviePosterBanner } from "@/components/MoviePosterBanner";
 
 export default function HomePage() {
   const { user, isLoading: authLoading, signOut } = useAuth();
@@ -93,11 +94,7 @@ export default function HomePage() {
 
   // Auth gating AFTER hooks to keep hook order stable
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+    return <LoadingOverlay isVisible={true} title="Initializing WritersRoom" />;
   }
   if (!user) return <SignInPage />;
 
@@ -163,119 +160,145 @@ export default function HomePage() {
   // Render styled UI
   return (
     <>
+      {/* Background layers */}
+      <MoviePosterBanner />
+      <div className="fixed inset-0 bg-white/85 backdrop-blur-sm z-0 pointer-events-none" />
+
+      {/* Overlays */}
       <DragOverlay isVisible={isDragging} />
       <LoadingOverlay isVisible={isParsing} title="Processing your screenplay" />
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6" onDrop={handleDrop}>
+      {/* Main content */}
+      <div className="min-h-screen p-6 relative z-10" onDrop={handleDrop}>
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-12">
-            <div className="text-center flex-1">
-              <h1 className="text-5xl font-bold text-white mb-4">WritersRoom</h1>
-              <p className="text-slate-300 text-xl">Professional screenwriting meets AI assistance</p>
+          {/* User Menu - Top Right */}
+          <div className="absolute top-8 right-8 flex items-center gap-4 z-20">
+            <div className="flex items-center gap-2 text-slate-900 text-sm">
+              <User className="w-4 h-4" />
+              <span>{user.displayName || user.email}</span>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-white">
-                <User className="w-5 h-5" />
-                <span>{user.displayName || user.email}</span>
-              </div>
-              <Button onClick={signOut} variant="outline" size="sm" className="text-white border-white hover:bg-white/10">
-                <LogOut className="w-4 h-4 mr-2" /> Sign Out
-              </Button>
-            </div>
+            <Button onClick={signOut} variant="ghost" size="sm" className="text-slate-700 hover:text-slate-900 hover:bg-white/50">
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
 
-          {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-            {/* Upload Card */}
-            <Card className={`border-2 border-dashed transition-all duration-200 cursor-pointer hover:scale-[1.02] ${isDragging ? 'border-purple-400 bg-purple-50/10 ring-4 ring-purple-400 shadow-lg shadow-purple-500/20' : 'border-slate-600 bg-slate-800/50 hover:border-slate-500 hover:bg-slate-800/70'} backdrop-blur`}>
-              <CardContent className="p-6 text-center">
+          {/* Hero Header */}
+          <div className="text-center mb-16 pt-12">
+            <h1 className="text-7xl md:text-8xl font-black text-slate-900 mb-6 tracking-tight">
+              Your Scripts
+            </h1>
+            <p className="text-2xl md:text-3xl text-slate-700 font-light tracking-wide">
+              Where stories begin
+            </p>
+          </div>
+
+          {/* Hero Actions */}
+          <div className="max-w-4xl mx-auto mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Upload - Primary CTA */}
+              <div className={`relative transition-all duration-300 ${isDragging ? 'scale-[1.02]' : ''}`}>
                 <input type="file" accept=".fdx" onChange={handleFileSelect} className="hidden" id="fdx-upload" disabled={isUploading} />
-                <Button onClick={() => document.getElementById('fdx-upload')?.click()} variant="ghost" disabled={isUploading} className="h-auto flex flex-col items-center space-y-3 w-full p-6 hover:bg-transparent text-slate-300 hover:text-white">
+                <button
+                  onClick={() => document.getElementById('fdx-upload')?.click()}
+                  disabled={isUploading}
+                  className={`w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-4 rounded-2xl transition-all duration-300 hover:scale-[1.02] shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed ${isDragging ? 'border-blue-500 bg-blue-50/90 ring-4 ring-blue-500/30' : 'border-slate-300 hover:bg-white hover:border-slate-400'}`}
+                >
                   {isUploading ? (
                     <>
-                      <div className="w-12 h-12 border-2 border-blue-600/50 border-t-blue-600 rounded-full animate-spin" />
-                      <span className="text-sm opacity-60">Processing...</span>
+                      <div className="w-16 h-16 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-6" />
+                      <div className="text-2xl font-bold text-slate-900 mb-2">Processing...</div>
+                      <div className="text-slate-600">Importing your screenplay</div>
                     </>
                   ) : (
                     <>
-                      <div className="w-12 h-12 rounded-lg bg-blue-600/20 flex items-center justify-center">
-                        <Upload className="w-6 h-6 text-blue-400" />
-                      </div>
-                      <div>
-                        <p className="font-semibold">Upload a Script</p>
-                        <p className="text-xs text-slate-400">Drop FDX file or click</p>
-                      </div>
+                      <Upload className="w-16 h-16 text-blue-600 mx-auto mb-6" />
+                      <div className="text-2xl font-bold text-slate-900 mb-2">Upload Script</div>
+                      <div className="text-slate-600">Drop FDX file or click to browse</div>
                     </>
                   )}
-                </Button>
-              </CardContent>
-            </Card>
+                </button>
+              </div>
 
-            {/* New Project Card */}
-            <Card className="border-slate-700 bg-slate-800/50 backdrop-blur hover:bg-slate-800/70 transition-all duration-200 cursor-pointer hover:scale-[1.02]">
-              <CardContent className="p-6 text-center">
-                <Button onClick={createNewScript} variant="ghost" className="h-auto flex flex-col items-center space-y-3 w-full p-6 hover:bg-transparent text-slate-300 hover:text-white">
-                  <div className="w-12 h-12 rounded-lg bg-purple-600/20 flex items-center justify-center">
-                    <Plus className="w-6 h-6 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">Start New Script</p>
-                    <p className="text-xs text-slate-400">Create from scratch</p>
-                  </div>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Loading State */}
-            {loadingScripts && (
-              <Card className="border-slate-700 bg-slate-800/50 backdrop-blur">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 border-2 border-slate-600/50 border-t-slate-400 rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-slate-400">Loading your scripts...</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Scripts */}
-            {scripts.map((p) => (
-              <Card key={p.script_id} className="border-slate-700 bg-slate-800/50 backdrop-blur hover:bg-slate-800/70 transition-all duration-200 cursor-pointer hover:scale-[1.02]" onClick={() => openProject(p.script_id)}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <FileText className="w-8 h-8 text-slate-400 flex-shrink-0" />
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <h3 className="text-white font-semibold text-lg mb-2 truncate">{p.title}</h3>
-                  <div className="space-y-1 text-sm text-slate-400">
-                    {p.description && (
-                      <p className="text-xs text-slate-500 truncate">{p.description}</p>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>{formatDate(p.updated_at)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+              {/* Create New - Secondary CTA */}
+              <button
+                onClick={createNewScript}
+                className="w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-4 border-slate-300 rounded-2xl hover:bg-white hover:border-slate-400 transition-all duration-300 hover:scale-[1.02] shadow-2xl"
+              >
+                <Plus className="w-16 h-16 text-purple-600 mx-auto mb-6" />
+                <div className="text-2xl font-bold text-slate-900 mb-2">Start New Script</div>
+                <div className="text-slate-600">Create from scratch</div>
+              </button>
+            </div>
           </div>
+
+          {/* Scripts Section */}
+          {loadingScripts ? (
+            <div className="max-w-6xl mx-auto text-center py-16">
+              <div className="w-16 h-16 border-4 border-slate-300/50 border-t-slate-700 rounded-full animate-spin mx-auto mb-6" />
+              <p className="text-xl text-slate-700">Loading your scripts...</p>
+            </div>
+          ) : scripts.length > 0 ? (
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold text-slate-900 mb-8">Recent Scripts</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {scripts.slice(0, 6).map((p) => (
+                  <Card
+                    key={p.script_id}
+                    className="border-2 border-slate-200 bg-white/90 backdrop-blur-md shadow-xl hover:bg-white hover:border-slate-300 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-2xl"
+                    onClick={() => openProject(p.script_id)}
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center">
+                          <FileText className="w-8 h-8 text-slate-700" />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <h3 className="text-slate-900 font-bold text-xl mb-3 line-clamp-2">{p.title}</h3>
+                      {p.description && (
+                        <p className="text-sm text-slate-600 mb-4 line-clamp-2">{p.description}</p>
+                      )}
+                      <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <Clock className="w-4 h-4" />
+                        <span>{formatDate(p.updated_at)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {scripts.length > 6 && (
+                <div className="text-center mt-8">
+                  <p className="text-slate-600">
+                    Showing 6 of {scripts.length} scripts
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : null}
 
           {/* Empty state */}
           {!loadingScripts && scripts.length === 0 && (
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No scripts yet</h3>
-              <p className="text-slate-400 mb-6">Upload an FDX file or create a new script to get started</p>
+            <div className="max-w-2xl mx-auto text-center py-20">
+              <div className="w-24 h-24 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-8">
+                <FileText className="w-12 h-12 text-slate-400" />
+              </div>
+              <h3 className="text-3xl font-bold text-slate-900 mb-4">Your creative journey begins here</h3>
+              <p className="text-xl text-slate-600">Upload your first screenplay or start writing something new</p>
             </div>
           )}
 
           {/* Error */}
           {uploadError && (
-            <div className="max-w-md mx-auto mb-8">
-              <div className="flex items-center gap-2 text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-800">
-                <span className="font-medium">Upload Failed</span>
-                <span className="text-sm">{uploadError}</span>
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="flex items-center gap-4 text-red-800 bg-red-50/95 backdrop-blur-xl p-6 rounded-xl border-2 border-red-200 shadow-xl">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl">⚠️</span>
+                </div>
+                <div>
+                  <div className="font-bold text-lg mb-1">Upload Failed</div>
+                  <div className="text-red-700">{uploadError}</div>
+                </div>
               </div>
             </div>
           )}
@@ -284,24 +307,24 @@ export default function HomePage() {
 
       {/* Title Modal */}
       {showTitleModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-600 rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 relative">
-            <Button onClick={handleCancelModal} variant="ghost" size="sm" className="absolute top-4 right-4 text-slate-400 hover:text-white">
-              <X className="w-4 h-4" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="bg-white/95 backdrop-blur-xl border-2 border-slate-200 rounded-2xl shadow-2xl p-10 max-w-lg w-full mx-4 relative">
+            <Button onClick={handleCancelModal} variant="ghost" size="sm" className="absolute top-6 right-6 text-slate-500 hover:text-slate-900 hover:bg-slate-100">
+              <X className="w-5 h-5" />
             </Button>
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-8 h-8 text-purple-400" />
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <FileText className="w-10 h-10 text-purple-600" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Create New Script</h2>
-              <p className="text-slate-300">What&apos;s the title of your masterpiece?</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3">Create New Script</h2>
+              <p className="text-lg text-slate-600">What&apos;s the title of your masterpiece?</p>
             </div>
-            <div className="mb-6">
-              <input type="text" value={newScriptTitle} onChange={(e) => setNewScriptTitle(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleCreateScript(); if (e.key === 'Escape') handleCancelModal(); }} placeholder="Enter script title..." className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" autoFocus />
+            <div className="mb-8">
+              <input type="text" value={newScriptTitle} onChange={(e) => setNewScriptTitle(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleCreateScript(); if (e.key === 'Escape') handleCancelModal(); }} placeholder="Enter script title..." className="w-full px-5 py-4 bg-white border-2 border-slate-300 rounded-xl text-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all" autoFocus />
             </div>
-            <div className="flex gap-3">
-              <Button onClick={handleCancelModal} variant="ghost" className="flex-1 text-slate-300 hover:text-white hover:bg-slate-700/50">Cancel</Button>
-              <Button onClick={handleCreateScript} disabled={!newScriptTitle.trim()} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed">Create Script</Button>
+            <div className="flex gap-4">
+              <Button onClick={handleCancelModal} variant="ghost" className="flex-1 py-3 text-lg font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl">Cancel</Button>
+              <Button onClick={handleCreateScript} disabled={!newScriptTitle.trim()} className="flex-1 py-3 text-lg font-semibold bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg hover:shadow-xl transition-all">Create Script</Button>
             </div>
           </div>
         </div>
