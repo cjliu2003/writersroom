@@ -14,7 +14,7 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: () => Promise<User | null>;
   signOut: () => Promise<void>;
-  getToken: () => Promise<string | null>;
+  getToken: (forceRefresh?: boolean) => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   signIn: async () => null,
   signOut: async () => {},
-  getToken: async () => null,
+  getToken: async (forceRefresh?: boolean) => null,
 });
 
 export function useAuth() {
@@ -99,9 +99,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const getToken = async (): Promise<string | null> => {
+  const getToken = async (forceRefresh = false): Promise<string | null> => {
     try {
-      return await getCurrentUserToken();
+      return await getCurrentUserToken(forceRefresh);
     } catch (error) {
       console.error('Error getting auth token:', error);
       return null;

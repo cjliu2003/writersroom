@@ -110,19 +110,20 @@ export const logOut = async (): Promise<void> => {
 };
 
 // Function to get the current user's ID token
-export const getCurrentUserToken = async (): Promise<string | null> => {
+export const getCurrentUserToken = async (forceRefresh = false): Promise<string | null> => {
   const auth = getFirebaseAuth();
   if (!auth) {
     return null;
   }
-  
+
   try {
     const user = auth.currentUser;
     if (!user) {
       return null;
     }
-    
-    return await user.getIdToken();
+
+    // Force refresh to get new token if expired
+    return await user.getIdToken(forceRefresh);
   } catch (error) {
     console.error('Error getting ID token:', error);
     return null;

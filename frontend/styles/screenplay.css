@@ -1,0 +1,162 @@
+/**
+ * Screenplay Formatting Styles
+ *
+ * Industry-standard screenplay formatting for TipTap editor.
+ * Measurements use millimeters (mm) to match pagination extension units.
+ *
+ * Positioning is relative to the page left margin (1.5" = 38.1mm),
+ * which is already set by the pagination extension.
+ */
+
+/* Global Screenplay Editor Styles */
+.screenplay-editor {
+  font-family: 'Courier', 'Courier New', monospace;
+  font-size: 12pt;
+  line-height: 12pt;
+  color: #000;
+  background: #fff;
+}
+
+/* Remove default margins from all screenplay elements */
+.screenplay-editor p {
+  margin: 0;
+}
+
+/* Scene Heading (Slug Line) */
+.screenplay-editor .screenplay-scene-heading,
+.screenplay-editor [data-type="scene-heading"] {
+  margin-left: 0 !important; /* Flush with left margin */
+  max-width: none !important;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-top: 24pt !important; /* Double-space before */
+  margin-bottom: 12pt !important; /* Single-space after */
+}
+
+/* Action (Scene Description) */
+.screenplay-editor .screenplay-action,
+.screenplay-editor [data-type="action"] {
+  margin-left: 0 !important; /* Flush with left margin */
+  max-width: none !important;
+  margin-bottom: 12pt !important; /* Single-space after */
+  line-height: 12pt;
+}
+
+/* Character Name (Character Cue) */
+.screenplay-editor .screenplay-character,
+.screenplay-editor [data-type="character"] {
+  /* Standard: 4.0" from page left edge = 2.5" from 1.5" left margin */
+  /* 2.5" = 63.5mm additional indent */
+  /* !important needed to override Tailwind prose styles */
+  width: fit-content !important;
+  max-width: none !important;
+  margin-left: 63.5mm !important; /* 4.0" from page left edge */
+  margin-right: auto !important;
+  text-transform: uppercase;
+  margin-top: 12pt !important; /* Single-space before */
+  margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */
+}
+
+/* Dialogue */
+.screenplay-editor .screenplay-dialogue,
+.screenplay-editor [data-type="dialogue"] {
+  /* Standard: 2.5" from page left edge = 1.0" from 1.5" left margin */
+  /* Right margin at 2.5" from page right = width of 3.5" */
+  /* 1.0" = 25.4mm additional indent, 3.5" = 88.9mm width */
+  /* !important needed to override Tailwind prose styles */
+  width: 88.9mm !important; /* 3.5 inches wide */
+  max-width: 88.9mm !important;
+  margin-left: 25.4mm !important; /* 2.5" from page left edge */
+  margin-right: 63.5mm !important; /* 2.5" from page right edge */
+  margin-bottom: 12pt !important; /* Single-space after */
+}
+
+/* Parenthetical */
+.screenplay-editor .screenplay-parenthetical,
+.screenplay-editor [data-type="parenthetical"] {
+  /* Standard: 3.5" from page left edge = 2.0" from 1.5" left margin */
+  /* Right margin at 2.5" from page right = width of 3.0" */
+  /* 2.0" = 50.8mm additional indent, 3.0" = 76.2mm width */
+  /* !important needed to override Tailwind prose styles */
+  width: 76.2mm !important; /* 3.0 inches wide */
+  max-width: 76.2mm !important;
+  margin-left: 50.8mm !important; /* 3.5" from page left edge */
+  margin-right: 63.5mm !important; /* 2.5" from page right edge */
+  font-style: italic;
+  margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */
+}
+
+/* Auto-wrap parenthetical content in parentheses */
+.screenplay-editor .screenplay-parenthetical::before,
+.screenplay-editor [data-type="parenthetical"]::before {
+  content: '(';
+}
+
+.screenplay-editor .screenplay-parenthetical::after,
+.screenplay-editor [data-type="parenthetical"]::after {
+  content: ')';
+}
+
+/* Transition */
+.screenplay-editor .screenplay-transition,
+.screenplay-editor [data-type="transition"] {
+  text-align: right !important;
+  text-transform: uppercase;
+  max-width: none !important;
+  margin-top: 12pt !important; /* Single-space before */
+  margin-bottom: 12pt !important; /* Single-space after */
+}
+
+/* Auto-add colon to transitions */
+.screenplay-editor .screenplay-transition::after,
+.screenplay-editor [data-type="transition"]::after {
+  content: ':';
+}
+
+/* Collaboration Cursor Styling (preserve from POC) */
+.collaboration-cursor__caret {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 1px solid;
+  border-right: 1px solid;
+  word-break: normal;
+  pointer-events: none;
+}
+
+.collaboration-cursor__label {
+  position: absolute;
+  top: -1.4em;
+  left: -1px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  user-select: none;
+  color: #fff;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px 3px 3px 0;
+  white-space: nowrap;
+}
+
+/* Ensure ProseMirror focus styles don't interfere */
+.screenplay-editor .ProseMirror:focus {
+  outline: none;
+}
+
+/* Placeholder styling for empty elements */
+.screenplay-editor .ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Page break styling (from pagination extension) */
+.screenplay-editor .page-break {
+  border-top: 2px dashed #ccc;
+  margin: 2rem 0;
+  padding-top: 2rem;
+  page-break-after: always;
+}
