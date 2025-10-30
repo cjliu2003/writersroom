@@ -6,8 +6,8 @@ import SignInPage from "@/components/SignInPage";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserScripts, uploadFDXFile, updateScript, deleteScript, type ScriptSummary } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Upload, FileText, Plus, Clock, LogOut, User, X, Edit2, Trash2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Upload, FileText, Plus, LogOut, User, X, Edit2, Trash2 } from "lucide-react";
 import DragOverlay from "@/components/DragOverlay";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { MoviePosterBanner } from "@/components/MoviePosterBanner";
@@ -159,11 +159,6 @@ export default function HomePage() {
     router.push(`/script-editor?scriptId=${projectId}&new=true&title=${encodeURIComponent(title)}`);
   };
 
-  const formatDate = (iso: string) => {
-    const d = new Date(iso);
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: d.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined });
-  };
-
   const handleEditClick = (e: React.MouseEvent, script: ScriptSummary) => {
     e.stopPropagation(); // Prevent card click
     setEditingScriptId(script.script_id);
@@ -177,22 +172,33 @@ export default function HomePage() {
       setEditingScriptId(null);
       return;
     }
+
+    // Optimistic update: Update UI immediately for instant feedback
+    const trimmedTitle = editTitle.trim();
+    setScripts(prev => prev.map(s =>
+      s.script_id === scriptId
+        ? { ...s, title: trimmedTitle }
+        : s
+    ));
+    setEditingScriptId(null);
+    setUploadError(null);
+
+    // Then make API call in background
     try {
-      await updateScript(scriptId, { title: editTitle.trim() });
+      await updateScript(scriptId, { title: trimmedTitle });
+    } catch (e: any) {
+      // On error, revert the optimistic update
       setScripts(prev => prev.map(s =>
         s.script_id === scriptId
-          ? { ...s, title: editTitle.trim() }
+          ? { ...s, title: scripts.find(script => script.script_id === scriptId)?.title || trimmedTitle }
           : s
       ));
-      setEditingScriptId(null);
-      setUploadError(null);
-    } catch (e: any) {
       setUploadError(e?.message || "Failed to update script");
-      setEditingScriptId(null);
     }
   };
 
   const handleCancelEdit = () => {
+    // Batch state updates using React 18's automatic batching
     setEditingScriptId(null);
     setEditTitle("");
     setEditWrittenBy("Written by");
@@ -206,14 +212,22 @@ export default function HomePage() {
 
   const handleConfirmDelete = async () => {
     if (!deletingScript) return;
+
+    // Optimistic update: Remove from UI immediately for instant feedback
+    const scriptToDelete = deletingScript;
+    setScripts(prev => prev.filter(s => s.script_id !== scriptToDelete.script_id));
+    setDeletingScript(null);
+    setUploadError(null);
+
+    // Then make API call in background
     try {
-      await deleteScript(deletingScript.script_id);
-      setScripts(prev => prev.filter(s => s.script_id !== deletingScript.script_id));
-      setDeletingScript(null);
-      setUploadError(null);
+      await deleteScript(scriptToDelete.script_id);
     } catch (e: any) {
+      // On error, restore the deleted script
+      setScripts(prev => [...prev, scriptToDelete].sort((a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      ));
       setUploadError(e?.message || "Failed to delete script");
-      setDeletingScript(null);
     }
   };
 
