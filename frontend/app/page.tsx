@@ -34,8 +34,30 @@ export default function HomePage() {
   const [scripts, setScripts] = useState<ScriptSummary[]>([]);
   const [loadingScripts, setLoadingScripts] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [errorFading, setErrorFading] = useState(false);
 
   // NOTE: Do not early-return before hooks. Auth gating moved below effects.
+
+  // Auto-dismiss error with gentle fade-out animation
+  useEffect(() => {
+    if (uploadError) {
+      // Start fade-out after 1.5 seconds
+      const fadeTimer = setTimeout(() => {
+        setErrorFading(true);
+      }, 1500);
+
+      // Remove error after fade-out completes (500ms fade duration)
+      const removeTimer = setTimeout(() => {
+        setUploadError(null);
+        setErrorFading(false);
+      }, 2000);
+
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(removeTimer);
+      };
+    }
+  }, [uploadError]);
 
   // Load user's scripts when a user is present
   useEffect(() => {
@@ -108,6 +130,33 @@ export default function HomePage() {
   // Handlers
   const openProject = (projectId: string) => router.push(`/script-editor?scriptId=${projectId}`);
 
+  // Unified file validation for both select and drag-and-drop
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    // Extension check
+    if (!file.name.toLowerCase().endsWith(".fdx")) {
+      return { valid: false, error: "Please upload a .fdx file" };
+    }
+
+    // MIME type check (FDX files are XML)
+    const validMimeTypes = ['text/xml', 'application/xml', 'application/octet-stream', ''];
+    if (file.type && !validMimeTypes.includes(file.type)) {
+      return { valid: false, error: "Invalid file type. Please upload a valid FDX file." };
+    }
+
+    // Size check (10MB limit)
+    const maxSizeMB = 10;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      return { valid: false, error: `File too large. Maximum size is ${maxSizeMB}MB.` };
+    }
+
+    // Basic sanity check - file should not be empty
+    if (file.size === 0) {
+      return { valid: false, error: "File appears to be empty" };
+    }
+
+    return { valid: true };
+  };
+
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
     setIsParsing(true);
@@ -134,20 +183,32 @@ export default function HomePage() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".fdx")) {
-      setUploadError("Please upload a .fdx file");
+
+    // Validate file
+    const validation = validateFile(file);
+    if (!validation.valid) {
+      setUploadError(validation.error || "Invalid file");
       return;
     }
+
     handleFileUpload(file);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    e.stopPropagation();
+    // Don't stopPropagation - let global handlers clean up drag state
     const file = e.dataTransfer.files?.[0];
-    if (file && file.name.toLowerCase().endsWith(".fdx")) {
-      handleFileUpload(file);
+
+    if (!file) return;
+
+    // Validate file with clear error feedback
+    const validation = validateFile(file);
+    if (!validation.valid) {
+      setUploadError(validation.error || "Invalid file");
+      return;
     }
+
+    handleFileUpload(file);
   };
 
   const createNewScript = () => setShowTitleModal(true);
@@ -275,6 +336,39 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Error Toast - Fixed at top center, auto-dismissing with fade-out */}
+      {uploadError && (
+        <div
+          className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 group ${
+            errorFading
+              ? 'opacity-0 scale-95 translate-y-[-8px]'
+              : 'opacity-100 scale-100 animate-in fade-in slide-in-from-top-2 duration-300'
+          }`}
+        >
+          <div className="bg-white/98 backdrop-blur-xl border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-2xl px-8 py-4 max-w-md">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <div className="absolute inset-0 w-2 h-2 rounded-full bg-red-500/30 animate-ping" />
+              </div>
+              <p className="font-[family-name:var(--font-courier-prime)] text-base text-slate-900 tracking-tight flex-1">
+                {uploadError}
+              </p>
+              <button
+                onClick={() => {
+                  setUploadError(null);
+                  setErrorFading(false);
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-slate-100 rounded-lg"
+                aria-label="Dismiss"
+              >
+                <X className="w-4 h-4 text-slate-400 hover:text-slate-700" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <div className="min-h-screen pt-12 p-6 relative z-10" onDrop={handleDrop}>
@@ -518,21 +612,6 @@ export default function HomePage() {
                     </button>
                   </CardContent>
                 </Card>
-              </div>
-            </div>
-          )}
-
-          {/* Error */}
-          {uploadError && (
-            <div className="max-w-2xl mx-auto mb-8">
-              <div className="flex items-center gap-4 text-red-800 bg-red-50/95 backdrop-blur-xl p-6 rounded-xl border-2 border-red-200 shadow-xl">
-                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl">⚠️</span>
-                </div>
-                <div>
-                  <div className="font-bold text-lg mb-1">Upload Failed</div>
-                  <div className="text-red-700">{uploadError}</div>
-                </div>
               </div>
             </div>
           )}

@@ -51,10 +51,44 @@ async def upload_fdx_file(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="File must be an FDX or XML file"
             )
-        
+
         # Read file content
         file_content = await file.read()
-        file_content_str = file_content.decode('utf-8')
+
+        # Decode with encoding fallback for robustness
+        file_content_str = None
+        for encoding in ['utf-8', 'utf-8-sig', 'latin-1', 'cp1252']:
+            try:
+                file_content_str = file_content.decode(encoding)
+                if encoding != 'utf-8':
+                    print(f"Successfully decoded file using {encoding} encoding")
+                break
+            except (UnicodeDecodeError, AttributeError):
+                continue
+
+        if file_content_str is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File encoding not supported. Please ensure file is properly encoded."
+            )
+
+        # Verify it's actually XML/FDX content
+        file_content_str_stripped = file_content_str.strip()
+        if not file_content_str_stripped:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File appears to be empty"
+            )
+
+        # Check for XML structure (Final Draft files start with XML declaration)
+        is_xml = file_content_str_stripped.startswith('<?xml')
+        has_fdx_content = '<FinalDraft' in file_content_str_stripped or '<finalDraft' in file_content_str_stripped
+
+        if not (is_xml or has_fdx_content):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File does not appear to be a valid FDX file. Please check the file format."
+            )
         
         # Parse FDX content
         print(f"Parsing FDX file: {file.filename}")
