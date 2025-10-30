@@ -33,14 +33,21 @@ export default function HomePage() {
   // Data state
   const [scripts, setScripts] = useState<ScriptSummary[]>([]);
   const [loadingScripts, setLoadingScripts] = useState(false);
+
+  // Separate error states for different operations
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [errorFading, setErrorFading] = useState(false);
 
   // NOTE: Do not early-return before hooks. Auth gating moved below effects.
 
   // Auto-dismiss error with gentle fade-out animation
+  // Combined error display - shows whichever error is active
+  const currentError = uploadError || editError || deleteError;
+
   useEffect(() => {
-    if (uploadError) {
+    if (currentError) {
       // Start fade-out after 1.5 seconds
       const fadeTimer = setTimeout(() => {
         setErrorFading(true);
@@ -49,6 +56,8 @@ export default function HomePage() {
       // Remove error after fade-out completes (500ms fade duration)
       const removeTimer = setTimeout(() => {
         setUploadError(null);
+        setEditError(null);
+        setDeleteError(null);
         setErrorFading(false);
       }, 2000);
 
@@ -57,7 +66,7 @@ export default function HomePage() {
         clearTimeout(removeTimer);
       };
     }
-  }, [uploadError]);
+  }, [currentError]);
 
   // Load user's scripts when a user is present
   useEffect(() => {
@@ -234,6 +243,10 @@ export default function HomePage() {
       return;
     }
 
+    // Store original values BEFORE optimistic update (fixes closure bug)
+    const originalScript = scripts.find(s => s.script_id === scriptId);
+    const originalTitle = originalScript?.title;
+
     // Optimistic update: Update UI immediately for instant feedback
     const trimmedTitle = editTitle.trim();
     setScripts(prev => prev.map(s =>
@@ -242,19 +255,22 @@ export default function HomePage() {
         : s
     ));
     setEditingScriptId(null);
-    setUploadError(null);
+    setEditError(null);
 
     // Then make API call in background
+    // NOTE: Backend currently only supports 'title' and 'description' fields.
+    // 'written_by' and 'author' are editable in UI but won't persist to database
+    // until backend schema is updated to include these fields.
     try {
       await updateScript(scriptId, { title: trimmedTitle });
     } catch (e: any) {
-      // On error, revert the optimistic update
+      // On error, revert to stored original values
       setScripts(prev => prev.map(s =>
         s.script_id === scriptId
-          ? { ...s, title: scripts.find(script => script.script_id === scriptId)?.title || trimmedTitle }
+          ? { ...s, title: originalTitle || trimmedTitle }
           : s
       ));
-      setUploadError(e?.message || "Failed to update script");
+      setEditError(e?.message || "Failed to update script");
     }
   };
 
@@ -278,7 +294,7 @@ export default function HomePage() {
     const scriptToDelete = deletingScript;
     setScripts(prev => prev.filter(s => s.script_id !== scriptToDelete.script_id));
     setDeletingScript(null);
-    setUploadError(null);
+    setDeleteError(null);
 
     // Then make API call in background
     try {
@@ -288,7 +304,7 @@ export default function HomePage() {
       setScripts(prev => [...prev, scriptToDelete].sort((a, b) =>
         new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
       ));
-      setUploadError(e?.message || "Failed to delete script");
+      setDeleteError(e?.message || "Failed to delete script");
     }
   };
 
@@ -338,7 +354,7 @@ export default function HomePage() {
       </div>
 
       {/* Error Toast - Fixed at top center, auto-dismissing with fade-out */}
-      {uploadError && (
+      {currentError && (
         <div
           className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 group ${
             errorFading
@@ -353,11 +369,13 @@ export default function HomePage() {
                 <div className="absolute inset-0 w-2 h-2 rounded-full bg-red-500/30 animate-ping" />
               </div>
               <p className="font-[family-name:var(--font-courier-prime)] text-base text-slate-900 tracking-tight flex-1">
-                {uploadError}
+                {currentError}
               </p>
               <button
                 onClick={() => {
                   setUploadError(null);
+                  setEditError(null);
+                  setDeleteError(null);
                   setErrorFading(false);
                 }}
                 className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-slate-100 rounded-lg"
