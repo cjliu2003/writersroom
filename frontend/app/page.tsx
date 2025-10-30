@@ -11,7 +11,6 @@ import { Upload, FileText, Plus, Clock, LogOut, User, X, Edit2, Trash2 } from "l
 import DragOverlay from "@/components/DragOverlay";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { MoviePosterBanner } from "@/components/MoviePosterBanner";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function HomePage() {
   const { user, isLoading: authLoading, signOut } = useAuth();
@@ -25,8 +24,10 @@ export default function HomePage() {
   const [newScriptTitle, setNewScriptTitle] = useState("");
 
   // Edit/Delete state
-  const [editingScript, setEditingScript] = useState<ScriptSummary | null>(null);
+  const [editingScriptId, setEditingScriptId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [editWrittenBy, setEditWrittenBy] = useState("Written by");
+  const [editAuthor, setEditAuthor] = useState("");
   const [deletingScript, setDeletingScript] = useState<ScriptSummary | null>(null);
 
   // Data state
@@ -165,25 +166,37 @@ export default function HomePage() {
 
   const handleEditClick = (e: React.MouseEvent, script: ScriptSummary) => {
     e.stopPropagation(); // Prevent card click
-    setEditingScript(script);
+    setEditingScriptId(script.script_id);
     setEditTitle(script.title);
+    setEditWrittenBy("Written by");
+    setEditAuthor(user?.displayName || user?.email || 'Writer');
   };
 
-  const handleSaveEdit = async () => {
-    if (!editingScript || !editTitle.trim()) return;
+  const handleSaveEdit = async (scriptId: string) => {
+    if (!editTitle.trim()) {
+      setEditingScriptId(null);
+      return;
+    }
     try {
-      await updateScript(editingScript.script_id, { title: editTitle.trim() });
+      await updateScript(scriptId, { title: editTitle.trim() });
       setScripts(prev => prev.map(s =>
-        s.script_id === editingScript.script_id
+        s.script_id === scriptId
           ? { ...s, title: editTitle.trim() }
           : s
       ));
-      setEditingScript(null);
+      setEditingScriptId(null);
       setUploadError(null);
     } catch (e: any) {
       setUploadError(e?.message || "Failed to update script");
-      setEditingScript(null);
+      setEditingScriptId(null);
     }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingScriptId(null);
+    setEditTitle("");
+    setEditWrittenBy("Written by");
+    setEditAuthor("");
   };
 
   const handleDeleteClick = (e: React.MouseEvent, script: ScriptSummary) => {
@@ -313,49 +326,132 @@ export default function HomePage() {
                 {scripts.map((p) => (
                   <Card
                     key={p.script_id}
-                    className="bg-white border-[1.5px] border-slate-300 hover:border-slate-400 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] overflow-hidden group"
-                    onClick={() => openProject(p.script_id)}
+                    className={`bg-white border-[1.5px] border-slate-300 shadow-xl transition-all duration-300 overflow-hidden group ${
+                      editingScriptId === p.script_id
+                        ? 'border-slate-400 scale-[1.02]'
+                        : 'hover:border-slate-400 hover:shadow-2xl cursor-pointer hover:scale-[1.02]'
+                    }`}
+                    onClick={() => editingScriptId !== p.script_id && openProject(p.script_id)}
                   >
                     {/* Industry-Standard Screenplay Title Page */}
                     <div className="relative h-64 bg-white flex flex-col items-center justify-center p-8">
-                      {/* Action Buttons - Subtle, Bottom-Right */}
-                      <div className="absolute bottom-3 right-3 z-10 flex gap-3">
-                        <button
-                          onClick={(e) => handleEditClick(e, p)}
-                          className="p-1.5 rounded-lg opacity-0 group-hover:opacity-40 hover:opacity-100 hover:scale-110 hover:bg-white/5 hover:backdrop-blur-sm hover:drop-shadow-[0_0_6px_rgba(0,0,0,0.12)] transition-all duration-200 ease-in-out group/edit"
-                          title="Edit title"
-                        >
-                          <Edit2 className="w-5 h-5 text-gray-500 group-hover/edit:text-black transition-colors duration-200 ease-in-out" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteClick(e, p)}
-                          className="p-1.5 rounded-lg opacity-0 group-hover:opacity-40 hover:opacity-100 hover:scale-110 hover:bg-white/5 hover:backdrop-blur-sm hover:drop-shadow-[0_0_6px_rgba(0,0,0,0.12)] transition-all duration-200 ease-in-out group/delete"
-                          title="Delete script"
-                        >
-                          <Trash2 className="w-5 h-5 text-gray-500 group-hover/delete:text-black transition-colors duration-200 ease-in-out" />
-                        </button>
-                      </div>
+                      {/* Action Buttons - Subtle, Bottom-Right (hidden during edit) */}
+                      {editingScriptId !== p.script_id && (
+                        <div className="absolute bottom-1 right-3 z-10 flex gap-2">
+                          <button
+                            onClick={(e) => handleEditClick(e, p)}
+                            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-40 hover:opacity-100 hover:scale-110 hover:bg-white/5 hover:backdrop-blur-sm hover:drop-shadow-[0_0_6px_rgba(0,0,0,0.12)] transition-all duration-200 ease-in-out group/edit"
+                            title="Edit title"
+                          >
+                            <Edit2 className="w-5 h-5 text-gray-500 group-hover/edit:text-black transition-colors duration-200 ease-in-out" />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteClick(e, p)}
+                            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-40 hover:opacity-100 hover:scale-110 hover:bg-white/5 hover:backdrop-blur-sm hover:drop-shadow-[0_0_6px_rgba(0,0,0,0.12)] transition-all duration-200 ease-in-out group/delete"
+                            title="Delete script"
+                          >
+                            <Trash2 className="w-5 h-5 text-gray-500 group-hover/delete:text-black transition-colors duration-200 ease-in-out" />
+                          </button>
+                        </div>
+                      )}
 
-                      {/* Title - Uppercase, Centered, Underlined */}
-                      <h2 className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2">
-                        {p.title}
-                      </h2>
+                      {/* Title - Uppercase, Centered, Underlined (or Editable) */}
+                      {editingScriptId === p.script_id ? (
+                        <input
+                          type="text"
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveEdit(p.script_id);
+                            if (e.key === 'Escape') handleCancelEdit();
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          maxLength={30}
+                          className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2 bg-transparent border-none outline-none focus:outline-none w-full px-2"
+                          autoFocus
+                        />
+                      ) : (
+                        <h2 className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2">
+                          {p.title}
+                        </h2>
+                      )}
 
                       {/* Blank lines (3 line breaks equivalent) */}
                       <div className="h-12" aria-hidden="true" />
 
-                      {/* "Written by" */}
-                      <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
-                        Written by
-                      </div>
+                      {/* "Written by" - Editable in edit mode */}
+                      {editingScriptId === p.script_id ? (
+                        <input
+                          type="text"
+                          value={editWrittenBy}
+                          onChange={(e) => setEditWrittenBy(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveEdit(p.script_id);
+                            if (e.key === 'Escape') handleCancelEdit();
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          maxLength={30}
+                          className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black bg-transparent border-none outline-none focus:outline-none w-full px-2"
+                        />
+                      ) : (
+                        <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
+                          Written by
+                        </div>
+                      )}
 
                       {/* Blank line (1 line break) */}
                       <div className="h-6" aria-hidden="true" />
 
-                      {/* Author Name */}
-                      <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
-                        {user?.displayName || user?.email || 'Writer'}
-                      </div>
+                      {/* Author Name - Editable in edit mode */}
+                      {editingScriptId === p.script_id ? (
+                        <input
+                          type="text"
+                          value={editAuthor}
+                          onChange={(e) => setEditAuthor(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveEdit(p.script_id);
+                            if (e.key === 'Escape') handleCancelEdit();
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          maxLength={30}
+                          className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black bg-transparent border-none outline-none focus:outline-none w-full px-2"
+                        />
+                      ) : (
+                        <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
+                          {user?.displayName || user?.email || 'Writer'}
+                        </div>
+                      )}
+
+                      {/* Save/Cancel buttons - Identical position/styling to Edit/Delete */}
+                      {editingScriptId === p.script_id && (
+                        <div className="absolute bottom-1 right-3 z-10 flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSaveEdit(p.script_id);
+                            }}
+                            className="p-1.5 rounded-lg opacity-100 hover:opacity-100 hover:scale-110 hover:bg-white/5 hover:backdrop-blur-sm hover:drop-shadow-[0_0_6px_rgba(0,0,0,0.12)] transition-all duration-200 ease-in-out"
+                            disabled={!editTitle.trim()}
+                            title="Save changes (Enter)"
+                          >
+                            <svg className="w-5 h-5 text-gray-500 hover:text-black transition-colors duration-200 ease-in-out" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCancelEdit();
+                            }}
+                            className="p-1.5 rounded-lg opacity-100 hover:opacity-100 hover:scale-110 hover:bg-white/5 hover:backdrop-blur-sm hover:drop-shadow-[0_0_6px_rgba(0,0,0,0.12)] transition-all duration-200 ease-in-out"
+                            title="Cancel editing (Escape)"
+                          >
+                            <svg className="w-5 h-5 text-gray-500 hover:text-black transition-colors duration-200 ease-in-out" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </Card>
                 ))}
@@ -454,65 +550,36 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Edit Title Modal */}
-      {editingScript && (
-        <Dialog open={!!editingScript} onOpenChange={() => setEditingScript(null)}>
-          <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl border-2 border-slate-200">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-slate-900">Edit Script Title</DialogTitle>
-              <DialogDescription className="text-slate-600">
-                Update the title for &quot;{editingScript.title}&quot;
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSaveEdit();
-                  if (e.key === 'Escape') setEditingScript(null);
-                }}
-                className="w-full px-4 py-3 bg-white border-2 border-slate-300 rounded-xl text-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-                placeholder="Enter script title..."
-                autoFocus
-              />
-            </div>
-            <DialogFooter className="gap-2">
-              <Button variant="ghost" onClick={() => setEditingScript(null)} className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">
-                Cancel
-              </Button>
-              <Button onClick={handleSaveEdit} disabled={!editTitle.trim()} className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50">
-                Save Changes
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
       {/* Delete Confirmation Modal */}
       {deletingScript && (
-        <Dialog open={!!deletingScript} onOpenChange={() => setDeletingScript(null)}>
-          <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl border-2 border-slate-200">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-red-600">Delete Script?</DialogTitle>
-              <DialogDescription className="text-slate-600">
-                Are you sure you want to delete &quot;{deletingScript.title}&quot;? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="gap-2 pt-4">
-              <Button variant="ghost" onClick={() => setDeletingScript(null)} className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50" onClick={() => setDeletingScript(null)}>
+          <div className="bg-white/95 backdrop-blur-xl border-2 border-red-200 rounded-2xl shadow-2xl p-10 max-w-lg w-full mx-4 relative" onClick={(e) => e.stopPropagation()}>
+            <Button onClick={() => setDeletingScript(null)} variant="ghost" size="sm" className="absolute top-6 right-6 text-slate-500 hover:text-slate-900 hover:bg-slate-100">
+              <X className="w-5 h-5" />
+            </Button>
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border-2 border-red-200">
+                <Trash2 className="w-10 h-10 text-red-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3">Delete Script?</h2>
+              <p className="text-lg text-slate-600">
+                Are you sure you want to delete <span className="font-semibold text-slate-900">&quot;{deletingScript.title}&quot;</span>?
+              </p>
+              <p className="text-base text-slate-500 mt-2">This action cannot be undone.</p>
+            </div>
+            <div className="flex gap-4">
+              <Button onClick={() => setDeletingScript(null)} variant="ghost" className="flex-1 py-3 text-lg font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl">
                 Cancel
               </Button>
               <Button
                 onClick={handleConfirmDelete}
-                className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all"
+                className="flex-1 py-3 text-lg font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
               >
                 Delete Script
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
