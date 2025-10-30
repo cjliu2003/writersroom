@@ -266,26 +266,32 @@ export default function HomePage() {
                 {scripts.map((p) => (
                   <Card
                     key={p.script_id}
-                    className="border-2 border-slate-200 bg-white/90 backdrop-blur-md shadow-xl hover:bg-white hover:border-slate-300 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-2xl"
+                    className="bg-white shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] overflow-hidden group border-0"
                     onClick={() => openProject(p.script_id)}
                   >
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start justify-between">
-                        <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center">
-                          <FileText className="w-8 h-8 text-slate-700" />
-                        </div>
+                    {/* Industry-Standard Screenplay Title Page */}
+                    <div className="relative h-64 bg-white flex flex-col items-center justify-center p-8">
+                      {/* Title - Uppercase, Centered, Underlined */}
+                      <h2 className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2">
+                        {p.title}
+                      </h2>
+
+                      {/* Blank lines (3 line breaks equivalent) */}
+                      <div className="h-12" aria-hidden="true" />
+
+                      {/* "Written by" */}
+                      <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
+                        Written by
                       </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <h3 className="text-slate-900 font-bold text-xl mb-3 line-clamp-2">{p.title}</h3>
-                      {p.description && (
-                        <p className="text-sm text-slate-600 mb-4 line-clamp-2">{p.description}</p>
-                      )}
-                      <div className="flex items-center gap-2 text-sm text-slate-500">
-                        <Clock className="w-4 h-4" />
-                        <span>{formatDate(p.updated_at)}</span>
+
+                      {/* Blank line (1 line break) */}
+                      <div className="h-6" aria-hidden="true" />
+
+                      {/* Author Name */}
+                      <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
+                        {user?.displayName || user?.email || 'Writer'}
                       </div>
-                    </CardContent>
+                    </div>
                   </Card>
                 ))}
 
