@@ -117,7 +117,7 @@
   }
 }
 
-/* Scrolling Movie Poster Rows - Responsive Layout */
+/* Scrolling Movie Poster Rows - Adaptive 7-Row Layout (5 visible, 2 discoverable) */
 .poster-rows-container {
   position: absolute;
   inset: 0;
@@ -126,40 +126,25 @@
   justify-content: flex-start;
   gap: 1.5rem;
   padding: 2rem 0;
-  overflow: hidden;
+  overflow-y: auto;  /* Allow vertical scroll to discover rows 6-7 */
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
 
-/* Responsive row heights based on viewport */
+/* Hide scrollbar for Chrome/Safari/newer Edge */
+.poster-rows-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Flexible row heights - adapts to poster size */
 .poster-row {
   display: flex;
   overflow: hidden;
   width: 100%;
   flex-shrink: 0;
-  min-height: 210px;
   align-items: center;
-}
-
-/* Larger screens get more spacing */
-@media (min-height: 1000px) {
-  .poster-rows-container {
-    gap: 2rem;
-    padding: 2.5rem 0;
-  }
-
-  .poster-row {
-    min-height: 225px;
-  }
-}
-
-@media (min-height: 1200px) {
-  .poster-rows-container {
-    gap: 2.5rem;
-    padding: 3rem 0;
-  }
-
-  .poster-row {
-    min-height: 270px;
-  }
 }
 
 .poster-row-track {
@@ -183,38 +168,15 @@
   animation-play-state: paused;
 }
 
-/* Individual poster styling - responsive dimensions */
+/* Individual poster styling - fluid dimensions calculated by JS */
 .poster-item {
   flex-shrink: 0;
-  width: 140px;
-  height: 210px;
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.3);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-}
-
-/* Responsive poster sizes based on viewport height */
-@media (min-height: 800px) {
-  .poster-item {
-    width: 130px;
-    height: 195px;
-  }
-}
-
-@media (min-height: 1000px) {
-  .poster-item {
-    width: 150px;
-    height: 225px;
-  }
-}
-
-@media (min-height: 1200px) {
-  .poster-item {
-    width: 180px;
-    height: 270px;
-  }
+  /* Width and height set via inline styles from JS calculation */
 }
 
 /* Cinematic hover effect */
@@ -227,9 +189,9 @@
 
 .poster-img {
   object-fit: cover;
-  width: 100%;
-  height: 100%;
+  display: block;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Image respects parent .poster-item dimensions set via inline styles */
 }
 
 /* Radial vignette - creates reading zone in center while keeping posters visible */
@@ -281,36 +243,16 @@
   }
 }
 
-/* Mobile/tablet responsiveness - smaller spacing on smaller screens */
+/* Mobile/tablet responsiveness - tighter spacing on smaller screens */
 @media (max-width: 768px) {
-  .poster-rows-container {
-    gap: 1.25rem;
-    padding: 1.5rem 0;
-  }
-
-  .poster-row {
-    min-height: 180px;
-  }
-
-  .poster-item {
-    width: 120px;
-    height: 180px;
-  }
-}
-
-@media (max-width: 480px) {
   .poster-rows-container {
     gap: 1rem;
     padding: 1rem 0;
   }
 
-  .poster-row {
-    min-height: 150px;
-  }
-
-  .poster-item {
-    width: 100px;
-    height: 150px;
+  /* Ensure smooth scrolling on touch devices */
+  .poster-rows-container {
+    -webkit-overflow-scrolling: touch;
   }
 }
 

@@ -1,10 +1,13 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { MoviePosterBanner } from '@/components/MoviePosterBanner';
 
-// Cinematic styling constants
+/**
+ * Cinematic styling constants for login page
+ * Using clamp() for fluid responsive typography
+ */
 const TITLE_STYLES = {
   fontSize: 'clamp(3.5rem, 12vw, 11rem)',
   textShadow: '5px 5px 10px rgba(0, 0, 0, 0.95), 3px 3px 6px rgba(0, 0, 0, 0.9), -1px -1px 3px rgba(0, 0, 0, 0.6)',
@@ -33,26 +36,33 @@ const BUTTON_HOVER_STYLES = {
 
 export default function SignInPage() {
   const { signIn, isLoading } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
   const handleSignIn = useCallback(async () => {
+    setError(null);
+
     try {
       const result = await signIn();
+
       if (!result) {
-        alert('Firebase authentication is not configured. Please check your environment variables.');
+        setError('Authentication is not configured. Please contact support.');
       }
-    } catch (error) {
-      console.error('Sign in failed:', error);
-      alert('Sign in failed. Please check your Firebase configuration.');
+    } catch (err) {
+      console.error('[SignInPage] Authentication failed:', err);
+      setError('Sign in failed. Please try again or contact support.');
     }
   }, [signIn]);
 
   const handleButtonMouseEnter = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    Object.assign(e.currentTarget.style, BUTTON_HOVER_STYLES);
+    const button = e.currentTarget;
+    button.style.background = BUTTON_HOVER_STYLES.background;
+    button.style.borderColor = BUTTON_HOVER_STYLES.borderColor;
   }, []);
 
   const handleButtonMouseLeave = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.background = BUTTON_BASE_STYLES.background;
-    e.currentTarget.style.borderColor = BUTTON_BASE_STYLES.border.split(' ')[2];
+    const button = e.currentTarget;
+    button.style.background = BUTTON_BASE_STYLES.background;
+    button.style.borderColor = 'rgba(255, 255, 255, 0.8)';
   }, []);
 
   return (
@@ -76,7 +86,17 @@ export default function SignInPage() {
             by screenwriters, for screenwriters
           </p>
 
-          {/* Button group */}
+          {/* Error message */}
+          {error && (
+            <div
+              className="mb-6 px-6 py-3 bg-red-900/80 border-2 border-red-500/80 rounded-lg backdrop-blur-sm max-w-md"
+              role="alert"
+            >
+              <p className="text-white font-medium">{error}</p>
+            </div>
+          )}
+
+          {/* Authentication buttons */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center w-full max-w-2xl px-4">
             {/* Sign In Button */}
             <button
@@ -86,11 +106,12 @@ export default function SignInPage() {
               style={BUTTON_BASE_STYLES}
               onMouseEnter={handleButtonMouseEnter}
               onMouseLeave={handleButtonMouseLeave}
+              aria-label="Sign in with Google"
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
 
-            {/* Sign Up Button */}
+            {/* Sign Up Button - Currently uses same handler as Sign In */}
             <button
               onClick={handleSignIn}
               disabled={isLoading}
@@ -98,6 +119,7 @@ export default function SignInPage() {
               style={BUTTON_BASE_STYLES}
               onMouseEnter={handleButtonMouseEnter}
               onMouseLeave={handleButtonMouseLeave}
+              aria-label="Sign up with Google"
             >
               Sign Up
             </button>
