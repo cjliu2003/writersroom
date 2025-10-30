@@ -4,13 +4,14 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SignInPage from "@/components/SignInPage";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserScripts, uploadFDXFile, type ScriptSummary } from "@/lib/api";
+import { getUserScripts, uploadFDXFile, updateScript, deleteScript, type ScriptSummary } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Upload, FileText, Plus, Clock, LogOut, User, X } from "lucide-react";
+import { Upload, FileText, Plus, Clock, LogOut, User, X, Edit2, Trash2 } from "lucide-react";
 import DragOverlay from "@/components/DragOverlay";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { MoviePosterBanner } from "@/components/MoviePosterBanner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function HomePage() {
   const { user, isLoading: authLoading, signOut } = useAuth();
@@ -22,6 +23,11 @@ export default function HomePage() {
   const [isParsing, setIsParsing] = useState(false);
   const [showTitleModal, setShowTitleModal] = useState(false);
   const [newScriptTitle, setNewScriptTitle] = useState("");
+
+  // Edit/Delete state
+  const [editingScript, setEditingScript] = useState<ScriptSummary | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [deletingScript, setDeletingScript] = useState<ScriptSummary | null>(null);
 
   // Data state
   const [scripts, setScripts] = useState<ScriptSummary[]>([]);
@@ -157,6 +163,47 @@ export default function HomePage() {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: d.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined });
   };
 
+  const handleEditClick = (e: React.MouseEvent, script: ScriptSummary) => {
+    e.stopPropagation(); // Prevent card click
+    setEditingScript(script);
+    setEditTitle(script.title);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingScript || !editTitle.trim()) return;
+    try {
+      await updateScript(editingScript.script_id, { title: editTitle.trim() });
+      setScripts(prev => prev.map(s =>
+        s.script_id === editingScript.script_id
+          ? { ...s, title: editTitle.trim() }
+          : s
+      ));
+      setEditingScript(null);
+      setUploadError(null);
+    } catch (e: any) {
+      setUploadError(e?.message || "Failed to update script");
+      setEditingScript(null);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, script: ScriptSummary) => {
+    e.stopPropagation(); // Prevent card click
+    setDeletingScript(script);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingScript) return;
+    try {
+      await deleteScript(deletingScript.script_id);
+      setScripts(prev => prev.filter(s => s.script_id !== deletingScript.script_id));
+      setDeletingScript(null);
+      setUploadError(null);
+    } catch (e: any) {
+      setUploadError(e?.message || "Failed to delete script");
+      setDeletingScript(null);
+    }
+  };
+
   // Render styled UI
   return (
     <>
@@ -214,12 +261,22 @@ export default function HomePage() {
             <div className="min-h-screen flex items-center justify-center">
               <div className="max-w-4xl mx-auto w-full px-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Upload - Primary CTA */}
+                  {/* Create New - Primary CTA */}
+                  <button
+                    onClick={createNewScript}
+                    className="w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-[1.5px] border-slate-300 rounded-2xl hover:bg-white hover:border-slate-400 transition-all duration-300 hover:scale-[1.02] shadow-2xl"
+                  >
+                    <Plus className="w-16 h-16 text-purple-600 mx-auto mb-6" />
+                    <div className="text-2xl font-bold text-slate-900 mb-2">Start New Script</div>
+                    <div className="text-slate-600">Create from scratch</div>
+                  </button>
+
+                  {/* Upload - Secondary CTA */}
                   <div className={`relative transition-all duration-300 ${isDragging ? 'scale-[1.02]' : ''}`}>
                     <button
                       onClick={() => document.getElementById('fdx-upload')?.click()}
                       disabled={isUploading}
-                      className={`w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-4 rounded-2xl transition-all duration-300 hover:scale-[1.02] shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed ${isDragging ? 'border-blue-500 bg-blue-50/90 ring-4 ring-blue-500/30' : 'border-slate-300 hover:bg-white hover:border-slate-400'}`}
+                      className={`w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-[1.5px] rounded-2xl transition-all duration-300 hover:scale-[1.02] shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed ${isDragging ? 'border-blue-500 bg-blue-50/90 ring-4 ring-blue-500/30' : 'border-slate-300 hover:bg-white hover:border-slate-400'}`}
                     >
                       {isUploading ? (
                         <>
@@ -236,16 +293,6 @@ export default function HomePage() {
                       )}
                     </button>
                   </div>
-
-                  {/* Create New - Secondary CTA */}
-                  <button
-                    onClick={createNewScript}
-                    className="w-full px-12 py-16 bg-white/90 backdrop-blur-xl border-4 border-slate-300 rounded-2xl hover:bg-white hover:border-slate-400 transition-all duration-300 hover:scale-[1.02] shadow-2xl"
-                  >
-                    <Plus className="w-16 h-16 text-purple-600 mx-auto mb-6" />
-                    <div className="text-2xl font-bold text-slate-900 mb-2">Start New Script</div>
-                    <div className="text-slate-600">Create from scratch</div>
-                  </button>
                 </div>
               </div>
             </div>
@@ -266,11 +313,29 @@ export default function HomePage() {
                 {scripts.map((p) => (
                   <Card
                     key={p.script_id}
-                    className="bg-white shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] overflow-hidden group border-0"
+                    className="bg-white border-[1.5px] border-slate-300 hover:border-slate-400 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-[1.02] overflow-hidden group"
                     onClick={() => openProject(p.script_id)}
                   >
                     {/* Industry-Standard Screenplay Title Page */}
                     <div className="relative h-64 bg-white flex flex-col items-center justify-center p-8">
+                      {/* Action Buttons - Subtle, Bottom-Right */}
+                      <div className="absolute bottom-3 right-3 z-10 flex gap-3">
+                        <button
+                          onClick={(e) => handleEditClick(e, p)}
+                          className="p-1.5 rounded-lg opacity-0 group-hover:opacity-40 hover:opacity-100 hover:scale-110 hover:bg-white/5 hover:backdrop-blur-sm hover:drop-shadow-[0_0_6px_rgba(0,0,0,0.12)] transition-all duration-200 ease-in-out group/edit"
+                          title="Edit title"
+                        >
+                          <Edit2 className="w-5 h-5 text-gray-500 group-hover/edit:text-black transition-colors duration-200 ease-in-out" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteClick(e, p)}
+                          className="p-1.5 rounded-lg opacity-0 group-hover:opacity-40 hover:opacity-100 hover:scale-110 hover:bg-white/5 hover:backdrop-blur-sm hover:drop-shadow-[0_0_6px_rgba(0,0,0,0.12)] transition-all duration-200 ease-in-out group/delete"
+                          title="Delete script"
+                        >
+                          <Trash2 className="w-5 h-5 text-gray-500 group-hover/delete:text-black transition-colors duration-200 ease-in-out" />
+                        </button>
+                      </div>
+
                       {/* Title - Uppercase, Centered, Underlined */}
                       <h2 className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2">
                         {p.title}
@@ -295,8 +360,26 @@ export default function HomePage() {
                   </Card>
                 ))}
 
+                {/* Create New Card - Integrated into Grid */}
+                <Card className="border-[1.5px] border-slate-300 bg-white/80 backdrop-blur-md shadow-xl hover:bg-white/95 hover:border-slate-400 transition-all duration-300 cursor-pointer hover:scale-[1.02]">
+                  <CardContent className="p-6 h-full flex items-center justify-center">
+                    <button
+                      onClick={createNewScript}
+                      className="w-full h-full flex flex-col items-center justify-center space-y-4 py-8 hover:bg-transparent"
+                    >
+                      <div className="w-12 h-12 rounded-lg bg-purple-600/20 flex items-center justify-center">
+                        <Plus className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900">Start New Script</p>
+                        <p className="text-xs text-slate-500">Create from scratch</p>
+                      </div>
+                    </button>
+                  </CardContent>
+                </Card>
+
                 {/* Upload Card - Integrated into Grid */}
-                <Card className={`border-2 border-dashed transition-all duration-300 cursor-pointer hover:scale-[1.02] ${isDragging ? 'border-blue-400 bg-blue-50/80 ring-4 ring-blue-400/30 shadow-xl' : 'border-slate-300 bg-white/80 hover:border-slate-400 hover:bg-white/95 shadow-xl'} backdrop-blur-md`}>
+                <Card className={`border-[1.5px] border-dashed transition-all duration-300 cursor-pointer hover:scale-[1.02] ${isDragging ? 'border-blue-400 bg-blue-50/80 ring-4 ring-blue-400/30 shadow-xl' : 'border-slate-300 bg-white/80 hover:border-slate-400 hover:bg-white/95 shadow-xl'} backdrop-blur-md`}>
                   <CardContent className="p-6 h-full flex items-center justify-center">
                     <button
                       onClick={() => document.getElementById('fdx-upload')?.click()}
@@ -322,24 +405,6 @@ export default function HomePage() {
                           </div>
                         </>
                       )}
-                    </button>
-                  </CardContent>
-                </Card>
-
-                {/* Create New Card - Integrated into Grid */}
-                <Card className="border-2 border-slate-300 bg-white/80 backdrop-blur-md shadow-xl hover:bg-white/95 hover:border-slate-400 transition-all duration-300 cursor-pointer hover:scale-[1.02]">
-                  <CardContent className="p-6 h-full flex items-center justify-center">
-                    <button
-                      onClick={createNewScript}
-                      className="w-full h-full flex flex-col items-center justify-center space-y-4 py-8 hover:bg-transparent"
-                    >
-                      <div className="w-12 h-12 rounded-lg bg-purple-600/20 flex items-center justify-center">
-                        <Plus className="w-6 h-6 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">Start New Script</p>
-                        <p className="text-xs text-slate-500">Create from scratch</p>
-                      </div>
                     </button>
                   </CardContent>
                 </Card>
@@ -387,6 +452,67 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Edit Title Modal */}
+      {editingScript && (
+        <Dialog open={!!editingScript} onOpenChange={() => setEditingScript(null)}>
+          <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl border-2 border-slate-200">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-slate-900">Edit Script Title</DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Update the title for &quot;{editingScript.title}&quot;
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveEdit();
+                  if (e.key === 'Escape') setEditingScript(null);
+                }}
+                className="w-full px-4 py-3 bg-white border-2 border-slate-300 rounded-xl text-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                placeholder="Enter script title..."
+                autoFocus
+              />
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="ghost" onClick={() => setEditingScript(null)} className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={!editTitle.trim()} className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50">
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingScript && (
+        <Dialog open={!!deletingScript} onOpenChange={() => setDeletingScript(null)}>
+          <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl border-2 border-slate-200">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-red-600">Delete Script?</DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Are you sure you want to delete &quot;{deletingScript.title}&quot;? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 pt-4">
+              <Button variant="ghost" onClick={() => setDeletingScript(null)} className="text-slate-700 hover:text-slate-900 hover:bg-slate-100">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmDelete}
+                className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all"
+              >
+                Delete Script
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );

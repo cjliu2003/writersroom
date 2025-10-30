@@ -213,24 +213,24 @@ async def update_script(
 ):
     """
     Update a script.
-    
+
     Requires authentication and edit access to the script (owner or editor).
     """
     # Get script if user has edit access (not just viewer)
     script = await get_script_if_user_has_access(
-        script_id, 
-        current_user, 
-        db, 
+        script_id,
+        current_user,
+        db,
         allow_viewer=False
     )
-    
+
     # Create update data dictionary with non-None fields
     update_data = {k: v for k, v in script_update.model_dump().items() if v is not None}
-    
+
     if not update_data:
         # No fields to update, return the script as is
         return script
-        
+
     # Update script
     query = (
         update(Script)
@@ -238,12 +238,46 @@ async def update_script(
         .values(**update_data)
         .returning(Script)
     )
-    
+
     result = await db.execute(query)
     updated_script = result.scalar_one()
     await db.commit()
-    
+
     return updated_script
+
+
+@router.delete("/{script_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_script(
+    script_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Delete a script.
+
+    Requires authentication and ownership of the script.
+    Only the script owner can delete it (not editors or viewers).
+    """
+    # Get script if user has access
+    script = await get_script_if_user_has_access(
+        script_id,
+        current_user,
+        db,
+        allow_viewer=False
+    )
+
+    # Verify ownership (only owner can delete)
+    if script.owner_id != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the script owner can delete it"
+        )
+
+    # Delete script (cascades to related records via DB constraints)
+    await db.delete(script)
+    await db.commit()
+
+    return None
 
 
 

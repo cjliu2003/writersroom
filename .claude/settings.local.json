@@ -31,7 +31,8 @@
       "Bash(exit 1)",
       "Bash(fi)",
       "Bash(code --status:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(python -m py_compile:*)"
     ],
     "deny": [],
     "ask": []
