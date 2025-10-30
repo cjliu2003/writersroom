@@ -18,7 +18,7 @@ export default function DragOverlay({ isVisible }: DragOverlayProps) {
       {/* Frosted glass border with gentle blue glow */}
       <div className="absolute inset-4">
         <div
-          className="w-full h-full rounded-2xl border-2 border-blue-400/40 bg-white/40 backdrop-blur-md shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all duration-200 ease-out"
+          className="w-full h-full rounded-2xl border-2 border-dashed border-blue-400/60 bg-white/40 backdrop-blur-md shadow-[0_0_20px_rgba(96,165,250,0.2)] transition-all duration-200 ease-out"
           style={{
             animation: 'pulseBorder 2s ease-in-out infinite'
           }}
@@ -30,10 +30,10 @@ export default function DragOverlay({ isVisible }: DragOverlayProps) {
         <div className="text-center transition-all duration-300 ease-out">
           {/* Floating icon with soft blue glow */}
           <div className="relative mb-8">
-            <div className="absolute inset-0 rounded-full bg-blue-400/15 blur-2xl scale-150"
+            <div className="absolute inset-0 rounded-full bg-blue-400/20 blur-2xl scale-150"
                  style={{ animation: 'pulseGlow 2s ease-in-out infinite' }} />
             <div className="relative w-24 h-24 mx-auto rounded-full bg-white/95 backdrop-blur-sm border border-gray-200/50
-                          flex items-center justify-center shadow-[0_8px_32px_rgba(37,99,235,0.2)]">
+                          flex items-center justify-center shadow-[0_8px_32px_rgba(96,165,250,0.25)]">
               <FileText className="w-12 h-12 text-blue-600" style={{ animation: 'gentleBounce 2s ease-in-out infinite' }} />
             </div>
           </div>
@@ -62,12 +62,12 @@ export default function DragOverlay({ isVisible }: DragOverlayProps) {
       <style jsx>{`
         @keyframes pulseBorder {
           0%, 100% {
-            box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);
-            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
+            border-color: rgba(96, 165, 250, 0.6);
           }
           50% {
-            box-shadow: 0 0 25px rgba(37, 99, 235, 0.3);
-            border-color: rgba(37, 99, 235, 0.5);
+            box-shadow: 0 0 25px rgba(96, 165, 250, 0.35);
+            border-color: rgba(96, 165, 250, 0.75);
           }
         }
 
