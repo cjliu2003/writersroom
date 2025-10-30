@@ -6,7 +6,7 @@ import { MoviePosterBanner } from '@/components/MoviePosterBanner';
 
 /**
  * Cinematic styling constants for login page
- * Using clamp() for fluid responsive typography
+ * Using clamp() for fluid responsive typography that adapts to viewport size
  */
 const TITLE_STYLES = {
   fontSize: 'clamp(3.5rem, 12vw, 11rem)',
@@ -16,28 +16,51 @@ const TITLE_STYLES = {
 } as const;
 
 const SUBTITLE_STYLES = {
-  fontSize: 'clamp(1.25rem, 3vw, 2rem)',
+  fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
   textShadow: '3px 3px 8px rgba(0, 0, 0, 0.95), 2px 2px 4px rgba(0, 0, 0, 0.8)',
   opacity: 0.95
 } as const;
 
 const BUTTON_BASE_STYLES = {
-  fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+  fontSize: 'clamp(1.375rem, 3vw, 1.875rem)',
   textShadow: '2px 2px 4px rgba(0, 0, 0, 0.9)',
-  background: 'rgba(255, 255, 255, 0.45)',
-  border: '3px solid rgba(255, 255, 255, 0.8)',
+  background: 'rgba(255, 255, 255, 0.9)',
+  border: '4px solid rgba(255, 255, 255, 0.95)',
   backdropFilter: 'blur(12px)'
 } as const;
 
 const BUTTON_HOVER_STYLES = {
-  background: 'rgba(255, 255, 255, 0.6)',
+  background: 'rgba(255, 255, 255, 0.95)',
   borderColor: 'rgba(255, 255, 255, 1)'
 } as const;
 
+// Color constants for consistency
+const COLORS = {
+  buttonBackground: 'rgba(255, 255, 255, 0.9)',
+  buttonBorder: 'rgba(255, 255, 255, 0.95)'
+} as const;
+
+/**
+ * SignInPage - Authentication entry point with cinematic design
+ *
+ * Features:
+ * - Google OAuth authentication via Firebase
+ * - Animated movie poster background
+ * - Responsive typography and layout
+ * - User-friendly error handling
+ * - WCAG-compliant accessibility
+ *
+ * Note: Firebase automatically handles both new user registration and
+ * existing user sign-in through the same OAuth flow.
+ */
 export default function SignInPage() {
   const { signIn, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Handles Google OAuth authentication
+   * Clears any existing errors and initiates sign-in flow
+   */
   const handleSignIn = useCallback(async () => {
     setError(null);
 
@@ -53,16 +76,22 @@ export default function SignInPage() {
     }
   }, [signIn]);
 
+  /**
+   * Apply hover styles to button
+   */
   const handleButtonMouseEnter = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const button = e.currentTarget;
     button.style.background = BUTTON_HOVER_STYLES.background;
     button.style.borderColor = BUTTON_HOVER_STYLES.borderColor;
   }, []);
 
+  /**
+   * Reset button to base styles
+   */
   const handleButtonMouseLeave = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const button = e.currentTarget;
-    button.style.background = BUTTON_BASE_STYLES.background;
-    button.style.borderColor = 'rgba(255, 255, 255, 0.8)';
+    button.style.background = COLORS.buttonBackground;
+    button.style.borderColor = COLORS.buttonBorder;
   }, []);
 
   return (
@@ -72,7 +101,7 @@ export default function SignInPage() {
         <div className="w-full flex flex-col items-center justify-center text-center z-10 animate-fade-in">
           {/* Main title */}
           <h1
-            className="font-black text-white uppercase mb-8 leading-none px-4"
+            className="font-black text-white uppercase mb-7 leading-none px-4"
             style={TITLE_STYLES}
           >
             WRITERSROOM
@@ -80,10 +109,10 @@ export default function SignInPage() {
 
           {/* Subtitle */}
           <p
-            className="text-white font-semibold mb-16 tracking-wide px-4"
+            className="text-white font-semibold mb-7 tracking-wide px-4"
             style={SUBTITLE_STYLES}
           >
-            by screenwriters, for screenwriters
+            by screenwriters, for screenwriters...
           </p>
 
           {/* Error message */}
@@ -96,32 +125,18 @@ export default function SignInPage() {
             </div>
           )}
 
-          {/* Authentication buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center w-full max-w-2xl px-4">
-            {/* Sign In Button */}
+          {/* Authentication button */}
+          <div className="flex justify-center items-center w-full px-4">
             <button
               onClick={handleSignIn}
               disabled={isLoading}
-              className="group relative px-8 sm:px-16 py-4 sm:py-5 font-bold text-white uppercase tracking-widest transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto sm:min-w-[200px]"
+              className="group relative px-12 sm:px-24 py-6 sm:py-8 font-bold text-white uppercase tracking-widest transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto sm:min-w-[260px]"
               style={BUTTON_BASE_STYLES}
               onMouseEnter={handleButtonMouseEnter}
               onMouseLeave={handleButtonMouseLeave}
-              aria-label="Sign in with Google"
+              aria-label="Continue with Google"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </button>
-
-            {/* Sign Up Button - Currently uses same handler as Sign In */}
-            <button
-              onClick={handleSignIn}
-              disabled={isLoading}
-              className="group relative px-8 sm:px-16 py-4 sm:py-5 font-bold text-white uppercase tracking-widest transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto sm:min-w-[200px]"
-              style={BUTTON_BASE_STYLES}
-              onMouseEnter={handleButtonMouseEnter}
-              onMouseLeave={handleButtonMouseLeave}
-              aria-label="Sign up with Google"
-            >
-              Sign Up
+              {isLoading ? 'Connecting...' : 'Continue with Google'}
             </button>
           </div>
         </div>
