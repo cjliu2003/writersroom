@@ -1,8 +1,42 @@
-main-app.js?v=1761777170471:1847 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
 background.js:53 Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')
     at background.js:53:33
 (anonymous) @ background.js:53
-page.tsx:105 Tiptap Error: SSR has been detected, please set `immediatelyRender` explicitly to `false` to avoid hydration mismatches.
+main-app.js?v=1761810077436:1847 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+app-index.js:33 Warning: Extra attributes from the server: data-new-gr-c-s-check-loaded,data-gr-ext-installed
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+printWarning @ react-dom.development.js:94
+error @ react-dom.development.js:68
+warnForExtraAttributes @ react-dom.development.js:32731
+diffHydratedProperties @ react-dom.development.js:35117
+hydrateInstance @ react-dom.development.js:36127
+prepareToHydrateHostInstance @ react-dom.development.js:7246
+completeWork @ react-dom.development.js:19725
+completeUnitOfWork @ react-dom.development.js:25963
+performUnitOfWork @ react-dom.development.js:25759
+workLoopConcurrent @ react-dom.development.js:25734
+renderRootConcurrent @ react-dom.development.js:25690
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+page.tsx:146 Tiptap Error: SSR has been detected, please set `immediatelyRender` explicitly to `false` to avoid hydration mismatches.
 getInitialEditor @ index.js:986
 EditorInstanceManager @ index.js:961
 eval @ index.js:1167
@@ -11,7 +45,7 @@ mountState @ react-dom.development.js:12085
 useState @ react-dom.development.js:13334
 useState @ react.development.js:2509
 useEditor @ index.js:1167
-TestTipTapPage @ page.tsx:105
+TestTipTapPage @ page.tsx:146
 renderWithHooks @ react-dom.development.js:11121
 mountIndeterminateComponent @ react-dom.development.js:16869
 beginWork$1 @ react-dom.development.js:18458
@@ -23,388 +57,109 @@ performConcurrentWorkOnRoot @ react-dom.development.js:24504
 workLoop @ scheduler.development.js:256
 flushWork @ scheduler.development.js:225
 performWorkUntilDeadline @ scheduler.development.js:534
-page.tsx:85 [AUTH DEBUG] No user, skipping token fetch
-index.js:902 Setting selection to 3 - 3
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'paragraph', pos: 2, contentSize: 37, nodeContent: 'Connecting to collaboration server...'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'page', contentSize: 41, nodeContent: 'Connecting to collaboration server...'}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'page', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
+firebase.ts:33 Firebase config check: {apiKey: 'present', authDomain: 'present', projectId: 'present', appId: 'present'}
 AuthContext.tsx:37 AuthProvider useEffect starting...
 AuthContext.tsx:46 Client side - initializing Firebase auth...
 firebase.ts:137 subscribeToAuthChanges called
-firebase.ts:33 Firebase config check: {apiKey: 'present', authDomain: 'present', projectId: 'present', appId: 'present'}
 firebase.ts:150 Firebase auth available, setting up onAuthStateChanged
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
 smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
 smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
 firebase.ts:155 onAuthStateChanged triggered: User: jlofwall@gmail.com
 AuthContext.tsx:62 Auth state changed: User: jlofwall@gmail.com
-page.tsx:82 [AUTH DEBUG] User detected, fetching token...
-page.tsx:50 [AUTH DEBUG] Starting token fetch with forceRefresh=true
-page.tsx:51 [AUTH DEBUG] Current user: jlofwall@gmail.com
-page.tsx:56 [AUTH DEBUG] Received token: eyJhbGciOiJSUzI1NiIsImtpZCI6IjdlYTA5ZDA1NzI2MmU2M2... (length: 1156)
-page.tsx:64 [AUTH DEBUG] Token exp: 2025-10-29T23:32:51.000Z
-page.tsx:65 [AUTH DEBUG] Token expires in: 3600 seconds
-page.tsx:66 [AUTH DEBUG] Token is VALID
-page.tsx:74 [AUTH DEBUG] Token state updated
-use-script-yjs-collaboration.ts:174 [ScriptYjsCollaboration] Connecting to: ws://localhost:8000/api/ws/scripts/bb82f02b-2ec5-4670-9f56-3268f693cd18?token=***
+use-script-yjs-collaboration.ts:174 [ScriptYjsCollaboration] Connecting to: ws://localhost:8000/api/ws/scripts/e7a5847d-cf2d-415b-a4f2-764774c1f81e?token=***
 smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
 smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
 smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'paragraph', pos: 0, contentSize: 0, nodeContent: ''}
 smart-enter-plugin.ts:118 [SmartEnter] Skipped - pos <= 1
 smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-index.js:902 Setting selection to 3 - 3
 smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
 smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'paragraph', pos: 2, contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'page', contentSize: 4, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'page', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: true, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 282, origin: 'PluginKey'}
-index.js:235 TextSelection endpoint not pointing into a node with inline content (page)
-checkTextSelection @ index.js:235
-TextSelection @ index.js:249
-create @ index.js:295
-eval @ sync-plugin.js:488
-eval @ mutex.js:39
-_forceRerender @ sync-plugin.js:461
-view @ sync-plugin.js:220
-updatePluginViews @ index.js:5507
-updateStateInner @ index.js:5460
-updateState @ index.js:5388
-createView @ index.js:4770
-Editor @ index.js:4543
-createEditor @ index.js:1022
-refreshEditorInstance @ index.js:1131
-eval @ index.js:1101
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23334
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23334
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23267
-commitPassiveMountEffects @ react-dom.development.js:23225
-flushPassiveEffectsImpl @ react-dom.development.js:26497
-flushPassiveEffects @ react-dom.development.js:26438
-commitRootImpl @ react-dom.development.js:26337
-commitRoot @ react-dom.development.js:26077
-performSyncWorkOnRoot @ react-dom.development.js:24925
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-flushPassiveEffectsImpl @ react-dom.development.js:26518
-flushPassiveEffects @ react-dom.development.js:26438
-eval @ react-dom.development.js:26172
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'page', pos: 0, contentSize: 4, nodeContent: ''}
+smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'paragraph', pos: 0, contentSize: 0, nodeContent: ''}
 smart-enter-plugin.ts:118 [SmartEnter] Skipped - pos <= 1
 smart-enter-plugin.ts:121 [SmartEnter] Modified: false
 smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
 smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
 use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'paragraph', pos: 8, contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'page', contentSize: 4, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'page', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: true, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-index.js:999 Unable to resolve node at position 5. Capping offset to 0
-capOffsetInNode @ index.js:999
-moveToThisTextBlock @ index.js:1017
-paginationUpdateCursorPosition @ index.js:4840
-buildPageView @ index.js:4549
-update @ index.js:4885
-updatePluginViews @ index.js:5514
-updateStateInner @ index.js:5460
-updateState @ index.js:5388
-dispatchTransaction @ index.js:4830
-EditorView.dispatch @ index.js:5763
-eval @ sync-plugin.js:667
-eval @ mutex.js:39
-_typeChanged @ sync-plugin.js:629
-callAll @ function.js:39
-callEventHandlerListeners @ yjs.cjs:2024
-eval @ yjs.cjs:3330
-eval @ yjs.cjs:3311
-callAll @ function.js:39
-cleanupTransactions @ yjs.cjs:3335
-transact @ yjs.cjs:3461
-readUpdateV2 @ yjs.cjs:1689
-applyUpdateV2 @ yjs.cjs:1784
-applyUpdate @ yjs.cjs:1798
-readSyncStep2 @ sync.cjs:107
-readSyncMessage @ sync.cjs:145
-messageHandlers.<computed> @ y-websocket.cjs:68
-readMessage @ y-websocket.cjs:149
-websocket.onmessage @ y-websocket.cjs:170
-index.js:902 Setting selection to 5 - 5
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'paragraph', pos: 4, contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: true, isEmpty: true, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 1094, origin: 'WebsocketProvider'}
+use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 2291, origin: 'WebsocketProvider'}
 use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
-test-tiptap:1 The resource http://localhost:3102/_next/static/chunks/webpack.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-test-tiptap:1 The resource http://localhost:3102/_next/static/chunks/app/layout.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-test-tiptap:1 The resource http://localhost:3102/_next/static/chunks/app-pages-internals.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-test-tiptap:1 The resource http://localhost:3102/_next/static/chunks/main-app.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 36, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 42, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 1, nodeContent: 'c'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 28, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 2, nodeContent: 'ch'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 3, nodeContent: 'cha'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 4, nodeContent: 'char'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 5, nodeContent: 'chara'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 6, nodeContent: 'charac'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 7, nodeContent: 'charact'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 8, nodeContent: 'characte'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'character', pos: 4, contentSize: 9, nodeContent: 'character'}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'paragraph', contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'paragraph', transitionType: undefined, availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: false, sameType: false, isEmpty: false, shouldTransform: undefined}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 18, origin: 'PluginKey'}
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-index.js:3312 Not inside a paragraph node
-Enter @ index.js:3312
-eval @ index.js:107
-eval @ index.js:3177
-someProp @ index.js:5544
-editHandlers.keydown @ index.js:3177
-view.dom.addEventListener.view.input.eventHandlers.<computed> @ index.js:3099
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'paragraph', pos: 15, contentSize: 0, nodeContent: ''}
-smart-enter-plugin.ts:73 [SmartEnter] Previous node: {type: 'character', contentSize: 9, nodeContent: 'character'}
-smart-enter-plugin.ts:82 [SmartEnter] Transition lookup: {prevType: 'character', transitionType: 'dialogue', availableTransitions: Array(4)}
-smart-enter-plugin.ts:94 [SmartEnter] Should transform? {hasTransition: true, sameType: false, isEmpty: true, shouldTransform: false}
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 33, origin: 'PluginKey'}
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+page.tsx:77 [TestTipTap] Fetching script content for: e7a5847d-cf2d-415b-a4f2-764774c1f81e
+api.ts:25 [api] requesting http://localhost:8000/api/scripts/e7a5847d-cf2d-415b-a4f2-764774c1f81e/content token? true
+page.tsx:82 [TestTipTap] Script content received: {title: 'test', current_version: 1, content_source: 'script', blocks: 18}blocks: 18content_source: "script"current_version: 1title: "test"[[Prototype]]: Objectconstructor: ƒ Object()hasOwnProperty: ƒ hasOwnProperty()isPrototypeOf: ƒ isPrototypeOf()propertyIsEnumerable: ƒ propertyIsEnumerable()toLocaleString: ƒ toLocaleString()toString: ƒ toString()valueOf: ƒ valueOf()__defineGetter__: ƒ __defineGetter__()__defineSetter__: ƒ __defineSetter__()__lookupGetter__: ƒ __lookupGetter__()__lookupSetter__: ƒ __lookupSetter__()__proto__: (...)get __proto__: ƒ __proto__()set __proto__: ƒ __proto__()
+page.tsx:97 [TestTipTap] Converted to TipTap document: {docType: 'doc', contentNodes: 18}contentNodes: 18docType: "doc"[[Prototype]]: Object
+page.tsx:105 [TestTipTap] Content statistics: {totalBlocks: 18, typeCounts: {…}, totalCharacters: 562, totalWords: 102, averageWordsPerBlock: 5.666666666666667}averageWordsPerBlock: 5.666666666666667totalBlocks: 18totalCharacters: 562totalWords: 102typeCounts: {scene_heading: 2, action: 3, character: 5, dialogue: 5, parenthetical: 2, …}action: 3character: 5dialogue: 5parenthetical: 2scene_heading: 2transition: 1[[Prototype]]: Object[[Prototype]]: Object
+page.tsx:112 [TestTipTap] Editor not ready yet
+eval @ page.tsx:112
+await in eval
+handleLoadScript @ page.tsx:127
+callCallback @ react-dom.development.js:20565
+invokeGuardedCallbackImpl @ react-dom.development.js:20614
+invokeGuardedCallback @ react-dom.development.js:20689
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:20703
+executeDispatch @ react-dom.development.js:32128
+processDispatchQueueItemsInOrder @ react-dom.development.js:32160
+processDispatchQueue @ react-dom.development.js:32173
+dispatchEventsForPlugins @ react-dom.development.js:32184
+eval @ react-dom.development.js:32374
+batchedUpdates$1 @ react-dom.development.js:24953
+batchedUpdates @ react-dom.development.js:28844
+dispatchEventForPluginEventSystem @ react-dom.development.js:32373
+dispatchEvent @ react-dom.development.js:30141
+dispatchDiscreteEvent @ react-dom.development.js:30112
 smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
 smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
 smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
 smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: true, code: 1005, reason: '', type: 'close', …}
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: false
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: true, code: 1005, reason: '', type: 'close', …}
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: false
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: true, code: 1005, reason: '', type: 'close', …}
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: false
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: true, code: 1005, reason: '', type: 'close', …}
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: false
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true

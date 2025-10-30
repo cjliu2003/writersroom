@@ -1,32 +1,13 @@
-SyntaxError: No node type or group 'paragraph' found (in content expression 'paragraph block*')
-Call Stack
-TokenStream.err
-node_modules/prosemirror-model/dist/index.js (1797:16)
-resolveName
-node_modules/prosemirror-model/dist/index.js (1859:1)
-parseExprAtom
-node_modules/prosemirror-model/dist/index.js (1870:1)
-parseExprSubscript
-node_modules/prosemirror-model/dist/index.js (1814:1)
-parseExprSeq
-node_modules/prosemirror-model/dist/index.js (1809:1)
-parseExpr
-node_modules/prosemirror-model/dist/index.js (1802:1)
-ContentMatch.parse
-node_modules/prosemirror-model/dist/index.js (1624:1)
-new Schema
-node_modules/prosemirror-model/dist/index.js (2441:1)
-getSchemaByResolvedExtensions
-node_modules/@tiptap/core/dist/index.js (553:1)
-new ExtensionManager
-node_modules/@tiptap/core/dist/index.js (1170:1)
-Editor.createExtensionManager
-node_modules/@tiptap/core/dist/index.js (4602:1)
-new Editor
-node_modules/@tiptap/core/dist/index.js (4434:1)
-EditorInstanceManager.createEditor
-node_modules/@tiptap/react/dist/index.js (908:1)
-EditorInstanceManager.refreshEditorInstance
-node_modules/@tiptap/react/dist/index.js (1017:1)
-eval
-node_modules/@tiptap/react/dist/index.js (987:1)
+Unhandled Runtime Error
+ReferenceError: Cannot access 'editor' before initialization
+
+Source
+app/test-tiptap/page.tsx (156:18) @ editor
+
+  154 |       setLoadingScript(false);
+  155 |     }
+> 156 |   }, [authToken, editor]);
+      |                  ^
+  157 |
+  158 |   // Handle script ID change
+  159 |   const handleLoadScript = () => {

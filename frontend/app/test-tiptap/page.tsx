@@ -12,21 +12,23 @@
 
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+import { JSONContent } from '@tiptap/core';
 // @ts-ignore - pagination extension may not have types
-import PaginationExtension, {PageNode, HeaderFooterNode, BodyNode} from 'tiptap-extension-pagination';
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
+import {PaginationPlus, PAGE_SIZES} from 'tiptap-pagination-plus';
+import { contentBlocksToTipTap, getContentBlocksStats } from '@/utils/content-blocks-converter';
+import { getScriptContent, type ScriptWithContent } from '@/lib/api';
 import '@/styles/screenplay.css';
 
-// Use a real script ID - you can get one from /script-editor page URL
-// Or navigate to your home page, create a script, and copy its ID here
-const TEST_SCRIPT_ID = 'bb82f02b-2ec5-4670-9f56-3268f693cd18'; // Replace with real script ID!
+// Default script ID for testing
+const DEFAULT_SCRIPT_ID = 'e7a5847d-cf2d-415b-a4f2-764774c1f81e';
 
 // Generate random color for user cursor
 const getRandomColor = () => {
@@ -38,56 +40,92 @@ export default function TestTipTapPage() {
   const [userColor] = useState(getRandomColor());
   const [userName] = useState(`User-${Math.floor(Math.random() * 1000)}`);
   const [authToken, setAuthToken] = useState<string>('');
+  const [scriptId, setScriptId] = useState<string>(DEFAULT_SCRIPT_ID);
+  const [scriptInput, setScriptInput] = useState<string>(DEFAULT_SCRIPT_ID);
+  const [loadingScript, setLoadingScript] = useState(false);
+  const [scriptError, setScriptError] = useState<string>('');
+  const [scriptStats, setScriptStats] = useState<any>(null);
+  const [pendingContent, setPendingContent] = useState<JSONContent | null>(null);
 
   // Get Firebase auth from context (same pattern as other editors)
   const { user, getToken, isLoading: authLoading } = useAuth();
 
-  // Fetch auth token when user is available (force refresh to avoid expired tokens)
+  // Fetch auth token when user is available (needed for WebSocket)
   useEffect(() => {
     let cancelled = false;
     const fetchToken = async () => {
       try {
-        console.log('[AUTH DEBUG] Starting token fetch with forceRefresh=true');
-        console.log('[AUTH DEBUG] Current user:', user?.email);
-
-        // Force refresh to get a fresh token (WebSocket needs valid token)
-        const token = await getToken(true);
-
-        console.log('[AUTH DEBUG] Received token:', token ? `${token.substring(0, 50)}... (length: ${token.length})` : 'null');
-
-        // Decode and log token expiration for debugging
-        if (token) {
-          try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const now = Math.floor(Date.now() / 1000);
-            const expiresIn = payload.exp - now;
-            console.log('[AUTH DEBUG] Token exp:', new Date(payload.exp * 1000).toISOString());
-            console.log('[AUTH DEBUG] Token expires in:', expiresIn, 'seconds');
-            console.log('[AUTH DEBUG] Token is', expiresIn > 0 ? 'VALID' : 'EXPIRED');
-          } catch (decodeError) {
-            console.warn('[AUTH DEBUG] Could not decode token:', decodeError);
-          }
-        }
-
+        const token = await getToken();
         if (cancelled) return;
         setAuthToken(token || '');
-        console.log('[AUTH DEBUG] Token state updated');
       } catch (e) {
-        console.error('[AUTH DEBUG] Token fetch FAILED:', e);
+        console.warn('[TestTipTap] Failed to fetch auth token:', e);
         if (cancelled) return;
         setAuthToken('');
       }
     };
-    if (user) {
-      console.log('[AUTH DEBUG] User detected, fetching token...');
-      fetchToken();
-    } else {
-      console.log('[AUTH DEBUG] No user, skipping token fetch');
-    }
+    fetchToken();
     return () => { cancelled = true };
   }, [user, getToken]);
 
-  // Reuse existing Yjs collaboration hook (100% unchanged!)
+  // Load script content from backend
+  const loadScript = useCallback(async (id: string) => {
+    setLoadingScript(true);
+    setScriptError('');
+    setScriptStats(null);
+
+    try {
+      console.log('[TestTipTap] Fetching script content for:', id);
+
+      // Use existing API helper (handles auth automatically)
+      const scriptData: ScriptWithContent = await getScriptContent(id);
+
+      console.log('[TestTipTap] Script content received:', {
+        title: scriptData.title,
+        current_version: scriptData.current_version,
+        content_source: scriptData.content_source,
+        blocks: scriptData.content_blocks?.length || 0
+      });
+
+      if (!scriptData.content_blocks || scriptData.content_blocks.length === 0) {
+        console.warn('[TestTipTap] No content_blocks found in script');
+        setScriptError('Script has no content. Try uploading an FDX file first.');
+        return;
+      }
+
+      // Convert backend format to TipTap format
+      const tipTapDoc = contentBlocksToTipTap(scriptData.content_blocks);
+      console.log('[TestTipTap] Converted to TipTap document:', {
+        docType: tipTapDoc.type,
+        contentNodes: tipTapDoc.content?.length || 0
+      });
+
+      // Get statistics
+      const stats = getContentBlocksStats(scriptData.content_blocks);
+      setScriptStats(stats);
+      console.log('[TestTipTap] Content statistics:', stats);
+
+      // Store content in state - useEffect will apply when editor is ready
+      console.log('[TestTipTap] Storing content for application to editor');
+      setPendingContent(tipTapDoc);
+
+    } catch (error: any) {
+      console.error('[TestTipTap] Load failed:', error);
+      setScriptError(error.message || 'Failed to load script');
+    } finally {
+      setLoadingScript(false);
+    }
+  }, []);
+
+  // Handle script ID change - allow reload even if same ID (useful for testing)
+  const handleLoadScript = () => {
+    if (scriptInput) {
+      setScriptId(scriptInput);
+      loadScript(scriptInput);
+    }
+  };
+
+  // Reuse existing Yjs collaboration hook
   const {
     doc,
     provider,
@@ -96,7 +134,7 @@ export default function TestTipTapPage() {
     connectionError,
     reconnect,
   } = useScriptYjsCollaboration({
-    scriptId: TEST_SCRIPT_ID,
+    scriptId: scriptId,
     authToken: authToken,
     enabled: !!authToken, // Only enable when we have auth token
   });
@@ -128,28 +166,64 @@ export default function TestTipTapPage() {
         }),
       ] : []),
       // Pagination
-      PaginationExtension.configure({
-        defaultPaperSize: "Letter", // 8.5" × 11"
-        defaultMarginConfig: {
-          top: 25.4,    // 1 inch (mm)
-          bottom: 25.4,
-          left: 38.1,  // 1.5 inches (screenplay binding margin)
-          right: 25.4,
-        },
-        pageAmendmentOptions: { enableHeader: false, enableFooter: false }, 
-        defaultPageBorders: {top: 10, right: 10, bottom: 10, left: 10}
+      PaginationPlus.configure({
+        // geometry
+        ...PAGE_SIZES.LETTER,
+        // chrome between pages
+        pageGap: 24,
+        pageGapBorderSize: 1,
+        pageBreakBackground: '#ffffff',
+
+        // header/footer (set to 0 if you don't want page numbers)
+        pageHeaderHeight: 48,    // ~0.5in @ 96 DPI
+        pageFooterHeight: 0,
+        headerLeft: '',
+        headerRight: '<span class="rm-page-number"></span>.',
+        footerLeft: '',
+        footerRight: '',
+      
+        // screenplay margins (in px)
+        marginTop: 48,           // 1.0in Total (stacks with header height)
+        marginBottom: 96,        // 1.0in
+        marginLeft: 144,         // 1.5in
+        marginRight: 96,         // 1.0in
+
+        // extra padding inside content area (keep 0)
+        contentMarginTop: 0,
+        contentMarginBottom: 0,
       }),
-      PageNode,
-      HeaderFooterNode,
-      BodyNode
     ],
     editorProps: {
-      attributes: {
-        class: 'screenplay-editor prose prose-sm focus:outline-none min-h-screen p-8',
-      },
+      attributes: { class: 'screenplay-editor focus:outline-none min-h-screen' },
     },
     content: !doc ? '<p>Connecting to collaboration server...</p>' : undefined,
   }, [doc, provider]);
+
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.setAttribute("data-pagination-overrides", "true");
+    style.textContent = `
+      /* Start at 1 so the *second* page shows 2 (we'll hide page 1 header) */
+      .rm-with-pagination { counter-reset: page-number 1 !important; }
+
+      /* Do NOT show a number in the first page header */
+      .rm-with-pagination .rm-first-page-header .rm-page-number { 
+        display: none !important; 
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
+  // Apply pending content when editor becomes ready
+  useEffect(() => {
+    if (editor && pendingContent) {
+      console.log('[TestTipTap] Applying pending content to editor');
+      editor.commands.setContent(pendingContent);
+      console.log('[TestTipTap] Content applied successfully');
+      setPendingContent(null); // Clear after applying
+    }
+  }, [editor, pendingContent]);
 
   // Show auth loading state
   if (authLoading) {
@@ -250,14 +324,59 @@ export default function TestTipTapPage() {
 
       {/* Test Info Panel */}
       <div className="max-w-7xl mx-auto px-6 py-4">
+        {/* Script Loader */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold text-gray-900 mb-3">Load Script from Backend</h3>
+          <div className="flex gap-3 items-start">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Script ID
+              </label>
+              <input
+                type="text"
+                value={scriptInput}
+                onChange={(e) => setScriptInput(e.target.value)}
+                placeholder="Enter script ID (UUID)"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="pt-7">
+              <button
+                onClick={handleLoadScript}
+                disabled={loadingScript || !scriptInput}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+              >
+                {loadingScript ? 'Loading...' : 'Load Script'}
+              </button>
+            </div>
+          </div>
+
+          {scriptError && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-800">
+                <strong>Error:</strong> {scriptError}
+              </p>
+            </div>
+          )}
+
+          {scriptStats && (
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-800">
+                <strong>Loaded:</strong> {scriptStats.totalBlocks} blocks, {scriptStats.totalWords} words
+                {scriptStats.typeCounts.scene_heading && ` • ${scriptStats.typeCounts.scene_heading} scenes`}
+              </p>
+            </div>
+          )}
+        </div>
+
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <h3 className="font-semibold text-blue-900 mb-2">Phase 1 POC Testing Instructions</h3>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>1. Click &ldquo;Open in New Tab&rdquo; to test real-time collaboration</li>
-            <li>2. Type in one tab and watch it appear instantly in the other</li>
-            <li>3. Type ~55 lines to see automatic page break insertion</li>
-            <li>4. Verify collaboration status shows &ldquo;synced&rdquo; (green)</li>
-            <li>5. Test: Close one tab, verify content persists in other tab</li>
+            <li>1. Upload an FDX file via backend API to get a script ID</li>
+            <li>2. Enter the script ID above and click "Load Script"</li>
+            <li>3. Click &ldquo;Open in New Tab&rdquo; to test real-time collaboration</li>
+            <li>4. Type in one tab and watch it appear instantly in the other</li>
+            <li>5. Verify pagination and formatting match industry standards</li>
           </ul>
         </div>
 
@@ -284,12 +403,10 @@ export default function TestTipTapPage() {
       </div>
 
       {/* Editor Container */}
-      <div className="max-w-7xl mx-auto px-6 pb-12">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <EditorContent
-            editor={editor}
-            className="screenplay-editor"
-          />
+      <div className="bg-white rounded-lg shadow-lg">
+        {/* keep the outer card full-width if you like, but center the editor inside */}
+        <div className="flex justify-center">
+          <EditorContent editor={editor} className="screenplay-editor" />
         </div>
       </div>
 
@@ -297,7 +414,7 @@ export default function TestTipTapPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-sm text-gray-600">
           <div>
-            <span className="font-medium">Script ID:</span> {TEST_SCRIPT_ID}
+            <span className="font-medium">Script ID:</span> {scriptId}
           </div>
           <div>
             <span className="font-medium">TipTap Version:</span> 2.26.4
@@ -315,7 +432,7 @@ export default function TestTipTapPage() {
         }
 
         .screenplay-editor .ProseMirror {
-          padding: 2rem;
+          padding: 0rem;
           font-family: 'Courier', 'Courier New', monospace;
           font-size: 12pt;
           line-height: 12pt;
