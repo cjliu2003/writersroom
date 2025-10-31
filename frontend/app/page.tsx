@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import SignInPage from "@/components/SignInPage";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserScripts, uploadFDXFile, updateScript, deleteScript, getScriptContent, type ScriptSummary } from "@/lib/api";
@@ -43,8 +44,11 @@ export default function HomePage() {
   // NOTE: Do not early-return before hooks. Auth gating moved below effects.
 
   // Auto-dismiss error with gentle fade-out animation
-  // Combined error display - shows whichever error is active
-  const currentError = uploadError || editError || deleteError;
+  // Combined error display - shows whichever error is active (memoized to avoid recalculation)
+  const currentError = useMemo(
+    () => uploadError || editError || deleteError,
+    [uploadError, editError, deleteError]
+  );
 
   useEffect(() => {
     if (currentError) {
@@ -95,26 +99,27 @@ export default function HomePage() {
     };
   }, [user]);
 
-  // Global drag-overlay listeners
+  // Global drag-overlay listeners (using useRef for cleaner drag counter management)
+  const dragCounterRef = useRef(0);
+
   useEffect(() => {
-    let dragCounter = 0;
     const onDragEnter = (e: DragEvent) => {
       e.preventDefault();
-      dragCounter++;
-      if (dragCounter === 1) setIsDragging(true);
+      dragCounterRef.current++;
+      if (dragCounterRef.current === 1) setIsDragging(true);
     };
     const onDragLeave = (e: DragEvent) => {
       e.preventDefault();
-      dragCounter--;
-      if (dragCounter <= 0) {
-        dragCounter = 0;
+      dragCounterRef.current--;
+      if (dragCounterRef.current <= 0) {
+        dragCounterRef.current = 0;
         setIsDragging(false);
       }
     };
     const onDragOver = (e: DragEvent) => e.preventDefault();
     const onDrop = (e: DragEvent) => {
       e.preventDefault();
-      dragCounter = 0;
+      dragCounterRef.current = 0;
       setIsDragging(false);
     };
 
@@ -130,23 +135,15 @@ export default function HomePage() {
     };
   }, []);
 
-  // Auth gating AFTER hooks to keep hook order stable
-  if (authLoading) {
-    return (
-      <ProcessingScreen
-        isVisible={true}
-        message="Initializing WritersRoom"
-        subtitle="preparing your creative workspace…"
-      />
-    );
-  }
-  if (!user) return <SignInPage />;
-
-  // Handlers
-  const openProject = (projectId: string) => router.push(`/script-editor?scriptId=${projectId}`);
+  // Handlers (memoized with useCallback to prevent unnecessary re-renders)
+  // MUST be defined before early returns to satisfy React's rules of hooks
+  const openProject = useCallback(
+    (projectId: string) => router.push(`/script-editor?scriptId=${projectId}`),
+    [router]
+  );
 
   // Unified file validation for both select and drag-and-drop
-  const validateFile = (file: File): { valid: boolean; error?: string } => {
+  const validateFile = useCallback((file: File): { valid: boolean; error?: string } => {
     // Extension check
     if (!file.name.toLowerCase().endsWith(".fdx")) {
       return { valid: false, error: "Please upload a .fdx file" };
@@ -170,9 +167,9 @@ export default function HomePage() {
     }
 
     return { valid: true };
-  };
+  }, []);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = useCallback(async (file: File) => {
     setIsUploading(true);
     setIsParsing(true); // Show ProcessingScreen
     setUploadError(null);
@@ -203,9 +200,9 @@ export default function HomePage() {
       setIsUploading(false);
       setIsParsing(false);
     }
-  };
+  }, [router]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -217,9 +214,9 @@ export default function HomePage() {
     }
 
     handleFileUpload(file);
-  };
+  }, [validateFile, handleFileUpload]);
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     // Don't stopPropagation - let global handlers clean up drag state
     const file = e.dataTransfer.files?.[0];
@@ -234,27 +231,32 @@ export default function HomePage() {
     }
 
     handleFileUpload(file);
-  };
+  }, [validateFile, handleFileUpload]);
 
-  const createNewScript = () => setShowTitleModal(true);
-  const handleCancelModal = () => { setShowTitleModal(false); setNewScriptTitle(""); };
-  const handleCreateScript = () => {
+  const createNewScript = useCallback(() => setShowTitleModal(true), []);
+
+  const handleCancelModal = useCallback(() => {
+    setShowTitleModal(false);
+    setNewScriptTitle("");
+  }, []);
+
+  const handleCreateScript = useCallback(() => {
     const title = newScriptTitle.trim();
     if (!title) return;
     const projectId = `new-${Date.now()}`;
     router.push(`/script-editor?scriptId=${projectId}&new=true&title=${encodeURIComponent(title)}`);
-  };
+  }, [newScriptTitle, router]);
 
-  const handleEditClick = (e: React.MouseEvent, script: ScriptSummary) => {
+  const handleEditClick = useCallback((e: React.MouseEvent, script: ScriptSummary) => {
     e.stopPropagation(); // Prevent card click
     setEditingScriptId(script.script_id);
     setEditTitle(script.title);
     setEditWrittenBy("Written by");
     // Load author from description field (where it's stored in the backend)
     setEditAuthor(script.description || user?.displayName || user?.email || 'Writer');
-  };
+  }, [user]);
 
-  const handleSaveEdit = async (scriptId: string) => {
+  const handleSaveEdit = useCallback(async (scriptId: string) => {
     if (!editTitle.trim()) {
       setEditingScriptId(null);
       return;
@@ -292,22 +294,22 @@ export default function HomePage() {
       ));
       setEditError(e?.message || "Failed to update script");
     }
-  };
+  }, [editTitle, editAuthor, scripts]);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     // Batch state updates using React 18's automatic batching
     setEditingScriptId(null);
     setEditTitle("");
     setEditWrittenBy("Written by");
     setEditAuthor("");
-  };
+  }, []);
 
-  const handleDeleteClick = (e: React.MouseEvent, script: ScriptSummary) => {
+  const handleDeleteClick = useCallback((e: React.MouseEvent, script: ScriptSummary) => {
     e.stopPropagation(); // Prevent card click
     setDeletingScript(script);
-  };
+  }, []);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!deletingScript) return;
 
     // Optimistic update: Remove from UI immediately for instant feedback
@@ -326,7 +328,19 @@ export default function HomePage() {
       ));
       setDeleteError(e?.message || "Failed to delete script");
     }
-  };
+  }, [deletingScript]);
+
+  // Auth gating AFTER hooks to keep hook order stable
+  if (authLoading) {
+    return (
+      <ProcessingScreen
+        isVisible={true}
+        message="Initializing WritersRoom"
+        subtitle="preparing your creative workspace…"
+      />
+    );
+  }
+  if (!user) return <SignInPage />;
 
   // Render styled UI
   return (
@@ -659,30 +673,93 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Title Modal */}
-      {showTitleModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-slate-200 rounded-2xl shadow-2xl p-10 max-w-lg w-full mx-4 relative">
-            <Button onClick={handleCancelModal} variant="ghost" size="sm" className="absolute top-6 right-6 text-slate-500 hover:text-slate-900 hover:bg-slate-100">
-              <X className="w-5 h-5" />
-            </Button>
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <FileText className="w-10 h-10 text-purple-600" />
+      {/* Title Modal - Redesigned to match WritersRoom aesthetic */}
+      <AnimatePresence>
+        {showTitleModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50"
+            onClick={handleCancelModal}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="backdrop-blur-xl bg-white/60 dark:bg-slate-900/60 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/30 dark:border-slate-700/30 p-12 max-w-lg w-full mx-4 relative"
+              style={{
+                fontFamily: 'var(--font-courier-prime), "Courier New", monospace'
+              }}
+            >
+              {/* Close button */}
+              <button
+                onClick={handleCancelModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Icon with glow */}
+              <div className="text-center mb-8 mt-6">
+                <div className="flex justify-center mb-6">
+                  <FileText
+                    className="h-12 w-12 text-violet-400 drop-shadow-[0_0_10px_rgba(167,139,250,0.4)]"
+                    strokeWidth={1.5}
+                  />
+                </div>
+
+                {/* Title */}
+                <h2 className="text-xl font-mono text-gray-800 dark:text-gray-100 tracking-wide mb-2">
+                  Create New Script
+                </h2>
+
+                {/* Subtitle */}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  What&apos;s the title of your masterpiece?
+                </p>
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">Create New Script</h2>
-              <p className="text-lg text-slate-600">What&apos;s the title of your masterpiece?</p>
-            </div>
-            <div className="mb-8">
-              <input type="text" value={newScriptTitle} onChange={(e) => setNewScriptTitle(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleCreateScript(); if (e.key === 'Escape') handleCancelModal(); }} placeholder="Enter script title..." className="w-full px-5 py-4 bg-white border-2 border-slate-300 rounded-xl text-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all" autoFocus />
-            </div>
-            <div className="flex gap-4">
-              <Button onClick={handleCancelModal} variant="ghost" className="flex-1 py-3 text-lg font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl">Cancel</Button>
-              <Button onClick={handleCreateScript} disabled={!newScriptTitle.trim()} className="flex-1 py-3 text-lg font-semibold bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg hover:shadow-xl transition-all">Create Script</Button>
-            </div>
-          </div>
-        </div>
-      )}
+
+              {/* Input */}
+              <div className="mb-8">
+                <input
+                  type="text"
+                  value={newScriptTitle}
+                  onChange={(e) => setNewScriptTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleCreateScript();
+                    if (e.key === 'Escape') handleCancelModal();
+                  }}
+                  placeholder="Enter script title..."
+                  className="w-full px-4 py-3 rounded-lg border border-violet-300/50 bg-white/70 dark:bg-slate-800/50 focus:ring-2 focus:ring-violet-400 focus:border-violet-400 font-mono text-gray-700 dark:text-gray-100 placeholder:text-gray-400 transition-all shadow-inner"
+                  autoFocus
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancelModal}
+                  className="flex-1 px-5 py-2.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-mono tracking-wide transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateScript}
+                  disabled={!newScriptTitle.trim()}
+                  className="flex-1 px-5 py-2.5 rounded-lg bg-violet-500/90 hover:bg-violet-500 text-white font-mono tracking-wide shadow-[0_0_10px_rgba(167,139,250,0.3)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  Create Script
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Delete Confirmation Modal - Cinematic WritersRoom Style */}
       {deletingScript && (
