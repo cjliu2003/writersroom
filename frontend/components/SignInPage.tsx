@@ -22,10 +22,10 @@ const SUBTITLE_STYLES = {
 } as const;
 
 const BUTTON_BASE_STYLES = {
-  fontSize: 'clamp(1.375rem, 3vw, 1.875rem)',
-  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.9)',
+  fontSize: 'clamp(1.25rem, 2.5vw, 1.625rem)',
+  textShadow: '1px 1px 3px rgba(0, 0, 0, 0.7)',
   background: 'rgba(255, 255, 255, 0.9)',
-  border: '4px solid rgba(255, 255, 255, 0.95)',
+  border: '2px solid rgba(255, 255, 255, 0.9)',
   backdropFilter: 'blur(12px)'
 } as const;
 
@@ -130,13 +130,13 @@ export default function SignInPage() {
             <button
               onClick={handleSignIn}
               disabled={isLoading}
-              className="group relative px-12 sm:px-24 py-6 sm:py-8 font-bold text-white uppercase tracking-widest transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto sm:min-w-[260px]"
+              className="group relative rounded-2xl px-8 sm:px-16 py-5 sm:py-6 font-semibold text-white uppercase tracking-wide transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto sm:min-w-[240px]"
               style={BUTTON_BASE_STYLES}
               onMouseEnter={handleButtonMouseEnter}
               onMouseLeave={handleButtonMouseLeave}
-              aria-label="Continue with Google"
+              aria-label="Sign in with Google"
             >
-              {isLoading ? 'Connecting...' : 'Continue with Google'}
+              {isLoading ? 'Connecting...' : 'Sign in with Google'}
             </button>
           </div>
         </div>
