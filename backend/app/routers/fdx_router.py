@@ -109,7 +109,7 @@ async def upload_fdx_file(
         # Create new script in database with content_blocks populated
         new_script = Script(
             title=parsed_result.title,
-            description=f"Imported from {file.filename}",
+            description=None,  # Let frontend display user's profile name as author
             owner_id=current_user.user_id,
             content_blocks=script_content_blocks  # Populate Script.content_blocks for script-level editor
         )

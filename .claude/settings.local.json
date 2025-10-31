@@ -32,7 +32,8 @@
       "Bash(fi)",
       "Bash(code --status:*)",
       "Bash(npm run lint)",
-      "Bash(python -m py_compile:*)"
+      "Bash(python -m py_compile:*)",
+      "mcp__sequential-thinking__sequentialthinking"
     ],
     "deny": [],
     "ask": []

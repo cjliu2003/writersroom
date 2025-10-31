@@ -170,7 +170,9 @@ export interface FDXUploadResponse {
   };
 }
 
-export async function uploadFDXFile(file: File): Promise<FDXUploadResponse> {
+export async function uploadFDXFile(
+  file: File
+): Promise<FDXUploadResponse> {
   const token = await getCurrentUserToken();
 
   if (!token) {

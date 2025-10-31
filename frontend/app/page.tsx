@@ -4,12 +4,12 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SignInPage from "@/components/SignInPage";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserScripts, uploadFDXFile, updateScript, deleteScript, type ScriptSummary } from "@/lib/api";
+import { getUserScripts, uploadFDXFile, updateScript, deleteScript, getScriptContent, type ScriptSummary } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText, Plus, LogOut, User, X, Edit2, Trash2 } from "lucide-react";
 import DragOverlay from "@/components/DragOverlay";
-import LoadingOverlay from "@/components/LoadingOverlay";
+import ProcessingScreen from "@/components/ProcessingScreen";
 import { MoviePosterBanner } from "@/components/MoviePosterBanner";
 
 export default function HomePage() {
@@ -132,7 +132,13 @@ export default function HomePage() {
 
   // Auth gating AFTER hooks to keep hook order stable
   if (authLoading) {
-    return <LoadingOverlay isVisible={true} title="Initializing WritersRoom" />;
+    return (
+      <ProcessingScreen
+        isVisible={true}
+        message="Initializing WritersRoom"
+        subtitle="preparing your creative workspace…"
+      />
+    );
   }
   if (!user) return <SignInPage />;
 
@@ -168,19 +174,29 @@ export default function HomePage() {
 
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
-    setIsParsing(true);
+    setIsParsing(true); // Show ProcessingScreen
     setUploadError(null);
     try {
+      // Upload and process file
       const res = await uploadFDXFile(file);
-      // Optimistically add script and navigate
+
+      // Optimistically add script to list
       setScripts(prev => [{
         script_id: res.script_id,
         title: res.title,
-        description: `Imported from ${file.name}`,
+        description: null, // Let it default to user's profile name
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, ...prev]);
-      router.push(`/script-editor?scriptId=${res.script_id}`);
+
+      // Pre-fetch script content so editor is ready immediately
+      const scriptContent = await getScriptContent(res.script_id);
+
+      // Store in sessionStorage for instant editor load
+      sessionStorage.setItem(`script_${res.script_id}`, JSON.stringify(scriptContent));
+
+      // Navigate - editor will use cached data and render immediately
+      router.push(`/script-editor?scriptId=${res.script_id}&fromUpload=true`);
     } catch (e: any) {
       console.error("Upload failed:", e);
       setUploadError(e?.message || "Upload failed. Please try again.");
@@ -234,7 +250,8 @@ export default function HomePage() {
     setEditingScriptId(script.script_id);
     setEditTitle(script.title);
     setEditWrittenBy("Written by");
-    setEditAuthor(user?.displayName || user?.email || 'Writer');
+    // Load author from description field (where it's stored in the backend)
+    setEditAuthor(script.description || user?.displayName || user?.email || 'Writer');
   };
 
   const handleSaveEdit = async (scriptId: string) => {
@@ -246,28 +263,31 @@ export default function HomePage() {
     // Store original values BEFORE optimistic update (fixes closure bug)
     const originalScript = scripts.find(s => s.script_id === scriptId);
     const originalTitle = originalScript?.title;
+    const originalDescription = originalScript?.description;
 
     // Optimistic update: Update UI immediately for instant feedback
     const trimmedTitle = editTitle.trim();
+    const trimmedAuthor = editAuthor.trim();
     setScripts(prev => prev.map(s =>
       s.script_id === scriptId
-        ? { ...s, title: trimmedTitle }
+        ? { ...s, title: trimmedTitle, description: trimmedAuthor || null }
         : s
     ));
     setEditingScriptId(null);
     setEditError(null);
 
     // Then make API call in background
-    // NOTE: Backend currently only supports 'title' and 'description' fields.
-    // 'written_by' and 'author' are editable in UI but won't persist to database
-    // until backend schema is updated to include these fields.
+    // Store author name in description field since backend supports it
     try {
-      await updateScript(scriptId, { title: trimmedTitle });
+      await updateScript(scriptId, {
+        title: trimmedTitle,
+        description: trimmedAuthor || null
+      });
     } catch (e: any) {
       // On error, revert to stored original values
       setScripts(prev => prev.map(s =>
         s.script_id === scriptId
-          ? { ...s, title: originalTitle || trimmedTitle }
+          ? { ...s, title: originalTitle || trimmedTitle, description: originalDescription }
           : s
       ));
       setEditError(e?.message || "Failed to update script");
@@ -317,7 +337,10 @@ export default function HomePage() {
 
       {/* Overlays */}
       <DragOverlay isVisible={isDragging} />
-      <LoadingOverlay isVisible={isParsing} title="Processing your screenplay" />
+      <ProcessingScreen
+        isVisible={isParsing}
+        mode="upload"
+      />
 
       {/* Top Navigation Bar */}
       <div className="fixed top-0 left-0 right-0 z-30 bg-white/70 backdrop-blur-md border-b border-slate-200/50">
@@ -544,7 +567,7 @@ export default function HomePage() {
                         />
                       ) : (
                         <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
-                          {user?.displayName || user?.email || 'Writer'}
+                          {p.description || user?.displayName || user?.email || 'Writer'}
                         </div>
                       )}
 
