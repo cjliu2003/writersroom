@@ -1,69 +1,146 @@
 'use client';
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogIn, Film } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { MoviePosterBanner } from '@/components/MoviePosterBanner';
 
+/**
+ * Cinematic styling constants for login page
+ * Using clamp() for fluid responsive typography that adapts to viewport size
+ */
+const TITLE_STYLES = {
+  fontSize: 'clamp(3.5rem, 12vw, 11rem)',
+  textShadow: '5px 5px 10px rgba(0, 0, 0, 0.95), 3px 3px 6px rgba(0, 0, 0, 0.9), -1px -1px 3px rgba(0, 0, 0, 0.6)',
+  fontFamily: 'system-ui, -apple-system, sans-serif',
+  letterSpacing: '0.03em'
+} as const;
+
+const SUBTITLE_STYLES = {
+  fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+  textShadow: '3px 3px 8px rgba(0, 0, 0, 0.95), 2px 2px 4px rgba(0, 0, 0, 0.8)',
+  opacity: 0.95
+} as const;
+
+const BUTTON_BASE_STYLES = {
+  fontSize: 'clamp(1.25rem, 2.5vw, 1.625rem)',
+  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.9), 1px 1px 2px rgba(0, 0, 0, 0.8), 0px 0px 8px rgba(0, 0, 0, 0.6)',
+  background: 'rgba(255, 255, 255, 0.9)',
+  border: '2px solid rgba(255, 255, 255, 0.9)',
+  backdropFilter: 'blur(12px)'
+} as const;
+
+const BUTTON_HOVER_STYLES = {
+  background: 'rgba(255, 255, 255, 0.95)',
+  borderColor: 'rgba(255, 255, 255, 1)'
+} as const;
+
+// Color constants for consistency
+const COLORS = {
+  buttonBackground: 'rgba(255, 255, 255, 0.9)',
+  buttonBorder: 'rgba(255, 255, 255, 0.95)'
+} as const;
+
+/**
+ * SignInPage - Authentication entry point with cinematic design
+ *
+ * Features:
+ * - Google OAuth authentication via Firebase
+ * - Animated movie poster background
+ * - Responsive typography and layout
+ * - User-friendly error handling
+ * - WCAG-compliant accessibility
+ *
+ * Note: Firebase automatically handles both new user registration and
+ * existing user sign-in through the same OAuth flow.
+ */
 export default function SignInPage() {
   const { signIn, isLoading } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSignIn = async () => {
+  /**
+   * Handles Google OAuth authentication
+   * Clears any existing errors and initiates sign-in flow
+   */
+  const handleSignIn = useCallback(async () => {
+    setError(null);
+
     try {
       const result = await signIn();
+
       if (!result) {
-        // If Firebase isn't working, show an error message
-        alert('Firebase authentication is not configured. Please check your environment variables.');
+        setError('Authentication is not configured. Please contact support.');
       }
-    } catch (error) {
-      console.error('Sign in failed:', error);
-      alert('Sign in failed. Please check your Firebase configuration.');
+    } catch (err) {
+      console.error('[SignInPage] Authentication failed:', err);
+      setError('Sign in failed. Please try again or contact support.');
     }
-  };
+  }, [signIn]);
+
+  /**
+   * Apply hover styles to button
+   */
+  const handleButtonMouseEnter = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget;
+    button.style.background = BUTTON_HOVER_STYLES.background;
+    button.style.borderColor = BUTTON_HOVER_STYLES.borderColor;
+  }, []);
+
+  /**
+   * Reset button to base styles
+   */
+  const handleButtonMouseLeave = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget;
+    button.style.background = COLORS.buttonBackground;
+    button.style.borderColor = COLORS.buttonBorder;
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6">
-      <Card className="w-full max-w-md bg-slate-800/50 backdrop-blur border-slate-700">
-        <CardHeader className="text-center pb-6">
-          <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Film className="w-8 h-8 text-purple-400" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-white mb-2">
-            WritersRoom
-          </CardTitle>
-          <p className="text-slate-300">
-            Professional screenwriting meets AI assistance
-          </p>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <p className="text-slate-400 text-sm mb-6">
-              Sign in to access your scripts and collaborate with AI
-            </p>
-          </div>
-          
-          <Button
-            onClick={handleSignIn}
-            disabled={isLoading}
-            className="w-full bg-white hover:bg-gray-100 text-gray-900 font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-3"
+    <>
+      <MoviePosterBanner />
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full flex flex-col items-center justify-center text-center z-10 animate-fade-in">
+          {/* Main title */}
+          <h1
+            className="font-black text-white uppercase mb-7 leading-none px-4"
+            style={TITLE_STYLES}
           >
-            {isLoading ? (
-              <div className="w-5 h-5 border-2 border-gray-400 border-t-gray-900 rounded-full animate-spin" />
-            ) : (
-              <LogIn className="w-5 h-5" />
-            )}
-            {isLoading ? 'Signing in...' : 'Sign in with Google'}
-          </Button>
-          
-          <div className="text-center">
-            <p className="text-xs text-slate-500">
-              By signing in, you agree to our terms of service and privacy policy
-            </p>
+            WRITERSROOM
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            className="text-white font-semibold mb-7 tracking-wide px-4"
+            style={SUBTITLE_STYLES}
+          >
+            by screenwriters, for screenwriters...
+          </p>
+
+          {/* Error message */}
+          {error && (
+            <div
+              className="mb-6 px-6 py-3 bg-red-900/80 border-2 border-red-500/80 rounded-lg backdrop-blur-sm max-w-md"
+              role="alert"
+            >
+              <p className="text-white font-medium">{error}</p>
+            </div>
+          )}
+
+          {/* Authentication button */}
+          <div className="flex justify-center items-center w-full px-4">
+            <button
+              onClick={handleSignIn}
+              disabled={isLoading}
+              className="group relative rounded-2xl px-8 sm:px-16 py-5 sm:py-6 font-semibold text-white uppercase tracking-wide transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto sm:min-w-[240px]"
+              style={BUTTON_BASE_STYLES}
+              onMouseEnter={handleButtonMouseEnter}
+              onMouseLeave={handleButtonMouseLeave}
+              aria-label="Sign in with Google"
+            >
+              {isLoading ? 'Connecting...' : 'Sign in with Google'}
+            </button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </>
   );
 }

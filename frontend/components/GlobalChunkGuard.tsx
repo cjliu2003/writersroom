@@ -37,8 +37,10 @@ export default function GlobalChunkGuard() {
       }
     }
 
-    // Prime likely-needed chunks
-    preloadCriticalChunks()
+    // Note: preloadCriticalChunks() disabled to prevent preload warnings
+    // Next.js handles chunk loading automatically
+    // Uncomment only if experiencing frequent chunk loading errors
+    // preloadCriticalChunks()
 
     window.addEventListener("unhandledrejection", handler)
     window.addEventListener("error", handler)

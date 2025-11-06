@@ -13,8 +13,9 @@ interface ChunkRetryProviderProps {
  */
 export default function ChunkRetryProvider({ children }: ChunkRetryProviderProps) {
   useEffect(() => {
-    // Preload critical chunks to reduce loading failures
-    preloadCriticalChunks()
+    // Note: preloadCriticalChunks() disabled to prevent preload warnings
+    // Next.js handles chunk loading automatically
+    // preloadCriticalChunks()
 
     // Set up global error handler for chunk loading failures
     const handleGlobalError = (event: ErrorEvent) => {
