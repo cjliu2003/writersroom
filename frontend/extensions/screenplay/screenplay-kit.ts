@@ -29,6 +29,7 @@ import { Transition } from './nodes/transition';
 
 // Plugins
 import { SmartEnterPlugin } from './plugins/smart-enter-plugin';
+import { SmartBreaksPlugin } from './plugins/smart-breaks-plugin';
 
 export interface ScreenplayKitOptions {
   /**
@@ -66,10 +67,22 @@ export const ScreenplayKit = Extension.create<ScreenplayKitOptions>({
       plugins.push(SmartEnterPlugin());
     }
 
-    // TODO: Add Smart Page Breaks plugin when Phase 3 is implemented
-    // if (this.options.enableSmartPageBreaks) {
-    //   plugins.push(SmartPageBreaksPlugin());
-    // }
+    // Add Smart Page Breaks plugin if enabled (default: false)
+    if (this.options.enableSmartPageBreaks === true) {
+      plugins.push(SmartBreaksPlugin({
+        schemaNames: {
+          sceneHeading: 'sceneHeading',
+          action: 'action',
+          character: 'character',
+          parenthetical: 'parenthetical',
+          dialogue: 'dialogue',
+          transition: 'transition',
+        },
+        moreText: '(MORE)',
+        contdText: " (CONT'D)",
+        safetyPx: 4,
+      }));
+    }
 
     return plugins;
   },

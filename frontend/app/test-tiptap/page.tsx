@@ -28,7 +28,7 @@ import { getScriptContent, type ScriptWithContent } from '@/lib/api';
 import '@/styles/screenplay.css';
 
 // Default script ID for testing
-const DEFAULT_SCRIPT_ID = 'e7a5847d-cf2d-415b-a4f2-764774c1f81e';
+const DEFAULT_SCRIPT_ID = 'e4ba3b38-0c14-4e4a-b008-1399cb9beb42';
 
 // Generate random color for user cursor
 const getRandomColor = () => {
@@ -149,7 +149,9 @@ export default function TestTipTapPage() {
         // Note: paragraph is kept enabled as a fallback and for compatibility with pagination
       }),
       // Screenplay formatting extensions
-      ScreenplayKit,
+      ScreenplayKit.configure({
+        enableSmartPageBreaks: true,  // Enable smart page breaks (Tier 1 foundation)
+      }),
       // Collaboration
       ...(doc ? [
         Collaboration.configure({
