@@ -23,7 +23,7 @@ const SUBTITLE_STYLES = {
 
 const BUTTON_BASE_STYLES = {
   fontSize: 'clamp(1.25rem, 2.5vw, 1.625rem)',
-  textShadow: '1px 1px 3px rgba(0, 0, 0, 0.7)',
+  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.9), 1px 1px 2px rgba(0, 0, 0, 0.8), 0px 0px 8px rgba(0, 0, 0, 0.6)',
   background: 'rgba(255, 255, 255, 0.9)',
   border: '2px solid rgba(255, 255, 255, 0.9)',
   backdropFilter: 'blur(12px)'
