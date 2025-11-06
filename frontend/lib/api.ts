@@ -53,12 +53,40 @@ export interface ScriptSummary {
 
 export async function getUserScripts(): Promise<ScriptSummary[]> {
   const response = await authenticatedFetch('/users/me/scripts');
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch user scripts');
   }
-  
+
   return response.json();
+}
+
+export async function updateScript(
+  scriptId: string,
+  updates: { title?: string; description?: string }
+): Promise<ScriptSummary> {
+  const response = await authenticatedFetch(`/scripts/${scriptId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(updates),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to update script');
+  }
+
+  return response.json();
+}
+
+export async function deleteScript(scriptId: string): Promise<void> {
+  const response = await authenticatedFetch(`/scripts/${scriptId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to delete script');
+  }
 }
 
 // Scenes for a specific script
@@ -142,7 +170,9 @@ export interface FDXUploadResponse {
   };
 }
 
-export async function uploadFDXFile(file: File): Promise<FDXUploadResponse> {
+export async function uploadFDXFile(
+  file: File
+): Promise<FDXUploadResponse> {
   const token = await getCurrentUserToken();
 
   if (!token) {

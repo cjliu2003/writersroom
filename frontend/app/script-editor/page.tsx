@@ -15,7 +15,7 @@
 
 "use client"
 
-import { useState, useEffect, Suspense, useCallback } from "react"
+import { useState, useEffect, Suspense, useCallback, useMemo } from "react"
 import { ScriptEditorWithAutosave } from "@/components/script-editor-with-autosave"
 import { ScriptSceneSidebar } from "@/components/script-scene-sidebar"
 import { useAuth } from "@/contexts/AuthContext"
@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Home, FileText, Eye, HelpCircle, Download, Menu } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import ErrorBoundary from "@/components/ErrorBoundary"
+import ProcessingScreen from "@/components/ProcessingScreen"
 import type { SceneBoundary } from "@/utils/scene-boundary-tracker"
 
 import { getScriptContent, exportFDXFile, type ScriptWithContent } from '@/lib/api'
@@ -32,13 +33,72 @@ import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/util
 import { useChunkRetry } from '@/hooks/useChunkRetry'
 
 function ScriptEditorPageContent() {
-  const [script, setScript] = useState<ScriptWithContent | null>(null)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { user, isLoading: authLoading, getToken, signIn } = useAuth()
+
+  // Helper function to load and transform cached data
+  const loadCachedScript = (): ScriptWithContent | null => {
+    const scriptId = searchParams.get('scriptId')
+    const fromUpload = searchParams.get('fromUpload') === 'true'
+
+    if (!fromUpload || !scriptId) return null
+
+    const cacheKey = `script_${scriptId}`
+    const cachedData = sessionStorage.getItem(cacheKey)
+
+    if (!cachedData) return null
+
+    try {
+      const scriptContent = JSON.parse(cachedData)
+      console.log('[ScriptEditor] 🚀 Loading cached data synchronously on mount')
+
+      // Transform content blocks if needed
+      if (scriptContent.content_blocks && scriptContent.content_blocks.length > 0) {
+        scriptContent.content_blocks = scriptContent.content_blocks.map((block: any) => {
+          if (block.children && Array.isArray(block.children)) {
+            return block
+          }
+          return {
+            type: block.type || 'paragraph',
+            children: [{ text: block.text || '' }],
+            ...(block.metadata && { metadata: block.metadata })
+          }
+        })
+      }
+
+      // Clean up cached data immediately after loading
+      sessionStorage.removeItem(cacheKey)
+      return scriptContent
+    } catch (e) {
+      console.error('[ScriptEditor] Failed to load cached data:', e)
+      sessionStorage.removeItem(cacheKey)
+      return null
+    }
+  }
+
+  // Initialize script with cached data if available (synchronous load on mount)
+  const [script, setScript] = useState<ScriptWithContent | null>(() => loadCachedScript())
+
+  // Early cache detection - check if we successfully loaded cached data
+  const hasCachedData = script !== null && searchParams.get('fromUpload') === 'true'
   const [isAssistantOpen, setIsAssistantOpen] = useState(true)
-  const [lastSaved, setLastSaved] = useState<Date>(new Date())
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentScriptId, setCurrentScriptId] = useState<string | null>(null)
+  // Initialize lastSaved from cached script if available
+  const [lastSaved, setLastSaved] = useState<Date>(() =>
+    script ? new Date(script.updated_at) : new Date()
+  )
+  // Initialize isLoading based on cache presence - if cached data exists, start with false
+  const [isLoading, setIsLoading] = useState(!hasCachedData)
+  // Initialize isFromUpload directly from searchParams to avoid message flickering
+  const [isFromUpload, setIsFromUpload] = useState(() => searchParams.get('fromUpload') === 'true')
+  const [currentScriptId, setCurrentScriptId] = useState<string | null>(() =>
+    script?.script_id || searchParams.get('scriptId')
+  )
   const [error, setError] = useState<string | null>(null)
-  const [currentVersion, setCurrentVersion] = useState(0)
+  // Initialize currentVersion from cached script if available
+  const [currentVersion, setCurrentVersion] = useState(() =>
+    script?.current_version || 0
+  )
   const [authToken, setAuthToken] = useState<string>("")
   const [autosaveEnabled, setAutosaveEnabled] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
@@ -49,10 +109,6 @@ function ScriptEditorPageContent() {
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number | null>(null)
   const [scrollToSceneFn, setScrollToSceneFn] = useState<((index: number) => void) | null>(null)
   const [isSceneSidebarOpen, setIsSceneSidebarOpen] = useState(true)
-
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { user, isLoading: authLoading, getToken, signIn } = useAuth()
 
   // Enable chunk retry mechanism
   useChunkRetry()
@@ -103,13 +159,13 @@ function ScriptEditorPageContent() {
     }, 20000)
 
     const loadScript = async () => {
-      setIsLoading(true)
       setError(null)
 
       // Check if we have a scriptId from the URL
       const scriptId = searchParams.get('scriptId')
       const isNewScript = searchParams.get('new') === 'true'
       const newScriptTitle = searchParams.get('title')
+      const fromUpload = searchParams.get('fromUpload') === 'true'
 
       if (!scriptId) {
         console.warn('[ScriptEditor] No scriptId in URL')
@@ -119,7 +175,18 @@ function ScriptEditorPageContent() {
       }
 
       setCurrentScriptId(scriptId)
+      setIsFromUpload(fromUpload) // Track if coming from upload
       markOpened(scriptId)
+
+      // If script already loaded from cache (synchronously on mount), we're done
+      if (hasCachedData && script) {
+        console.log('[ScriptEditor] ✅ Script already loaded from cache, skipping fetch')
+        return
+      }
+
+      // Otherwise, show loading state and fetch normally
+      console.log('[ScriptEditor] 🔄 No cached data, fetching from backend')
+      setIsLoading(true)
 
       // Handle new script creation
       if (isNewScript) {
@@ -309,14 +376,15 @@ function ScriptEditorPageContent() {
     )
   }
 
-  if (isLoading || !script) {
+  // Only show ProcessingScreen if we're actually loading AND don't have cached data ready
+  // When hasCachedData is true, skip loading screen entirely - script will load instantly
+  if (!hasCachedData && (isLoading || !script)) {
+    // Unified loading experience for both upload and open flows
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading script...</p>
-        </div>
-      </div>
+      <ProcessingScreen
+        isVisible={true}
+        mode={isFromUpload ? 'upload' : 'open'}
+      />
     )
   }
 

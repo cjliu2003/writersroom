@@ -51,24 +51,30 @@ export function useChunkRetry() {
 
 /**
  * Preload critical chunks to reduce the chance of loading failures
+ * Note: Disabled by default to prevent preload warnings for dynamic chunks
+ * Enable only if you're experiencing frequent chunk loading failures
  */
 export function preloadCriticalChunks() {
   if (typeof window === 'undefined') return
 
-  const criticalPaths = [
-    '/_next/static/chunks/webpack.js',
-    '/_next/static/chunks/main-app.js',
-    '/_next/static/chunks/app/layout.js',
-    '/_next/static/chunks/app-pages-internals.js'
-  ]
+  // Commented out to prevent "preload not used" warnings
+  // Next.js handles chunk loading automatically and these paths may not exist
+  // Uncomment only if experiencing frequent chunk loading errors
 
-  criticalPaths.forEach(path => {
-    const link = document.createElement('link')
-    link.rel = 'preload'
-    link.as = 'script'
-    link.href = path
-    document.head.appendChild(link)
-  })
+  // const criticalPaths = [
+  //   '/_next/static/chunks/webpack.js',
+  //   '/_next/static/chunks/main-app.js',
+  //   '/_next/static/chunks/app/layout.js',
+  //   '/_next/static/chunks/app-pages-internals.js'
+  // ]
+
+  // criticalPaths.forEach(path => {
+  //   const link = document.createElement('link')
+  //   link.rel = 'preload'
+  //   link.as = 'script'
+  //   link.href = path
+  //   document.head.appendChild(link)
+  // })
 }
 
 export default useChunkRetry
