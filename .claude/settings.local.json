@@ -14,7 +14,9 @@
       "mcp__playwright__browser_close",
       "mcp__chrome-devtools__navigate_page",
       "mcp__chrome-devtools__wait_for",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(npx next lint:*)"
     ],
     "deny": [],
     "ask": []
