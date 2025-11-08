@@ -276,15 +276,18 @@ export function ScriptSceneSidebar({
                     </div>
 
                     {/* Scene Metadata */}
-                    <div className="flex items-center gap-4 text-xs text-gray-500 group-hover:text-gray-600 mb-2">
+                    <div className="space-y-1.5 text-xs text-gray-500 group-hover:text-gray-600">
+                      {/* Runtime */}
                       <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                        <Clock className="w-3 h-3 flex-shrink-0" />
                         <span>{stats.minutes} min</span>
                       </div>
+
+                      {/* Characters - allow wrapping */}
                       {characters.length > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          <span className="truncate">
+                        <div className="flex items-start gap-1">
+                          <Users className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                          <span className="break-words leading-relaxed">
                             {characters.join(', ')}
                           </span>
                         </div>

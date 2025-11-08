@@ -27,6 +27,7 @@ import { withYjs, YjsEditor, toSharedType } from 'slate-yjs';
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { SceneBoundaryTracker, SceneBoundary } from '@/utils/scene-boundary-tracker';
 import { usePageBreaks, getPageNumber } from '@/hooks/use-page-breaks';
+import { usePageDecorations } from '@/hooks/use-page-decorations';
 import { ScreenplayElement, ScreenplayBlockType } from '@/types/screenplay';
 
 // Custom editor wrapper for screenplay-specific normalization
@@ -140,8 +141,15 @@ export function ScriptEditorWithCollaboration({
   const [sceneBoundaries, setSceneBoundaries] = useState<SceneBoundary[]>([]);
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number | null>(null);
 
-  // Page break calculation for professional page formatting
+  // Page break calculation for professional page formatting (Web Worker - existing)
   const { pageBreaks, totalPages, isCalculating: isCalculatingPages } = usePageBreaks(value as ScreenplayElement[]);
+
+  // NEW: Decoration-based pagination (Phase 1.4)
+  const { decorate: decoratePageBreaks, totalPages: decorationPages, isCalculating: isCalculatingDecorations } = usePageDecorations(
+    editor,
+    doc,
+    { enabled: true, debounceMs: 150 } // Feature flag for gradual rollout
+  );
 
   // Editor container ref for scroll navigation
   const editorContainerRef = useRef<HTMLDivElement>(null);
@@ -157,6 +165,16 @@ export function ScriptEditorWithCollaboration({
       console.warn('[ScriptEditor] Error updating scene boundaries:', error);
     }
   }, [value, boundaryTracker, onSceneBoundariesChange]);
+
+  // Validation logging: Compare Web Worker vs decoration pagination (temporary)
+  useEffect(() => {
+    console.log('[Pagination Validation]', {
+      workerPages: totalPages,
+      decorationPages,
+      match: totalPages === decorationPages,
+      difference: Math.abs(totalPages - decorationPages),
+    });
+  }, [totalPages, decorationPages]);
 
   // Scroll to scene navigation
   const scrollToScene = useCallback((sceneIndex: number) => {
@@ -481,7 +499,7 @@ export function ScriptEditorWithCollaboration({
     const baseStyles: React.CSSProperties = {
       fontFamily: 'Courier, monospace',
       fontSize: '12pt',
-      lineHeight: '1.5',
+      lineHeight: '12pt', // Fixed: use 12pt for 6 lines/inch (standard screenplay format)
       whiteSpace: 'pre-wrap',
       wordWrap: 'break-word',
     };
@@ -608,10 +626,45 @@ export function ScriptEditorWithCollaboration({
     }
   }, []);
 
-  // Render text leaf (for formatting like bold, italic)
+  // Render text leaf (for formatting like bold, italic, and page breaks)
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     let { attributes, children, leaf } = props;
 
+    // Handle page break decorations (Phase 2.1 - Simple separator)
+    if ('pageBreak' in leaf && leaf.pageBreak) {
+      return (
+        <span {...attributes}>
+          {/* Full-viewport-width separator - simple and consistent */}
+          <div
+            className="page-break-separator"
+            contentEditable={false}
+            style={{
+              display: 'block',
+              width: '100vw',  // Full viewport width
+              height: '2rem',  // Spacing between pages
+              background: '#f3f4f6',  // Match outer container (gray-100)
+              position: 'relative',
+              left: '50%',
+              right: '50%',
+              marginLeft: '-50vw',  // Offset to left edge of viewport
+              marginRight: '-50vw',  // Offset to right edge of viewport
+              userSelect: 'none',
+            }}
+          />
+          {/* Top margin for new page */}
+          <div
+            contentEditable={false}
+            style={{
+              height: '1in',  // Match paddingTop to create consistent page start
+              userSelect: 'none',
+            }}
+          />
+          {children}
+        </span>
+      );
+    }
+
+    // Handle text formatting (existing)
     if (leaf.bold) {
       children = <strong>{children}</strong>;
     }
@@ -668,6 +721,11 @@ export function ScriptEditorWithCollaboration({
             • {sceneBoundaries.length} scene{sceneBoundaries.length !== 1 ? 's' : ''}
           </span>
         )}
+        {/* Page count validation - show both systems during transition */}
+        <span className="text-xs text-gray-500">
+          • Pages: {totalPages} (worker) / {decorationPages} (decorations)
+          {totalPages === decorationPages ? ' ✓' : ' ⚠️'}
+        </span>
       </div>
     );
   };
@@ -677,57 +735,28 @@ export function ScriptEditorWithCollaboration({
       {/* Sync status indicator */}
       {renderSyncStatus()}
 
-      {/* Professional page layout with 8.5" x 11" pages */}
+      {/* Simple white container - Phase 2.2: Decoration-based pagination */}
       <div className="flex-1 overflow-auto py-8 px-4 bg-gray-100">
-        <div className="max-w-none mx-auto" style={{ position: 'relative' }}>
-          {/* Page backgrounds layer (behind editor) */}
-          {Array.from({ length: Math.max(totalPages, 1) }, (_, pageIndex) => (
-            <div
-              key={`page-bg-${pageIndex}`}
-              className="bg-white shadow-lg border border-gray-300"
-              style={{
-                position: 'absolute',
-                top: `calc(${pageIndex * 11}in + ${pageIndex * 2}rem)`,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '8.5in',
-                height: '11in',
-                zIndex: 0,
-              }}
-            >
-              {/* Page number */}
-              <div
-                className="absolute text-xs text-gray-500"
-                style={{
-                  top: '0.5in',
-                  right: '1in',
-                  fontFamily: '"Courier Prime", Courier, monospace',
-                }}
-              >
-                {pageIndex + 1}.
-              </div>
-            </div>
-          ))}
-
-          {/* Editor content layer (on top of page backgrounds) */}
-          <div
-            style={{
-              position: 'relative',
-              zIndex: 1,
-              width: '8.5in',
-              margin: '0 auto',
-              padding: '1in 1in 1in 1.5in',
-              paddingTop: '1.2in',
-              minHeight: `calc(${Math.max(totalPages, 1) * 11}in + ${(Math.max(totalPages, 1) - 1) * 2}rem)`,
-              fontFamily: '"Courier Prime", Courier, monospace',
-              fontSize: '12pt',
-              lineHeight: '12pt',
-            }}
-          >
+        <div className="screenplay-container" style={{
+          width: '8.5in',
+          minHeight: '11in',
+          margin: '0 auto',
+          background: 'white',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #e5e7eb',
+        }}>
+          <div style={{
+            padding: '1in 1in 1in 1.5in',
+            paddingTop: '1in',
+            fontFamily: '"Courier Prime", Courier, monospace',
+            fontSize: '12pt',
+            lineHeight: '12pt',
+          }}>
             <Slate editor={editor} initialValue={value} onChange={handleChange}>
               <Editable
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
+                decorate={decoratePageBreaks}
                 placeholder="Start writing your screenplay..."
                 spellCheck
                 autoFocus

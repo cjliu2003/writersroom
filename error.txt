@@ -1,23 +1,13 @@
+Unhandled Runtime Error
+ReferenceError: Cannot access 'editor' before initialization
 
----
+Source
+app/test-tiptap/page.tsx (156:18) @ editor
 
-**Unhandled Runtime Error**
-
-```
-Error: Cannot resolve a Slate point from DOM point: [object Text],1
-```
-
-**Call Stack**
-
-```
-Object.toSlatePoint
-    node_modules/slate-dom/dist/index.es.js (856:1)
-
-Object.toSlateRange
-    node_modules/slate-dom/dist/index.es.js (968:1)
-
-HTMLDivElement.eval
-    node_modules/slate-react/dist/index.es.js (2876:1)
-```
-
----
+  154 |       setLoadingScript(false);
+  155 |     }
+> 156 |   }, [authToken, editor]);
+      |                  ^
+  157 |
+  158 |   // Handle script ID change
+  159 |   const handleLoadScript = () => {

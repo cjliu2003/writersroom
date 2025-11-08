@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import SignInPage from "@/components/SignInPage";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserScripts, uploadFDXFile, updateScript, deleteScript, getScriptContent, type ScriptSummary } from "@/lib/api";
+import { getUserScripts, uploadFDXFile, createScript, updateScript, deleteScript, getScriptContent, type ScriptSummary } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText, Plus, LogOut, User, X, Edit2, Trash2 } from "lucide-react";
@@ -240,11 +240,25 @@ export default function HomePage() {
     setNewScriptTitle("");
   }, []);
 
-  const handleCreateScript = useCallback(() => {
+  const handleCreateScript = useCallback(async () => {
     const title = newScriptTitle.trim();
     if (!title) return;
-    const projectId = `new-${Date.now()}`;
-    router.push(`/script-editor?scriptId=${projectId}&new=true&title=${encodeURIComponent(title)}`);
+
+    setIsUploading(true);
+    try {
+      // Create script in database first
+      const newScript = await createScript({ title });
+
+      // Navigate to editor with real script ID
+      router.push(`/script-editor?scriptId=${newScript.script_id}`);
+    } catch (error) {
+      console.error('[HomePage] Failed to create script:', error);
+      alert('Failed to create script. Please try again.');
+    } finally {
+      setIsUploading(false);
+      setShowTitleModal(false);
+      setNewScriptTitle('');
+    }
   }, [newScriptTitle, router]);
 
   const handleEditClick = useCallback((e: React.MouseEvent, script: ScriptSummary) => {

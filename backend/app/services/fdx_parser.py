@@ -176,9 +176,8 @@ class FDXParser:
         # Check for transitions regardless of XML type
         for pattern in cls.TRANSITION_PATTERNS:
             if pattern.match(text):
-                formatted_text = text.upper()
-                if not (formatted_text.endswith(':') or formatted_text.endswith('.')):
-                    formatted_text += ':'
+                # Strip formatting characters (colon, period) - CSS will add them back
+                formatted_text = text.upper().rstrip('.:').strip()
                 return {'type': 'transition', 'text': formatted_text}
         
         # Handle Scene Headings
@@ -211,12 +210,14 @@ class FDXParser:
             'Character': {'type': 'character', 'text': text.upper()},
             'Dialogue': {'type': 'dialogue', 'text': text},
             'Parenthetical': {
-                'type': 'parenthetical', 
-                'text': f"({text})" if not (text.startswith('(') and text.endswith(')')) else text
+                'type': 'parenthetical',
+                # Strip parentheses - CSS will add them back via ::before and ::after
+                'text': text.strip('()').strip()
             },
             'Transition': {
-                'type': 'transition', 
-                'text': text.upper() + ('' if text.endswith(':') else ':')
+                'type': 'transition',
+                # Strip colon/period - CSS will add colon back via ::after
+                'text': text.upper().rstrip('.:').strip()
             },
             'Scene Heading': {'type': 'scene_heading', 'text': text.upper()},
             'Shot': {'type': 'shot', 'text': text},

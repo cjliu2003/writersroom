@@ -1,0 +1,2657 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft DocumentType="Script" Template="No" Version="5">
+
+  <Content>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Length="5/8" Page="1" Title="">
+        <SceneArcBeats>
+          <CharacterArcBeat Name="CAMILA">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="SAM">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+      <Text>Int. HALLWAY - SASKATOON POLICE DEPARTMENT – NIGHT</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The hallway is bare. Pale walls. Scuffed tile floors. A fire extinguisher hangs crooked in its bracket.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>AGENT SAM PATRICK CARTER (mid 20s, ex-military, plainclothes) stands stiff, tearing through a case file. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>AGENT CAMILA TORRES (early 30s, composed, a gold crucifix) approaches him. She has a steady calm about her. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CaMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Relax. You wrote it.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam takes a breath. Nods. Turns to her. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SaM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Right.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Agent One-Eleven’s on stand by. You want him to take this?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No. I’ve got this.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Camila nods. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Good. We need a confession. If things get messy he’s taking over.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam nods. Takes a breath. Then, he opens the door...</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Length="5 2/8" Page="1" Title="">
+        <SceneArcBeats>
+          <CharacterArcBeat Name="ATLAS">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="CAMILA">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="RICHARD">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="SAM">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+      <Text>Int. IntERROGATION ROOM - conTINUOUS</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam enters. The room is small. Claustrophobic. The walls are concrete. A one-way mirror stretches across the far wall.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>In a chair, at the table, sits RICHARD HUGHES (50s, bloated, balding) folding into himself like a broken marionette. His eyes are on his fingers. He picks at his long, dirty nails. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Richard. I’m Agent Sam Patrick Carter. I’m with the FBI.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard doesn’t respond. Sam hesitates. Continues.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I work in the Behavioral Science Unit. We analyze behaviors to build profiles of offenders.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>You’re a perfect fit.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard glares at him. Then his eyes return to his nails.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>If you give us your history from the night of the--</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam hesitates. Then...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>The hard way then... </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Each victim of the ‘Schoolyard Stalker’ was found in a different city than they were taken. Most of them last seen at school. We have reason to believe Amanda Mills, Susie Silver, and Grace Mitchell–-</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richards eyes twitch up at the name. He turns away.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>--Were taken from the school yard. Still, no one noticed anything.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>You were on site. The janitor.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RiCHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>It’s a contracting company.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Right. </Text>
+      <Text AdornmentStyle="-1">Jani-King</Text>
+      <Text>. That’s how Maia Sterling identified you, the blue crown on your van.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>She said you gave her this ring.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam removes a signet ring from his pocket. Lays it on the table. Richard looks at it.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Grace Mitchell was recovered missing a ring matching this one. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Why’d you give it to Maia?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard picks his nails in silence.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>We have you. If you cooperate--</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Can I go home?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam frowns. Jaw clenched. He hears a voice. In his head...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA (o.S.)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Stay on the profile.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam studies Richard. Then...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Each victim was found wrapped in bedsheets and left on busy roads. Visible. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Points to compassion.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam flinches. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Tastes wrong. Wasted on you.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard breaths a laugh. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA (o.S.)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Calm it down.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>We’re dealing with a power-reassurance killer. He cared about the victims. Shared compliments, gifts. So when his urges took over-</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RichARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I’m not your guy.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam hesitates. There’s silence for a moment.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No. No we already have you--</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CaMILA (o.S.)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>That’s enough. I’m bringing him in.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam turns away from Richard. To the mirror.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(whispering)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No- Not yet.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA (o.S.)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Join the call. Get Richard too.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam takes a breath. Spots himself in the mirror. He’s tense. He fixes his suit. Adjusts his hair. Turns. Forces a smile.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Richard, my supervisor wants to speak to you... I made a mistake.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard studies him. Nods.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Okay.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>He’s remote. I’m hosting him locally. Join the call.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard nods. There’s a chime. Like someone joining a meeting. Sam moves to the door. Opens it.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>SPECIAL AGENT ATLAS111 (30s, unnervingly calm, perfect, more designed than born) stands in the hall. He steps past Sam holding a manilla folder.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He has </Text>
+      <Text Style="Bold">no reflection</Text>
+      <Text> in the glass...</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard looks at him. Squints. Stiffens.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>What the- who are you?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>AtLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>‘I am that I am.’</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat, to Richard)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Whoever I need to be.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>The fuck?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam salutes Atlas. Leans in. Away from Richard.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SaM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>It’s an honor, Sir. Should we make a plan?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas looks at him. Annoyed. </Text>
+      <Text Style="Italic">He is the plan. </Text>
+      <Text>Then, Atlas turns to Richard. He opens his folder and slams a picture of a girl with disfigured face on the table. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Most of his victims were suffocated with a pillow. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Not Grace. Her skull was cracked from a blow to the back of her head. After she fell, she was stabbed a dozen times. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Her parents couldn’t identify her.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard shifts in the chair. Avoiding the photo. Sam studies Atlas. He almost speaks. Stops himself. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>This type of offender is delusional. Believing their obsession will be reciprocated. They ask for affirmations, while they’re... </Text>
+      <Text Style="Italic">with</Text>
+      <Text> the victims. And if he got one. A powerful one. He’d believe his delusion wasn’t a sickness, but a cure for his miserable life. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard picks his nails. Harder now. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>He wouldn’t expect these girls to cry, to beg for their mothers. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>And Grace didn’t. Now he didn’t know this, at the time, but she’d dealt with a similar predator. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Her uncle would ask her for reassurance when molesting her. Grace profiled this freak...</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard shifts.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>...She gave him the affirmations he craved. He saw their life. Let his guard down. She almost escaped--</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>--so he chased her down. Struck her in the back of her head before punishing her perceived betrayal-</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Stop.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I think she told him the exact same thing her uncle forced her to say--</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard squirms. We’re close on his face. Atlas continues, but we don’t see him. </Text>
+      <Text Style="Bold">A small girl speaks</Text>
+      <Text>...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS (As grace)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I love you.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard looks up. Horrified. ATLAS HAS CHANGED SKINS. He’s transformed into Grace. He’s now a THIRTEEN YEAR OLD GIRL. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam backs up. Mouth open. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Grace?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS (as grace)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I thought you loved me.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>How are- what?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Grace tears up. So does Richard.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS (as grace)</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(tearful)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Why’d you hurt me?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>RICHARD</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(crying)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I’m sorry!!</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Richard gets up. Scrambles to Grace, lunging to hug her. When he reaches her, </Text>
+      <Text Style="Underline">he falls through her</Text>
+      <Text>. Off screen, Atlas changes back to himself.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>That enough?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CaMILA (o.S.)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Yeah. Good work.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas glances at Sam. He smirks. Then disappears. Richard shrieks. Crumples into a ball. Sam stands over him. Bewildered. He hesitates. Then exits.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Length="6/8" Page="7" Title="">
+        <SceneArcBeats>
+          <CharacterArcBeat Name="CAMILA">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="SAM">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+      <Text>Int. HALLWAY - SASKATOON POLICE DEPARTMENT – continuous</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam enter the hall. DETECTIVE COLLINS (50s, local, sweating), INSPECTOR BISHOP (40s, bald, pragmatic), and CROWN COUNSEL FINLAY (30s, corporate), stand smiling behind Camila. She smirks at Sam. He shakes his hand.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Nicely done.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>What was that?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Atlas.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam nods. Considers. Then...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>How’d he know about the uncle?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Camila darkens.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I have a hunch. But get home. Lauren called. I’ll clean up here.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam’s face drops. He nods.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Right.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He hesitates. Smiles at the team. Exits. </Text>
+    </Paragraph>
+    <Paragraph Type="Transition">
+      <Text>Cut to:</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Length="2 3/8" Page="7" Title="">
+        <SceneArcBeats>
+          <CharacterArcBeat Name="LAUREN">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="SAM">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+      <Text>Int. Sam’s APARTMENT - Base reality - Day</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam holds his new-born son. He applies a cream to THIN, FRESH CUTS on the boys head. LAUREN (early 30s, beautiful, unpolished, tired, a young mother) manages the apartment.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>And this will help?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Lauren</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>With the scaring. Yes.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>It’s a brutal start to things.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>We all got one. He won’t remember. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Yeah but- the umbilical cord, the circumcision, the RIFT. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>He’s starting life already bleeding.  </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(half-joking)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>It’s an honest introduction. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam looks down. Doesn’t respond.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Don’t worry. He’ll be fine. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>You’ve been calling Camila.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I have.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I don’t think that’s appropriate.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I think it is. She told me you met your hero. How was that?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam considers.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Odd. He’s... incredible. But he introduced himself with a quote from Exodus. The answer God gives Moses when he asks his name.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(laughing)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Jesus. So what-he thinks he’s God?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No. That’s- that’s not it.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>And no one knows who he really is?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam shakes his head. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Do you think your dad knew?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(hesitates, shrugs)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Maybe.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>There’s a long pause. Sam’s eyes are glazed, unfocused. Lauren snaps her fingers at him.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Don’t </Text>
+      <Text Style="Bold">Drift</Text>
+      <Text>! Especially not when you’re holding him.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam blinks. He sighs. Stands up.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I have to go.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>What? No. Baby, you just got home.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>They need me. A girl’s been taken.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>A senator’s daughter.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Lauren looks at him. Takes a breath. Nods.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I get it. I’ll be okay.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>It’s a huge case. I wouldn’t go if-</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I know. You’re a hero. Just remember: you’re a dad now too.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Of course. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam kisses his son. Puts him in his crib. Turns to Lauren.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>LAUREN</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Be safe, please. And be good.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He kisses her forehead.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Always.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam grabs his coat. Shuts the door. His son begins to cry.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Length="4 5/8" Page="10" Title="">
+        <SceneArcBeats>
+          <CharacterArcBeat Name="CAMILA">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="DIRECTOR SHAW">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="SAM">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="SENATOR WHITMORE">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+      <Text>Int. </Text>
+      <Text AdornmentStyle="-1">CBAU</Text>
+      <Text> BRIEFING ROOM – </Text>
+      <Text AdornmentStyle="-1">QUANTICO</Text>
+      <Text> - Base reality – afternoon</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam enters. Harsh overheads illuminate the windowless briefing room. SENATOR LEWIS </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+      <Text> (50s, military buzz, wrinkled suit) paces. Fuming. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SenATOR </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>There’s a camera in every head in the country! Where is she?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam sits beside Camila. </Text>
+      <Text AdornmentStyle="-1">FBI</Text>
+      <Text> DIRECTOR ISAIAH SHAW (60s, deep-set eyes, coffee-stained teeth) sits at the head of the table. He rubs his brow. Tired. Impatient. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>The RIFT chips give us real-time feedback. Not omniscience.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Besides. Everyone’s drifting anyway. Full-time in the Recurse.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No one saw her.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SENATOR </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Then what? How do we find her?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>By looking. This is the Cyber Behavioral Science Unit. No magic. Just behavior. Offenders change their names, faces, environments...</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>But they can’t change </Text>
+      <Text Style="Italic">why. </Text>
+      <Text>We map digital footprints to physical identities.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>And we’re the best.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He turns to Sam and Camila. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Agent Torres leads our technical operations. Agent Carter’s not </Text>
+      <Text AdornmentStyle="-1">CBAU</Text>
+      <Text>, but he’s one of the best profilers in the Bureau.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SenATOR </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I want the best.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>And you have him.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Special Agent Atlas111. Head of the </Text>
+      <Text AdornmentStyle="-1">CBAU</Text>
+      <Text>. Not a meetings type.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The senator bites his nails. Studies him. Shaw stands.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Director Shaw</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Last week, Lila Whitmore’s RIFT signal cut out three minutes after entering the Dupont Circle Metro station. She never came back online. Yesterday, this mesh-</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>As he speaks, a 3D rendering of LILA WHITMORE (17, pale skin, soft features) appears. She’s motionless. Standing at the center of the room. Identical to the real girl. </Text>
+    </Paragraph>
+    <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="12" Spacing="1" StartsNewPage="No" Type="General">
+      <DualDialogue>
+        <SpellCheckIgnoreLists>
+          <IgnoredRanges/>
+          <IgnoredWords/>
+        </SpellCheckIgnoreLists>
+        <Paragraph Type="Character">
+          <Text>senATOR WHITMORE</Text>
+        </Paragraph>
+        <Paragraph Type="Parenthetical">
+          <Text>(to himself)</Text>
+        </Paragraph>
+        <Paragraph Type="Dialogue">
+          <Text>Oh my God.</Text>
+        </Paragraph>
+        <Paragraph Type="Character">
+          <Text>DirECTOR SHAW</Text>
+        </Paragraph>
+        <Paragraph Type="Dialogue">
+          <Text>-was identified at Skin Bazaar on </Text>
+          <Text Style="Bold">Silk Road.</Text>
+          <Text> </Text>
+        </Paragraph>
+      </DualDialogue>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The senator tears up. Approaches his daughter. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>senATOR WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(tearful)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Baby.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Camila frowns.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Senator. If it’s too much I can mute your </Text>
+      <Text AdornmentStyle="-1">AR</Text>
+      <Text> feed.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He shakes his head. Wipes his tears.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SeNATOR WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>That’s alright. I’m okay.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Shaw hesitates. Continues.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Metadata’s clean. New wallet. We flagged the hash. Matched a Silk Road node cluster dormant since Operation </Text>
+      <Text Style="Bold">Quiet Harbor.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Camila grabs her cross.  </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CamILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Fuck.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam looks at her. Then the director. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I’ve only worked Base. Catch me up.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SeNATOR </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>If he can’t follow, why’s he here?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>director shaw </Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>This is a high-profile case and we need a face. You know Captain Moore. He trusts Sam with his life. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>His father founded the division.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The senator nods. Turns to Sam.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SENATOR </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I’m sorry.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SaM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Don’t apologize. I can’t imagine the stress.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Quiet Harbor was our response to the largest decentralized trafficking network we’ve seen. Led by a user: DrFrankEpstein911. If this skin’s tied to that market-</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text Style="Bold">Jack is back.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>There’s silence for a moment. Then...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>We have a name?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No- Sorry. FrankEpstein’s a programmer. A middle man. Like a drop-shipper for human beings.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Some agents took to calling him </Text>
+      <Text Style="Bold">‘Jack the Shipper.’</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SeNATOR </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Dear God.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>One-Eleven almost caught him two years ago. Then he went dark. Account’s been dead ever since. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Now... he’s back.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CaMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Director, I’m already assigned to ten missing persons cases I can’t-</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Drop them.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>What?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DirECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>An attack on the senator is an act of war. Each day she’s missing we look weaker. Lila’s the priority. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The senator is pale. Nauseous. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SeNATOR </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I- My wife needs me, but if there is anything I can do, just ask.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The director nods. Camila forces a smile.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>We’ll find her.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SENATOR </Text>
+      <Text AdornmentStyle="-1">WHITMORE</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(nodding, hopeful)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I know.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He de-spawns. Disappearing from the room. Shaw turns to Sam.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DirECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>We’re hitting this from every layer. Drone sweeps in Base Reality. Neural syncs with global police. In Augmented Reality we’re tracking ambient feeds. Flagged visuals. If it is Jack, we’ll only find her in VR. On Silk Road.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>You two and Atlas will sweep it. Find the auction. Buy her back.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Director, I don’t do Silk Road.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I know our arrangement. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Call this an exception.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Shaw turns to leave.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SaM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Then I’m in? With the </Text>
+      <Text AdornmentStyle="-1">CBAU</Text>
+      <Text>?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Shaw stops. Turns. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>DIRECTOR SHAW</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Sure. If you find her.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He exits. Sam smiles. Camila opens her laptop. Types. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>camILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Relax. Just another case. I’m crossing timestamp with vendor echoes-it’s noisy, but I can hear 'em. You’re behind. Meet Atlas in the Recurse. The </Text>
+      <Text Style="Bold">Digital Morgue.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam nods. Stands. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CaMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>And Sam, Silk Road... Before you go in, you need to know what you believe.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam smirks.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Easy. Good and evil. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Like the stories.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Camila studies him. Concerned. She hesitates. Then...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>CAMILA</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>In there... The lines don’t hold.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam shrugs. He exits.</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Length="2/8" Page="14" Title="">
+        <SceneArcBeats/>
+      </SceneProperties>
+      <Text>INT. </Text>
+      <Text AdornmentStyle="-1">CBAU</Text>
+      <Text> CUBICLE ROOM – </Text>
+      <Text AdornmentStyle="-1">QUANTICO</Text>
+      <Text> - base reality – continUOUS</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam enters. Rows of identical cubicles sit </Text>
+      <Text AdornmentStyle="-1">beneathe</Text>
+      <Text> a fluorescent buzz. A few agents sit slouched at their desks, lips parted, eyes glassy. All drifting.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He drops into a chair. Exhales. Checks his watch: 3:41 PM. He leans back. Then, his eyes glaze over. His fingers twitch. </Text>
+    </Paragraph>
+    <Paragraph Type="Transition">
+      <Text>Cut to:</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Length="1 4/8" Page="14" Title="">
+        <SceneArcBeats>
+          <CharacterArcBeat Name="ATLAS">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="SAM">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+      <Text>Int. Digital morgue - the recurse - night</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>The matte-black room is lit by a dim overhead glow. Two doors face each other. One bears a worn Bureau seal. The other, an Ouroboros, a snake devouring itself, edged in faint blue light from something beyond. Sam appears in the space.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas stands at the center. Motionless. Staring at the snake. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Agent One-Eleven?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas takes a breath. Turns. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>AtLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Call me Atlas.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam eyes the door. Then...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Sure. Is that where we’re headed?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>No.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>What is it?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>The Archive. We’ll be in the Vault. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam nods.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>That reminds me-</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam fishes in his suit jacket pocket. He pulls out a foil sheet. No bigger than a dollar bill. It’s perforated into twenty square tabs. Like a sheet of acid.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Each tab glows. Some blue. Some green. Each like a microprocessor etched in gel. Tiny circuits shimmering across the thin, flexible sheet. Sam holds it out.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>A collection of my professional history. Memories from cases, some from my deployments. Take it.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Why?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I want you to trust me.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas examines him. He takes the sheet. Pockets it. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>I read your profiles. You’re a decent analyst. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Uh- yes sir. Thank you.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>That doesn’t mean you’re ready. In Base Reality behavior is contained.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>In here... </Text>
+      <Text Style="Underline">everything is behavior.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam nods. Atlas turns to the Vault door. The Bureau’s seal. He inputs a code to a mounted keypad. The light turns green. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>AtLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Let’s get started...</Text>
+    </Paragraph>
+    <Paragraph Type="Scene Heading">
+      <SceneProperties Length="3 1/8" Page="16" Title="">
+        <SceneArcBeats>
+          <CharacterArcBeat Name="ATLAS">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+          <CharacterArcBeat Name="SAM">
+            <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+          </CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+      <Text>Int. The vault - Jack’s original auction - recurse - night</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam and Atlas stand at the center of a circular, torch-lit chamber. Damp stone walls curve around them. Fourteen barred alcoves ring the room. Seven men. Seven women. Each victim wears a price tag. Hourglasses hang above them, sand frozen mid-fall. In front of them, a stone throne rises from the floor, carved with three snarling wolf heads.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>On it sits </Text>
+      <Text Style="Bold">JACK THE SHIPPER</Text>
+      <Text>, cloaked in digital flesh. His skin an echo of Michelangelo’s Minos. Nude but for a coiled serpent: its head biting his groin, its tail around his neck.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>This is a freeze frame rendering. Jack’s old market. No compression artifacts. It’s all as he made it.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SaM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Jesus Christ.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Jack is an organized sexual sadist with theological delusions.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(gesturing to Jack’s skin)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>He wears the skin of Minos. Judge of Souls in the Greek mythology. This skin’s modeled Michelangelo’s depiction. The serpent’s a punishment for lust. Jack kept it.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Says a lot. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam walks the room. Pale. Mouth open. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>AtlAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>The wolf heads are a distortion of Cerberus. The three-headed hound that guarded the gates of Hades. There’s always seven men and seven women. He never added alcoves. Even as the auction count fluctuated. Minos fed that number to the Minotaur every nine years. </Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Jack’s not as patient. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam moves to the throne. Runs his fingers along the stone. He crouches down. Stares into Jack’s dead eyes.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>He thinks himself a judge. He’s not selling. He’s sentencing.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam’s glare lingers. After a moment. He stands up.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>He built his own Hell.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Yeah. In C.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(shocked)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>In C? That shouldn’t- Are you sure? </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Positive. Synthetic scene deconstruction flagged a custom compiler. No prefab assets. No engine. He built it from scratch.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam hesitates. He looks at Jack.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Does he ever change his skin?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas darkens.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>He used to. I’ve seen Anubis, Solomon, even Brett </Text>
+      <Text AdornmentStyle="-1">Kavanaugh</Text>
+      <Text>. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>Sam</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Jesus.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>All judges. All aligned with his pathology.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>What changed?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas hesitates. After a moment, Sam turns. Realizing.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SaM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>You did.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas studies him. Nods. </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Is that why you picked the name? ‘Atlas the Titan?’</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>That’s part of it. Atlas the Titan  holds up the heavens. A symbol of preservation. When Jack figured out I was hunting him. He chose Minos.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>It stuck.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Sam nods. Considers. Then...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>That’s...</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He trails off.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>What?</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Nothing. I just- I thought with tech, we were outgrowing our myths.</Text>
+    </Paragraph>
+    <Paragraph Type="Parenthetical">
+      <Text>(beat)</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Never thought it’d bring them back.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas watches him, for a moment. Then...</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>It hasn’t.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Agree to disagree. </Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas nods. Continues.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>‘Doctor’ points to training. ‘Frank-Epstein’ fuses Frankenstein and Epstein. He identifies with both. But as the doctor. Not the monster. Implication’s arrested emotional development, paired with 
+severe narcissism and borderline traits. The ‘911’ points there too.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>You really think medical training just cause of the ‘Doctor?’</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>That and his needlework. No infections. No scarring. Every tattoo’s surgically clean.  </Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>SAM</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Needlework?</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>Atlas looks at him. Sighs. Realizing.</Text>
+    </Paragraph>
+    <Paragraph Type="Character">
+      <Text>ATLAS</Text>
+    </Paragraph>
+    <Paragraph Type="Dialogue">
+      <Text>Right.</Text>
+    </Paragraph>
+    <Paragraph Type="Action">
+      <Text>He takes a breath. The room goes dark...</Text>
+    </Paragraph>
+  </Content>
+
+  <Watermarking Opacity="70" Position="Diagonal Descending">
+    <DynamicContent>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="0.00" RightIndent="1.39" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+    </DynamicContent>
+    <Distribution>
+      <Name></Name>
+    </Distribution>
+    <WatermarkImage Height="144"></WatermarkImage>
+  </Watermarking>
+
+  <HeaderAndFooter FooterFirstPage="Yes" FooterVisible="No" HeaderFirstPage="No" HeaderVisible="Yes" StartingPage="1">
+    <Header>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.25" RightIndent="-1.00" SpaceBefore="0" Spacing="1" StartsNewPage="No">
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="">	</Text>
+        <DynamicLabel AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="" Type="Collated Revisions"/>
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="">	</Text>
+        <DynamicLabel AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="" Type="Page #"/>
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="">.</Text>
+        <Tabstops>
+          <Tabstop Position="4.50" Type="Center"/>
+          <Tabstop Position="7.25" Type="Right"/>
+        </Tabstops>
+      </Paragraph>
+    </Header>
+    <Footer>
+      <Paragraph Alignment="Right" FirstIndent="0.00" Leading="Regular" LeftIndent="1.25" RightIndent="-1.25" SpaceBefore="0" Spacing="1" StartsNewPage="No">
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""> </Text>
+      </Paragraph>
+    </Footer>
+  </HeaderAndFooter>
+
+  <SpellCheckIgnoreLists>
+    <IgnoredRanges>
+      <Range End="5941" Start="5936"/>
+      <Range End="78533" Start="78520"/>
+      <Range End="116150" Start="116142"/>
+    </IgnoredRanges>
+    <IgnoredWords>
+      <Word>Codeprint</Word>
+      <Word>FBI</Word>
+      <Word>Quantico</Word>
+      <Word>WHITMORE</Word>
+      <Word>heterochromia</Word>
+    </IgnoredWords>
+  </SpellCheckIgnoreLists>
+
+  <PageLayout BackgroundColor="#FFFFFFFFFFFF" BottomMargin="72" BreakDialogueAndActionAtSentences="Yes" DocumentLeading="Normal" FooterMargin="36" ForegroundColor="#000000000000" HeaderMargin="36" InvisiblesColor="#808080808080" TopMargin="72" UsesSmartQuotes="Yes">
+    <PageSize Height="11.00" Width="8.50"/>
+    <AutoCastList AddParentheses="Yes" AutomaticallyGenerate="Yes" CastListElement="Cast List"/>
+  </PageLayout>
+
+  <WindowState Height="798" Left="0" Mode="Normal" Top="77" Width="1440"/>
+
+  <TextState Scaling="150" Selection="72534,72534" ShowInvisibles="No"/>
+
+  <ElementSettings Type="General">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="General" ReturnKey="General" Shortcut="0" WinShortcut="0"/>
+    <Outline CanHide="No" Level="1"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Scene Heading">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="AllCaps"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="24" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Scene Heading" ReturnKey="Action" Shortcut="1" WinShortcut="1"/>
+    <Outline CanHide="No" Level="2"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Action">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="12" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Action" ReturnKey="Action" Shortcut="2" WinShortcut="2"/>
+    <Outline CanHide="No" Level="1"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Character">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="AllCaps"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="3.50" RightIndent="7.25" SpaceBefore="12" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Character" ReturnKey="Dialogue" Shortcut="3" WinShortcut="3"/>
+    <Outline CanHide="No" Level="1"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Parenthetical">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""/>
+    <ParagraphSpec Alignment="Left" FirstIndent="-0.10" Leading="Regular" LeftIndent="3.00" RightIndent="5.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Parenthetical" ReturnKey="Dialogue" Shortcut="4" WinShortcut="4"/>
+    <Outline CanHide="No" Level="1"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Dialogue">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="2.50" RightIndent="6.00" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Dialogue" ReturnKey="Action" Shortcut="5" WinShortcut="5"/>
+    <Outline CanHide="No" Level="1"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Transition">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="AllCaps"/>
+    <ParagraphSpec Alignment="Right" FirstIndent="0.00" Leading="Regular" LeftIndent="5.50" RightIndent="7.10" SpaceBefore="12" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Transition" ReturnKey="Scene Heading" Shortcut="6" WinShortcut="6"/>
+    <Outline CanHide="No" Level="1"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Shot">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="AllCaps"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="12" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Scene Heading" ReturnKey="Action" Shortcut="7" WinShortcut="7"/>
+    <Outline CanHide="No" Level="1"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Cast List">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="AllCaps"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Action" ReturnKey="Action" Shortcut="8" WinShortcut="8"/>
+    <Outline CanHide="No" Level="1"/>
+  </ElementSettings>
+
+  <ElementSettings Type="New Act">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="Bold+Underline+AllCaps"/>
+    <ParagraphSpec Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="12" Spacing="1" StartsNewPage="Yes"/>
+    <Behavior PaginateAs="Scene Heading" ReturnKey="Scene Heading" Shortcut="9" WinShortcut="9"/>
+    <Outline CanHide="No" Level="4"/>
+  </ElementSettings>
+
+  <ElementSettings Type="End of Act">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="Bold+Underline+AllCaps"/>
+    <ParagraphSpec Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="24" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="Character" ReturnKey="New Act" Shortcut="Ctrl+9" WinShortcut="Shift+9"/>
+    <Outline CanHide="No" Level="4"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Outline Body">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#87878F8FE0E0" Font="Courier Final Draft" RevisionID="0" Size="10" Style="Italic+HiddenText"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.25" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="General" ReturnKey="Outline Body" Shortcut="Ctrl+0" WinShortcut="Shift+0"/>
+    <Outline CanHide="Yes" Level="0"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Outline 1">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#87878F8FE0E0" Font="Courier Final Draft" RevisionID="0" Size="12" Style="Bold+Italic+HiddenText"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.25" RightIndent="7.50" SpaceBefore="12" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="General" ReturnKey="Outline Body" Shortcut="Ctrl+1" WinShortcut="Shift+1"/>
+    <Outline CanHide="Yes" Level="4"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Outline 2">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#87878F8FE0E0" Font="Courier Final Draft" RevisionID="0" Size="12" Style="Bold+Italic+HiddenText"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.38" RightIndent="7.50" SpaceBefore="12" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="General" ReturnKey="Outline Body" Shortcut="Ctrl+2" WinShortcut="Shift+2"/>
+    <Outline CanHide="Yes" Level="3"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Outline 3">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#87878F8FE0E0" Font="Courier Final Draft" RevisionID="0" Size="12" Style="Bold+Italic+HiddenText"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.50" RightIndent="7.50" SpaceBefore="12" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="General" ReturnKey="Outline Body" Shortcut="Ctrl+3" WinShortcut="Shift+3"/>
+    <Outline CanHide="Yes" Level="2"/>
+  </ElementSettings>
+
+  <ElementSettings Type="Outline 4">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#87878F8FE0E0" Font="Courier Final Draft" RevisionID="0" Size="12" Style="Bold+Italic+HiddenText"/>
+    <ParagraphSpec Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.62" RightIndent="7.50" SpaceBefore="12" Spacing="1" StartsNewPage="No"/>
+    <Behavior PaginateAs="General" ReturnKey="Outline Body" Shortcut="Ctrl+4" WinShortcut="Shift+4"/>
+    <Outline CanHide="Yes" Level="1"/>
+  </ElementSettings>
+
+  <TitlePage>
+    <HeaderAndFooter FooterFirstPage="Yes" FooterVisible="No" HeaderFirstPage="No" HeaderVisible="Yes" StartingPage="1">
+      <Header>
+        <Paragraph Alignment="Right" FirstIndent="0.00" Leading="Regular" LeftIndent="1.25" RightIndent="-1.25" SpaceBefore="0" Spacing="1" StartsNewPage="No">
+          <DynamicLabel AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="" Type="Page #"/>
+          <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="">.</Text>
+        </Paragraph>
+      </Header>
+      <Footer>
+        <Paragraph Alignment="Right" FirstIndent="0.00" Leading="Regular" LeftIndent="1.25" RightIndent="-1.25" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      </Footer>
+    </HeaderAndFooter>
+    <Content>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No">
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="Underline+AllCaps">Silk road</Text>
+      </Paragraph>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No">
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="">Written by</Text>
+      </Paragraph>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No">
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="">Luca Thomas Wheeler</Text>
+      </Paragraph>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Center" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No"/>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No">
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="">Address</Text>
+      </Paragraph>
+      <Paragraph Alignment="Full" FirstIndent="0.00" Leading="Regular" LeftIndent="1.00" RightIndent="7.50" SpaceBefore="0" Spacing="1" StartsNewPage="No">
+        <Text AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style="">Phone Number</Text>
+      </Paragraph>
+    </Content>
+    <TextState Scaling="100" Selection="55,55" ShowInvisibles="No"/>
+  </TitlePage>
+
+  <SmartType>
+    <Characters>
+      <Character>Sam</Character>
+      <Character>Agent bennet</Character>
+      <Character>Atlas</Character>
+      <Character>Richard</Character>
+      <Character>Detective Collins.</Character>
+      <Character>Detective collins</Character>
+      <Character>Camila</Character>
+      <Character>Inspector bishiop</Character>
+      <Character>Lauren</Character>
+      <Character>Director Shaw</Character>
+      <Character>Senator whitmore</Character>
+      <Character>DEPUTY DIRECTOR MOORE</Character>
+      <Character>LAUREN
+</Character>
+      <Character>Victim</Character>
+      <Character>SAM
+</Character>
+      <Character>Anna</Character>
+      <Character>Woman</Character>
+      <Character>Woman
+</Character>
+      <Character>Bouncer</Character>
+      <Character>Dr. mind</Character>
+      <Character>Hope</Character>
+      <Character>Mom</Character>
+      <Character>Sm</Character>
+      <Character>CAMILA\</Character>
+      <Character>SENATOR WHITMORE
+</Character>
+      <Character>Preyboy</Character>
+      <Character>Tactical commander</Character>
+      <Character>He</Character>
+      <Character>Homeless man</Character>
+      <Character>Jack</Character>
+      <Character>Lila</Character>
+      <Character>Administrator.</Character>
+      <Character>Administrator</Character>
+      <Character>Ella</Character>
+      <Character>Caregiver</Character>
+      <Character>Ava</Character>
+      <Character>Marla</Character>
+      <Character>Swat lead</Character>
+      <Character>DAD</Character>
+      <Character>GAUNT MAN</Character>
+    </Characters>
+    <Extensions>
+      <Extension>(V.O.)</Extension>
+      <Extension>(O.S.)</Extension>
+      <Extension>(O.C.)</Extension>
+      <Extension>(CONT'D)</Extension>
+      <Extension>(SUBTITLE)</Extension>
+      <Extension>(TEXT)</Extension>
+      <Extension>(Grace’s voice)</Extension>
+      <Extension>(Sam’s father’s voice)</Extension>
+      <Extension>(as ella)</Extension>
+      <Extension>(aS preyboy)</Extension>
+      <Extension>(As Atlas)</Extension>
+      <Extension>(os</Extension>
+      <Extension>(as atlas0</Extension>
+      <Extension>( o</Extension>
+      <Extension>(as ed)</Extension>
+    </Extensions>
+    <SceneIntros Separator=". ">
+      <SceneIntro>INT</SceneIntro>
+      <SceneIntro>EXT</SceneIntro>
+      <SceneIntro>I/E</SceneIntro>
+      <SceneIntro>FLASH—INT</SceneIntro>
+      <SceneIntro>S</SceneIntro>
+      <SceneIntro>NT</SceneIntro>
+    </SceneIntros>
+    <Locations>
+      <Location>INTERROGATION ROOM</Location>
+      <Location>OBSERVATION ROOM – SASKATOON POLICE DEPARTMENT – NIGHT</Location>
+      <Location>INTERROGATION ROOM - SASKATUAN POLICE DEPARTMENT</Location>
+      <Location>SAM'S APPARTMENT</Location>
+      <Location>CBAU BRIEFING ROOM – QUANTICO – NIGHT</Location>
+      <Location>DIGITAL MORGUE - THE RECURSE</Location>
+      <Location>JACK'S ORIGINAL AUCTION - RECURSE</Location>
+      <Location>THE VAULT</Location>
+      <Location>TRAIN-STATION</Location>
+      <Location>TRAIN</Location>
+      <Location>SWINGER CLUB</Location>
+      <Location>DR. MINDS OFFICE</Location>
+      <Location>DR. MINDS OFFICE - SILK ROAD</Location>
+      <Location>ABANDONED BARN - BASE REALITY</Location>
+      <Location>HALO HOUSE - SILK ROAD</Location>
+      <Location>SWINGER CLUB - SILK ROAD</Location>
+      <Location>FARMHOUSE</Location>
+      <Location>HALLWAY</Location>
+      <Location>BACK ALLEY - OUTSIDE DR. MIND'S CLUB - SILK ROAD</Location>
+      <Location>EXIT NODE - SILK ROAD - RECURSE</Location>
+      <Location>CENTRAL STOCKYARD - CLUSTER WEST / DELTA13</Location>
+      <Location>FARMLAND NODE – CLUSTER WEST / DELTA13 – CONTINUOUS</Location>
+      <Location>CBAU CUBICLE ROOM – QUANTICO</Location>
+      <Location>BRIEFING ROOM HALLWAY</Location>
+      <Location>DIRECTOR SHAW'S OFFICE</Location>
+      <Location>SAM'S APARTMENT</Location>
+      <Location>SAM'S BEDROOM</Location>
+      <Location>FARMLAND NODE – CLUSTER WEST / DELTA13 – NIGHT</Location>
+      <Location>SAM'S POLICE CRUISER</Location>
+      <Location>EAST 94TH STREET – BASE REALITY – NIGHT</Location>
+      <Location>SAM'S POLICE CRUISER – BASE REALITY – CONTINUOUS</Location>
+      <Location>DIGITAL FARMLAND – SILK ROAD – CONTINUOUS</Location>
+      <Location>ANIMAL HOSPITAL BASEMENT – CONTINUOUS</Location>
+      <Location>JACK'S MARKET - SILK ROAD</Location>
+      <Location>JACK'S AUCTION - SILK ROAD</Location>
+      <Location>SKID ROW - SILK ROAD</Location>
+      <Location>THE VAULT - THE RECURSE</Location>
+      <Location>THE ARCHIVE - THE RECURSE</Location>
+      <Location>CHILDHOOD BEDROOM – NIGHT (MEMORY)</Location>
+      <Location>PUBLIC SCHOOL CLASSROOM – DAY</Location>
+      <Location>ORPHANAGE DINING ROOM – NIGHT (MEMORY)</Location>
+      <Location>SCHOOL BATHROOM – DAY (MEMORY)</Location>
+      <Location>ORPHANAGE COMMON ROOM</Location>
+      <Location>ORPHANAGE CORRIDOR</Location>
+      <Location>ABANDONED DHS FACILITY - BATON ROUGE</Location>
+      <Location>ATLAS'S HOME - THE RECUSE - MALIBU</Location>
+      <Location>INTERROGATION ROOM – SOUTHERN FIELD OFFICE – BASE REALITY</Location>
+      <Location>OBSERVATION ROOM – SOUTHERN FIELD OFFICE</Location>
+      <Location>OBSERVATION ROOM - BASE REALITY</Location>
+      <Location>INN</Location>
+      <Location>APARTMENT</Location>
+      <Location>FOSTER OFFICE</Location>
+      <Location>THERAPY OFFICE – NIGHT (MEMORY)</Location>
+      <Location>FOSTER HOME BASEMENT – DUSK (MEMORY)</Location>
+      <Location>ABANDONED FIELD</Location>
+      <Location>JACK'S ORIGINAL AUCTION</Location>
+      <Location>JACK'S TORTURE ROOM</Location>
+      <Location>OPT-OUT CENTER - SILK ROAD</Location>
+      <Location>MEADOW - OPT-OUT CENTER - SILK ROAD</Location>
+      <Location>TRAIN-STATION - SILK ROAD</Location>
+      <Location>ROOFTOP</Location>
+      <Location>DHS FACILITY – HALLWAY – CONTINUOUS</Location>
+      <Location>CBAU BRIEFING ROOM – QUANTICO</Location>
+      <Location>PUBLIC POOL</Location>
+      <Location>OFFICE</Location>
+      <Location>CAR</Location>
+      <Location>SOLITARY CELL - BASE REALITY</Location>
+      <Location>GRASSY FIELD - RECURSE</Location>
+    </Locations>
+    <TimesOfDay Separator=" - ">
+      <TimeOfDay>DAY</TimeOfDay>
+      <TimeOfDay>NIGHT</TimeOfDay>
+      <TimeOfDay>AFTERNOON</TimeOfDay>
+      <TimeOfDay>MORNING</TimeOfDay>
+      <TimeOfDay>EVENING</TimeOfDay>
+      <TimeOfDay>LATER</TimeOfDay>
+      <TimeOfDay>MOMENTS LATER</TimeOfDay>
+      <TimeOfDay>CONTINUOUS</TimeOfDay>
+      <TimeOfDay>THE NEXT DAY</TimeOfDay>
+      <TimeOfDay>MAGIC HOUR</TimeOfDay>
+      <TimeOfDay>DAWN</TimeOfDay>
+      <TimeOfDay>DUSK</TimeOfDay>
+      <TimeOfDay>SAME</TimeOfDay>
+      <TimeOfDay>SAME TIME</TimeOfDay>
+      <TimeOfDay>SASKATUAN POLICE DEPARTMENT</TimeOfDay>
+      <TimeOfDay>JACK'S TORTURE ROOM – RECURSE – DAY</TimeOfDay>
+      <TimeOfDay>RECURSE </TimeOfDay>
+      <TimeOfDay>SILK ROAD</TimeOfDay>
+      <TimeOfDay>SASKATOON POLICE DEPARTMENT – NIGHT</TimeOfDay>
+      <TimeOfDay>SASKATOON POLICE DEPARTMENT – CON</TimeOfDay>
+      <TimeOfDay>SASKATOON POLICE DEPARTMENT – CONTINUOUS</TimeOfDay>
+      <TimeOfDay>BASE REALITY – MORNING</TimeOfDay>
+      <TimeOfDay>BASE REALITY – CONTINUOUS</TimeOfDay>
+      <TimeOfDay>BASE REALITY – EARLY MORNING</TimeOfDay>
+      <TimeOfDay>NIGHT (MEMORY)</TimeOfDay>
+      <TimeOfDay>BASE REALITY – DAY</TimeOfDay>
+      <TimeOfDay>GOLDEN HOUR</TimeOfDay>
+      <TimeOfDay>BASE REALITY</TimeOfDay>
+      <TimeOfDay>LATER (MEMORY)</TimeOfDay>
+      <TimeOfDay>RECURSE (MEMORY)</TimeOfDay>
+      <TimeOfDay>BASE REALITY – DAY (MEMORY)</TimeOfDay>
+      <TimeOfDay>BASE REALITY – LATER (MEMORY)</TimeOfDay>
+      <TimeOfDay>BASE REALITY – WEEKS LATER</TimeOfDay>
+      <TimeOfDay>BASE REALITY – NIGHT</TimeOfDay>
+      <TimeOfDay>DAY (MEMORY)</TimeOfDay>
+      <TimeOfDay>BASE REALITY </TimeOfDay>
+    </TimesOfDay>
+    <Transitions>
+      <Transition>CUT TO:</Transition>
+      <Transition>FADE IN:</Transition>
+      <Transition>FADE OUT.</Transition>
+      <Transition>FADE TO:</Transition>
+      <Transition>DISSOLVE TO:</Transition>
+      <Transition>BACK TO:</Transition>
+      <Transition>MATCH CUT TO:</Transition>
+      <Transition>JUMP CUT TO:</Transition>
+      <Transition>FADE TO BLACK.</Transition>
+      <Transition>SMASH CUT TO:</Transition>
+      <Transition>CUT TO BLACK.</Transition>
+      <Transition>TIME CUT:</Transition>
+      <Transition>Flash to:</Transition>
+      <Transition>Fade to black:</Transition>
+    </Transitions>
+  </SmartType>
+
+  <MoresAndContinueds>
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""/>
+    <DialogueBreaks AutomaticCharacterContinueds="Yes" BottomOfPage="Yes" DialogueBottom="(MORE)" DialogueTop="(CONT'D)" TopOfNext="Yes"/>
+    <SceneBreaks ContinuedNumber="No" SceneBottom="(CONTINUED)" SceneBottomOfPage="No" SceneTop="CONTINUED:" SceneTopOfNext="No"/>
+  </MoresAndContinueds>
+
+  <LockedPages/>
+
+  <Revisions ActiveSet="1" Location="7.75" RevisionMode="No" RevisionsShown="Active" ShowPageColor="No">
+    <Revision Color="#000000000000" FullRevision="No" ID="1" Mark="*" Name="Blue Rev. (mm/dd/yy)" PageColor="#C6C6EDEDFEFE" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="2" Mark="*" Name="Pink Rev. (mm/dd/yy)" PageColor="#FDFDCCCCD4D4" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="3" Mark="*" Name="Yellow Rev. (mm/dd/yy)" PageColor="#FDFDFFFFABAB" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="4" Mark="*" Name="Green Rev. (mm/dd/yy)" PageColor="#D1D1FEFED0D0" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="5" Mark="*" Name="Goldenrod Rev. (mm/dd/yy)" PageColor="#FAFACDCD3939" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="6" Mark="*" Name="Buff Rev. (mm/dd/yy)" PageColor="#FCFCEDED9D9D" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="7" Mark="*" Name="Salmon Rev. (mm/dd/yy)" PageColor="#F8F8AEAE8E8E" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="8" Mark="*" Name="Cherry Rev. (mm/dd/yy)" PageColor="#FBFBA4A4B4B4" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="9" Mark="*" Name="Tan Rev. (mm/dd/yy)" PageColor="#FDFDF1F1C7C7" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="10" Mark="*" Name="2nd White Rev. (mm/dd/yy)" PageColor="#FFFFFFFFFFFF" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="11" Mark="*" Name="2nd Blue Rev. (mm/dd/yy)" PageColor="#C6C6EDEDFEFE" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="12" Mark="*" Name="2nd Pink Rev. (mm/dd/yy)" PageColor="#FDFDCCCCD4D4" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="13" Mark="*" Name="2nd Yellow Rev. (mm/dd/yy)" PageColor="#FDFDFFFFABAB" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="14" Mark="*" Name="2nd Green Rev. (mm/dd/yy)" PageColor="#D1D1FEFED0D0" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="15" Mark="*" Name="2nd Goldenrod Rev. (mm/dd/yy)" PageColor="#FAFACDCD3939" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="16" Mark="*" Name="2nd Buff Rev. (mm/dd/yy)" PageColor="#FCFCEDED9D9D" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="17" Mark="*" Name="2nd Salmon Rev. (mm/dd/yy)" PageColor="#F8F8AEAE8E8E" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="18" Mark="*" Name="2nd Cherry Rev. (mm/dd/yy)" PageColor="#FBFBA4A4B4B4" Style=""/>
+    <Revision Color="#000000000000" FullRevision="No" ID="19" Mark="*" Name="2nd Tan Rev. (mm/dd/yy)" PageColor="#FDFDF1F1C7C7" Style=""/>
+  </Revisions>
+
+  <SplitState ActivePanel="1" CardsAcross="2" ShowAction="Yes" ShowSceneTitle="Yes" ShowSummary="Yes" SplitMode="None" SplitterPosition="0">
+    <ScriptPanel DisplayMode="Page">
+      <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Arial" RevisionID="0" Size="12" Style=""/>
+    </ScriptPanel>
+  </SplitState>
+
+  <Macros>
+    <Macro Element="Scene Heading" Name="INT" Shortcut="Ctrl+Alt+1" Text="INT. " Transition="None">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Scene Heading" Name="EXT" Shortcut="Ctrl+Alt+2" Text="EXT. " Transition="None">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Scene Heading" Name="I/E" Shortcut="Ctrl+Alt+3" Text="I/E " Transition="None">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Scene Heading" Name="DAY" Shortcut="Ctrl+Alt+4" Text=" - DAY" Transition="Action">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Scene Heading" Name="NIGHT" Shortcut="Ctrl+Alt+5" Text=" - NIGHT" Transition="Action">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Scene Heading" Name="SUNRISE" Shortcut="Ctrl+Alt+6" Text=" - SUNRISE" Transition="Action">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Scene Heading" Name="MAGIC" Shortcut="Ctrl+Alt+7" Text=" - MAGIC" Transition="Action">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Parenthetical" Name="CONT" Shortcut="Ctrl+Alt+8" Text="continuing" Transition="Dialogue">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Parenthetical" Name="INTER" Shortcut="Ctrl+Alt+9" Text="interrupting" Transition="Dialogue">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="None" Name="" Shortcut="Ctrl+Alt+0" Text="" Transition="None">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Transition" Name="CUTTO" Shortcut="Ctrl+Shift+Alt+1" Text="CUT TO:" Transition="Scene Heading">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Action" Name="FADEIN" Shortcut="Ctrl+Shift+Alt+2" Text="FADE IN:" Transition="Scene Heading">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Transition" Name="FADEOUT" Shortcut="Ctrl+Shift+Alt+3" Text="FADE OUT." Transition="Scene Heading">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Transition" Name="FADETO" Shortcut="Ctrl+Shift+Alt+4" Text="FADE TO:" Transition="Scene Heading">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Transition" Name="DISSLV" Shortcut="Ctrl+Shift+Alt+5" Text="DISSOLVE TO:" Transition="Scene Heading">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Transition" Name="BACKTO" Shortcut="Ctrl+Shift+Alt+6" Text="BACK TO:" Transition="Scene Heading">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Transition" Name="MATCHCUT" Shortcut="Ctrl+Shift+Alt+7" Text="MATCH CUT TO:" Transition="Scene Heading">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Transition" Name="JUMPCUT" Shortcut="Ctrl+Shift+Alt+8" Text="JUMP CUT TO:" Transition="Scene Heading">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="Transition" Name="FBLACK" Shortcut="Ctrl+Shift+Alt+9" Text="FADE TO BLACK." Transition="None">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+    <Macro Element="None" Name="" Shortcut="E" Text="" Transition="None">
+      <Alias Confirm="No" MatchCase="No" SmartReplace="Yes" Text="" WordOnly="No">
+        <ActivateIn Element="General"/>
+        <ActivateIn Element="Scene Heading"/>
+        <ActivateIn Element="Action"/>
+        <ActivateIn Element="Character"/>
+        <ActivateIn Element="Parenthetical"/>
+        <ActivateIn Element="Dialogue"/>
+        <ActivateIn Element="Transition"/>
+        <ActivateIn Element="Shot"/>
+      </Alias>
+    </Macro>
+  </Macros>
+
+  <Actors>
+    <Actor MacVoice="" Name="Man 1" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Man 2" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Woman 1" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Woman 2" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Boy 1" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Boy 2" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Girl 1" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Girl 2" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Old Man" Pitch="Normal" Speed="Medium" WinVoice=""/>
+    <Actor MacVoice="" Name="Old Woman" Pitch="Normal" Speed="Medium" WinVoice=""/>
+  </Actors>
+
+  <Cast>
+    <Narrator Actor="Man 1">
+      <Element Type="Character"/>
+      <Element Type="Dialogue"/>
+    </Narrator>
+    <Member Actor="Man 1" Character="Sam"/>
+    <Member Actor="Man 1" Character="Agent bennet"/>
+    <Member Actor="Man 1" Character="Atlas"/>
+    <Member Actor="Man 1" Character="Richard"/>
+    <Member Actor="Man 1" Character="Detective Collins."/>
+    <Member Actor="Man 1" Character="Detective collins"/>
+    <Member Actor="Man 1" Character="Camila"/>
+    <Member Actor="Man 1" Character="Inspector bishiop"/>
+    <Member Actor="Man 1" Character="Lauren"/>
+    <Member Actor="Man 1" Character="Director Shaw"/>
+    <Member Actor="Man 1" Character="Senator whitmore"/>
+    <Member Actor="Man 1" Character="DEPUTY DIRECTOR MOORE"/>
+    <Member Actor="Man 1" Character="LAUREN&#xA;"/>
+    <Member Actor="Man 1" Character="Victim"/>
+    <Member Actor="Man 1" Character="SAM&#xA;"/>
+    <Member Actor="Man 1" Character="Anna"/>
+    <Member Actor="Man 1" Character="Woman"/>
+    <Member Actor="Man 1" Character="Woman&#xA;"/>
+    <Member Actor="Man 1" Character="Bouncer"/>
+    <Member Actor="Man 1" Character="Dr. mind"/>
+    <Member Actor="Man 1" Character="Hope"/>
+    <Member Actor="Man 1" Character="Mom"/>
+    <Member Actor="Man 1" Character="Sm"/>
+    <Member Actor="Man 1" Character="CAMILA\"/>
+    <Member Actor="Man 1" Character="SENATOR WHITMORE&#xA;"/>
+    <Member Actor="Man 1" Character="Preyboy"/>
+    <Member Actor="Man 1" Character="Tactical commander"/>
+    <Member Actor="Man 1" Character="He"/>
+    <Member Actor="Man 1" Character="Homeless man"/>
+    <Member Actor="Man 1" Character="Jack"/>
+    <Member Actor="Man 1" Character="Lila"/>
+    <Member Actor="Man 1" Character="Administrator."/>
+    <Member Actor="Man 1" Character="Administrator"/>
+    <Member Actor="Man 1" Character="Ella"/>
+    <Member Actor="Man 1" Character="Caregiver"/>
+    <Member Actor="Man 1" Character="Ava"/>
+    <Member Actor="Man 1" Character="Marla"/>
+    <Member Actor="Man 1" Character="Swat lead"/>
+    <Member Actor="Man 1" Character="DAD"/>
+    <Member Actor="Man 1" Character="GAUNT MAN"/>
+  </Cast>
+
+  <SceneNumberOptions LeftLocation="0.75" NumberScheme="1A" RightLocation="7.38" ShowNumbersOnLeft="Yes" ShowNumbersOnRight="Yes">
+    <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""/>
+  </SceneNumberOptions>
+
+  <CastList SortOption="Alphabetical">
+    <CustomOrder/>
+  </CastList>
+
+  <CharacterHighlighting>
+    <Character Color="#FFFFFFFFFFFF" Name="ATLAS" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="AVA" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="BOUNCER" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="CAMILA" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="CAREGIVER" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="DIRECTOR SHAW" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="DR. MIND" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="ELLA" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="GAUNT MAN" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="HOMELESS MAN" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="HOPE" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="JACK" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="LAUREN" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="LILA" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="LITTER" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="MARLA" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="MOM" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="PREYBOY" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="RICHARD" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="SAM" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="SENATOR WHITMORE" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="SWAT LEAD" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="TACTICAL COMMANDER" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="VICTIM" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="WOMAN" Visible="No"/>
+    <Character Color="#FFFFFFFFFFFF" Name="YOUNG AVA" Visible="No"/>
+  </CharacterHighlighting>
+
+  <SceneNavigatorPreferences>
+    <TableColumnSettings IsSortAscending="Yes" SortColumn="Order" TableIdentifier="NavDynScenes">
+      <Column Width="54">Order</Column>
+      <Column Width="48">Page</Column>
+      <Column Width="102">Title</Column>
+      <Column Width="50">Color</Column>
+      <Column Width="46">Intro</Column>
+      <Column Width="173">Location</Column>
+      <Column Width="98">Time</Column>
+      <Column Width="70">Scene #</Column>
+      <Column Width="58">Length</Column>
+    </TableColumnSettings>
+  </SceneNavigatorPreferences>
+
+  <TagsNavigatorPreferences IsSortAscending="Yes" SortColumn="Order">
+    <Column Width="50">Page</Column>
+    <Column Width="64">Scene #</Column>
+    <Column Width="50">Intro</Column>
+    <Column Width="260">Location</Column>
+    <Column Width="90">Time</Column>
+    <Column Width="60">Length</Column>
+    <Column UserType="CategoryColumnType" Width="360">Synopsis</Column>
+    <Column UserType="CategoryColumnType" Width="360">Cast Members</Column>
+    <Column Width="360">Tags</Column>
+    <Column Width="54">Order</Column>
+  </TagsNavigatorPreferences>
+
+  <AltCollection/>
+
+  <TargetScriptLength>120</TargetScriptLength>
+
+  <ListItems/>
+
+  <DisplayBoards>
+    <DisplayBoard Height="10000" Id="ea5ac6af-4926-415c-897c-51bfeff25831" ScrollOrigin="0,0" Type="Beat" Width="24000" ZoomLevel="100.000"/>
+    <DisplayBoard Height="76" Id="f54e428f-4469-484b-8c9d-7dba54866258" ScrollOrigin="630,0" Type="StoryMap" Width="14600" ZoomLevel="730.000"/>
+  </DisplayBoards>
+
+  <Writers/>
+
+  <WriterMarkup State="Off"/>
+
+  <TagData>
+    <TagCategories>
+      <TagCategory Color="#00003600B700" Id="01fc9642-84ff-4366-b37c-a3068dee57e8" Name="Cast Members" Number="2" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="028a4e2b-b507-4d09-88ab-90e3edae9071" Name="Background Actors" Number="3" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="0377dbe6-77a3-41af-bda8-86eb2468fdbf" Name="Stunts" Number="4" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="04721a56-f54b-49c8-80ad-d53887d6b851" Name="Vehicles" Number="5" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="05c556eb-6bc1-4a3a-b09f-f8b5ba1b6afa" Name="Props" Number="6" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="069e18b8-2109-4f3d-94e7-d802027a60a8" Name="Special Effects" Number="8" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="0726fa85-1e65-4ab8-87de-bf21d09b01f0" Name="Wardrobe" Number="9" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="08ae1eef-32ce-415f-9a9b-0982d2453ec4" Name="Makeup/Hair" Number="10" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="09cb0d1c-ce01-4f22-bb64-b5f2e6c491c6" Name="Animals" Number="11" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="0ae40617-cc7c-48e6-ae2b-5aaecc09986f" Name="Animal Wrangler" Number="12" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="0b0b44c9-aa4b-4c40-88b1-d94472ad7a26" Name="Music" Number="13" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="0ce7d308-096d-4603-8fe8-349f72cd89ff" Name="Sound" Number="15" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="0debb71b-5743-4c53-80cc-e17e841ce645" Name="Set Dressing" Number="17" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="0e7a8fc5-5441-4bad-a9bf-5ddd3fe51c69" Name="Greenery" Number="18" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="0ff5cda4-4d43-4cfe-940f-91380c46fdad" Name="Special Equipment" Number="19" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="109d0eaa-0334-4823-ac0c-b44d3f209dc4" Name="Security" Number="20" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="1179a4b1-70ee-4011-b4a2-809a0af09e92" Name="Additional Labor" Number="21" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="12ab0932-e3b9-4b4a-bcd0-3da1b4e61d5e" Name="Visual Effects" Number="23" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="135cc9d1-c4d5-4d00-83d9-571f584ea9cd" Name="Mechanical Effects" Number="24" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="15b6f4fd-4e74-4ad8-9971-b239d88c2997" Name="Notes" Number="26" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="216f33fd-fc42-4269-be01-b05b18f815a0" Name="Comments" Number="31" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="47b02ff1-5161-4137-b736-f36eebba7643" Name="Camera" Number="7" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="63c140da-ef2b-491a-b416-b46f461abb89" Name="Script Day" Number="27" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="70877d87-30ef-45b6-be46-c6fa94b83a71" Name="Sequence" Number="29" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="849f1ebf-5507-4f33-bff6-3a5b4d73be14" Name="Unit" Number="28" Style="Bold"/>
+      <TagCategory Color="#000000000000" Id="8e5e75c2-713b-47df-a75f-f12648b98ded" Name="Synopsis" Number="1" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="c5e89e4d-f83e-4c28-950c-92a63f1b5f26" Name="Location" Number="30" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="c86eae40-3b01-41c3-a7de-6859e6ec971d" Name="Art Department" Number="16" Style="Bold"/>
+      <TagCategory Color="#94AA11150000" Id="ce04f547-f7ee-40c9-ab66-d95a0c98034e" Name="Miscellaneous" Number="25" Style="Bold"/>
+    </TagCategories>
+  </TagData>
+
+  <Characters>
+    <TableColumnSettings IsSortAscending="Yes" SortColumn="" TableIdentifier="NavDynCharacters">
+      <Column Width="150">Character</Column>
+      <Column Width="114">Speaking Scenes</Column>
+      <Column UserType="TraitColumnType" Width="50">Role</Column>
+      <Column UserType="TraitColumnType" Width="63">Gender</Column>
+      <Column UserType="TraitColumnType" Width="70">Ethnicity</Column>
+      <Column UserType="TraitColumnType" Width="83">Orientation</Column>
+      <Column UserType="TraitColumnType" Width="73">Disability</Column>
+      <Column UserType="TraitColumnType" Width="50">Age</Column>
+      <Column UserType="TraitColumnType" Width="85">Occupation</Column>
+    </TableColumnSettings>
+    <CharacterTraitData>
+      <Traits>
+        <Trait ID="ebe44c35-fd80-4bc4-8117-2b806e604a94" Name="Age" Type="text"/>
+        <Trait ID="3c1c04e2-48dc-4b04-8643-89d1cd9ca137" Name="Disability" Type="text"/>
+        <Trait ID="f4076594-524d-4733-ac6b-e4dde6690d68" Name="Ethnicity" Type="text"/>
+        <Trait ID="db64dbfc-6458-4884-a413-86503cdf4965" Name="Gender" Type="text"/>
+        <Trait ID="07f4dbfe-2591-4b03-818f-67f98b5294b1" Name="Occupation" Type="text"/>
+        <Trait ID="43d5358c-f271-4cf6-80b8-832450963c11" Name="Orientation" Type="text"/>
+        <Trait ID="8fac4d6f-1056-47d5-b312-882aba8fa7a6" Name="Role" Type="text"/>
+      </Traits>
+      <Holders/>
+    </CharacterTraitData>
+    <ChartOptions Identifier="InclusivityAnalysis">
+      <FilterSets>
+        <FilterSet Default="Yes">
+          <Filter Index="1" Name="Trait" Value="">
+            <Match></Match>
+          </Filter>
+          <Filter Index="0" Name="Trait" Value="Role">
+            <Match></Match>
+          </Filter>
+          <Filter Index="0" Name="Count" Value="MIN">
+            <Match>1</Match>
+          </Filter>
+        </FilterSet>
+        <FilterSet>
+          <Filter Index="1" Name="Trait" Value="">
+            <Match></Match>
+          </Filter>
+          <Filter Index="0" Name="Trait" Value="">
+            <Match></Match>
+          </Filter>
+          <Filter Index="0" Name="Count" Value="MIN">
+            <Match>1</Match>
+          </Filter>
+        </FilterSet>
+      </FilterSets>
+    </ChartOptions>
+  </Characters>
+
+  <ScriptNotes/>
+
+  <Images/>
+
+  <Outlines Hidden="No"/>
+
+</FinalDraft>

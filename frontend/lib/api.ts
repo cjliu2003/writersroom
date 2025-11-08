@@ -61,6 +61,23 @@ export async function getUserScripts(): Promise<ScriptSummary[]> {
   return response.json();
 }
 
+export async function createScript(data: {
+  title: string;
+  description?: string;
+}): Promise<ScriptSummary> {
+  const response = await authenticatedFetch('/scripts/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to create script');
+  }
+
+  return response.json();
+}
+
 export async function updateScript(
   scriptId: string,
   updates: { title?: string; description?: string }
@@ -132,6 +149,7 @@ export interface ScriptWithContent {
   version: number;
   updated_by: string | null;
   content_source: 'script' | 'scenes' | 'empty';
+  has_yjs_updates: boolean; // Whether Yjs updates exist (Yjs is source of truth)
 }
 
 export async function getScriptContent(scriptId: string): Promise<ScriptWithContent> {
