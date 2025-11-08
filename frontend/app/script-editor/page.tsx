@@ -36,6 +36,7 @@ import {
 import { extractSlateContentFromTipTap } from '@/utils/tiptap-to-slate-format';
 import { ScriptSceneSidebar } from '@/components/script-scene-sidebar';
 import { AIChatbot } from '@/components/ai-chatbot';
+import ProcessingScreen from '@/components/ProcessingScreen';
 import { Button } from '@/components/ui/button';
 import { Home, FileText, Eye, HelpCircle, Download, Menu } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -67,6 +68,7 @@ export default function TestTipTapPage() {
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [isLoadingScript, setIsLoadingScript] = useState(true);
 
   // Scene tracking state
   const [sceneBoundaries, setSceneBoundaries] = useState<SceneBoundary[]>([]);
@@ -107,11 +109,26 @@ export default function TestTipTapPage() {
           title: scriptData.title,
           current_version: scriptData.current_version,
           content_source: scriptData.content_source,
-          blocks: scriptData.content_blocks?.length || 0
+          blocks: scriptData.content_blocks?.length || 0,
+          has_yjs_updates: scriptData.has_yjs_updates
         });
 
+        // Always set script metadata (including title) even if no content yet
+        setScript(scriptData);
+        setLastSaved(new Date(scriptData.updated_at));
+
+        // If no content blocks, check if we should wait for Yjs sync
         if (!scriptData.content_blocks || scriptData.content_blocks.length === 0) {
           console.warn('[TipTapEditor] No content_blocks found in script');
+
+          // If Yjs has updates, keep loading screen visible until Yjs sync completes
+          // Otherwise, hide loading screen and show empty editor
+          if (!scriptData.has_yjs_updates) {
+            console.log('[TipTapEditor] No Yjs updates, showing empty editor');
+            setIsLoadingScript(false);
+          } else {
+            console.log('[TipTapEditor] Yjs updates exist, waiting for sync before hiding loading screen');
+          }
           return;
         }
 
@@ -125,10 +142,19 @@ export default function TestTipTapPage() {
         // Store content in state - useEffect will apply when editor is ready
         console.log('[TipTapEditor] Storing content for application to editor');
         setPendingContent(tipTapDoc);
-        setScript(scriptData);
-        setLastSaved(new Date(scriptData.updated_at));
+
+        // If Yjs has updates, keep loading screen visible until Yjs sync completes
+        // (content will come from Yjs, not from pendingContent)
+        // Otherwise, hide loading screen now (we'll seed from pendingContent)
+        if (!scriptData.has_yjs_updates) {
+          console.log('[TipTapEditor] No Yjs updates, hiding loading screen (will seed from REST)');
+          setIsLoadingScript(false);
+        } else {
+          console.log('[TipTapEditor] Yjs updates exist, keeping loading screen until sync completes');
+        }
       } catch (error: any) {
         console.error('[TipTapEditor] Load failed:', error);
+        setIsLoadingScript(false); // Hide loading screen even on error
       }
     };
 
@@ -184,7 +210,7 @@ export default function TestTipTapPage() {
         // chrome between pages
         pageGap: 24,
         pageGapBorderSize: 1,
-        pageBreakBackground: '#ffffff',
+        pageBreakBackground: '#f1f3f5',
 
         // header/footer (set to 0 if you don't want page numbers)
         pageHeaderHeight: 48,    // ~0.5in @ 96 DPI
@@ -239,6 +265,15 @@ export default function TestTipTapPage() {
         return;
       }
 
+      // CRITICAL FIX: If backend has Yjs updates, skip seeding entirely
+      // Yjs sync will provide the content from script_versions table
+      // This prevents duplication when REST API returns stale content_blocks
+      if (script?.has_yjs_updates) {
+        console.log('[TestTipTap] Skipping setContent - Yjs updates exist in database (Yjs is source of truth)');
+        setPendingContent(null); // Clear pending content to prevent retry
+        return;
+      }
+
       // After sync completes, check if Yjs document already has content
       const yjsFragment = doc.get('default', Y.XmlFragment);
       const yjsHasContent = yjsFragment && yjsFragment.length > 0;
@@ -263,12 +298,20 @@ export default function TestTipTapPage() {
       console.log('[TestTipTap] Content applied successfully');
       setPendingContent(null); // Clear after applying
     }
-  }, [editor, pendingContent, doc, syncStatus]);
+  }, [editor, pendingContent, doc, syncStatus, script]);
+
+  // Hide loading screen when Yjs sync completes (for has_yjs_updates case)
+  useEffect(() => {
+    if (script?.has_yjs_updates && syncStatus === 'synced' && isLoadingScript) {
+      console.log('[TipTapEditor] Yjs sync complete, hiding loading screen');
+      setIsLoadingScript(false);
+    }
+  }, [script, syncStatus, isLoadingScript]);
 
   // Load layout preferences on mount
   useEffect(() => {
     const prefs = loadLayoutPrefs();
-    setIsAssistantOpen(prefs.assistantVisible);
+    setIsAssistantOpen(prefs.assistantVisible ?? true);
     setIsSceneSidebarOpen(prefs.sceneListVisible ?? true);
   }, []);
 
@@ -406,8 +449,15 @@ export default function TestTipTapPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Fixed Top Header - Final Draft Style */}
+    <>
+      {/* Loading Screen */}
+      <ProcessingScreen
+        isVisible={isLoadingScript || authLoading}
+        mode="open"
+      />
+
+      <div className="flex h-screen bg-gray-100">
+        {/* Fixed Top Header - Final Draft Style */}
       <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white shadow-md">
         {/* Top Menu Bar with Centered Title */}
         <div className="px-6 py-3 flex items-center h-16">
@@ -481,9 +531,6 @@ export default function TestTipTapPage() {
             <Menu className="w-4 h-4 mr-2" />
             {isSceneSidebarOpen ? 'Hide' : 'Show'} Scenes
           </Button>
-          <span className="text-sm text-gray-600">
-            Screenplay Editor • TipTap
-          </span>
         </div>
         <Button
           onClick={() => setIsAssistantOpen(!isAssistantOpen)}
@@ -551,7 +598,7 @@ export default function TestTipTapPage() {
                 : '100vw' // No sidebars
             }}
           >
-            <div className="bg-white rounded-lg shadow-lg">
+            <div className="screenplay-editor-wrapper min-h-screen overflow-auto">
               <div className="flex justify-center">
                 <EditorContent editor={editor} className="screenplay-editor" />
               </div>
@@ -569,8 +616,21 @@ export default function TestTipTapPage() {
 
       {/* Custom Styles for Screenplay Editor */}
       <style jsx global>{`
+        :root {
+          --app-chrome-bg: #f1f3f5;
+        }
+
+        .screenplay-editor-wrapper {
+          background: var(--app-chrome-bg);
+        }
+
         .screenplay-editor {
           min-height: 800px;
+        }
+
+        .rm-with-pagination .page {
+          background: #fff;
+          box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
         }
 
         .screenplay-editor .ProseMirror {
@@ -611,6 +671,7 @@ export default function TestTipTapPage() {
           white-space: nowrap;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }

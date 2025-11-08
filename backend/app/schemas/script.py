@@ -84,6 +84,12 @@ class ScriptWithContent(BaseModel):
         description="Source of content: 'script' (native) or 'scenes' (rebuilt from scenes)"
     )
 
+    # Yjs persistence metadata
+    has_yjs_updates: bool = Field(
+        False,
+        description="Whether Yjs updates exist in script_versions table (indicates Yjs is source of truth)"
+    )
+
     class Config:
         from_attributes = True
         json_encoders = {

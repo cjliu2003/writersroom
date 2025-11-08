@@ -3,7 +3,7 @@ Script management endpoints for the WritersRoom API
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, desc
+from sqlalchemy import select, update, desc, func
 from typing import List, Dict, Any
 import logging
 
@@ -15,6 +15,7 @@ from app.models.user import User
 from app.models.script import Script
 from app.models.scene import Scene
 from app.models.scene_version import SceneVersion
+from app.models.script_version import ScriptVersion
 from app.models.script_collaborator import ScriptCollaborator, CollaboratorRole
 from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse, ScriptWithContent
 from app.auth.dependencies import get_current_user
@@ -184,6 +185,16 @@ async def get_script_with_content(
             content_blocks = []
             content_source = "empty"
 
+    # Check if Yjs updates exist in script_versions table
+    # This tells frontend whether to skip seeding (Yjs will provide content)
+    yjs_count_result = await db.execute(
+        select(func.count(ScriptVersion.version_id))
+        .where(ScriptVersion.script_id == script_id)
+    )
+    has_yjs_updates = yjs_count_result.scalar_one() > 0
+
+    logger.info(f"[GET /content] Script {script_id}: has_yjs_updates={has_yjs_updates}")
+
     # Build response with content
     return ScriptWithContent(
         script_id=script.script_id,
@@ -200,7 +211,8 @@ async def get_script_with_content(
         version=script.version,
         updated_by=script.updated_by,
         scene_summaries=script.scene_summaries,  # Include AI-generated summaries
-        content_source=content_source
+        content_source=content_source,
+        has_yjs_updates=has_yjs_updates
     )
 
 
