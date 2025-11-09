@@ -137,13 +137,13 @@ function generateSceneUUID(position: number): string {
 /**
  * Scroll to a specific scene in the editor.
  *
- * Uses TipTap commands to:
- * 1. Focus the editor
- * 2. Set text selection to scene start position
- * 3. Calculate scroll position accounting for fixed headers (112px + 16px buffer)
- * 4. Scroll to position using window.scrollTo() for precise control
+ * Uses TipTap view to:
+ * 1. Find DOM element at scene position
+ * 2. Calculate scroll position accounting for fixed headers (76px + 16px buffer)
+ * 3. Scroll to position using window.scrollTo() for precise control
  *
- * Note: Header offset matches script-editor implementation (64px menu + 48px controls + 16px buffer)
+ * Note: Does NOT change text selection - only scrolls viewport.
+ * This allows scene navigation without changing the cursor position or active scene highlight.
  *
  * @param editor - TipTap Editor instance
  * @param scene - Scene boundary to scroll to
@@ -165,45 +165,38 @@ export function scrollToScene(editor: Editor | null, scene: SceneBoundary): void
   });
 
   try {
-    // Focus editor and set selection to scene start position
-    editor.commands.focus();
-    editor.commands.setTextSelection(scrollPos);
+    const { view } = editor;
 
-    // Find the DOM element for this position and scroll with header offset
-    // We need to wait a tick for the selection to be set
-    setTimeout(() => {
-      const { view } = editor;
-      const dom = view.nodeDOM(scrollPos);
+    // Find the DOM element at this position WITHOUT changing selection
+    const dom = view.nodeDOM(scrollPos);
 
-      if (dom instanceof HTMLElement) {
-        // Calculate position accounting for fixed header (112px) plus padding buffer
-        // 112px = 64px top menu + 48px controls bar
-        // +16px buffer to ensure scene header is fully visible above fixed headers
-        const headerOffset = 112 + 16;
-        const elementPosition = dom.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    if (dom instanceof HTMLElement) {
+      // Calculate position accounting for fixed headers
+      // 48px compact header + ~60px scene bar + 16px buffer = 124px total offset
+      const headerOffset = 124;
+      const elementPosition = dom.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-        // Scroll to position with smooth behavior
+      // Scroll to position with smooth behavior
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+
+      console.log('[TipTapSceneTracker] Scrolled to scene with header offset (no selection change)');
+    } else {
+      // Fallback: scroll using coordsAtPos
+      const coords = view.coordsAtPos(scrollPos);
+      if (coords) {
+        // Use same header offset calculation for consistency
+        const headerOffset = 124;
         window.scrollTo({
-          top: offsetPosition,
+          top: coords.top + window.pageYOffset - headerOffset,
           behavior: 'smooth'
         });
-
-        console.log('[TipTapSceneTracker] Scrolled to scene with header offset');
-      } else {
-        // Fallback: scroll using coordsAtPos
-        const coords = view.coordsAtPos(scrollPos);
-        if (coords) {
-          // Use same header offset calculation for consistency
-          const headerOffset = 112 + 16;
-          window.scrollTo({
-            top: coords.top + window.pageYOffset - headerOffset,
-            behavior: 'smooth'
-          });
-          console.log('[TipTapSceneTracker] Scrolled using coords fallback');
-        }
+        console.log('[TipTapSceneTracker] Scrolled using coords fallback (no selection change)');
       }
-    }, 50);
+    }
   } catch (error) {
     console.error('[TipTapSceneTracker] Failed to scroll to scene:', error);
   }

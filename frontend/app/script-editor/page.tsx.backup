@@ -1,7 +1,5 @@
 /**
- * TipTap Phase 1 POC Test Route - REFACTORED UI
- *
- * UI Refactoring: Clean minimal top bar + horizontal scene navigation + bottom AI assistant
+ * TipTap Phase 1 POC Test Route
  *
  * Validates TipTap v2.26.4 + Pagination with existing Y.js collaboration infrastructure.
  *
@@ -21,6 +19,7 @@ import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { JSONContent } from '@tiptap/core';
 import * as Y from 'yjs';
+// @ts-ignore - pagination extension may not have types
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
@@ -35,10 +34,14 @@ import {
   type SceneBoundary
 } from '@/utils/tiptap-scene-tracker';
 import { extractSlateContentFromTipTap } from '@/utils/tiptap-to-slate-format';
+import { ScriptSceneSidebar } from '@/components/script-scene-sidebar';
+import { AIChatbot } from '@/components/ai-chatbot';
 import ProcessingScreen from '@/components/ProcessingScreen';
+import { Button } from '@/components/ui/button';
 import { CompactHeader } from '@/components/compact-header';
 import { HorizontalSceneBar } from '@/components/horizontal-scene-bar';
 import { AIAssistantBottomSheet } from '@/components/ai-assistant-bottom-sheet';
+import { Home, FileText, Eye, HelpCircle, Download, Menu } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '@/styles/screenplay.css';
 
@@ -57,12 +60,13 @@ export default function TestTipTapPage() {
   const [userColor] = useState(getRandomColor());
   const [userName] = useState(`User-${Math.floor(Math.random() * 1000)}`);
   const [authToken, setAuthToken] = useState<string>('');
+  // Read scriptId from query params, fallback to default for testing
   const [scriptId, setScriptId] = useState<string>(() => searchParams.get('scriptId') || DEFAULT_SCRIPT_ID);
   const [pendingContent, setPendingContent] = useState<JSONContent | null>(null);
   const [script, setScript] = useState<ScriptWithContent | null>(null);
 
   // UI state
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false); // Start closed for cleaner view
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false); // Start closed for cleaner initial view
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -73,10 +77,10 @@ export default function TestTipTapPage() {
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number | null>(null);
   const [liveSlateContent, setLiveSlateContent] = useState<any[]>([]);
 
-  // Get Firebase auth from context
+  // Get Firebase auth from context (same pattern as other editors)
   const { user, getToken, isLoading: authLoading } = useAuth();
 
-  // Fetch auth token when user is available
+  // Fetch auth token when user is available (needed for WebSocket)
   useEffect(() => {
     let cancelled = false;
     const fetchToken = async () => {
@@ -99,6 +103,8 @@ export default function TestTipTapPage() {
     const loadScriptFromAPI = async () => {
       try {
         console.log('[TipTapEditor] Fetching script content for:', scriptId);
+
+        // Use existing API helper (handles auth automatically)
         const scriptData: ScriptWithContent = await getScriptContent(scriptId);
 
         console.log('[TipTapEditor] Script content received:', {
@@ -109,11 +115,16 @@ export default function TestTipTapPage() {
           has_yjs_updates: scriptData.has_yjs_updates
         });
 
+        // Always set script metadata (including title) even if no content yet
         setScript(scriptData);
         setLastSaved(new Date(scriptData.updated_at));
 
+        // If no content blocks, check if we should wait for Yjs sync
         if (!scriptData.content_blocks || scriptData.content_blocks.length === 0) {
           console.warn('[TipTapEditor] No content_blocks found in script');
+
+          // If Yjs has updates, keep loading screen visible until Yjs sync completes
+          // Otherwise, hide loading screen and show empty editor
           if (!scriptData.has_yjs_updates) {
             console.log('[TipTapEditor] No Yjs updates, showing empty editor');
             setIsLoadingScript(false);
@@ -123,14 +134,20 @@ export default function TestTipTapPage() {
           return;
         }
 
+        // Convert backend format to TipTap format
         const tipTapDoc = contentBlocksToTipTap(scriptData.content_blocks);
         console.log('[TipTapEditor] Converted to TipTap document:', {
           docType: tipTapDoc.type,
           contentNodes: tipTapDoc.content?.length || 0
         });
 
+        // Store content in state - useEffect will apply when editor is ready
+        console.log('[TipTapEditor] Storing content for application to editor');
         setPendingContent(tipTapDoc);
 
+        // If Yjs has updates, keep loading screen visible until Yjs sync completes
+        // (content will come from Yjs, not from pendingContent)
+        // Otherwise, hide loading screen now (we'll seed from pendingContent)
         if (!scriptData.has_yjs_updates) {
           console.log('[TipTapEditor] No Yjs updates, hiding loading screen (will seed from REST)');
           setIsLoadingScript(false);
@@ -139,7 +156,7 @@ export default function TestTipTapPage() {
         }
       } catch (error: any) {
         console.error('[TipTapEditor] Load failed:', error);
-        setIsLoadingScript(false);
+        setIsLoadingScript(false); // Hide loading screen even on error
       }
     };
 
@@ -148,7 +165,7 @@ export default function TestTipTapPage() {
     }
   }, [scriptId, authToken]);
 
-  // Yjs collaboration hook
+  // Reuse existing Yjs collaboration hook
   const {
     doc,
     provider,
@@ -157,19 +174,23 @@ export default function TestTipTapPage() {
   } = useScriptYjsCollaboration({
     scriptId: scriptId,
     authToken: authToken,
-    enabled: !!authToken,
+    enabled: !!authToken, // Only enable when we have auth token
   });
 
-  // Initialize TipTap editor
+  // Initialize TipTap editor with screenplay extensions + collaboration + pagination
   const editor = useEditor({
     extensions: [
+      // Configure StarterKit to disable conflicting extensions
       StarterKit.configure({
-        history: false,
-        heading: false,
+        history: false, // Yjs provides undo/redo
+        heading: false, // ScreenplayKit provides scene headings
+        // Note: paragraph is kept enabled as a fallback and for compatibility with pagination
       }),
+      // Screenplay formatting extensions
       ScreenplayKit.configure({
-        enableSmartPageBreaks: true,
+        enableSmartPageBreaks: true,  // Enable smart page breaks
       }),
+      // Collaboration
       ...(doc ? [
         Collaboration.configure({
           document: doc,
@@ -184,21 +205,30 @@ export default function TestTipTapPage() {
           },
         }),
       ] : []),
+      // Pagination
       PaginationPlus.configure({
+        // geometry
         ...PAGE_SIZES.LETTER,
+        // chrome between pages
         pageGap: 24,
         pageGapBorderSize: 1,
         pageBreakBackground: '#f1f3f5',
-        pageHeaderHeight: 48,
+
+        // header/footer (set to 0 if you don't want page numbers)
+        pageHeaderHeight: 48,    // ~0.5in @ 96 DPI
         pageFooterHeight: 0,
         headerLeft: '',
         headerRight: '<span class="rm-page-number"></span>.',
         footerLeft: '',
         footerRight: '',
-        marginTop: 48,
-        marginBottom: 96,
-        marginLeft: 144,
-        marginRight: 96,
+      
+        // screenplay margins (in px)
+        marginTop: 48,           // 1.0in Total (stacks with header height)
+        marginBottom: 96,        // 1.0in
+        marginLeft: 144,         // 1.5in
+        marginRight: 96,         // 1.0in
+
+        // extra padding inside content area (keep 0)
         contentMarginTop: 0,
         contentMarginBottom: 0,
       }),
@@ -209,12 +239,14 @@ export default function TestTipTapPage() {
     content: !doc ? '<p>Connecting to collaboration server...</p>' : undefined,
   }, [doc, provider]);
 
-  // Page numbering CSS override
   useEffect(() => {
     const style = document.createElement("style");
     style.setAttribute("data-pagination-overrides", "true");
     style.textContent = `
+      /* Start at 1 so the *second* page shows 2 (we'll hide page 1 header content) */
       .rm-with-pagination { counter-reset: page-number 1 !important; }
+
+      /* Hide first page header content (number and dot) but keep spacing */
       .rm-with-pagination .rm-first-page-header {
         visibility: hidden !important;
       }
@@ -223,37 +255,54 @@ export default function TestTipTapPage() {
     return () => { document.head.removeChild(style); };
   }, []);
 
-  // Apply pending content when editor is ready
+  // Apply pending content when editor becomes ready
+  // CRITICAL: Wait for initial Yjs sync to complete before seeding to prevent duplication
   useEffect(() => {
     if (editor && pendingContent && doc) {
+      // CRITICAL: Must wait for initial sync to complete before checking/seeding
+      // If we check while syncStatus is 'connecting' or 'connected', the Yjs doc
+      // might still be empty even though sync is in progress
       if (syncStatus !== 'synced') {
         console.log('[TestTipTap] Waiting for sync before seeding, current status:', syncStatus);
         return;
       }
 
+      // CRITICAL FIX: If backend has Yjs updates, skip seeding entirely
+      // Yjs sync will provide the content from script_versions table
+      // This prevents duplication when REST API returns stale content_blocks
       if (script?.has_yjs_updates) {
-        console.log('[TestTipTap] Skipping setContent - Yjs updates exist in database');
-        setPendingContent(null);
+        console.log('[TestTipTap] Skipping setContent - Yjs updates exist in database (Yjs is source of truth)');
+        setPendingContent(null); // Clear pending content to prevent retry
         return;
       }
 
+      // After sync completes, check if Yjs document already has content
       const yjsFragment = doc.get('default', Y.XmlFragment);
       const yjsHasContent = yjsFragment && yjsFragment.length > 0;
-      const editorHasContent = editor.state.doc.content.size > 2;
+
+      // Check if editor already has content
+      const editorHasContent = editor.state.doc.content.size > 2; // >2 accounts for empty doc structure
 
       if (yjsHasContent || editorHasContent) {
-        console.log('[TestTipTap] Skipping setContent - content already exists');
-        setPendingContent(null);
+        console.log('[TestTipTap] Skipping setContent - content already exists:', {
+          yjsLength: yjsFragment?.length || 0,
+          editorSize: editor.state.doc.content.size,
+          syncStatus: syncStatus,
+          reason: yjsHasContent ? 'Yjs has content (from sync)' : 'Editor has content'
+        });
+        setPendingContent(null); // Clear pending content to prevent retry
         return;
       }
 
+      // Both Yjs and editor are empty after sync - safe to seed
       console.log('[TestTipTap] Seeding editor - no content found after sync');
       editor.commands.setContent(pendingContent);
-      setPendingContent(null);
+      console.log('[TestTipTap] Content applied successfully');
+      setPendingContent(null); // Clear after applying
     }
   }, [editor, pendingContent, doc, syncStatus, script]);
 
-  // Hide loading screen when Yjs sync completes
+  // Hide loading screen when Yjs sync completes (for has_yjs_updates case)
   useEffect(() => {
     if (script?.has_yjs_updates && syncStatus === 'synced' && isLoadingScript) {
       console.log('[TipTapEditor] Yjs sync complete, hiding loading screen');
@@ -261,27 +310,28 @@ export default function TestTipTapPage() {
     }
   }, [script, syncStatus, isLoadingScript]);
 
-  // Load layout preferences
+  // Load layout preferences on mount
   useEffect(() => {
     const prefs = loadLayoutPrefs();
     setIsAssistantOpen(prefs.assistantVisible ?? false);
   }, []);
 
-  // Save layout preferences
+  // Save layout preferences when AI assistant state changes
   useEffect(() => {
     const prefs: EditorLayoutPrefs = {
-      sceneListVisible: true, // Horizontal bar always visible
+      sceneListVisible: true, // Horizontal bar is always visible
       assistantVisible: isAssistantOpen
     };
     saveLayoutPrefs(prefs);
   }, [isAssistantOpen]);
 
-  // Extract scene boundaries when editor content changes
+  // Extract scene boundaries and live content when editor content changes
   useEffect(() => {
     if (editor && editor.state.doc) {
       const boundaries = extractSceneBoundariesFromTipTap(editor);
       setSceneBoundaries(boundaries);
 
+      // Extract live content in Slate format for sidebar features
       const slateContent = extractSlateContentFromTipTap(editor);
       setLiveSlateContent(slateContent);
 
@@ -298,7 +348,10 @@ export default function TestTipTapPage() {
       setCurrentSceneIndex(sceneIndex);
     };
 
+    // Update on selection change
     editor.on('selectionUpdate', updateCurrentScene);
+
+    // Initial update
     updateCurrentScene();
 
     return () => {
@@ -343,12 +396,6 @@ export default function TestTipTapPage() {
     }
   };
 
-  // Handle collaborators button click (placeholder)
-  const handleCollaboratorsClick = () => {
-    console.log('[TipTapEditor] Collaborators feature coming soon');
-    // TODO: Open share/collaborate dialog
-  };
-
   // Show auth loading state
   if (authLoading) {
     return (
@@ -373,7 +420,7 @@ export default function TestTipTapPage() {
     );
   }
 
-  // Show loading state while waiting for auth token or Yjs
+  // Show loading state while waiting for auth token or Yjs to connect
   if (!authToken || !doc || !editor) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -389,6 +436,12 @@ export default function TestTipTapPage() {
       </div>
     );
   }
+
+  // Handle collaborators button click (placeholder for future)
+  const handleCollaboratorsClick = () => {
+    console.log('[TipTapEditor] Collaborators feature coming soon');
+    // TODO: Open share/collaborate dialog
+  };
 
   return (
     <>
@@ -416,15 +469,103 @@ export default function TestTipTapPage() {
         onSceneClick={handleSceneClick}
       />
 
+      <div className="flex h-screen bg-gray-100">
+        {/* REMOVED: Old header structure replaced with CompactHeader component above */}
+      <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white shadow-md" style={{display: 'none'}}>
+        {/* Top Menu Bar with Centered Title */}
+        <div className="px-6 py-3 flex items-center h-16">
+          {/* Left Navigation */}
+          <div className="flex items-center gap-1 flex-1 min-w-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/")}
+              className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md px-3 py-1"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Home
+            </Button>
+            <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100 rounded-md px-3 py-1">
+              <FileText className="w-4 h-4 mr-1" />
+              File
+            </Button>
+            <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100 rounded-md px-3 py-1">
+              <Eye className="w-4 h-4 mr-1" />
+              View
+            </Button>
+            <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100 rounded-md px-3 py-1">
+              <HelpCircle className="w-4 h-4 mr-1" />
+              Help
+            </Button>
+          </div>
+
+          {/* Centered Script Title */}
+          <div className="flex-1 flex justify-center min-w-0">
+            <h1 className="font-semibold text-gray-800 text-xl tracking-wide truncate">
+              {script?.title || 'Untitled Script'}
+            </h1>
+          </div>
+
+          {/* Right Controls */}
+          <div className="flex items-center gap-4 flex-1 justify-end min-w-0">
+            {/* Connection Status */}
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${getStatusColor(syncStatus)}`}></div>
+              <span className="text-xs text-gray-500 capitalize hidden sm:inline">
+                {syncStatus}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500 hidden sm:inline">
+              Saved {lastSaved.toLocaleTimeString()}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isExporting}
+              onClick={handleExportFDX}
+              className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-4 h-4 mr-1" />
+              {isExporting ? 'Exporting...' : 'Export'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Controls Bar */}
+      <div className="fixed top-16 left-0 right-0 z-40 border-b border-gray-200 bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsSceneSidebarOpen(!isSceneSidebarOpen)}
+            className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md px-3 py-1"
+          >
+            <Menu className="w-4 h-4 mr-2" />
+            {isSceneSidebarOpen ? 'Hide' : 'Show'} Scenes
+          </Button>
+        </div>
+        <Button
+          onClick={() => setIsAssistantOpen(!isAssistantOpen)}
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 shadow-sm ${
+            isAssistantOpen
+              ? 'bg-purple-600 text-white shadow-md hover:bg-purple-700 hover:shadow-lg'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:shadow-md hover:border-gray-300'
+          }`}
+        >
+          AI Assistant
+        </Button>
+      </div>
+
       {/* Export Error Banner */}
       {exportError && (
-        <div className="fixed top-20 right-6 z-50 max-w-md">
-          <div className="flex items-center gap-2 text-red-600 bg-red-50 p-4 rounded-lg border border-red-200 shadow-lg">
+        <div className="fixed top-32 right-6 z-50 max-w-md">
+          <div className="flex items-center gap-2 text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-800 shadow-lg">
             <span className="font-medium">Export Failed</span>
             <span className="text-sm">{exportError}</span>
             <button
               onClick={() => setExportError(null)}
-              className="ml-auto text-red-600 hover:text-red-800 font-bold text-xl leading-none"
+              className="ml-auto text-red-400 hover:text-red-300 font-bold text-xl leading-none"
             >
               ×
             </button>
@@ -432,23 +573,61 @@ export default function TestTipTapPage() {
         </div>
       )}
 
-      {/* Main Content Area - Screenplay Editor */}
-      <div className="pt-[116px] w-full bg-[#f1f3f5]">
-        <div className="screenplay-editor-wrapper min-h-screen">
-          <div className="flex justify-center">
-            <EditorContent editor={editor} className="screenplay-editor" />
+      {/* Left Sidebar - Scene Navigation */}
+      {isSceneSidebarOpen && (
+        <div className="fixed left-0 top-[112px] w-80 h-[calc(100vh-112px)] z-30 transition-all duration-300">
+          <ScriptSceneSidebar
+            scenes={sceneBoundaries}
+            onSceneClick={handleSceneClick}
+            currentSceneIndex={currentSceneIndex}
+            scriptContent={liveSlateContent}
+            scriptId={scriptId}
+            script={script || undefined}
+          />
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div
+        className="pt-[112px] w-full flex transition-all duration-300"
+        style={{
+          marginLeft: isSceneSidebarOpen ? '320px' : '0',
+          marginRight: isAssistantOpen ? '384px' : '0'
+        }}
+      >
+        {/* Editor Container - dynamically centered */}
+        <div
+          className="flex-1 flex justify-center transition-all duration-300"
+        >
+          <div
+            className="w-full transition-all duration-300"
+            style={{
+              maxWidth: isSceneSidebarOpen && isAssistantOpen
+                ? 'calc(100vw - 704px)' // Both sidebars: 320px + 384px
+                : isSceneSidebarOpen
+                ? 'calc(100vw - 320px)' // Scene sidebar only
+                : isAssistantOpen
+                ? 'calc(100vw - 384px)' // AI assistant only
+                : '100vw' // No sidebars
+            }}
+          >
+            <div className="screenplay-editor-wrapper min-h-screen overflow-auto">
+              <div className="flex justify-center">
+                <EditorContent editor={editor} className="screenplay-editor" />
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Right Sidebar - AI Assistant */}
+        {isAssistantOpen && (
+          <div className="fixed right-0 top-[112px] w-96 h-[calc(100vh-112px)] z-30 transition-all duration-300">
+            <AIChatbot projectId={scriptId || undefined} isVisible={true} />
+          </div>
+        )}
       </div>
 
-      {/* AI Assistant Bottom Sheet */}
-      <AIAssistantBottomSheet
-        isOpen={isAssistantOpen}
-        onToggle={() => setIsAssistantOpen(!isAssistantOpen)}
-        projectId={scriptId}
-      />
-
-      {/* Custom Styles for Screenplay Editor - PRESERVED */}
+      {/* Custom Styles for Screenplay Editor */}
       <style jsx global>{`
         :root {
           --app-chrome-bg: #f1f3f5;
@@ -479,7 +658,7 @@ export default function TestTipTapPage() {
           outline: none;
         }
 
-        /* Collaboration cursor styling */
+        /* Collaboration cursor styling */}
         .collaboration-cursor__caret {
           position: relative;
           margin-left: -1px;
@@ -505,6 +684,7 @@ export default function TestTipTapPage() {
           white-space: nowrap;
         }
       `}</style>
+      </div>
     </>
   );
 }
