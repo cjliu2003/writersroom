@@ -454,16 +454,16 @@ export default function TestTipTapPage() {
       )}
 
       {/* Main Content Area - Screenplay Editor */}
-      <div className="pt-[105px] w-full bg-[#f1f3f5]">
+      <div className="fixed top-[105px] left-0 right-0 bottom-0 w-full bg-[#f1f3f5] overflow-y-auto">
         <div
-          className="screenplay-editor-wrapper min-h-screen transition-all duration-200 ease-out"
+          className="screenplay-editor-wrapper min-h-full transition-all duration-200 ease-out"
           style={{
             marginLeft: assistantPosition === 'left' && assistantSideWidth > 0 ? `${assistantSideWidth}px` : '0',
             marginRight: assistantPosition === 'right' && assistantSideWidth > 0 ? `${assistantSideWidth}px` : '0',
             willChange: assistantSideWidth > 0 ? 'margin-left, margin-right' : 'auto',
           }}
         >
-          <div className="flex justify-center">
+          <div className="flex justify-center pt-10 pb-10">
             <EditorContent editor={editor} className="screenplay-editor" />
           </div>
         </div>
