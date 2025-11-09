@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, useSpring, useMotionValue } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { AIChatbot } from '@/components/ai-chatbot';
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MessageCircle, MoveHorizontal } from 'lucide-react';
 
@@ -14,6 +14,13 @@ interface AIAssistantBottomSheetProps {
   onPositionChange?: (position: ChatPosition) => void;
   onWidthChange?: (width: number) => void;
 }
+
+// Shared style constants
+const COURIER_FONT_FAMILY = "'Courier New', 'Courier', monospace";
+const COURIER_SCREENPLAY_FONT = "'Courier Final Draft', 'Courier Screenplay', 'Courier New', Courier, monospace";
+const HEADER_HEIGHT = 44;
+const COLLAPSED_SIDE_WIDTH = 36;
+const COLLAPSED_BOTTOM_HEIGHT = 32;
 
 export function AIAssistantBottomSheet({
   isOpen,
@@ -82,14 +89,6 @@ export function AIAssistantBottomSheet({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only on mount
-
-  // Initialize with clean state
-  useEffect(() => {
-    localStorage.removeItem('ai-chat-layout');
-    setPosition('bottom');
-    setSideWidth(420);
-    setHeight(35);
-  }, []);
 
   // Notify parent of width changes - immediate, no delay
   useEffect(() => {
@@ -175,7 +174,7 @@ export function AIAssistantBottomSheet({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, position]);
+  }, [isDragging, position, isOpen, onWidthChange]);
 
   // Handle ESC key to close
   useEffect(() => {
@@ -213,7 +212,7 @@ export function AIAssistantBottomSheet({
         transform: 'translateX(-50%)',
         width: '100%',
         maxWidth: '1200px',
-        height: isOpen ? `${height}vh` : '32px',
+        height: isOpen ? `${height}vh` : `${COLLAPSED_BOTTOM_HEIGHT}px`,
         borderTopLeftRadius: '8px',
         borderTopRightRadius: '8px',
         borderBottom: 'none',
@@ -226,14 +225,10 @@ export function AIAssistantBottomSheet({
         left: 0,
         top: `${headerOffset}px`,
         bottom: 0,
-        width: isOpen ? `${sideWidth}px` : '36px',
+        width: isOpen ? `${sideWidth}px` : `${COLLAPSED_SIDE_WIDTH}px`,
         height: `calc(100vh - ${headerOffset}px)`,
-        borderTopRightRadius: '0px',
-        borderBottomRightRadius: '0px',
-        borderLeft: 'none',
-        borderTop: 'none',
-        borderBottom: 'none',
-        borderRight: 'none',
+        borderRadius: 0,
+        border: 'none',
         boxShadow: '2px 0 8px rgba(0, 0, 0, 0.06), 1px 0 2px rgba(0, 0, 0, 0.04)',
       };
     } else { // right
@@ -243,14 +238,10 @@ export function AIAssistantBottomSheet({
         right: 0,
         top: `${headerOffset}px`,
         bottom: 0,
-        width: isOpen ? `${sideWidth}px` : '36px',
+        width: isOpen ? `${sideWidth}px` : `${COLLAPSED_SIDE_WIDTH}px`,
         height: `calc(100vh - ${headerOffset}px)`,
-        borderTopLeftRadius: '0px',
-        borderBottomLeftRadius: '0px',
-        borderRight: 'none',
-        borderTop: 'none',
-        borderBottom: 'none',
-        borderLeft: 'none',
+        borderRadius: 0,
+        border: 'none',
         boxShadow: '-2px 0 8px rgba(0, 0, 0, 0.06), -1px 0 2px rgba(0, 0, 0, 0.04)',
       };
     }
@@ -266,13 +257,18 @@ export function AIAssistantBottomSheet({
         className="h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-all duration-200 group"
       >
         <div className="flex flex-col items-center gap-3 py-6">
-          <div className="p-1.5 rounded-md bg-gray-100 group-hover:bg-purple-50 transition-colors">
+          <div
+            className="p-1.5 rounded-md bg-gray-100 group-hover:bg-purple-50 transition-colors"
+            style={{
+              transform: position === 'right' ? 'rotate(180deg)' : 'none',
+            }}
+          >
             <MessageCircle className="w-4 h-4 text-gray-600 group-hover:text-purple-400" />
           </div>
           <div
             style={{
               writingMode: 'vertical-rl',
-              fontFamily: "'Courier New', 'Courier', monospace",
+              fontFamily: COURIER_FONT_FAMILY,
               fontSize: '10px',
               fontWeight: 600,
               color: '#666',
@@ -309,7 +305,7 @@ export function AIAssistantBottomSheet({
           </div>
           <span
             style={{
-              fontFamily: "'Courier New', 'Courier', monospace",
+              fontFamily: COURIER_FONT_FAMILY,
               fontSize: '11px',
               fontWeight: 600,
               color: '#666',
@@ -332,10 +328,10 @@ export function AIAssistantBottomSheet({
 
     return (
       <div
-        className="relative flex items-center justify-between px-4 py-2 border-b select-none bg-white/50"
+        className="relative flex items-center justify-between px-4 py-2.5 border-b select-none bg-white/50"
         style={{
-          height: '40px',
-          borderColor: 'rgba(0, 0, 0, 0.06)',
+          height: `${HEADER_HEIGHT}px`,
+          borderColor: 'rgba(0, 0, 0, 0.08)',
         }}
       >
         <div className="flex items-center gap-2.5">
@@ -343,15 +339,16 @@ export function AIAssistantBottomSheet({
             <MessageCircle className="w-3.5 h-3.5 text-purple-400" />
           </div>
           <h3
-            className="text-xs font-semibold"
             style={{
-              fontFamily: "'Courier New', 'Courier', monospace",
-              color: '#444',
-              letterSpacing: '0.08em',
+              fontFamily: COURIER_SCREENPLAY_FONT,
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#222',
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
             }}
           >
-            AI Chat
+            AI WRITING ASSISTANT
           </h3>
         </div>
 
@@ -364,7 +361,7 @@ export function AIAssistantBottomSheet({
                 cyclePosition();
               }}
               className="flex items-center gap-1 px-2 py-1 rounded hover:bg-purple-50 transition-colors text-gray-500 hover:text-purple-500 text-xs"
-              style={{ fontFamily: "'Courier New', 'Courier', monospace" }}
+              style={{ fontFamily: COURIER_FONT_FAMILY }}
               title="Change position"
             >
               <MoveHorizontal className="w-3.5 h-3.5" />
@@ -378,7 +375,7 @@ export function AIAssistantBottomSheet({
               onToggle();
             }}
             className="flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700 text-xs"
-            style={{ fontFamily: "'Courier New', 'Courier', monospace" }}
+            style={{ fontFamily: COURIER_FONT_FAMILY }}
           >
             {position === 'bottom' ? (
               <>
@@ -446,7 +443,7 @@ export function AIAssistantBottomSheet({
         {isOpen && (
           <>
             {renderExpandedHeader()}
-            <div className="h-[calc(100%-40px)] overflow-hidden bg-white">
+            <div className={`h-[calc(100%-${HEADER_HEIGHT}px)] overflow-hidden bg-white`}>
               <AIChatbot projectId={projectId} isVisible={true} light={true} />
             </div>
           </>

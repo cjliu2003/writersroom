@@ -17,7 +17,8 @@
       "Bash(npm view:*)",
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(npx next lint:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
