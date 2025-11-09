@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatbot } from '@/components/ai-chatbot';
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MessageCircle, MoveHorizontal } from 'lucide-react';
@@ -21,6 +21,15 @@ const COURIER_SCREENPLAY_FONT = "'Courier Final Draft', 'Courier Screenplay', 'C
 const HEADER_HEIGHT = 44;
 const COLLAPSED_SIDE_WIDTH = 36;
 const COLLAPSED_BOTTOM_HEIGHT = 32;
+
+// Base styles for all positions
+const BASE_CONTAINER_STYLES = {
+  background: 'rgba(255, 255, 255, 0.98)',
+  backdropFilter: 'blur(12px)',
+  border: '1px solid rgba(0, 0, 0, 0.06)',
+  zIndex: 50,
+  transition: 'width 0.2s ease-out, height 0.2s ease-out',
+} as const;
 
 export function AIAssistantBottomSheet({
   isOpen,
@@ -121,13 +130,13 @@ export function AIAssistantBottomSheet({
     return () => window.removeEventListener('resize', handleResize);
   }, [position]);
 
-  // Position toggle function
-  const cyclePosition = () => {
+  // Position toggle function with useCallback
+  const cyclePosition = useCallback(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 1200) return;
 
     const next = position === 'bottom' ? 'right' : position === 'right' ? 'left' : 'bottom';
     setPosition(next);
-  };
+  }, [position]);
 
   // Resize drag handlers
   const handleResizeDragStart = (e: React.MouseEvent) => {
@@ -188,18 +197,11 @@ export function AIAssistantBottomSheet({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onToggle]);
 
-  // Get container styles based on position and open state
-  const getContainerStyles = () => {
-    // Use dynamically measured navigation bar height for pixel-perfect alignment
-    // Falls back to 105px if measurement hasn't completed yet
+  // Memoized container styles based on position and open state
+  const containerStyles = useMemo(() => {
     const headerOffset = measuredOffset;
-
     const baseStyles = {
-      background: 'rgba(255, 255, 255, 0.98)',
-      backdropFilter: 'blur(12px)',
-      border: '1px solid rgba(0, 0, 0, 0.06)',
-      zIndex: 50, // Above HorizontalSceneBar (z-40) and editor content
-      transition: 'width 0.2s ease-out, height 0.2s ease-out',
+      ...BASE_CONTAINER_STYLES,
       willChange: isOpen ? 'width, height' : 'auto',
     };
 
@@ -245,10 +247,10 @@ export function AIAssistantBottomSheet({
         boxShadow: '-2px 0 8px rgba(0, 0, 0, 0.06), -1px 0 2px rgba(0, 0, 0, 0.04)',
       };
     }
-  };
+  }, [position, isOpen, height, sideWidth, measuredOffset]);
 
   // Render collapsed tab for side modes
-  const renderCollapsedSideTab = () => {
+  const renderCollapsedSideTab = useCallback(() => {
     if (position === 'bottom' || isOpen) return null;
 
     return (
@@ -290,10 +292,10 @@ export function AIAssistantBottomSheet({
         </div>
       </div>
     );
-  };
+  }, [position, isOpen, onToggle]);
 
   // Render collapsed bar for bottom mode
-  const renderCollapsedBottomBar = () => {
+  const renderCollapsedBottomBar = useCallback(() => {
     if (position !== 'bottom' || isOpen) return null;
 
     return (
@@ -322,10 +324,10 @@ export function AIAssistantBottomSheet({
         <ChevronUp className="w-3.5 h-3.5 text-gray-400 group-hover:text-purple-400 transition-colors" />
       </div>
     );
-  };
+  }, [position, isOpen, onToggle]);
 
   // Render expanded header
-  const renderExpandedHeader = () => {
+  const renderExpandedHeader = useCallback(() => {
     if (!isOpen) return null;
 
     return (
@@ -399,13 +401,13 @@ export function AIAssistantBottomSheet({
         </div>
       </div>
     );
-  };
+  }, [isOpen, isClient, position, cyclePosition, onToggle]);
 
   return (
     <>
       <motion.div
         className="z-[9999]"
-        style={getContainerStyles()}
+        style={containerStyles}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{

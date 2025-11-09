@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Home, Download, UserPlus, CheckCircle, Loader2, WifiOff, AlertCircle } from 'lucide-react';
@@ -17,6 +17,13 @@ interface CompactHeaderProps {
   onTitleChange?: (newTitle: string) => void;
 }
 
+const MAX_TITLE_LENGTH = 25;
+
+// Shared class strings for consistency and performance
+const TITLE_BASE_CLASSES = "font-[family-name:var(--font-courier-prime)] text-lg font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2";
+const BUTTON_CLASSES = "text-gray-700 hover:text-gray-900 hover:bg-gray-200/50 px-3 py-2 h-10";
+const ICON_SIZE = "w-6 h-6";
+
 export function CompactHeader({
   scriptTitle,
   syncStatus,
@@ -30,7 +37,6 @@ export function CompactHeader({
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(scriptTitle);
   const inputRef = useRef<HTMLInputElement>(null);
-  const MAX_TITLE_LENGTH = 25;
 
   // Update local state when prop changes
   useEffect(() => {
@@ -45,25 +51,29 @@ export function CompactHeader({
     }
   }, [isEditing]);
 
-  const handleTitleClick = () => {
+  // Memoized handlers for performance
+  const handleTitleClick = useCallback(() => {
     setIsEditing(true);
-  };
+  }, []);
 
-  const handleTitleBlur = () => {
+  const handleTitleBlur = useCallback(() => {
     const trimmedTitle = editedTitle.trim();
 
-    if (trimmedTitle && trimmedTitle !== scriptTitle && onTitleChange) {
-      // Update immediately for seamless transition, before API call
-      setIsEditing(false);
-      onTitleChange(trimmedTitle);
-    } else {
-      // Revert to original title if empty or unchanged
+    // Always revert to original if empty or unchanged
+    if (!trimmedTitle || trimmedTitle === scriptTitle) {
       setEditedTitle(scriptTitle);
       setIsEditing(false);
+      return;
     }
-  };
 
-  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    // Only save if we have a valid new title
+    if (onTitleChange) {
+      setIsEditing(false);
+      onTitleChange(trimmedTitle);
+    }
+  }, [editedTitle, scriptTitle, onTitleChange]);
+
+  const handleTitleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       inputRef.current?.blur();
@@ -71,15 +81,15 @@ export function CompactHeader({
       setEditedTitle(scriptTitle);
       setIsEditing(false);
     }
-  };
+  }, [scriptTitle]);
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.slice(0, MAX_TITLE_LENGTH);
     setEditedTitle(value);
-  };
+  }, []);
 
-  // Get sync status display
-  const getSyncStatusDisplay = () => {
+  // Memoized sync status display
+  const statusDisplay = useMemo(() => {
     switch (syncStatus) {
       case 'synced':
         return {
@@ -115,9 +125,8 @@ export function CompactHeader({
           animate: true,
         };
     }
-  };
+  }, [syncStatus]);
 
-  const statusDisplay = getSyncStatusDisplay();
   const StatusIcon = statusDisplay.icon;
 
   return (
@@ -132,9 +141,9 @@ export function CompactHeader({
                   variant="ghost"
                   size="sm"
                   onClick={onHomeClick}
-                  className="text-gray-700 hover:text-gray-900 hover:bg-gray-200/50 px-3 py-2 h-10"
+                  className={BUTTON_CLASSES}
                 >
-                  <Home className="w-5 h-5" />
+                  <Home className={ICON_SIZE} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -155,13 +164,12 @@ export function CompactHeader({
               onBlur={handleTitleBlur}
               onKeyDown={handleTitleKeyDown}
               maxLength={MAX_TITLE_LENGTH}
-              className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2 bg-transparent border-none outline-none focus:outline-none w-full max-w-xl px-2"
-              placeholder="UNTITLED SCRIPT"
+              className={`${TITLE_BASE_CLASSES} bg-transparent border-none outline-none focus:outline-none w-full max-w-xl px-2`}
             />
           ) : (
             <h1
               onClick={handleTitleClick}
-              className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2 truncate max-w-xl cursor-text hover:opacity-70 px-2 transition-opacity"
+              className={`${TITLE_BASE_CLASSES} truncate max-w-xl cursor-text hover:opacity-70 px-2 transition-opacity`}
               title="Click to edit title"
             >
               {scriptTitle || 'Untitled Script'}
@@ -178,9 +186,9 @@ export function CompactHeader({
                   variant="ghost"
                   size="sm"
                   onClick={onCollaboratorsClick}
-                  className="text-gray-700 hover:text-gray-900 hover:bg-gray-200/50 px-3 py-2 h-10"
+                  className={BUTTON_CLASSES}
                 >
-                  <UserPlus className="w-5 h-5" />
+                  <UserPlus className={ICON_SIZE} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -197,9 +205,9 @@ export function CompactHeader({
                   size="sm"
                   onClick={onExportClick}
                   disabled={isExporting}
-                  className="text-gray-700 hover:text-gray-900 hover:bg-gray-200/50 px-3 py-2 h-10 disabled:opacity-50"
+                  className={`${BUTTON_CLASSES} disabled:opacity-50`}
                 >
-                  <Download className="w-5 h-5" />
+                  <Download className={ICON_SIZE} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -209,9 +217,9 @@ export function CompactHeader({
           </TooltipProvider>
 
           {/* Sync Status - Google Drive style with fixed width */}
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 ml-2 w-24">
+          <div className="flex items-center gap-1.5 text-sm text-gray-500 ml-2 w-24">
             <StatusIcon
-              className={`w-3.5 h-3.5 ${statusDisplay.color} ${statusDisplay.animate ? 'animate-spin' : ''}`}
+              className={`w-4 h-4 ${statusDisplay.color} ${statusDisplay.animate ? 'animate-spin' : ''}`}
             />
             <span className="hidden sm:inline whitespace-nowrap">{statusDisplay.text}</span>
           </div>
