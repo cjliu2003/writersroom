@@ -27,6 +27,7 @@ export function AIAssistantBottomSheet({
   const [sideWidth, setSideWidth] = useState(420); // pixels for side modes
   const [isDragging, setIsDragging] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [measuredOffset, setMeasuredOffset] = useState(105); // Dynamically measured navigation height
   const dragStartY = useRef(0);
   const dragStartX = useRef(0);
   const dragStartHeight = useRef(35);
@@ -35,6 +36,43 @@ export function AIAssistantBottomSheet({
   // Check if we're on client side
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  // Measure actual navigation bar height for pixel-perfect alignment
+  useEffect(() => {
+    const measureNavigationHeight = () => {
+      // Find the HorizontalSceneBar element
+      const sceneBar = document.querySelector('[class*="top-12"][class*="z-40"]');
+
+      if (sceneBar) {
+        const rect = sceneBar.getBoundingClientRect();
+        const bottomPosition = rect.bottom;
+
+        // Use the measured bottom position as our offset
+        setMeasuredOffset(Math.round(bottomPosition));
+      }
+    };
+
+    // Measure on mount and after a brief delay to ensure DOM is ready
+    measureNavigationHeight();
+    const timer = setTimeout(measureNavigationHeight, 100);
+
+    // Add resize observer to update on window resize
+    const resizeObserver = new ResizeObserver(measureNavigationHeight);
+    const sceneBar = document.querySelector('[class*="top-12"][class*="z-40"]');
+
+    if (sceneBar) {
+      resizeObserver.observe(sceneBar);
+    }
+
+    // Also listen for window resize
+    window.addEventListener('resize', measureNavigationHeight);
+
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', measureNavigationHeight);
+    };
   }, []);
 
   // Initialize parent with current position on mount
@@ -153,13 +191,15 @@ export function AIAssistantBottomSheet({
 
   // Get container styles based on position and open state
   const getContainerStyles = () => {
-    const headerOffset = 116; // Height of CompactHeader + HorizontalSceneBar
+    // Use dynamically measured navigation bar height for pixel-perfect alignment
+    // Falls back to 105px if measurement hasn't completed yet
+    const headerOffset = measuredOffset;
 
     const baseStyles = {
       background: 'rgba(255, 255, 255, 0.98)',
       backdropFilter: 'blur(12px)',
       border: '1px solid rgba(0, 0, 0, 0.06)',
-      zIndex: 40,
+      zIndex: 50, // Above HorizontalSceneBar (z-40) and editor content
       transition: 'width 0.2s ease-out, height 0.2s ease-out',
       willChange: isOpen ? 'width, height' : 'auto',
     };
@@ -188,9 +228,12 @@ export function AIAssistantBottomSheet({
         bottom: 0,
         width: isOpen ? `${sideWidth}px` : '36px',
         height: `calc(100vh - ${headerOffset}px)`,
-        borderTopRightRadius: '8px',
-        borderBottomRightRadius: '8px',
+        borderTopRightRadius: '0px',
+        borderBottomRightRadius: '0px',
         borderLeft: 'none',
+        borderTop: 'none',
+        borderBottom: 'none',
+        borderRight: 'none',
         boxShadow: '2px 0 8px rgba(0, 0, 0, 0.06), 1px 0 2px rgba(0, 0, 0, 0.04)',
       };
     } else { // right
@@ -202,9 +245,12 @@ export function AIAssistantBottomSheet({
         bottom: 0,
         width: isOpen ? `${sideWidth}px` : '36px',
         height: `calc(100vh - ${headerOffset}px)`,
-        borderTopLeftRadius: '8px',
-        borderBottomLeftRadius: '8px',
+        borderTopLeftRadius: '0px',
+        borderBottomLeftRadius: '0px',
         borderRight: 'none',
+        borderTop: 'none',
+        borderBottom: 'none',
+        borderLeft: 'none',
         boxShadow: '-2px 0 8px rgba(0, 0, 0, 0.06), -1px 0 2px rgba(0, 0, 0, 0.04)',
       };
     }
@@ -225,13 +271,14 @@ export function AIAssistantBottomSheet({
           </div>
           <div
             style={{
-              writingMode: position === 'left' ? 'vertical-rl' : 'vertical-lr',
+              writingMode: 'vertical-rl',
               fontFamily: "'Courier New', 'Courier', monospace",
               fontSize: '10px',
               fontWeight: 600,
               color: '#666',
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
+              transform: position === 'right' ? 'rotate(180deg)' : 'none',
             }}
             className="group-hover:text-purple-500 transition-colors"
           >

@@ -435,7 +435,7 @@ export default function TestTipTapPage() {
       )}
 
       {/* Main Content Area - Screenplay Editor */}
-      <div className="pt-[116px] w-full bg-[#f1f3f5]">
+      <div className="pt-[105px] w-full bg-[#f1f3f5]">
         <div
           className="screenplay-editor-wrapper min-h-screen transition-all duration-200 ease-out"
           style={{
