@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Home, Download, UserPlus, CheckCircle, Loader2, WifiOff, AlertCircle } from 'lucide-react';
@@ -14,6 +14,7 @@ interface CompactHeaderProps {
   onHomeClick: () => void;
   onExportClick: () => void;
   onCollaboratorsClick: () => void;
+  onTitleChange?: (newTitle: string) => void;
 }
 
 export function CompactHeader({
@@ -24,7 +25,59 @@ export function CompactHeader({
   onHomeClick,
   onExportClick,
   onCollaboratorsClick,
+  onTitleChange,
 }: CompactHeaderProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(scriptTitle);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const MAX_TITLE_LENGTH = 25;
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setEditedTitle(scriptTitle);
+  }, [scriptTitle]);
+
+  // Focus input when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleTitleClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleTitleBlur = () => {
+    const trimmedTitle = editedTitle.trim();
+
+    if (trimmedTitle && trimmedTitle !== scriptTitle && onTitleChange) {
+      // Update immediately for seamless transition, before API call
+      setIsEditing(false);
+      onTitleChange(trimmedTitle);
+    } else {
+      // Revert to original title if empty or unchanged
+      setEditedTitle(scriptTitle);
+      setIsEditing(false);
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputRef.current?.blur();
+    } else if (e.key === 'Escape') {
+      setEditedTitle(scriptTitle);
+      setIsEditing(false);
+    }
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.slice(0, MAX_TITLE_LENGTH);
+    setEditedTitle(value);
+  };
+
   // Get sync status display
   const getSyncStatusDisplay = () => {
     switch (syncStatus) {
@@ -93,9 +146,29 @@ export function CompactHeader({
 
         {/* Center: Script Title */}
         <div className="flex-1 flex justify-center px-4">
-          <h1 className="text-lg font-semibold text-gray-800 truncate max-w-md" style={{ fontFamily: "'Courier New', Courier, monospace" }}>
-            {scriptTitle || 'Untitled Script'}
-          </h1>
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={editedTitle}
+              onChange={handleTitleChange}
+              onBlur={handleTitleBlur}
+              onKeyDown={handleTitleKeyDown}
+              maxLength={MAX_TITLE_LENGTH}
+              className="text-lg font-semibold text-gray-800 bg-transparent border-b border-transparent focus:border-gray-300 outline-none px-2 py-0.5 text-center w-full max-w-xl transition-colors"
+              style={{ fontFamily: "'Courier New', Courier, monospace" }}
+              placeholder="Untitled Script"
+            />
+          ) : (
+            <h1
+              onClick={handleTitleClick}
+              className="text-lg font-semibold text-gray-800 truncate max-w-xl cursor-text hover:opacity-70 px-2 py-0.5 transition-opacity"
+              style={{ fontFamily: "'Courier New', Courier, monospace" }}
+              title="Click to edit title"
+            >
+              {scriptTitle || 'Untitled Script'}
+            </h1>
+          )}
         </div>
 
         {/* Right: Collaborators, Export, Status */}

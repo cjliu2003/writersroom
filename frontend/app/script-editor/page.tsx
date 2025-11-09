@@ -26,7 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
 import {PaginationPlus, PAGE_SIZES} from 'tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
-import { getScriptContent, exportFDXFile, type ScriptWithContent } from '@/lib/api';
+import { getScriptContent, exportFDXFile, updateScript, type ScriptWithContent } from '@/lib/api';
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs';
 import {
   extractSceneBoundariesFromTipTap,
@@ -351,6 +351,24 @@ export default function TestTipTapPage() {
     // TODO: Open share/collaborate dialog
   };
 
+  const handleTitleChange = async (newTitle: string) => {
+    if (!script) return;
+
+    // Optimistically update local state immediately for seamless UX
+    const previousTitle = script.title;
+    setScript(prev => prev ? { ...prev, title: newTitle } : null);
+
+    try {
+      console.log('[TipTapEditor] Updating script title:', newTitle);
+      await updateScript(scriptId, { title: newTitle });
+      console.log('[TipTapEditor] Script title updated successfully');
+    } catch (error) {
+      console.error('[TipTapEditor] Failed to update script title:', error);
+      // Revert to previous title on error
+      setScript(prev => prev ? { ...prev, title: previousTitle } : null);
+    }
+  };
+
   // Show auth loading state
   if (authLoading) {
     return (
@@ -409,6 +427,7 @@ export default function TestTipTapPage() {
         onHomeClick={() => router.push("/")}
         onExportClick={handleExportFDX}
         onCollaboratorsClick={handleCollaboratorsClick}
+        onTitleChange={handleTitleChange}
       />
 
       {/* Horizontal Scene Navigation Bar */}
