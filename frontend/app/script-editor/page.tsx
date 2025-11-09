@@ -63,6 +63,8 @@ export default function TestTipTapPage() {
 
   // UI state
   const [isAssistantOpen, setIsAssistantOpen] = useState(false); // Start closed for cleaner view
+  const [assistantSideWidth, setAssistantSideWidth] = useState(0); // Width of side panel when open
+  const [assistantPosition, setAssistantPosition] = useState<'bottom' | 'left' | 'right'>('bottom');
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -434,7 +436,14 @@ export default function TestTipTapPage() {
 
       {/* Main Content Area - Screenplay Editor */}
       <div className="pt-[116px] w-full bg-[#f1f3f5]">
-        <div className="screenplay-editor-wrapper min-h-screen">
+        <div
+          className="screenplay-editor-wrapper min-h-screen transition-all duration-200 ease-out"
+          style={{
+            marginLeft: assistantPosition === 'left' && assistantSideWidth > 0 ? `${assistantSideWidth}px` : '0',
+            marginRight: assistantPosition === 'right' && assistantSideWidth > 0 ? `${assistantSideWidth}px` : '0',
+            willChange: assistantSideWidth > 0 ? 'margin-left, margin-right' : 'auto',
+          }}
+        >
           <div className="flex justify-center">
             <EditorContent editor={editor} className="screenplay-editor" />
           </div>
@@ -446,6 +455,8 @@ export default function TestTipTapPage() {
         isOpen={isAssistantOpen}
         onToggle={() => setIsAssistantOpen(!isAssistantOpen)}
         projectId={scriptId}
+        onWidthChange={(width) => setAssistantSideWidth(width)}
+        onPositionChange={(position) => setAssistantPosition(position)}
       />
 
       {/* Custom Styles for Screenplay Editor - PRESERVED */}
