@@ -257,28 +257,30 @@ export function AIAssistantBottomSheet({
         className="h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-all duration-200 group"
       >
         <div className="flex flex-col items-center gap-3 py-6">
+          {/* Icon + Text grouped together with unified rotation */}
           <div
-            className="p-1.5 rounded-md bg-gray-100 group-hover:bg-purple-50 transition-colors"
+            className="flex flex-col items-center gap-2"
             style={{
               transform: position === 'right' ? 'rotate(180deg)' : 'none',
             }}
           >
-            <MessageCircle className="w-4 h-4 text-gray-600 group-hover:text-purple-400" />
-          </div>
-          <div
-            style={{
-              writingMode: 'vertical-rl',
-              fontFamily: COURIER_FONT_FAMILY,
-              fontSize: '10px',
-              fontWeight: 600,
-              color: '#666',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              transform: position === 'right' ? 'rotate(180deg)' : 'none',
-            }}
-            className="group-hover:text-purple-500 transition-colors"
-          >
-            AI Chat
+            <div className="p-1.5 rounded-md bg-gray-100 group-hover:bg-purple-50 transition-colors">
+              <MessageCircle className="w-4 h-4 text-gray-600 group-hover:text-purple-400" />
+            </div>
+            <div
+              style={{
+                writingMode: 'vertical-rl',
+                fontFamily: COURIER_FONT_FAMILY,
+                fontSize: '10px',
+                fontWeight: 600,
+                color: '#666',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+              }}
+              className="group-hover:text-purple-500 transition-colors"
+            >
+              AI Chat
+            </div>
           </div>
           {position === 'left' ? (
             <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-purple-400 transition-colors" />

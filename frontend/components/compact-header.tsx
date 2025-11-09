@@ -155,15 +155,13 @@ export function CompactHeader({
               onBlur={handleTitleBlur}
               onKeyDown={handleTitleKeyDown}
               maxLength={MAX_TITLE_LENGTH}
-              className="text-lg font-semibold text-gray-800 bg-transparent border-b border-transparent focus:border-gray-300 outline-none px-2 py-0.5 text-center w-full max-w-xl transition-colors"
-              style={{ fontFamily: "'Courier New', Courier, monospace" }}
-              placeholder="Untitled Script"
+              className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2 bg-transparent border-none outline-none focus:outline-none w-full max-w-xl px-2"
+              placeholder="UNTITLED SCRIPT"
             />
           ) : (
             <h1
               onClick={handleTitleClick}
-              className="text-lg font-semibold text-gray-800 truncate max-w-xl cursor-text hover:opacity-70 px-2 py-0.5 transition-opacity"
-              style={{ fontFamily: "'Courier New', Courier, monospace" }}
+              className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2 truncate max-w-xl cursor-text hover:opacity-70 px-2 transition-opacity"
               title="Click to edit title"
             >
               {scriptTitle || 'Untitled Script'}
