@@ -1,0 +1,76 @@
+ Implementation Complete ✅
+
+  I've successfully implemented the pagination stability check fix for the smart page breaks system. Here's what was added:
+
+  1. New arePagesStable() Function (lines 315-340)
+
+  function arePagesStable(rects: DOMRect[]): boolean
+
+  This validation function checks two critical conditions:
+
+  Sequential Order Check:
+  - Verifies each header is below the previous one (rects[i].top < rects[i+1].top)
+  - Catches the Page 18 issue where header 19 was above header 18
+
+  Mid-Document Rendering Check:
+  - Detects headers at viewport top (Y=0) in the middle of the document
+  - Indicates pagination is still rendering/positioning headers
+  - Skips check for first header (can legitimately be at top)
+
+  2. Enhanced computeDecorations() Function (lines 264-282)
+
+  Added three new steps after finding pagination headers:
+
+  Step 2A - Get Header Positions:
+  const headerRects = headers.map(h => h.getBoundingClientRect());
+
+  Step 2B - Debug Logging:
+  console.log('[SmartBreaks] 🔍 Header positions:');
+  headerRects.forEach((rect, i) => {
+    console.log(`  Header ${i}: top=${rect.top.toFixed(1)}`);
+  });
+  This provides diagnostic visibility into header positions before validation.
+
+  Step 2C - Stability Check:
+  if (!arePagesStable(headerRects)) {
+    console.warn('[SmartBreaks] ⚠️ Pagination not stable, deferring computation...');
+    return DecorationSet.create(doc, []);
+  }
+  Returns empty DecorationSet if unstable, preventing incorrect calculations.
+
+  Expected Behavior
+
+  When Page 18 Issue Occurs:
+  The console will now show:
+  [SmartBreaks] 🔍 Header positions:
+    Header 18: top=1388.3
+    Header 19: top=0.0  ← Problem detected!
+  [SmartBreaks] ⚠️ Pagination unstable: header 18 (top=1388.3) is not above header 19 (top=0.0)
+  [SmartBreaks] ⚠️ Pagination not stable, deferring computation. Will retry on next update.
+
+  When Pagination is Stable:
+  [SmartBreaks] 🔍 Header positions:
+    Header 0: top=-18123.6
+    Header 1: top=-17067.6
+    ...
+  [SmartBreaks] ✅ Pagination stable, proceeding with computation
+
+  Automatic Retry Mechanism
+
+  The plugin's existing architecture will automatically retry:
+  - ResizeObserver triggers recomputation when layout changes
+  - MutationObserver triggers when DOM structure changes
+  - Document changes trigger recomputation
+  - Once pagination stabilizes, computation will succeed
+
+  Benefits
+
+  ✅ Catches Page 18 Geometry Issue: Detects non-sequential headers and defers computation✅ Diagnostic Visibility: Header position logging helps debug pagination issues✅ Graceful Degradation:
+  Returns empty decorations instead of corrupted page spans✅ Automatic Recovery: Retries when pagination becomes stable✅ No Breaking Changes: TypeScript compilation successful, backward
+  compatible
+
+  The action block spanning 17→19 should now either:
+  1. Be correctly identified as spanning 17→18 once pagination stabilizes, OR
+  2. Defer computation entirely until headers are properly positioned
+
+  Would you like me to test this in the browser to see the new console output?

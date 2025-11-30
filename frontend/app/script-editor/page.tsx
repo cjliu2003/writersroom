@@ -23,7 +23,7 @@ import * as Y from 'yjs';
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
-import {PaginationPlus, PAGE_SIZES} from 'tiptap-pagination-plus';
+import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
 import { getScriptContent, exportFDXFile, type ScriptWithContent } from '@/lib/api';
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs';
@@ -184,10 +184,6 @@ export default function TestTipTapPage() {
         heading: false, // ScreenplayKit provides scene headings
         // Note: paragraph is kept enabled as a fallback and for compatibility with pagination
       }),
-      // Screenplay formatting extensions
-      ScreenplayKit.configure({
-        enableSmartPageBreaks: true,  // Enable smart page breaks
-      }),
       // Collaboration
       ...(doc ? [
         Collaboration.configure({
@@ -229,6 +225,10 @@ export default function TestTipTapPage() {
         // extra padding inside content area (keep 0)
         contentMarginTop: 0,
         contentMarginBottom: 0,
+      }),
+      // Screenplay formatting extensions
+      ScreenplayKit.configure({
+        enableSmartPageBreaks: false,  // Enable smart page breaks
       }),
     ],
     editorProps: {
