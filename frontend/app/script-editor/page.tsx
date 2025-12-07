@@ -673,8 +673,8 @@ export default function TestTipTapPage() {
         style={{
           position: 'fixed',
           top: isTopBarCollapsed
-            ? (isSceneNavCollapsed ? '12px' : '55px')
-            : (isSceneNavCollapsed ? '60px' : '103px'),
+            ? (isSceneNavCollapsed ? '0' : '44px')
+            : (isSceneNavCollapsed ? '48px' : '92px'),
           left: 0,
           right: isAssistantOpen ? '384px' : '0',
           bottom: 0,
@@ -690,7 +690,7 @@ export default function TestTipTapPage() {
               maxWidth: isAssistantOpen ? 'calc(100vw - 384px)' : '100vw'
             }}
           >
-            <div className="screenplay-editor-wrapper min-h-screen">
+            <div className="screenplay-editor-wrapper min-h-screen pt-6">
               <div className="flex justify-center">
                 <EditorContent editor={editor} className="screenplay-editor" />
               </div>
@@ -704,11 +704,11 @@ export default function TestTipTapPage() {
             className="fixed right-0 w-96 z-30 transition-all duration-300"
             style={{
               top: isTopBarCollapsed
-                ? (isSceneNavCollapsed ? '12px' : '55px')
-                : (isSceneNavCollapsed ? '60px' : '103px'),
+                ? (isSceneNavCollapsed ? '0' : '44px')
+                : (isSceneNavCollapsed ? '48px' : '92px'),
               height: isTopBarCollapsed
-                ? (isSceneNavCollapsed ? 'calc(100vh - 12px)' : 'calc(100vh - 55px)')
-                : (isSceneNavCollapsed ? 'calc(100vh - 60px)' : 'calc(100vh - 103px)')
+                ? (isSceneNavCollapsed ? '100vh' : 'calc(100vh - 44px)')
+                : (isSceneNavCollapsed ? 'calc(100vh - 48px)' : 'calc(100vh - 92px)')
             }}
           >
             <AIChatbot projectId={scriptId || undefined} isVisible={true} />
