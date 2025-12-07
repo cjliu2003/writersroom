@@ -1,18 +1,8 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Trash2, UserPlus, Users } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trash2, UserPlus, Users, X } from 'lucide-react';
 import { getCollaborators, addCollaborator, removeCollaborator, type Collaborator } from '@/lib/api';
 
 interface ShareDialogProps {
@@ -108,108 +98,146 @@ export function ShareDialog({ isOpen, onClose, scriptId, scriptTitle, isOwner }:
     });
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Share Script
-          </DialogTitle>
-          <DialogDescription>
-            {scriptTitle ? `Share "${scriptTitle}" with others` : 'Invite collaborators to edit or view this script'}
-          </DialogDescription>
-        </DialogHeader>
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          onClick={(e) => e.stopPropagation()}
+          className="backdrop-blur-xl bg-white/70 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/30 pt-10 px-10 pb-8 max-w-lg w-full mx-4 relative"
+          style={{ fontFamily: 'var(--font-courier-prime), "Courier New", monospace' }}
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
 
-        {/* Error/Success Messages */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
-            {error}
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-5">
+              <Users
+                className="h-12 w-12 text-violet-400 drop-shadow-[0_0_10px_rgba(167,139,250,0.4)]"
+                strokeWidth={1.5}
+              />
+            </div>
+            <h2 className="text-2xl font-mono text-gray-800 tracking-wide mb-2">
+              Share Script
+            </h2>
+            {scriptTitle && (
+              <p className="font-[family-name:var(--font-courier-prime)] text-lg text-gray-700 uppercase underline decoration-1 underline-offset-4">
+                {scriptTitle}
+              </p>
+            )}
           </div>
-        )}
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded text-sm">
-            {success}
-          </div>
-        )}
 
-        {/* Add Collaborator Form - Only for owners */}
-        {isOwner && (
-          <form onSubmit={handleAddCollaborator} className="space-y-3">
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Label htmlFor="email" className="sr-only">Email</Label>
-                <Input
-                  id="email"
+          {/* Error/Success Messages */}
+          {error && (
+            <div className="bg-red-50/80 border border-red-200/50 text-red-700 px-5 py-3 rounded-xl text-base mb-5">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-green-50/80 border border-green-200/50 text-green-700 px-5 py-3 rounded-xl text-base mb-5">
+              {success}
+            </div>
+          )}
+
+          {/* Add Collaborator Form - Only for owners */}
+          {isOwner && (
+            <form onSubmit={handleAddCollaborator} className="mb-8">
+              <div className="flex gap-3">
+                <input
                   type="email"
                   placeholder="Enter email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isAdding}
+                  className="flex-1 px-5 py-3 rounded-xl border border-violet-200/50 bg-white/70 focus:ring-2 focus:ring-violet-400 focus:border-violet-400 font-mono text-base text-gray-700 placeholder:text-gray-400 transition-all shadow-inner outline-none"
                 />
-              </div>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as 'editor' | 'viewer')}
-                disabled={isAdding}
-                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <option value="editor">Editor</option>
-                <option value="viewer">Viewer</option>
-              </select>
-            </div>
-            <Button type="submit" disabled={isAdding || !email.trim()} className="w-full">
-              <UserPlus className="w-4 h-4 mr-2" />
-              {isAdding ? 'Adding...' : 'Add Collaborator'}
-            </Button>
-          </form>
-        )}
-
-        {/* Collaborators List */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">
-            {collaborators.length > 0 ? 'Collaborators' : 'No collaborators yet'}
-          </Label>
-
-          {isLoading ? (
-            <div className="text-sm text-gray-500 py-4 text-center">Loading...</div>
-          ) : (
-            <div className="max-h-48 overflow-y-auto space-y-2">
-              {collaborators.map((collab) => (
-                <div
-                  key={collab.user_id}
-                  className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as 'editor' | 'viewer')}
+                  disabled={isAdding}
+                  className="px-4 py-3 rounded-xl border border-violet-200/50 bg-white/70 text-base text-gray-700 focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all outline-none cursor-pointer"
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">
-                      {collab.display_name || 'Unknown User'}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {collab.role === 'editor' ? 'Can edit' : 'Can view'} · Joined {formatDate(collab.joined_at)}
-                    </div>
-                  </div>
-                  {isOwner && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveCollaborator(collab.user_id, collab.display_name)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 ml-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <option value="editor">Editor</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+                <button
+                  type="submit"
+                  disabled={isAdding || !email.trim()}
+                  className="px-5 py-3 rounded-xl bg-violet-500/90 hover:bg-violet-500 text-white text-base font-medium shadow-[0_0_10px_rgba(167,139,250,0.3)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  {isAdding ? (
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <UserPlus className="w-6 h-6" />
                   )}
-                </div>
-              ))}
-            </div>
+                </button>
+              </div>
+            </form>
           )}
-        </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          {/* Collaborators List */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+                Collaborators
+              </p>
+              {isLoading && (
+                <div className="w-4 h-4 border-2 border-violet-300/50 border-t-violet-500 rounded-full animate-spin" />
+              )}
+            </div>
+
+            <div className="max-h-56 overflow-y-auto space-y-2">
+              {!isLoading && collaborators.length === 0 ? (
+                <p className="text-base text-gray-400 py-2">No collaborators yet</p>
+              ) : (
+                collaborators.map((collab) => (
+                  <div
+                    key={collab.user_id}
+                    className="flex items-center justify-between p-4 bg-white/50 rounded-xl group"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="text-base font-medium text-gray-800 truncate">
+                        {collab.display_name || 'Unknown User'}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {collab.role === 'editor' ? 'Can edit' : 'Can view'} · Joined {formatDate(collab.joined_at)}
+                      </div>
+                    </div>
+                    {isOwner && (
+                      <button
+                        onClick={() => handleRemoveCollaborator(collab.user_id, collab.display_name)}
+                        className="p-2 rounded-lg text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-50/50 transition-all ml-2"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
