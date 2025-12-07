@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { SceneBoundary } from '@/utils/tiptap-scene-tracker';
@@ -30,6 +30,8 @@ export function SceneNavBar({
 }: SceneNavBarProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeItemRef = useRef<HTMLButtonElement>(null);
+  const [hoveredScene, setHoveredScene] = useState<{ heading: string; x: number } | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-scroll to keep active scene visible
   useEffect(() => {
@@ -53,10 +55,10 @@ export function SceneNavBar({
 
   return (
     <div
-      className="w-full bg-white border-b border-gray-200 shadow-sm"
+      className="w-full bg-white border-b border-gray-200 shadow-sm overflow-visible"
       style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
     >
-      <div className="relative flex items-center h-11">
+      <div className="relative flex items-center h-11 overflow-visible">
         {/* Left fade indicator - sized for top bar collapse arrow */}
         <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
 
@@ -78,12 +80,33 @@ export function SceneNavBar({
             ) : (
               scenes.map((scene, index) => {
                 const isActive = currentSceneIndex === index;
+                const fullHeading = scene.heading || 'UNTITLED';
+
                 return (
                   <button
                     key={`scene-${index}-${scene.startIndex}`}
                     ref={isActive ? activeItemRef : null}
                     onClick={() => onSceneClick(index)}
-                    title={scene.heading || 'UNTITLED'}
+                    onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = rect.left + rect.width / 2;
+                      // Clear any existing timeout
+                      if (hoverTimeoutRef.current) {
+                        clearTimeout(hoverTimeoutRef.current);
+                      }
+                      // Delay tooltip appearance by 500ms
+                      hoverTimeoutRef.current = setTimeout(() => {
+                        setHoveredScene({ heading: fullHeading, x });
+                      }, 500);
+                    }}
+                    onMouseLeave={() => {
+                      // Clear timeout if mouse leaves before delay completes
+                      if (hoverTimeoutRef.current) {
+                        clearTimeout(hoverTimeoutRef.current);
+                        hoverTimeoutRef.current = null;
+                      }
+                      setHoveredScene(null);
+                    }}
                     className={`
                       flex items-center gap-1.5 px-3 py-1.5 rounded-md
                       text-xs whitespace-nowrap flex-shrink-0
@@ -130,6 +153,23 @@ export function SceneNavBar({
           </Button>
         )}
       </div>
+
+      {/* Floating tooltip - renders outside scroll container */}
+      {hoveredScene && (
+        <div
+          className="fixed z-[200] px-3 py-2 bg-white text-gray-700 text-xs rounded-md shadow-lg border border-gray-200 whitespace-nowrap animate-in fade-in slide-in-from-top-1 duration-150"
+          style={{
+            top: '100px',
+            left: hoveredScene.x,
+            transform: 'translateX(-50%)',
+            fontFamily: "var(--font-courier-prime), 'Courier New', monospace"
+          }}
+        >
+          {hoveredScene.heading}
+          {/* Tooltip arrow pointing up */}
+          <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-2.5 h-2.5 bg-white border-l border-t border-gray-200 rotate-45" />
+        </div>
+      )}
 
       {/* Hide scrollbar CSS */}
       <style jsx>{`
