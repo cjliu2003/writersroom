@@ -6,6 +6,8 @@
 export interface EditorLayoutPrefs {
   sceneListVisible?: boolean;  // Deprecated: scene sidebar removed in favor of nav bar
   assistantVisible: boolean;
+  chatCollapsed?: boolean;     // Whether chat panel is collapsed to minimal state
+  chatHeight?: number;         // Height of chat panel in pixels (default: 220)
 }
 
 const STORAGE_KEY = 'editorLayoutPrefs';
@@ -27,16 +29,21 @@ export function loadLayoutPrefs(): EditorLayoutPrefs {
   // Return defaults if nothing stored or error occurred
   return {
     sceneListVisible: true,
-    assistantVisible: true
+    assistantVisible: true,
+    chatCollapsed: false,
+    chatHeight: 220
   };
 }
 
 /**
  * Save layout preferences to localStorage
+ * Merges with existing preferences to support partial updates
  */
-export function saveLayoutPrefs(prefs: EditorLayoutPrefs): void {
+export function saveLayoutPrefs(prefs: Partial<EditorLayoutPrefs>): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    const existing = loadLayoutPrefs();
+    const merged = { ...existing, ...prefs };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
   } catch (error) {
     console.error('Error saving layout preferences:', error);
   }

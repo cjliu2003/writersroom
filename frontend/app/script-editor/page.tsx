@@ -34,7 +34,6 @@ import {
   type SceneBoundary
 } from '@/utils/tiptap-scene-tracker';
 import { SceneNavBar } from '@/components/scene-nav-bar';
-import { FloatingAIButton } from '@/components/floating-ai-button';
 import { AIChatbot } from '@/components/ai-chatbot';
 import ProcessingScreen from '@/components/ProcessingScreen';
 import { ShareDialog } from '@/components/share-dialog';
@@ -64,7 +63,9 @@ export default function TestTipTapPage() {
   const [script, setScript] = useState<ScriptWithContent | null>(null);
 
   // UI state
-  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [chatHeight, setChatHeight] = useState(220);
+  const [isResizing, setIsResizing] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -322,13 +323,53 @@ export default function TestTipTapPage() {
   // Load layout preferences on mount
   useEffect(() => {
     const prefs = loadLayoutPrefs();
-    setIsAssistantOpen(prefs.assistantVisible ?? true);
+    setIsChatCollapsed(prefs.chatCollapsed ?? false);
+    setChatHeight(prefs.chatHeight ?? 220);
   }, []);
 
-  // Save layout preferences when AI assistant state changes
+  // Save layout preferences when chat state changes
   useEffect(() => {
-    saveLayoutPrefs({ assistantVisible: isAssistantOpen });
-  }, [isAssistantOpen]);
+    saveLayoutPrefs({ chatCollapsed: isChatCollapsed, chatHeight });
+  }, [isChatCollapsed, chatHeight]);
+
+  // Handle resize drag
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+
+    const startY = e.clientY;
+    const startHeight = chatHeight;
+    const collapseThreshold = 100; // Collapse if dragged below this height
+
+    const cleanup = () => {
+      setIsResizing(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaY = startY - moveEvent.clientY;
+      const rawHeight = startHeight + deltaY;
+
+      // Auto-collapse immediately when dragged below threshold
+      if (rawHeight < collapseThreshold) {
+        setIsChatCollapsed(true);
+        setChatHeight(220); // Reset to default for next expand
+        cleanup();
+        return;
+      }
+
+      const newHeight = Math.min(rawHeight, window.innerHeight * 0.6);
+      setChatHeight(newHeight);
+    };
+
+    const handleMouseUp = () => {
+      cleanup();
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [chatHeight]);
 
   // Track current scene and extract boundaries on any editor change
   // Combined into single effect to ensure boundaries are always fresh
@@ -670,15 +711,15 @@ export default function TestTipTapPage() {
 
       {/* Main Content Area - scroll container with dynamic bounds */}
       <div
-        className="flex transition-all duration-300 overflow-auto"
+        className={`flex overflow-auto ${isResizing ? '' : 'transition-all duration-300'}`}
         style={{
           position: 'fixed',
           top: isTopBarCollapsed
             ? (isSceneNavCollapsed ? '0' : '44px')
             : (isSceneNavCollapsed ? '48px' : '92px'),
           left: 0,
-          right: isAssistantOpen ? '384px' : '0',
-          bottom: 0,
+          right: 0,
+          bottom: isChatCollapsed ? '0' : `${chatHeight}px`,
         }}
       >
         {/* Editor Container - dynamically centered */}
@@ -688,7 +729,7 @@ export default function TestTipTapPage() {
           <div
             className="w-full transition-all duration-300"
             style={{
-              maxWidth: isAssistantOpen ? 'calc(100vw - 384px)' : '100vw'
+              maxWidth: '100vw'
             }}
           >
             <div className="screenplay-editor-wrapper min-h-screen pt-6">
@@ -699,29 +740,36 @@ export default function TestTipTapPage() {
           </div>
         </div>
 
-        {/* Right Sidebar - AI Assistant */}
-        {isAssistantOpen && (
-          <div
-            className="fixed right-0 w-96 z-30 transition-all duration-300"
-            style={{
-              top: isTopBarCollapsed
-                ? (isSceneNavCollapsed ? '0' : '44px')
-                : (isSceneNavCollapsed ? '48px' : '92px'),
-              height: isTopBarCollapsed
-                ? (isSceneNavCollapsed ? '100vh' : 'calc(100vh - 44px)')
-                : (isSceneNavCollapsed ? 'calc(100vh - 48px)' : 'calc(100vh - 92px)')
-            }}
-          >
-            <AIChatbot projectId={scriptId || undefined} isVisible={true} />
-          </div>
-        )}
       </div>
 
-      {/* Floating AI Button */}
-      <FloatingAIButton
-        onClick={() => setIsAssistantOpen(!isAssistantOpen)}
-        isOpen={isAssistantOpen}
-      />
+      {/* Bottom-Docked AI Chat */}
+      <div
+        className={`fixed z-30 ${isResizing ? '' : 'transition-all duration-300'}`}
+        style={{
+          bottom: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '88%',
+          maxWidth: '1400px',
+          height: isChatCollapsed ? 'auto' : `${chatHeight}px`,
+        }}
+      >
+        {/* Resize Handle - invisible but functional, only when expanded */}
+        {!isChatCollapsed && (
+          <div
+            onMouseDown={handleResizeMouseDown}
+            className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-10"
+            style={{ marginTop: '-6px' }}
+          />
+        )}
+        <AIChatbot
+          projectId={scriptId || undefined}
+          scriptTitle={script?.title}
+          isVisible={true}
+          isCollapsed={isChatCollapsed}
+          onCollapseToggle={() => setIsChatCollapsed(!isChatCollapsed)}
+        />
+      </div>
 
       {/* Custom Styles for Screenplay Editor */}
       <style jsx global>{`

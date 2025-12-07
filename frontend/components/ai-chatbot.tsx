@@ -3,15 +3,24 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MessageCircle, Send, Loader2, Sparkles } from "lucide-react"
+import { Send, Loader2, ChevronDown, Sparkles } from "lucide-react"
 import { sendChatMessage, type ChatMessage } from "@/lib/api"
 
 interface AIChatbotProps {
   projectId?: string
+  scriptTitle?: string
   isVisible?: boolean
+  isCollapsed?: boolean
+  onCollapseToggle?: () => void
 }
 
-export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
+export function AIChatbot({
+  projectId,
+  scriptTitle,
+  isVisible = true,
+  isCollapsed = false,
+  onCollapseToggle
+}: AIChatbotProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -43,9 +52,19 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+      const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight
+      }
     }
   }, [messages])
+
+  // Focus input when expanded
+  useEffect(() => {
+    if (!isCollapsed && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isCollapsed])
 
   const sendMessage = async () => {
     if (!inputValue.trim() || !projectId || isLoading) return
@@ -92,60 +111,100 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
     }
   }
 
+  // Generate personalized placeholder
+  const getPlaceholder = () => {
+    if (!projectId) return "Select a project to start..."
+    if (scriptTitle) return `Let's talk about ${scriptTitle.toUpperCase()}...`
+    return "Let's talk about your screenplay..."
+  }
+
   if (!isVisible) return null
 
+  // Collapsed state - subtle tab that matches the expanded header, aligned left
+  if (isCollapsed) {
+    return (
+      <div className="flex justify-start">
+        <button
+          onClick={onCollapseToggle}
+          className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-b-0 rounded-t-lg px-5 py-2 transition-all duration-200 shadow-sm hover:shadow-md"
+          style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
+          title="Open AI Assistant"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+          <span className="text-[11px] uppercase tracking-wide">AI</span>
+        </button>
+      </div>
+    )
+  }
+
+  // Expanded state - popup chat interface
   return (
-    <div className="h-[calc(100vh-112px)] flex flex-col bg-gradient-to-br from-purple-50/40 to-pink-50 shadow-2xl drop-shadow-lg border-l border-slate-200/50 overflow-hidden rounded-lg backdrop-blur-sm">
+    <div
+      className="h-full flex flex-col bg-white rounded-t-xl border border-gray-200 border-b-0 shadow-xl overflow-hidden"
+      style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
+    >
       {/* Header */}
-      <div className="border-b border-slate-200/80 bg-white/95 backdrop-blur-md p-4 flex items-center gap-2 shadow-sm">
-        <div className="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-purple-600" />
+      <div className="h-11 min-h-[44px] border-b border-gray-100 bg-gray-50/80 px-4 flex items-center justify-between rounded-t-xl">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-purple-500" />
+          <span className="text-xs text-gray-600 uppercase tracking-wide">AI Assistant</span>
         </div>
-        <h3 className="font-semibold text-slate-700">AI Assistant</h3>
+
+        <div className="flex items-center">
+          {/* Collapse button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCollapseToggle}
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-1 -mr-1"
+            title="Minimize"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-          <div className="space-y-4">
+        <ScrollArea className="h-full" ref={scrollAreaRef}>
+          <div className="p-4 space-y-3">
             {messages.length === 0 ? (
-              <div className="p-6 text-center">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 shadow-sm">
-                  <MessageCircle className="w-6 h-6 text-purple-400" />
-                </div>
-                <p className="text-sm text-gray-500 mb-2 font-medium">Start a conversation</p>
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  Ask me about your screenplay, characters, plot structure, or get writing advice.
+              <div className="py-8 text-center">
+                <Sparkles className="w-8 h-8 text-purple-200 mx-auto mb-3" />
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  {scriptTitle ? (
+                    <>Let's talk about {scriptTitle.toUpperCase()}...</>
+                  ) : (
+                    <>Let's talk about your screenplay...</>
+                  )}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Ask about characters, plot, structure, or anything else!
                 </p>
               </div>
             ) : (
               messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`text-sm leading-relaxed ${
+                    message.role === 'user'
+                      ? 'text-gray-800'
+                      : 'text-gray-600 pl-3 border-l-2 border-purple-200'
+                  }`}
                 >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                      message.role === 'user'
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-white/70 border border-slate-200 text-slate-700'
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {message.content}
-                    </p>
-                  </div>
+                  {message.role === 'user' && (
+                    <span className="text-purple-400 mr-1.5">&gt;</span>
+                  )}
+                  <span className="whitespace-pre-wrap">{message.content}</span>
                 </div>
               ))
             )}
 
             {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-white/70 border border-slate-200 rounded-2xl px-4 py-2">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-purple-500 animate-spin" />
-                    <span className="text-sm text-slate-600">Thinking...</span>
-                  </div>
+              <div className="text-sm text-gray-500 pl-3 border-l-2 border-purple-200">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-3 h-3 animate-spin text-purple-400" />
+                  <span>Thinking...</span>
                 </div>
               </div>
             )}
@@ -154,25 +213,32 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-slate-200/80 bg-white/95 backdrop-blur-md p-4">
-        <div className="flex gap-2">
+      <div className="border-t border-gray-100 bg-gray-50/50 p-3">
+        <div className="flex items-center gap-2">
+          <span className="text-purple-400 text-sm">&gt;</span>
           <input
             ref={inputRef}
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={projectId ? "Ask about your screenplay..." : "Select a project to start chatting"}
+            placeholder={getPlaceholder()}
             disabled={!projectId || isLoading}
-            className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontFamily: "inherit" }}
           />
           <Button
             onClick={sendMessage}
             disabled={!inputValue.trim() || !projectId || isLoading}
             size="sm"
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            variant="ghost"
+            className="text-gray-500 hover:text-purple-600 hover:bg-purple-50 p-1.5"
           >
-            <Send className="w-4 h-4" />
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </div>
