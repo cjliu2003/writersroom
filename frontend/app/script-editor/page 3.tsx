@@ -33,13 +33,12 @@ import {
   getCurrentSceneIndex,
   type SceneBoundary
 } from '@/utils/tiptap-scene-tracker';
-import { SceneNavBar } from '@/components/scene-nav-bar';
-import { FloatingAIButton } from '@/components/floating-ai-button';
+import { extractSlateContentFromTipTap } from '@/utils/tiptap-to-slate-format';
+import { ScriptSceneSidebar } from '@/components/script-scene-sidebar';
 import { AIChatbot } from '@/components/ai-chatbot';
 import ProcessingScreen from '@/components/ProcessingScreen';
-import { ShareDialog } from '@/components/share-dialog';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Pencil, Share2, Download, ChevronUp, ChevronDown } from 'lucide-react';
+import { Home, FileText, Pencil, Share2, Download, Menu, ChevronUp, ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '@/styles/screenplay.css';
 
@@ -64,6 +63,7 @@ export default function TestTipTapPage() {
   const [script, setScript] = useState<ScriptWithContent | null>(null);
 
   // UI state
+  const [isSceneSidebarOpen, setIsSceneSidebarOpen] = useState(true);
   const [isAssistantOpen, setIsAssistantOpen] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
@@ -75,16 +75,13 @@ export default function TestTipTapPage() {
   const [editingTitle, setEditingTitle] = useState('');
   const [isSavingTitle, setIsSavingTitle] = useState(false);
 
-  // Collapsible bar states
+  // Collapsible top bar state
   const [isTopBarCollapsed, setIsTopBarCollapsed] = useState(false);
-  const [isSceneNavCollapsed, setIsSceneNavCollapsed] = useState(false);
-
-  // Share dialog state
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   // Scene tracking state
   const [sceneBoundaries, setSceneBoundaries] = useState<SceneBoundary[]>([]);
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number | null>(null);
+  const [liveSlateContent, setLiveSlateContent] = useState<any[]>([]);
 
   // Get Firebase auth from context (same pattern as other editors)
   const { user, getToken, isLoading: authLoading } = useAuth();
@@ -323,19 +320,29 @@ export default function TestTipTapPage() {
   useEffect(() => {
     const prefs = loadLayoutPrefs();
     setIsAssistantOpen(prefs.assistantVisible ?? true);
+    setIsSceneSidebarOpen(prefs.sceneListVisible ?? true);
   }, []);
 
-  // Save layout preferences when AI assistant state changes
+  // Save layout preferences when sidebar states change
   useEffect(() => {
-    saveLayoutPrefs({ assistantVisible: isAssistantOpen });
-  }, [isAssistantOpen]);
+    const prefs: EditorLayoutPrefs = {
+      sceneListVisible: isSceneSidebarOpen,
+      assistantVisible: isAssistantOpen
+    };
+    saveLayoutPrefs(prefs);
+  }, [isSceneSidebarOpen, isAssistantOpen]);
 
-  // Extract scene boundaries when editor content changes
+  // Extract scene boundaries and live content when editor content changes
   useEffect(() => {
     if (editor && editor.state.doc) {
       const boundaries = extractSceneBoundariesFromTipTap(editor);
       setSceneBoundaries(boundaries);
-      console.log('[TipTapEditor] Extracted', boundaries.length, 'scenes');
+
+      // Extract live content in Slate format for sidebar features
+      const slateContent = extractSlateContentFromTipTap(editor);
+      setLiveSlateContent(slateContent);
+
+      console.log('[TipTapEditor] Extracted', boundaries.length, 'scenes,', slateContent.length, 'blocks');
     }
   }, [editor, editor?.state.doc.content]);
 
@@ -480,8 +487,11 @@ export default function TestTipTapPage() {
   const getStatusColor = (status: SyncStatus) => {
     switch (status) {
       case 'synced': return 'bg-green-500';
-      case 'error': return 'bg-red-500';
-      default: return 'bg-yellow-500';
+      case 'connected': return 'bg-yellow-500';
+      case 'connecting': return 'bg-gray-500';
+      case 'offline': return 'bg-red-500';
+      case 'error': return 'bg-red-700';
+      default: return 'bg-gray-400';
     }
   };
 
@@ -554,13 +564,13 @@ export default function TestTipTapPage() {
                 autoFocus
                 disabled={isSavingTitle}
                 className="text-gray-800 text-base tracking-wide text-center bg-transparent underline focus:outline-none px-2 py-0.5 uppercase"
-                style={{ fontFamily: "inherit", width: '34ch' }}
+                style={{ fontFamily: "inherit", width: '32ch' }}
               />
             ) : (
               <h1
                 onClick={handleTitleClick}
                 className="text-gray-800 text-base tracking-wide truncate text-center cursor-pointer hover:opacity-60 transition-opacity px-2 py-0.5 uppercase underline"
-                style={{ fontFamily: "inherit", maxWidth: '34ch' }}
+                style={{ fontFamily: "inherit", maxWidth: '32ch' }}
                 title="Click to edit title"
               >
                 {script?.title || 'Untitled Script'}
@@ -573,10 +583,9 @@ export default function TestTipTapPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsShareDialogOpen(true)}
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
+              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
               style={{ fontFamily: "inherit" }}
-              title="Share this script"
+              title="Coming soon"
             >
               <Share2 className="w-3.5 h-3.5 mr-1.5" />
               Share
@@ -601,7 +610,7 @@ export default function TestTipTapPage() {
           >
             <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getStatusColor(syncStatus)} ${syncStatus === 'synced' ? '' : 'animate-pulse'}`} title={`Status: ${syncStatus}`}></div>
             <span className="text-[10px] text-gray-400 whitespace-nowrap" style={{ fontFamily: "inherit" }}>
-              {syncStatus === 'synced' ? 'Saved' : syncStatus === 'connecting' ? 'Syncing' : syncStatus === 'connected' ? 'Synced' : syncStatus.charAt(0).toUpperCase() + syncStatus.slice(1)}
+              {syncStatus === 'synced' ? 'Saved' : syncStatus === 'connecting' ? 'Connecting...' : syncStatus}
             </span>
           </div>
         </div>
@@ -621,34 +630,35 @@ export default function TestTipTapPage() {
         </Button>
       )}
 
-      {/* Scene Navigation Bar */}
-      {!isSceneNavCollapsed && (
-        <div
-          className={`fixed left-0 right-0 z-40 transition-all duration-200 ${isTopBarCollapsed ? 'top-0' : 'top-12'}`}
-        >
-          <SceneNavBar
-            scenes={sceneBoundaries}
-            onSceneClick={handleSceneClick}
-            currentSceneIndex={currentSceneIndex}
-            onCollapse={() => setIsSceneNavCollapsed(true)}
-          />
+      {/* Controls Bar */}
+      <div
+        className={`fixed left-0 right-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm px-4 py-2 flex items-center justify-between transition-all duration-200 ${isTopBarCollapsed ? 'top-0' : 'top-12'}`}
+        style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
+      >
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsSceneSidebarOpen(!isSceneSidebarOpen)}
+            className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
+            style={{ fontFamily: "inherit" }}
+          >
+            <Menu className="w-3.5 h-3.5 mr-1.5" />
+            {isSceneSidebarOpen ? 'Hide' : 'Show'} Scenes
+          </Button>
         </div>
-      )}
-
-      {/* Expand button when scene nav is collapsed */}
-      {isSceneNavCollapsed && (
         <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsSceneNavCollapsed(false)}
-          className={`fixed z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm ${
-            isTopBarCollapsed ? 'top-2 right-2' : 'top-14 right-2'
+          onClick={() => setIsAssistantOpen(!isAssistantOpen)}
+          className={`px-3 py-1.5 rounded font-normal text-sm transition-all duration-200 ${
+            isAssistantOpen
+              ? 'bg-purple-600 text-white hover:bg-purple-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
-          title="Expand scene navigation"
+          style={{ fontFamily: "inherit" }}
         >
-          <ChevronDown className="w-4 h-4" />
+          AI Assistant
         </Button>
-      )}
+      </div>
 
       {/* Export Error Banner */}
       {exportError && (
@@ -666,13 +676,32 @@ export default function TestTipTapPage() {
         </div>
       )}
 
+      {/* Left Sidebar - Scene Navigation */}
+      {isSceneSidebarOpen && (
+        <div
+          className="fixed left-0 w-80 z-30 transition-all duration-300"
+          style={{
+            top: isTopBarCollapsed ? '44px' : '92px',
+            height: isTopBarCollapsed ? 'calc(100vh - 44px)' : 'calc(100vh - 92px)'
+          }}
+        >
+          <ScriptSceneSidebar
+            scenes={sceneBoundaries}
+            onSceneClick={handleSceneClick}
+            currentSceneIndex={currentSceneIndex}
+            scriptContent={liveSlateContent}
+            scriptId={scriptId}
+            script={script || undefined}
+          />
+        </div>
+      )}
+
       {/* Main Content Area */}
       <div
         className="w-full flex transition-all duration-300"
         style={{
-          paddingTop: isTopBarCollapsed
-            ? (isSceneNavCollapsed ? '12px' : '55px')
-            : (isSceneNavCollapsed ? '60px' : '103px'),
+          paddingTop: isTopBarCollapsed ? '44px' : '92px',
+          marginLeft: isSceneSidebarOpen ? '320px' : '0',
           marginRight: isAssistantOpen ? '384px' : '0'
         }}
       >
@@ -683,7 +712,13 @@ export default function TestTipTapPage() {
           <div
             className="w-full transition-all duration-300"
             style={{
-              maxWidth: isAssistantOpen ? 'calc(100vw - 384px)' : '100vw'
+              maxWidth: isSceneSidebarOpen && isAssistantOpen
+                ? 'calc(100vw - 704px)' // Both sidebars: 320px + 384px
+                : isSceneSidebarOpen
+                ? 'calc(100vw - 320px)' // Scene sidebar only
+                : isAssistantOpen
+                ? 'calc(100vw - 384px)' // AI assistant only
+                : '100vw' // No sidebars
             }}
           >
             <div className="screenplay-editor-wrapper min-h-screen overflow-auto">
@@ -699,24 +734,14 @@ export default function TestTipTapPage() {
           <div
             className="fixed right-0 w-96 z-30 transition-all duration-300"
             style={{
-              top: isTopBarCollapsed
-                ? (isSceneNavCollapsed ? '12px' : '55px')
-                : (isSceneNavCollapsed ? '60px' : '103px'),
-              height: isTopBarCollapsed
-                ? (isSceneNavCollapsed ? 'calc(100vh - 12px)' : 'calc(100vh - 55px)')
-                : (isSceneNavCollapsed ? 'calc(100vh - 60px)' : 'calc(100vh - 103px)')
+              top: isTopBarCollapsed ? '44px' : '92px',
+              height: isTopBarCollapsed ? 'calc(100vh - 44px)' : 'calc(100vh - 92px)'
             }}
           >
             <AIChatbot projectId={scriptId || undefined} isVisible={true} />
           </div>
         )}
       </div>
-
-      {/* Floating AI Button */}
-      <FloatingAIButton
-        onClick={() => setIsAssistantOpen(!isAssistantOpen)}
-        isOpen={isAssistantOpen}
-      />
 
       {/* Custom Styles for Screenplay Editor */}
       <style jsx global>{`
@@ -775,16 +800,6 @@ export default function TestTipTapPage() {
           white-space: nowrap;
         }
       `}</style>
-
-      {/* Share Dialog */}
-      {/* Note: isOwner defaults to true - backend enforces actual permissions */}
-      <ShareDialog
-        isOpen={isShareDialogOpen}
-        onClose={() => setIsShareDialogOpen(false)}
-        scriptId={scriptId}
-        scriptTitle={script?.title}
-        isOwner={true}
-      />
       </div>
     </>
   );

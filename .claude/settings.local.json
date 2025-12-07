@@ -28,7 +28,10 @@
       "Bash(pip3 show:*)",
       "Bash(/opt/homebrew/bin/python3.11:*)",
       "Bash(curl:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git reset:*)",
+      "mcp__playwright__browser_navigate",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

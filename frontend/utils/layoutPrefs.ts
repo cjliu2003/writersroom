@@ -4,7 +4,7 @@
  */
 
 export interface EditorLayoutPrefs {
-  sceneListVisible: boolean;
+  sceneListVisible?: boolean;  // Deprecated: scene sidebar removed in favor of nav bar
   assistantVisible: boolean;
 }
 
