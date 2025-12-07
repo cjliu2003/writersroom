@@ -487,6 +487,7 @@ export default function TestTipTapPage() {
   const getStatusColor = (status: SyncStatus) => {
     switch (status) {
       case 'synced': return 'bg-green-500';
+      case 'error': return 'bg-red-500';
       default: return 'bg-yellow-500';
     }
   };
