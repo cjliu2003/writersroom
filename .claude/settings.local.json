@@ -16,7 +16,9 @@
       "mcp__chrome-devtools__wait_for",
       "Bash(npm view:*)",
       "mcp__sequential-thinking__sequentialthinking",
-      "Bash(npx next lint:*)"
+      "Bash(npx next lint:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

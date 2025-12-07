@@ -25,7 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
 import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
-import { getScriptContent, exportFDXFile, type ScriptWithContent } from '@/lib/api';
+import { getScriptContent, exportFDXFile, updateScript, type ScriptWithContent } from '@/lib/api';
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs';
 import {
   extractSceneBoundariesFromTipTap,
@@ -38,7 +38,7 @@ import { ScriptSceneSidebar } from '@/components/script-scene-sidebar';
 import { AIChatbot } from '@/components/ai-chatbot';
 import ProcessingScreen from '@/components/ProcessingScreen';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Eye, HelpCircle, Download, Menu } from 'lucide-react';
+import { Home, FileText, Pencil, Share2, Download, Menu, ChevronUp, ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '@/styles/screenplay.css';
 
@@ -69,6 +69,14 @@ export default function TestTipTapPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [isLoadingScript, setIsLoadingScript] = useState(true);
+
+  // Editable title state
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitle, setEditingTitle] = useState('');
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+
+  // Collapsible top bar state
+  const [isTopBarCollapsed, setIsTopBarCollapsed] = useState(false);
 
   // Scene tracking state
   const [sceneBoundaries, setSceneBoundaries] = useState<SceneBoundary[]>([]);
@@ -395,6 +403,45 @@ export default function TestTipTapPage() {
     }
   };
 
+  // Handle title editing
+  const handleTitleClick = () => {
+    setEditingTitle(script?.title || 'Untitled Script');
+    setIsEditingTitle(true);
+  };
+
+  const handleTitleSave = async () => {
+    const trimmedTitle = editingTitle.trim();
+    if (!trimmedTitle || trimmedTitle === script?.title) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    setIsSavingTitle(true);
+    try {
+      await updateScript(scriptId, { title: trimmedTitle });
+      // Update local state
+      setScript(prev => prev ? { ...prev, title: trimmedTitle } : prev);
+      console.log('[TipTapEditor] Title updated successfully');
+    } catch (e: any) {
+      console.error('[TipTapEditor] Failed to update title:', e);
+      // Revert to original title on error
+      setEditingTitle(script?.title || 'Untitled Script');
+    } finally {
+      setIsSavingTitle(false);
+      setIsEditingTitle(false);
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      setIsEditingTitle(false);
+      setEditingTitle(script?.title || 'Untitled Script');
+    }
+  };
+
   // Show auth loading state
   if (authLoading) {
     return (
@@ -440,11 +487,7 @@ export default function TestTipTapPage() {
   const getStatusColor = (status: SyncStatus) => {
     switch (status) {
       case 'synced': return 'bg-green-500';
-      case 'connected': return 'bg-yellow-500';
-      case 'connecting': return 'bg-gray-500';
-      case 'offline': return 'bg-red-500';
-      case 'error': return 'bg-red-700';
-      default: return 'bg-gray-400';
+      default: return 'bg-yellow-500';
     }
   };
 
@@ -457,88 +500,157 @@ export default function TestTipTapPage() {
       />
 
       <div className="flex h-screen bg-gray-100">
-        {/* Fixed Top Header - Final Draft Style */}
-      <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white shadow-md">
-        {/* Top Menu Bar with Centered Title */}
-        <div className="px-6 py-3 flex items-center h-16">
-          {/* Left Navigation */}
-          <div className="flex items-center gap-1 flex-1 min-w-0">
+        {/* Fixed Top Header - Compact Screenplay Style (collapsible) */}
+      {!isTopBarCollapsed && (
+        <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-300 bg-white shadow-sm transition-all duration-200" style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}>
+          <div className="relative px-4 flex items-center justify-between h-12">
+            {/* Left - Collapse button + Home, File, Edit */}
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsTopBarCollapsed(true)}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5 -ml-2 mr-0"
+                title="Collapse toolbar"
+              >
+                <ChevronUp className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push("/")}
+                className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
+                style={{ fontFamily: "inherit" }}
+              >
+                <Home className="w-3.5 h-3.5 mr-1.5" />
+                Home
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
+                style={{ fontFamily: "inherit" }}
+                title="Coming soon"
+              >
+                <FileText className="w-3.5 h-3.5 mr-1.5" />
+                File
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
+                style={{ fontFamily: "inherit" }}
+                title="Coming soon"
+              >
+                <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                Edit
+              </Button>
+            </div>
+
+          {/* Center - Script Title (absolutely centered on page, click to edit) */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            {isEditingTitle ? (
+              <input
+                type="text"
+                value={editingTitle}
+                onChange={(e) => setEditingTitle(e.target.value.slice(0, 30))}
+                onBlur={handleTitleSave}
+                onKeyDown={handleTitleKeyDown}
+                maxLength={30}
+                autoFocus
+                disabled={isSavingTitle}
+                className="text-gray-800 text-base tracking-wide text-center bg-transparent underline focus:outline-none px-2 py-0.5 uppercase"
+                style={{ fontFamily: "inherit", width: '34ch' }}
+              />
+            ) : (
+              <h1
+                onClick={handleTitleClick}
+                className="text-gray-800 text-base tracking-wide truncate text-center cursor-pointer hover:opacity-60 transition-opacity px-2 py-0.5 uppercase underline"
+                style={{ fontFamily: "inherit", maxWidth: '34ch' }}
+                title="Click to edit title"
+              >
+                {script?.title || 'Untitled Script'}
+              </h1>
+            )}
+          </div>
+
+          {/* Right - Share, Export */}
+          <div className="flex items-center gap-0.5 mr-16">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/")}
-              className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md px-3 py-1"
+              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
+              style={{ fontFamily: "inherit" }}
+              title="Coming soon"
             >
-              <Home className="w-4 h-4 mr-2" />
-              Home
+              <Share2 className="w-3.5 h-3.5 mr-1.5" />
+              Share
             </Button>
-            <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100 rounded-md px-3 py-1">
-              <FileText className="w-4 h-4 mr-1" />
-              File
-            </Button>
-            <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100 rounded-md px-3 py-1">
-              <Eye className="w-4 h-4 mr-1" />
-              View
-            </Button>
-            <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100 rounded-md px-3 py-1">
-              <HelpCircle className="w-4 h-4 mr-1" />
-              Help
-            </Button>
-          </div>
-
-          {/* Centered Script Title */}
-          <div className="flex-1 flex justify-center min-w-0">
-            <h1 className="font-semibold text-gray-800 text-xl tracking-wide truncate">
-              {script?.title || 'Untitled Script'}
-            </h1>
-          </div>
-
-          {/* Right Controls */}
-          <div className="flex items-center gap-4 flex-1 justify-end min-w-0">
-            {/* Connection Status */}
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${getStatusColor(syncStatus)}`}></div>
-              <span className="text-xs text-gray-500 capitalize hidden sm:inline">
-                {syncStatus}
-              </span>
-            </div>
-            <span className="text-xs text-gray-500 hidden sm:inline">
-              Saved {lastSaved.toLocaleTimeString()}
-            </span>
             <Button
               variant="ghost"
               size="sm"
               disabled={isExporting}
               onClick={handleExportFDX}
-              className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ fontFamily: "inherit" }}
             >
-              <Download className="w-4 h-4 mr-1" />
+              <Download className="w-3.5 h-3.5 mr-1.5" />
               {isExporting ? 'Exporting...' : 'Export'}
             </Button>
           </div>
+
+          {/* Autosave indicator - dot anchored, text extends rightward */}
+          <div
+            className="absolute flex items-center gap-1 pl-2 border-l border-gray-200"
+            style={{ left: 'calc(100% - 80px)' }}
+          >
+            <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getStatusColor(syncStatus)} ${syncStatus === 'synced' ? '' : 'animate-pulse'}`} title={`Status: ${syncStatus}`}></div>
+            <span className="text-[10px] text-gray-400 whitespace-nowrap" style={{ fontFamily: "inherit" }}>
+              {syncStatus === 'synced' ? 'Saved' : syncStatus === 'connecting' ? 'Syncing' : syncStatus === 'connected' ? 'Synced' : syncStatus.charAt(0).toUpperCase() + syncStatus.slice(1)}
+            </span>
+          </div>
         </div>
       </div>
+      )}
+
+      {/* Expand button when top bar is collapsed */}
+      {isTopBarCollapsed && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsTopBarCollapsed(false)}
+          className="fixed top-2 left-2 z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm"
+          title="Expand toolbar"
+        >
+          <ChevronDown className="w-4 h-4" />
+        </Button>
+      )}
 
       {/* Controls Bar */}
-      <div className="fixed top-16 left-0 right-0 z-40 border-b border-gray-200 bg-white shadow-sm px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div
+        className={`fixed left-0 right-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm px-4 py-2 flex items-center justify-between transition-all duration-200 ${isTopBarCollapsed ? 'top-0' : 'top-12'}`}
+        style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
+      >
+        <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsSceneSidebarOpen(!isSceneSidebarOpen)}
-            className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md px-3 py-1"
+            className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
+            style={{ fontFamily: "inherit" }}
           >
-            <Menu className="w-4 h-4 mr-2" />
+            <Menu className="w-3.5 h-3.5 mr-1.5" />
             {isSceneSidebarOpen ? 'Hide' : 'Show'} Scenes
           </Button>
         </div>
         <Button
           onClick={() => setIsAssistantOpen(!isAssistantOpen)}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 shadow-sm ${
+          className={`px-3 py-1.5 rounded font-normal text-sm transition-all duration-200 ${
             isAssistantOpen
-              ? 'bg-purple-600 text-white shadow-md hover:bg-purple-700 hover:shadow-lg'
-              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:shadow-md hover:border-gray-300'
+              ? 'bg-purple-600 text-white hover:bg-purple-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
+          style={{ fontFamily: "inherit" }}
         >
           AI Assistant
         </Button>
@@ -546,13 +658,13 @@ export default function TestTipTapPage() {
 
       {/* Export Error Banner */}
       {exportError && (
-        <div className="fixed top-32 right-6 z-50 max-w-md">
-          <div className="flex items-center gap-2 text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-800 shadow-lg">
-            <span className="font-medium">Export Failed</span>
-            <span className="text-sm">{exportError}</span>
+        <div className="fixed top-24 right-4 z-50 max-w-sm">
+          <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded border border-red-200 shadow-md text-sm" style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}>
+            <span className="font-medium">Export Failed:</span>
+            <span>{exportError}</span>
             <button
               onClick={() => setExportError(null)}
-              className="ml-auto text-red-400 hover:text-red-300 font-bold text-xl leading-none"
+              className="ml-auto text-red-500 hover:text-red-700 font-bold text-lg leading-none"
             >
               ×
             </button>
@@ -562,7 +674,13 @@ export default function TestTipTapPage() {
 
       {/* Left Sidebar - Scene Navigation */}
       {isSceneSidebarOpen && (
-        <div className="fixed left-0 top-[112px] w-80 h-[calc(100vh-112px)] z-30 transition-all duration-300">
+        <div
+          className="fixed left-0 w-80 z-30 transition-all duration-300"
+          style={{
+            top: isTopBarCollapsed ? '44px' : '92px',
+            height: isTopBarCollapsed ? 'calc(100vh - 44px)' : 'calc(100vh - 92px)'
+          }}
+        >
           <ScriptSceneSidebar
             scenes={sceneBoundaries}
             onSceneClick={handleSceneClick}
@@ -576,8 +694,9 @@ export default function TestTipTapPage() {
 
       {/* Main Content Area */}
       <div
-        className="pt-[112px] w-full flex transition-all duration-300"
+        className="w-full flex transition-all duration-300"
         style={{
+          paddingTop: isTopBarCollapsed ? '44px' : '92px',
           marginLeft: isSceneSidebarOpen ? '320px' : '0',
           marginRight: isAssistantOpen ? '384px' : '0'
         }}
@@ -608,7 +727,13 @@ export default function TestTipTapPage() {
 
         {/* Right Sidebar - AI Assistant */}
         {isAssistantOpen && (
-          <div className="fixed right-0 top-[112px] w-96 h-[calc(100vh-112px)] z-30 transition-all duration-300">
+          <div
+            className="fixed right-0 w-96 z-30 transition-all duration-300"
+            style={{
+              top: isTopBarCollapsed ? '44px' : '92px',
+              height: isTopBarCollapsed ? 'calc(100vh - 44px)' : 'calc(100vh - 92px)'
+            }}
+          >
             <AIChatbot projectId={scriptId || undefined} isVisible={true} />
           </div>
         )}
