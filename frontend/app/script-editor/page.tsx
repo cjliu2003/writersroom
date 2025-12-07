@@ -666,14 +666,17 @@ export default function TestTipTapPage() {
         </div>
       )}
 
-      {/* Main Content Area */}
+      {/* Main Content Area - scroll container with dynamic bounds */}
       <div
-        className="w-full flex transition-all duration-300"
+        className="flex transition-all duration-300 overflow-auto"
         style={{
-          paddingTop: isTopBarCollapsed
+          position: 'fixed',
+          top: isTopBarCollapsed
             ? (isSceneNavCollapsed ? '12px' : '55px')
             : (isSceneNavCollapsed ? '60px' : '103px'),
-          marginRight: isAssistantOpen ? '384px' : '0'
+          left: 0,
+          right: isAssistantOpen ? '384px' : '0',
+          bottom: 0,
         }}
       >
         {/* Editor Container - dynamically centered */}
@@ -686,7 +689,7 @@ export default function TestTipTapPage() {
               maxWidth: isAssistantOpen ? 'calc(100vw - 384px)' : '100vw'
             }}
           >
-            <div className="screenplay-editor-wrapper min-h-screen overflow-auto">
+            <div className="screenplay-editor-wrapper min-h-screen">
               <div className="flex justify-center">
                 <EditorContent editor={editor} className="screenplay-editor" />
               </div>

@@ -32,6 +32,8 @@ export function SceneNavBar({
   const activeItemRef = useRef<HTMLButtonElement>(null);
   const [hoveredScene, setHoveredScene] = useState<{ heading: string; x: number; bottom: number } | null>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-scroll to keep active scene visible
   useEffect(() => {
@@ -71,6 +73,25 @@ export function SceneNavBar({
             msOverflowStyle: 'none',
             WebkitOverflowScrolling: 'touch',
           }}
+          onScroll={() => {
+            // Mark as scrolling and hide tooltip
+            isScrollingRef.current = true;
+            setHoveredScene(null);
+
+            // Clear any pending hover timeout
+            if (hoverTimeoutRef.current) {
+              clearTimeout(hoverTimeoutRef.current);
+              hoverTimeoutRef.current = null;
+            }
+
+            // Reset scroll end detection timer
+            if (scrollTimeoutRef.current) {
+              clearTimeout(scrollTimeoutRef.current);
+            }
+            scrollTimeoutRef.current = setTimeout(() => {
+              isScrollingRef.current = false;
+            }, 150); // Consider scrolling stopped after 150ms of no scroll events
+          }}
         >
           <div className="flex items-center gap-2 py-2">
             {scenes.length === 0 ? (
@@ -88,6 +109,9 @@ export function SceneNavBar({
                     ref={isActive ? activeItemRef : null}
                     onClick={() => onSceneClick(index)}
                     onMouseEnter={(e) => {
+                      // Don't show tooltip while scrolling
+                      if (isScrollingRef.current) return;
+
                       const rect = e.currentTarget.getBoundingClientRect();
                       const x = rect.left + rect.width / 2;
                       const bottom = rect.bottom;
@@ -97,7 +121,10 @@ export function SceneNavBar({
                       }
                       // Delay tooltip appearance by 500ms
                       hoverTimeoutRef.current = setTimeout(() => {
-                        setHoveredScene({ heading: fullHeading, x, bottom });
+                        // Double-check we're still not scrolling when timeout fires
+                        if (!isScrollingRef.current) {
+                          setHoveredScene({ heading: fullHeading, x, bottom });
+                        }
                       }, 500);
                     }}
                     onMouseLeave={() => {
