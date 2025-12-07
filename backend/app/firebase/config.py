@@ -53,5 +53,32 @@ def verify_firebase_token(id_token: str) -> dict:
     """
     if firebase_app is None:
         initialize_firebase()
-    
+
     return auth.verify_id_token(id_token)
+
+
+def get_firebase_user_by_email(email: str) -> Optional[dict]:
+    """
+    Look up a Firebase user by their email address.
+
+    Args:
+        email: The email address to look up.
+
+    Returns:
+        dict with uid, email, display_name if found, None if not found.
+
+    Raises:
+        Exception: If Firebase lookup fails for reasons other than user not found.
+    """
+    if firebase_app is None:
+        initialize_firebase()
+
+    try:
+        user = auth.get_user_by_email(email)
+        return {
+            "uid": user.uid,
+            "email": user.email,
+            "display_name": user.display_name
+        }
+    except auth.UserNotFoundError:
+        return None

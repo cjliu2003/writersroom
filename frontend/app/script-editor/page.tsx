@@ -37,6 +37,7 @@ import { extractSlateContentFromTipTap } from '@/utils/tiptap-to-slate-format';
 import { ScriptSceneSidebar } from '@/components/script-scene-sidebar';
 import { AIChatbot } from '@/components/ai-chatbot';
 import ProcessingScreen from '@/components/ProcessingScreen';
+import { ShareDialog } from '@/components/share-dialog';
 import { Button } from '@/components/ui/button';
 import { Home, FileText, Pencil, Share2, Download, Menu, ChevronUp, ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -77,6 +78,9 @@ export default function TestTipTapPage() {
 
   // Collapsible top bar state
   const [isTopBarCollapsed, setIsTopBarCollapsed] = useState(false);
+
+  // Share dialog state
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   // Scene tracking state
   const [sceneBoundaries, setSceneBoundaries] = useState<SceneBoundary[]>([]);
@@ -580,9 +584,10 @@ export default function TestTipTapPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
+              onClick={() => setIsShareDialogOpen(true)}
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
               style={{ fontFamily: "inherit" }}
-              title="Coming soon"
+              title="Share this script"
             >
               <Share2 className="w-3.5 h-3.5 mr-1.5" />
               Share
@@ -797,6 +802,16 @@ export default function TestTipTapPage() {
           white-space: nowrap;
         }
       `}</style>
+
+      {/* Share Dialog */}
+      {/* Note: isOwner defaults to true - backend enforces actual permissions */}
+      <ShareDialog
+        isOpen={isShareDialogOpen}
+        onClose={() => setIsShareDialogOpen(false)}
+        scriptId={scriptId}
+        scriptTitle={script?.title}
+        isOwner={true}
+      />
       </div>
     </>
   );

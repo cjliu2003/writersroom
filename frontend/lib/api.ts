@@ -300,3 +300,54 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
 
   return response.json();
 }
+
+// Collaborator API functions
+export interface Collaborator {
+  user_id: string;
+  display_name: string | null;
+  role: 'editor' | 'viewer';
+  joined_at: string;
+}
+
+export async function getCollaborators(scriptId: string): Promise<Collaborator[]> {
+  const response = await authenticatedFetch(`/scripts/${scriptId}/collaborators`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to fetch collaborators');
+  }
+
+  return response.json();
+}
+
+export async function addCollaborator(
+  scriptId: string,
+  email: string,
+  role: 'editor' | 'viewer' = 'editor'
+): Promise<Collaborator> {
+  const response = await authenticatedFetch(`/scripts/${scriptId}/collaborators`, {
+    method: 'POST',
+    body: JSON.stringify({ email, role }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to add collaborator');
+  }
+
+  return response.json();
+}
+
+export async function removeCollaborator(
+  scriptId: string,
+  userId: string
+): Promise<void> {
+  const response = await authenticatedFetch(`/scripts/${scriptId}/collaborators/${userId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to remove collaborator');
+  }
+}

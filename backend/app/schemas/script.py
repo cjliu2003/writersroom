@@ -95,3 +95,34 @@ class ScriptWithContent(BaseModel):
         json_encoders = {
             datetime: lambda dt: dt.isoformat()
         }
+
+
+# Collaborator schemas
+class AddCollaboratorRequest(BaseModel):
+    """Schema for adding a collaborator to a script"""
+    email: str = Field(
+        ...,
+        min_length=5,
+        max_length=254,
+        pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+        description="Email address of the user to invite"
+    )
+    role: str = Field(
+        "editor",
+        pattern="^(editor|viewer)$",
+        description="Role for the collaborator: 'editor' or 'viewer'"
+    )
+
+
+class CollaboratorResponse(BaseModel):
+    """Schema for collaborator information"""
+    user_id: str
+    display_name: Optional[str] = None
+    role: str
+    joined_at: datetime
+
+    class Config:
+        from_attributes = True
+        json_encoders = {
+            datetime: lambda dt: dt.isoformat()
+        }
