@@ -30,7 +30,7 @@ export function SceneNavBar({
 }: SceneNavBarProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeItemRef = useRef<HTMLButtonElement>(null);
-  const [hoveredScene, setHoveredScene] = useState<{ heading: string; x: number } | null>(null);
+  const [hoveredScene, setHoveredScene] = useState<{ heading: string; x: number; bottom: number } | null>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-scroll to keep active scene visible
@@ -90,13 +90,14 @@ export function SceneNavBar({
                     onMouseEnter={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const x = rect.left + rect.width / 2;
+                      const bottom = rect.bottom;
                       // Clear any existing timeout
                       if (hoverTimeoutRef.current) {
                         clearTimeout(hoverTimeoutRef.current);
                       }
                       // Delay tooltip appearance by 500ms
                       hoverTimeoutRef.current = setTimeout(() => {
-                        setHoveredScene({ heading: fullHeading, x });
+                        setHoveredScene({ heading: fullHeading, x, bottom });
                       }, 500);
                     }}
                     onMouseLeave={() => {
@@ -159,7 +160,7 @@ export function SceneNavBar({
         <div
           className="fixed z-[200] px-3 py-2 bg-white text-gray-700 text-xs rounded-md shadow-lg border border-gray-200 whitespace-nowrap animate-in fade-in slide-in-from-top-1 duration-150"
           style={{
-            top: '100px',
+            top: hoveredScene.bottom + 6,
             left: hoveredScene.x,
             transform: 'translateX(-50%)',
             fontFamily: "var(--font-courier-prime), 'Courier New', monospace"
