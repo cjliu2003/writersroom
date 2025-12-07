@@ -36,8 +36,9 @@ export function SceneNavBar({
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isFirstRenderRef = useRef(true);
 
-  // Auto-scroll to keep active scene visible
+  // Auto-scroll to keep active scene visible (also runs on mount/reopen)
   useEffect(() => {
     if (activeItemRef.current && scrollContainerRef.current) {
       const container = scrollContainerRef.current;
@@ -46,14 +47,16 @@ export function SceneNavBar({
       const containerRect = container.getBoundingClientRect();
       const itemRect = activeItem.getBoundingClientRect();
 
-      // Check if item is outside visible area
-      if (itemRect.left < containerRect.left || itemRect.right > containerRect.right) {
+      // Scroll on first render (mount/reopen) or when item is outside visible area
+      const isOutsideView = itemRect.left < containerRect.left || itemRect.right > containerRect.right;
+      if (isFirstRenderRef.current || isOutsideView) {
         activeItem.scrollIntoView({
-          behavior: 'smooth',
+          behavior: isFirstRenderRef.current ? 'auto' : 'smooth',
           block: 'nearest',
           inline: 'center'
         });
       }
+      isFirstRenderRef.current = false;
     }
   }, [currentSceneIndex]);
 

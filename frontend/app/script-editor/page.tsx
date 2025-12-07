@@ -330,34 +330,35 @@ export default function TestTipTapPage() {
     saveLayoutPrefs({ assistantVisible: isAssistantOpen });
   }, [isAssistantOpen]);
 
-  // Extract scene boundaries when editor content changes
-  useEffect(() => {
-    if (editor && editor.state.doc) {
-      const boundaries = extractSceneBoundariesFromTipTap(editor);
-      setSceneBoundaries(boundaries);
-      console.log('[TipTapEditor] Extracted', boundaries.length, 'scenes');
-    }
-  }, [editor, editor?.state.doc.content]);
-
-  // Track current scene as user navigates
+  // Track current scene and extract boundaries on any editor change
+  // Combined into single effect to ensure boundaries are always fresh
   useEffect(() => {
     if (!editor) return;
 
-    const updateCurrentScene = () => {
-      const sceneIndex = getCurrentSceneIndex(editor, sceneBoundaries);
+    const updateSceneState = () => {
+      // Re-extract boundaries on every change to ensure positions are accurate
+      const boundaries = extractSceneBoundariesFromTipTap(editor);
+      setSceneBoundaries(boundaries);
+
+      // Use fresh boundaries for scene detection
+      const sceneIndex = getCurrentSceneIndex(editor, boundaries);
       setCurrentSceneIndex(sceneIndex);
     };
 
-    // Update on selection change
-    editor.on('selectionUpdate', updateCurrentScene);
+    // Update on selection change (clicking/navigating in editor)
+    editor.on('selectionUpdate', updateSceneState);
+
+    // Update on document changes (typing, editing)
+    editor.on('update', updateSceneState);
 
     // Initial update
-    updateCurrentScene();
+    updateSceneState();
 
     return () => {
-      editor.off('selectionUpdate', updateCurrentScene);
+      editor.off('selectionUpdate', updateSceneState);
+      editor.off('update', updateSceneState);
     };
-  }, [editor, sceneBoundaries]);
+  }, [editor]);
 
   // Scene navigation handler
   const handleSceneClick = useCallback((sceneIndex: number) => {
