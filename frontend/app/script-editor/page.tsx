@@ -614,7 +614,7 @@ export default function TestTipTapPage() {
           variant="ghost"
           size="sm"
           onClick={() => setIsTopBarCollapsed(false)}
-          className="fixed top-2 left-2 z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm"
+          className="fixed top-[22px] left-2 -translate-y-1/2 z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm"
           title="Expand toolbar"
         >
           <ChevronDown className="w-4 h-4" />
@@ -631,6 +631,7 @@ export default function TestTipTapPage() {
             onSceneClick={handleSceneClick}
             currentSceneIndex={currentSceneIndex}
             onCollapse={() => setIsSceneNavCollapsed(true)}
+            isTopBarCollapsed={isTopBarCollapsed}
           />
         </div>
       )}

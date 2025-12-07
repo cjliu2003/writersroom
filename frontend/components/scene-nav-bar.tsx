@@ -10,6 +10,7 @@ interface SceneNavBarProps {
   onSceneClick: (sceneIndex: number) => void;
   currentSceneIndex: number | null;
   onCollapse?: () => void;
+  isTopBarCollapsed?: boolean;
 }
 
 /**
@@ -27,6 +28,7 @@ export function SceneNavBar({
   onSceneClick,
   currentSceneIndex,
   onCollapse,
+  isTopBarCollapsed = false,
 }: SceneNavBarProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeItemRef = useRef<HTMLButtonElement>(null);
@@ -61,13 +63,13 @@ export function SceneNavBar({
       style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
     >
       <div className="relative flex items-center h-11 overflow-visible">
-        {/* Left fade indicator - sized for top bar collapse arrow */}
-        <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
+        {/* Left fade indicator - sized for top bar collapse arrow when collapsed */}
+        <div className={`absolute left-0 top-0 bottom-0 bg-gradient-to-r from-white to-transparent pointer-events-none z-10 ${isTopBarCollapsed ? 'w-12' : 'w-3'}`} />
 
         {/* Scrollable scene container */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-x-auto scrollbar-hide pl-12 pr-12"
+          className={`flex-1 overflow-x-auto scrollbar-hide pr-12 ${isTopBarCollapsed ? 'pl-12' : 'pl-3'}`}
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
