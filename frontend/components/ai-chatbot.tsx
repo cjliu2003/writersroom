@@ -35,7 +35,7 @@ export function AIChatbot({
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Helper to scroll chat to bottom
   const scrollToBottom = () => {
@@ -95,6 +95,7 @@ export function AIChatbot({
     setMessages(prev => [...prev, userMessage])
     setInputValue('')
     setIsLoading(true)
+    inputRef.current?.focus()
 
     // Scroll immediately when user sends message
     scrollToBottom()
@@ -217,11 +218,20 @@ export function AIChatbot({
   // Get the appropriate collapse icon based on position
   const CollapseIcon = position === 'left' ? ChevronLeft : position === 'right' ? ChevronRight : ChevronDown
 
+  // Focus input when clicking anywhere in chat panel (except buttons)
+  const handlePanelClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (!target.closest('button') && !target.closest('input')) {
+      inputRef.current?.focus()
+    }
+  }
+
   // Expanded state - popup chat interface
   return (
     <div
       className={`h-full flex flex-col bg-white border border-gray-200 shadow-xl overflow-hidden ${panelStyles.container}`}
       style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
+      onClick={handlePanelClick}
     >
       {/* Header - Compact */}
       <div className={`h-7 min-h-[28px] border-b border-gray-100 bg-gray-50/80 px-3 flex items-center justify-between ${panelStyles.header}`}>
@@ -317,18 +327,18 @@ export function AIChatbot({
 
       {/* Input */}
       <div className="border-t border-gray-200 bg-gray-100 p-2 px-3">
-        <div className="flex items-center gap-2">
-          <span className="text-purple-500 text-[12pt] font-medium">&gt;</span>
-          <input
+        <div className="flex items-start gap-2">
+          <span className="text-purple-500 text-[12pt] font-medium leading-[20px]">&gt;</span>
+          <textarea
             ref={inputRef}
-            type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={getPlaceholder()}
-            disabled={!projectId || isLoading}
-            className="flex-1 bg-transparent text-[12pt] text-black placeholder-gray-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: "inherit" }}
+            disabled={!projectId}
+            rows={1}
+            className="flex-1 bg-transparent text-[12pt] text-black placeholder-gray-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none leading-[20px]"
+            style={{ fontFamily: "inherit", fieldSizing: "content" } as React.CSSProperties}
           />
           <Button
             onClick={sendMessage}
