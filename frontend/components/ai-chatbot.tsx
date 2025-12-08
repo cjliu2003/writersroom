@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send, Loader2, ChevronDown, Sparkles } from "lucide-react"
+import { Send, Loader2, ChevronDown, ChevronLeft, ChevronRight, Sparkles, PanelLeft, PanelRight, PanelBottom } from "lucide-react"
 import { sendChatMessage, type ChatMessage } from "@/lib/api"
+import { type ChatPosition } from "@/utils/layoutPrefs"
 
 interface AIChatbotProps {
   projectId?: string
@@ -12,6 +13,11 @@ interface AIChatbotProps {
   isVisible?: boolean
   isCollapsed?: boolean
   onCollapseToggle?: () => void
+  position?: ChatPosition
+  onPositionChange?: (position: ChatPosition) => void
+  // Toolbar states for collision avoidance when collapsed on left/right
+  isTopBarCollapsed?: boolean
+  isSceneNavCollapsed?: boolean
 }
 
 export function AIChatbot({
@@ -19,7 +25,11 @@ export function AIChatbot({
   scriptTitle,
   isVisible = true,
   isCollapsed = false,
-  onCollapseToggle
+  onCollapseToggle,
+  position = 'bottom',
+  onPositionChange,
+  isTopBarCollapsed = false,
+  isSceneNavCollapsed = false
 }: AIChatbotProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -120,14 +130,53 @@ export function AIChatbot({
 
   if (!isVisible) return null
 
-  // Collapsed state - subtle tab that matches the expanded header, aligned left
+  // Collapsed state - subtle tab that matches the expanded header
   if (isCollapsed) {
+    // Position-specific styling for collapsed tab
+    const collapsedStyles = {
+      bottom: {
+        container: "flex justify-start",
+        button: "flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-b-0 rounded-t-lg px-5 py-2 transition-all duration-200 shadow-sm hover:shadow-md",
+        layout: "flex-row"
+      },
+      left: {
+        container: "flex flex-col justify-start h-full",
+        button: "flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-l-0 rounded-r-lg px-2 py-5 transition-all duration-200 shadow-sm hover:shadow-md writing-vertical",
+        layout: "flex-col"
+      },
+      right: {
+        container: "flex flex-col justify-start h-full",
+        button: "flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-r-0 rounded-l-lg px-2 py-5 transition-all duration-200 shadow-sm hover:shadow-md writing-vertical",
+        layout: "flex-col"
+      }
+    }
+
+    const styles = collapsedStyles[position]
+    const isVertical = position === 'left' || position === 'right'
+
+    // Calculate top offset for collision avoidance with toolbar expand buttons
+    // Top bar expand button: ~44px from top when collapsed (22px position + button height + margin)
+    // Scene nav expand button: ~44px when top bar collapsed, ~68px when top bar expanded
+    let topOffset = 0
+    if (position === 'left' && isTopBarCollapsed) {
+      topOffset = 48 // Clear the top bar expand button
+    } else if (position === 'right' && isSceneNavCollapsed) {
+      topOffset = isTopBarCollapsed ? 48 : 72 // Clear the scene nav expand button
+    }
+
     return (
-      <div className="flex justify-start">
+      <div
+        className={styles.container}
+        style={{ paddingTop: topOffset > 0 ? `${topOffset}px` : undefined }}
+      >
         <button
           onClick={onCollapseToggle}
-          className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-b-0 rounded-t-lg px-5 py-2 transition-all duration-200 shadow-sm hover:shadow-md"
-          style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
+          className={styles.button}
+          style={{
+            fontFamily: "var(--font-courier-prime), 'Courier New', monospace",
+            writingMode: isVertical ? 'vertical-rl' : undefined,
+            textOrientation: isVertical ? 'mixed' : undefined
+          }}
           title="Open AI Assistant"
         >
           <Sparkles className="w-3.5 h-3.5 text-purple-400" />
@@ -137,20 +186,64 @@ export function AIChatbot({
     )
   }
 
+  // Position-specific styling for expanded panel
+  const expandedStyles = {
+    bottom: {
+      container: "rounded-t-xl border-b-0",
+      header: "rounded-t-xl",
+    },
+    left: {
+      container: "rounded-r-xl border-l-0",
+      header: "rounded-tr-xl",
+    },
+    right: {
+      container: "rounded-l-xl border-r-0",
+      header: "rounded-tl-xl",
+    }
+  }
+
+  const panelStyles = expandedStyles[position]
+
+  // Get the appropriate collapse icon based on position
+  const CollapseIcon = position === 'left' ? ChevronLeft : position === 'right' ? ChevronRight : ChevronDown
+
   // Expanded state - popup chat interface
   return (
     <div
-      className="h-full flex flex-col bg-white rounded-t-xl border border-gray-200 border-b-0 shadow-xl overflow-hidden"
+      className={`h-full flex flex-col bg-white border border-gray-200 shadow-xl overflow-hidden ${panelStyles.container}`}
       style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
     >
       {/* Header - Compact */}
-      <div className="h-7 min-h-[28px] border-b border-gray-100 bg-gray-50/80 px-3 flex items-center justify-between rounded-t-xl">
+      <div className={`h-7 min-h-[28px] border-b border-gray-100 bg-gray-50/80 px-3 flex items-center justify-between ${panelStyles.header}`}>
         <div className="flex items-center gap-1.5">
           <Sparkles className="w-3 h-3 text-purple-500" />
           <span className="text-[10px] text-gray-500 uppercase tracking-wide">AI</span>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-0.5">
+          {/* Position toggle button - cycles through positions */}
+          {onPositionChange && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const positions: ChatPosition[] = ['bottom', 'right', 'left'];
+                const currentIndex = positions.indexOf(position);
+                const nextIndex = (currentIndex + 1) % positions.length;
+                onPositionChange(positions[nextIndex]);
+              }}
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5"
+              title={`Move to ${position === 'bottom' ? 'right' : position === 'right' ? 'left' : 'bottom'}`}
+            >
+              {position === 'bottom' ? (
+                <PanelRight className="w-3.5 h-3.5" />
+              ) : position === 'right' ? (
+                <PanelLeft className="w-3.5 h-3.5" />
+              ) : (
+                <PanelBottom className="w-3.5 h-3.5" />
+              )}
+            </Button>
+          )}
           {/* Collapse button */}
           <Button
             variant="ghost"
@@ -159,7 +252,7 @@ export function AIChatbot({
             className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5 -mr-1"
             title="Minimize"
           >
-            <ChevronDown className="w-3.5 h-3.5" />
+            <CollapseIcon className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
@@ -173,9 +266,9 @@ export function AIChatbot({
                 <Sparkles className="w-6 h-6 text-purple-200 mx-auto mb-2" />
                 <p className="text-[12pt] text-gray-500 leading-relaxed">
                   {scriptTitle ? (
-                    <>Let's talk about {scriptTitle.toUpperCase()}...</>
+                    <>Let&apos;s talk about {scriptTitle.toUpperCase()}...</>
                   ) : (
-                    <>Let's talk about your screenplay...</>
+                    <>Let&apos;s talk about your screenplay...</>
                   )}
                 </p>
                 <p className="text-[10pt] text-gray-400 mt-1">

@@ -3,11 +3,16 @@
  * Manages persistence of sidebar visibility states
  */
 
+/** Position where the AI chat panel is docked */
+export type ChatPosition = 'bottom' | 'left' | 'right';
+
 export interface EditorLayoutPrefs {
   sceneListVisible?: boolean;  // Deprecated: scene sidebar removed in favor of nav bar
   assistantVisible: boolean;
   chatCollapsed?: boolean;     // Whether chat panel is collapsed to minimal state
-  chatHeight?: number;         // Height of chat panel in pixels (default: 220)
+  chatHeight?: number;         // Height of chat panel in pixels when docked at bottom (default: 220)
+  chatPosition?: ChatPosition; // Which edge the chat is docked to (default: 'bottom')
+  chatWidth?: number;          // Width of chat panel in pixels when docked left/right (default: 360)
 }
 
 const STORAGE_KEY = 'editorLayoutPrefs';
@@ -31,7 +36,9 @@ export function loadLayoutPrefs(): EditorLayoutPrefs {
     sceneListVisible: true,
     assistantVisible: true,
     chatCollapsed: false,
-    chatHeight: 220
+    chatHeight: 220,
+    chatPosition: 'bottom',
+    chatWidth: 360
   };
 }
 

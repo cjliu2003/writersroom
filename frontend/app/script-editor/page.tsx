@@ -26,7 +26,7 @@ import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
 import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
 import { getScriptContent, exportFDXFile, updateScript, type ScriptWithContent } from '@/lib/api';
-import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs';
+import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs, type ChatPosition } from '@/utils/layoutPrefs';
 import {
   extractSceneBoundariesFromTipTap,
   scrollToScene,
@@ -65,7 +65,8 @@ export default function TestTipTapPage() {
   // UI state
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [chatHeight, setChatHeight] = useState(220);
-  const [isResizing, setIsResizing] = useState(false);
+  const [chatPosition, setChatPosition] = useState<ChatPosition>('bottom');
+  const [chatWidth, setChatWidth] = useState(360);
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -325,24 +326,29 @@ export default function TestTipTapPage() {
     const prefs = loadLayoutPrefs();
     setIsChatCollapsed(prefs.chatCollapsed ?? false);
     setChatHeight(prefs.chatHeight ?? 220);
+    setChatPosition(prefs.chatPosition ?? 'bottom');
+    setChatWidth(prefs.chatWidth ?? 360);
   }, []);
 
   // Save layout preferences when chat state changes
   useEffect(() => {
-    saveLayoutPrefs({ chatCollapsed: isChatCollapsed, chatHeight });
-  }, [isChatCollapsed, chatHeight]);
+    saveLayoutPrefs({
+      chatCollapsed: isChatCollapsed,
+      chatHeight,
+      chatPosition,
+      chatWidth
+    });
+  }, [isChatCollapsed, chatHeight, chatPosition, chatWidth]);
 
-  // Handle resize drag
-  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+  // Handle vertical resize drag (for bottom position)
+  const handleVerticalResizeMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    setIsResizing(true);
 
     const startY = e.clientY;
     const startHeight = chatHeight;
     const collapseThreshold = 100; // Collapse if dragged below this height
 
     const cleanup = () => {
-      setIsResizing(false);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -370,6 +376,46 @@ export default function TestTipTapPage() {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, [chatHeight]);
+
+  // Handle horizontal resize drag (for left/right positions)
+  const handleHorizontalResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+
+    const startX = e.clientX;
+    const startWidth = chatWidth;
+    const collapseThreshold = 150; // Collapse if dragged below this width
+    const isLeftPosition = chatPosition === 'left';
+
+    const cleanup = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      // For left position: dragging right increases width
+      // For right position: dragging left increases width
+      const rawWidth = isLeftPosition ? startWidth + deltaX : startWidth - deltaX;
+
+      // Auto-collapse immediately when dragged below threshold
+      if (rawWidth < collapseThreshold) {
+        setIsChatCollapsed(true);
+        setChatWidth(360); // Reset to default for next expand
+        cleanup();
+        return;
+      }
+
+      const newWidth = Math.min(Math.max(rawWidth, 280), window.innerWidth * 0.5);
+      setChatWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      cleanup();
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [chatWidth, chatPosition]);
 
   // Track current scene and extract boundaries on any editor change
   // Combined into single effect to ensure boundaries are always fresh
@@ -711,23 +757,23 @@ export default function TestTipTapPage() {
 
       {/* Main Content Area - scroll container with dynamic bounds */}
       <div
-        className={`flex overflow-auto ${isResizing ? '' : 'transition-all duration-300'}`}
+        className="flex overflow-auto"
         style={{
           position: 'fixed',
           top: isTopBarCollapsed
             ? (isSceneNavCollapsed ? '0' : '44px')
             : (isSceneNavCollapsed ? '48px' : '92px'),
-          left: 0,
-          right: 0,
-          bottom: isChatCollapsed ? '0' : `${chatHeight}px`,
+          left: chatPosition === 'left' && !isChatCollapsed ? `${chatWidth}px` : 0,
+          right: chatPosition === 'right' && !isChatCollapsed ? `${chatWidth}px` : 0,
+          bottom: chatPosition === 'bottom' && !isChatCollapsed ? `${chatHeight}px` : 0,
         }}
       >
         {/* Editor Container - dynamically centered */}
         <div
-          className="flex-1 flex justify-center transition-all duration-300"
+          className="flex-1 flex justify-center"
         >
           <div
-            className="w-full transition-all duration-300"
+            className="w-full"
             style={{
               maxWidth: '100vw'
             }}
@@ -742,24 +788,59 @@ export default function TestTipTapPage() {
 
       </div>
 
-      {/* Bottom-Docked AI Chat */}
+      {/* AI Chat - Position-Aware Container */}
       <div
-        className={`fixed z-30 ${isResizing ? '' : 'transition-all duration-300'}`}
-        style={{
-          bottom: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '88%',
-          maxWidth: '1400px',
-          height: isChatCollapsed ? 'auto' : `${chatHeight}px`,
-        }}
+        className="fixed z-30"
+        style={
+          chatPosition === 'bottom'
+            ? {
+                bottom: 0,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '88%',
+                maxWidth: '1400px',
+                height: isChatCollapsed ? 'auto' : `${chatHeight}px`,
+              }
+            : chatPosition === 'left'
+            ? {
+                left: 0,
+                top: isTopBarCollapsed
+                  ? (isSceneNavCollapsed ? '0' : '44px')
+                  : (isSceneNavCollapsed ? '48px' : '92px'),
+                bottom: 0,
+                width: isChatCollapsed ? 'auto' : `${chatWidth}px`,
+              }
+            : {
+                // right position
+                right: 0,
+                top: isTopBarCollapsed
+                  ? (isSceneNavCollapsed ? '0' : '44px')
+                  : (isSceneNavCollapsed ? '48px' : '92px'),
+                bottom: 0,
+                width: isChatCollapsed ? 'auto' : `${chatWidth}px`,
+              }
+        }
       >
-        {/* Resize Handle - invisible but functional, only when expanded */}
-        {!isChatCollapsed && (
+        {/* Resize Handle - position-aware */}
+        {!isChatCollapsed && chatPosition === 'bottom' && (
           <div
-            onMouseDown={handleResizeMouseDown}
+            onMouseDown={handleVerticalResizeMouseDown}
             className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-10"
             style={{ marginTop: '-6px' }}
+          />
+        )}
+        {!isChatCollapsed && chatPosition === 'left' && (
+          <div
+            onMouseDown={handleHorizontalResizeMouseDown}
+            className="absolute top-0 bottom-0 right-0 w-3 cursor-ew-resize z-10"
+            style={{ marginRight: '-6px' }}
+          />
+        )}
+        {!isChatCollapsed && chatPosition === 'right' && (
+          <div
+            onMouseDown={handleHorizontalResizeMouseDown}
+            className="absolute top-0 bottom-0 left-0 w-3 cursor-ew-resize z-10"
+            style={{ marginLeft: '-6px' }}
           />
         )}
         <AIChatbot
@@ -768,6 +849,10 @@ export default function TestTipTapPage() {
           isVisible={true}
           isCollapsed={isChatCollapsed}
           onCollapseToggle={() => setIsChatCollapsed(!isChatCollapsed)}
+          position={chatPosition}
+          onPositionChange={setChatPosition}
+          isTopBarCollapsed={isTopBarCollapsed}
+          isSceneNavCollapsed={isSceneNavCollapsed}
         />
       </div>
 
