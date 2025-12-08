@@ -143,11 +143,11 @@ export function AIChatbot({
       className="h-full flex flex-col bg-white rounded-t-xl border border-gray-200 border-b-0 shadow-xl overflow-hidden"
       style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
     >
-      {/* Header */}
-      <div className="h-11 min-h-[44px] border-b border-gray-100 bg-gray-50/80 px-4 flex items-center justify-between rounded-t-xl">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-purple-500" />
-          <span className="text-xs text-gray-600 uppercase tracking-wide">AI Assistant</span>
+      {/* Header - Compact */}
+      <div className="h-7 min-h-[28px] border-b border-gray-100 bg-gray-50/80 px-3 flex items-center justify-between rounded-t-xl">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="w-3 h-3 text-purple-500" />
+          <span className="text-[10px] text-gray-500 uppercase tracking-wide">AI</span>
         </div>
 
         <div className="flex items-center">
@@ -156,10 +156,10 @@ export function AIChatbot({
             variant="ghost"
             size="sm"
             onClick={onCollapseToggle}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-1 -mr-1"
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5 -mr-1"
             title="Minimize"
           >
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
@@ -167,18 +167,18 @@ export function AIChatbot({
       {/* Messages */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="p-4 space-y-3">
+          <div className="p-3 space-y-3">
             {messages.length === 0 ? (
-              <div className="py-8 text-center">
-                <Sparkles className="w-8 h-8 text-purple-200 mx-auto mb-3" />
-                <p className="text-sm text-gray-500 leading-relaxed">
+              <div className="py-6 text-center">
+                <Sparkles className="w-6 h-6 text-purple-200 mx-auto mb-2" />
+                <p className="text-[12pt] text-gray-500 leading-relaxed">
                   {scriptTitle ? (
                     <>Let's talk about {scriptTitle.toUpperCase()}...</>
                   ) : (
                     <>Let's talk about your screenplay...</>
                   )}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-[10pt] text-gray-400 mt-1">
                   Ask about characters, plot, structure, or anything else!
                 </p>
               </div>
@@ -186,14 +186,14 @@ export function AIChatbot({
               messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`text-sm leading-relaxed ${
+                  className={`text-[12pt] leading-[16pt] rounded px-2 py-1.5 ${
                     message.role === 'user'
-                      ? 'text-gray-800'
-                      : 'text-gray-600 pl-3 border-l-2 border-purple-200'
+                      ? 'text-black'
+                      : 'text-black bg-purple-50/70 border-l-2 border-purple-300'
                   }`}
                 >
                   {message.role === 'user' && (
-                    <span className="text-purple-400 mr-1.5">&gt;</span>
+                    <span className="text-purple-500 font-medium mr-1.5">&gt;</span>
                   )}
                   <span className="whitespace-pre-wrap">{message.content}</span>
                 </div>
@@ -201,9 +201,9 @@ export function AIChatbot({
             )}
 
             {isLoading && (
-              <div className="text-sm text-gray-500 pl-3 border-l-2 border-purple-200">
+              <div className="text-[12pt] leading-[16pt] text-gray-600 bg-purple-50/70 border-l-2 border-purple-300 rounded px-2 py-1.5">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-3 h-3 animate-spin text-purple-400" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-500" />
                   <span>Thinking...</span>
                 </div>
               </div>
@@ -213,9 +213,9 @@ export function AIChatbot({
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-100 bg-gray-50/50 p-3">
+      <div className="border-t border-gray-200 bg-gray-100 p-2 px-3">
         <div className="flex items-center gap-2">
-          <span className="text-purple-400 text-sm">&gt;</span>
+          <span className="text-purple-500 text-[12pt] font-medium">&gt;</span>
           <input
             ref={inputRef}
             type="text"
@@ -224,7 +224,7 @@ export function AIChatbot({
             onKeyPress={handleKeyPress}
             placeholder={getPlaceholder()}
             disabled={!projectId || isLoading}
-            className="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-transparent text-[12pt] text-black placeholder-gray-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ fontFamily: "inherit" }}
           />
           <Button
