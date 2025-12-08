@@ -72,10 +72,8 @@ export function SceneNavBar({
         {/* Scrollable scene container */}
         <div
           ref={scrollContainerRef}
-          className={`flex-1 overflow-x-auto scrollbar-hide pr-12 ${isTopBarCollapsed ? 'pl-12' : 'pl-3'}`}
+          className={`flex-1 overflow-x-auto scene-nav-scrollbar pr-12 ${isTopBarCollapsed ? 'pl-12' : 'pl-3'}`}
           style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
             WebkitOverflowScrolling: 'touch',
           }}
           onScroll={() => {
@@ -204,10 +202,24 @@ export function SceneNavBar({
         </div>
       )}
 
-      {/* Hide scrollbar CSS */}
+      {/* Subtle scrollbar styling */}
       <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
+        .scene-nav-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+        }
+        .scene-nav-scrollbar::-webkit-scrollbar {
+          height: 4px;
+        }
+        .scene-nav-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scene-nav-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.12);
+          border-radius: 4px;
+        }
+        .scene-nav-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(0, 0, 0, 0.25);
         }
       `}</style>
     </div>
