@@ -37,6 +37,16 @@ export function AIChatbot({
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Helper to scroll chat to bottom
+  const scrollToBottom = () => {
+    requestAnimationFrame(() => {
+      const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight
+      }
+    })
+  }
+
   // Load conversation history from localStorage
   useEffect(() => {
     if (projectId) {
@@ -59,13 +69,10 @@ export function AIChatbot({
     }
   }, [projectId, messages])
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive (e.g., AI response)
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
-      if (viewport) {
-        viewport.scrollTop = viewport.scrollHeight
-      }
+    if (scrollAreaRef.current && messages.length > 0) {
+      scrollToBottom()
     }
   }, [messages])
 
@@ -88,6 +95,9 @@ export function AIChatbot({
     setMessages(prev => [...prev, userMessage])
     setInputValue('')
     setIsLoading(true)
+
+    // Scroll immediately when user sends message
+    scrollToBottom()
 
     try {
       const response = await sendChatMessage({
