@@ -575,9 +575,9 @@ export default function TestTipTapPage() {
 
   return (
     <>
-      {/* Loading Screen */}
+      {/* Loading Screen - covers everything until editor is fully ready */}
       <ProcessingScreen
-        isVisible={isLoadingScript || authLoading}
+        isVisible={isLoadingScript || authLoading || !script}
         mode="open"
       />
 

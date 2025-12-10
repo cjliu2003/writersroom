@@ -61,6 +61,16 @@ export async function getUserScripts(): Promise<ScriptSummary[]> {
   return response.json();
 }
 
+export async function getSharedScripts(): Promise<ScriptSummary[]> {
+  const response = await authenticatedFetch('/users/me/collaborations');
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch shared scripts');
+  }
+
+  return response.json();
+}
+
 export async function createScript(data: {
   title: string;
   description?: string;

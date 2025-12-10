@@ -421,6 +421,12 @@ async def add_collaborator(
         role=role
     )
     db.add(collaborator)
+
+    # Update script description with both author names (owner & first collaborator)
+    owner_name = current_user.display_name or "Writer"
+    collaborator_name = target_user.display_name or "Writer"
+    script.description = f"{owner_name} & {collaborator_name}"
+
     await db.commit()
     await db.refresh(collaborator)
 
@@ -479,6 +485,10 @@ async def remove_collaborator(
         )
 
     await db.delete(collaborator)
+
+    # Revert script description to just the owner's name
+    script.description = current_user.display_name or "Writer"
+
     await db.commit()
 
     logger.info(f"Removed collaborator {user_id} from script {script_id}")
