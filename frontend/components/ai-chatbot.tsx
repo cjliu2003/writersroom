@@ -148,50 +148,44 @@ export function AIChatbot({
       bottom: {
         container: "flex justify-start",
         button: "flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-b-0 rounded-t-lg px-5 py-2 transition-all duration-200 shadow-sm hover:shadow-md",
-        layout: "flex-row"
       },
       left: {
-        container: "flex flex-col justify-start h-full",
-        button: "flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-l-0 rounded-r-lg px-2 py-5 transition-all duration-200 shadow-sm hover:shadow-md writing-vertical",
-        layout: "flex-col"
+        container: "flex flex-col justify-end h-full pb-4",
+        button: "flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-l-0 rounded-r-md px-1.5 py-3 transition-all duration-200 shadow-sm hover:shadow-md",
       },
       right: {
-        container: "flex flex-col justify-start h-full",
-        button: "flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-r-0 rounded-l-lg px-2 py-5 transition-all duration-200 shadow-sm hover:shadow-md writing-vertical",
-        layout: "flex-col"
+        container: "flex flex-col justify-end h-full pb-4",
+        button: "flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-r-0 rounded-l-md px-1.5 py-3 transition-all duration-200 shadow-sm hover:shadow-md",
       }
     }
 
     const styles = collapsedStyles[position]
-    const isVertical = position === 'left' || position === 'right'
 
-    // Calculate top offset for collision avoidance with toolbar expand buttons
-    // Top bar expand button: ~44px from top when collapsed (22px position + button height + margin)
-    // Scene nav expand button: ~44px when top bar collapsed, ~68px when top bar expanded
-    let topOffset = 0
-    if (position === 'left' && isTopBarCollapsed) {
-      topOffset = 48 // Clear the top bar expand button
-    } else if (position === 'right' && isSceneNavCollapsed) {
-      topOffset = isTopBarCollapsed ? 48 : 72 // Clear the scene nav expand button
+    // Text faces outward toward screen edge:
+    // LEFT: vertical-lr → characters face LEFT (outward), reads bottom-to-top
+    // RIGHT: vertical-rl → characters face RIGHT (outward), reads top-to-bottom
+    const getWritingMode = () => {
+      if (position === 'left') return 'vertical-lr'
+      if (position === 'right') return 'vertical-rl'
+      return undefined
     }
 
+    const isVertical = position === 'left' || position === 'right'
+
     return (
-      <div
-        className={styles.container}
-        style={{ paddingTop: topOffset > 0 ? `${topOffset}px` : undefined }}
-      >
+      <div className={styles.container}>
         <button
           onClick={onCollapseToggle}
           className={styles.button}
           style={{
             fontFamily: "var(--font-courier-prime), 'Courier New', monospace",
-            writingMode: isVertical ? 'vertical-rl' : undefined,
+            writingMode: getWritingMode(),
             textOrientation: isVertical ? 'mixed' : undefined
           }}
           title="Open AI Assistant"
         >
-          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-          <span className="text-[11px] uppercase tracking-wide">AI</span>
+          <Sparkles className="w-3 h-3 text-purple-400" />
+          <span className="text-[10px] uppercase tracking-wide">AI</span>
         </button>
       </div>
     )
