@@ -55,7 +55,6 @@ export default function TestTipTapPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [userColor] = useState(getRandomColor());
-  const [userName] = useState(`User-${Math.floor(Math.random() * 1000)}`);
   const [authToken, setAuthToken] = useState<string>('');
   // Read scriptId from query params, fallback to default for testing
   const [scriptId, setScriptId] = useState<string>(() => searchParams.get('scriptId') || DEFAULT_SCRIPT_ID);
@@ -88,8 +87,14 @@ export default function TestTipTapPage() {
   const [sceneBoundaries, setSceneBoundaries] = useState<SceneBoundary[]>([]);
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number | null>(null);
 
+  // Collaborator presence tracking
+  const [collaborators, setCollaborators] = useState<Array<{ name: string; color: string; clientId: number }>>([]);
+
   // Get Firebase auth from context (same pattern as other editors)
   const { user, getToken, isLoading: authLoading } = useAuth();
+
+  // Derive user name for collaboration cursor from authenticated user
+  const userName = user?.displayName || user?.email?.split('@')[0] || 'Anonymous';
 
   // Fetch auth token when user is available (needed for WebSocket)
   useEffect(() => {
@@ -180,6 +185,7 @@ export default function TestTipTapPage() {
   const {
     doc,
     provider,
+    awareness,
     syncStatus,
     connectionError,
   } = useScriptYjsCollaboration({
@@ -187,6 +193,41 @@ export default function TestTipTapPage() {
     authToken: authToken,
     enabled: !!authToken, // Only enable when we have auth token
   });
+
+  // Track collaborators via awareness for presence indicator
+  useEffect(() => {
+    if (!awareness) return;
+
+    const updateCollaborators = () => {
+      const states = awareness.getStates();
+      const localClientId = awareness.clientID;
+      const remoteUsers: Array<{ name: string; color: string; clientId: number }> = [];
+
+      states.forEach((state: any, clientId: number) => {
+        // Skip our own client
+        if (clientId === localClientId) return;
+        // Handle both TipTap CollaborationCursor format (user.name, user.color)
+        // and our hook's format (name, color at root level)
+        const name = state?.user?.name || state?.name;
+        const color = state?.user?.color || state?.color || '#888888';
+        if (name) {
+          remoteUsers.push({ name, color, clientId });
+        }
+      });
+
+      setCollaborators(remoteUsers);
+    };
+
+    // Initial update
+    updateCollaborators();
+
+    // Listen for changes
+    awareness.on('change', updateCollaborators);
+
+    return () => {
+      awareness.off('change', updateCollaborators);
+    };
+  }, [awareness]);
 
   // Initialize TipTap editor with screenplay extensions + collaboration + pagination
   const editor = useEditor({
@@ -656,8 +697,31 @@ export default function TestTipTapPage() {
             )}
           </div>
 
-          {/* Right - Share, Export */}
+          {/* Right - Collaborators, Share, Export */}
           <div className="flex items-center gap-0.5 mr-16">
+            {/* Collaborator presence avatars - minimal, only shows when others are editing */}
+            {collaborators.length > 0 && (
+              <div className="flex items-center -space-x-1.5 mr-2 pr-2 border-r border-gray-200">
+                {collaborators.slice(0, 3).map((collab) => (
+                  <div
+                    key={collab.clientId}
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-white ring-2 ring-white"
+                    style={{ backgroundColor: collab.color }}
+                    title={collab.name}
+                  >
+                    {collab.name.charAt(0).toUpperCase()}
+                  </div>
+                ))}
+                {collaborators.length > 3 && (
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-gray-600 bg-gray-200 ring-2 ring-white"
+                    title={`${collaborators.length - 3} more`}
+                  >
+                    +{collaborators.length - 3}
+                  </div>
+                )}
+              </div>
+            )}
             <Button
               variant="ghost"
               size="sm"
