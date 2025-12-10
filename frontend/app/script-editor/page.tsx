@@ -697,17 +697,31 @@ export default function TestTipTapPage() {
       )}
 
       {/* Expand button when top bar is collapsed */}
-      {isTopBarCollapsed && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsTopBarCollapsed(false)}
-          className="fixed top-[22px] left-2 -translate-y-1/2 z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm"
-          title="Expand toolbar"
-        >
-          <ChevronDown className="w-4 h-4" />
-        </Button>
-      )}
+      {/* When scene nav is visible: sits on left side of scene nav bar, vertically centered (frames the bar with collapse button on right) */}
+      {/* When scene nav is collapsed: moves to right side only if chat is on left (to avoid overlap) */}
+      {isTopBarCollapsed && (() => {
+        const sceneNavVisible = !isSceneNavCollapsed;
+        const chatOnLeft = chatPosition === 'left' && !isChatCollapsed;
+
+        // Horizontal: always left when scene nav visible (frames the bar), otherwise avoid chat
+        const horizontalPos = sceneNavVisible ? 'left-2' : (chatOnLeft ? 'right-2' : 'left-2');
+
+        // Vertical: center on scene nav bar when visible (top-[22px] = vertically centered on 44px bar)
+        // Otherwise top-2 for floating position
+        const verticalPos = sceneNavVisible ? 'top-[22px] -translate-y-1/2' : 'top-2';
+
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsTopBarCollapsed(false)}
+            className={`fixed z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm ${horizontalPos} ${verticalPos}`}
+            title="Expand toolbar"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        );
+      })()}
 
       {/* Scene Navigation Bar */}
       {!isSceneNavCollapsed && (
@@ -725,19 +739,47 @@ export default function TestTipTapPage() {
       )}
 
       {/* Expand button when scene nav is collapsed */}
-      {isSceneNavCollapsed && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsSceneNavCollapsed(false)}
-          className={`fixed z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm ${
-            isTopBarCollapsed ? 'top-2 right-2' : 'top-14 right-2'
-          }`}
-          title="Expand scene navigation"
-        >
-          <ChevronDown className="w-4 h-4" />
-        </Button>
-      )}
+      {/* Moves to left side when chat is on right (to avoid overlap) */}
+      {/* Stacks below top bar button when both collapsed and on same side */}
+      {isSceneNavCollapsed && (() => {
+        const chatOnRight = chatPosition === 'right' && !isChatCollapsed;
+        const chatOnLeft = chatPosition === 'left' && !isChatCollapsed;
+
+        // Determine horizontal position: move to left if chat is on right, otherwise stay right
+        const horizontalPos = chatOnRight ? 'left-2' : 'right-2';
+
+        // Determine vertical position:
+        // - If top bar visible: below top bar (top-14)
+        // - If top bar collapsed: check if we need to stack
+        let verticalPos = 'top-14';
+        if (isTopBarCollapsed) {
+          // Top bar button is on left (default) unless chat is on left
+          const topBarButtonOnLeft = !(chatOnLeft);
+          const topBarButtonOnRight = chatOnLeft;
+
+          // Scene nav button is on left if chat is on right, otherwise right
+          const sceneNavButtonOnLeft = chatOnRight;
+          const sceneNavButtonOnRight = !chatOnRight;
+
+          // Stack below if both buttons end up on same side
+          const bothOnLeft = topBarButtonOnLeft && sceneNavButtonOnLeft;
+          const bothOnRight = topBarButtonOnRight && sceneNavButtonOnRight;
+
+          verticalPos = (bothOnLeft || bothOnRight) ? 'top-10' : 'top-2';
+        }
+
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsSceneNavCollapsed(false)}
+            className={`fixed z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm ${horizontalPos} ${verticalPos}`}
+            title="Expand scene navigation"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        );
+      })()}
 
       {/* Export Error Banner */}
       {exportError && (
