@@ -17,6 +17,12 @@ const courierPrime = Courier_Prime({
 export const metadata: Metadata = {
   title: "WritersRoom",
   description: "Professional screenwriting meets AI assistance",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-touch-icon.svg',
+  },
 }
 
 export default function RootLayout({

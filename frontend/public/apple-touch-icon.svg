@@ -1,0 +1,18 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="180" height="180" fill="#f8fafc"/>
+
+  <!-- Page body with dog-ear cutout - centered and scaled -->
+  <g transform="translate(45, 30) scale(2.8)">
+    <path d="M6 4C6 2.89543 6.89543 2 8 2H20L26 8V28C26 29.1046 25.1046 30 24 30H8C6.89543 30 6 29.1046 6 28V4Z" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.3"/>
+
+    <!-- Dog-ear fold -->
+    <path d="M20 2L20 6C20 7.10457 20.8954 8 22 8H26L20 2Z" fill="#e5e7eb"/>
+
+    <!-- Screenplay-style lines -->
+    <rect x="11" y="12" width="10" height="2" rx="0.5" fill="#1f2937"/>
+    <rect x="9" y="17" width="14" height="1.5" rx="0.5" fill="#374151"/>
+    <rect x="9" y="21" width="11" height="1.5" rx="0.5" fill="#374151"/>
+    <rect x="9" y="25" width="13" height="1.5" rx="0.5" fill="#374151"/>
+  </g>
+</svg>
