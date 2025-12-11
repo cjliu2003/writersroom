@@ -4,17 +4,25 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { MessageCircle, Send, Loader2, Sparkles } from "lucide-react"
-import { sendChatMessage, type ChatMessage } from "@/lib/api"
+import { sendChatMessageWithRAG, type ChatMessage, type ToolCallMetadata } from "@/lib/api"
+import { ToolMetadataDisplay } from "@/components/tool-metadata-display"
 
 interface AIChatbotProps {
   projectId?: string
   isVisible?: boolean
+  currentSceneId?: string
 }
 
-export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+// Extended message type to include tool metadata
+interface ExtendedChatMessage extends ChatMessage {
+  tool_metadata?: ToolCallMetadata
+}
+
+export function AIChatbot({ projectId, isVisible = true, currentSceneId }: AIChatbotProps) {
+  const [messages, setMessages] = useState<ExtendedChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -61,17 +69,51 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
     setIsLoading(true)
 
     try {
-      const response = await sendChatMessage({
+      // Use new RAG-enabled endpoint with intelligent context retrieval
+      const response = await sendChatMessageWithRAG({
         script_id: projectId,
-        messages: [...messages, userMessage],
-        include_scenes: true
+        conversation_id: conversationId,
+        current_scene_id: currentSceneId,
+        message: userMessage.content,
+        budget_tier: 'standard' // Can be 'quick', 'standard', or 'deep'
       })
 
-      if (response.success && response.message) {
-        setMessages(prev => [...prev, response.message!])
-      } else {
-        throw new Error(response.error || 'Failed to get response')
+      // Update conversation ID for future messages
+      if (!conversationId) {
+        setConversationId(response.conversation_id)
       }
+
+      // Create assistant message from response (with optional tool metadata)
+      const assistantMessage: ExtendedChatMessage = {
+        role: 'assistant',
+        content: response.message,
+        timestamp: new Date().toISOString(),
+        // Include tool metadata if tools were used
+        tool_metadata: response.tool_metadata
+      }
+
+      setMessages(prev => [...prev, assistantMessage])
+
+      // Log RAG metrics and tool usage for debugging
+      console.log('AI Response Metrics:', {
+        intent: response.context_used.intent,
+        budget_tier: response.context_used.budget_tier,
+        cache_hit: response.context_used.cache_hit,
+        cache_savings: `${response.context_used.cache_savings_pct}%`,
+        token_usage: response.usage,
+        // Phase 6: Tool metadata (if tools were used)
+        tool_metadata: response.tool_metadata || null
+      })
+
+      // If tools were used, log additional details
+      if (response.tool_metadata) {
+        console.log('Tool Usage:', {
+          tools_used: response.tool_metadata.tools_used.join(', '),
+          iterations: response.tool_metadata.tool_calls_made,
+          stop_reason: response.tool_metadata.stop_reason
+        })
+      }
+
     } catch (error) {
       console.error('Chat error:', error)
       const errorMessage: ChatMessage = {
@@ -122,7 +164,7 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
               messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-2 ${
@@ -135,6 +177,13 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
                       {message.content}
                     </p>
                   </div>
+
+                  {/* Display tool metadata for assistant messages if available */}
+                  {message.role === 'assistant' && message.tool_metadata && (
+                    <div className="mt-1 max-w-[80%]">
+                      <ToolMetadataDisplay metadata={message.tool_metadata} />
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -161,7 +210,7 @@ export function AIChatbot({ projectId, isVisible = true }: AIChatbotProps) {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder={projectId ? "Ask about your screenplay..." : "Select a project to start chatting"}
             disabled={!projectId || isLoading}
             className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
