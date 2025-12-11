@@ -37,8 +37,10 @@ import { SceneNavBar } from '@/components/scene-nav-bar';
 import { AIChatbot } from '@/components/ai-chatbot';
 import ProcessingScreen from '@/components/ProcessingScreen';
 import { ShareDialog } from '@/components/share-dialog';
+import { EditMenuDropdown } from '@/components/edit-menu-dropdown';
+import { FileMenuDropdown } from '@/components/file-menu-dropdown';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Pencil, Share2, Download, ChevronUp, ChevronDown } from 'lucide-react';
+import { Home, Share2, Download, ChevronUp, ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '@/styles/screenplay.css';
 
@@ -648,26 +650,12 @@ export default function TestTipTapPage() {
                 <Home className="w-3.5 h-3.5 mr-1.5" />
                 Home
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
-                style={{ fontFamily: "inherit" }}
-                title="Coming soon"
-              >
-                <FileText className="w-3.5 h-3.5 mr-1.5" />
-                File
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
-                style={{ fontFamily: "inherit" }}
-                title="Coming soon"
-              >
-                <Pencil className="w-3.5 h-3.5 mr-1.5" />
-                Edit
-              </Button>
+              <FileMenuDropdown
+                onExport={handleExportFDX}
+                isExporting={isExporting}
+                scriptTitle={script?.title}
+              />
+              <EditMenuDropdown editor={editor} />
             </div>
 
           {/* Center - Script Title (absolutely centered on page, click to edit) */}
