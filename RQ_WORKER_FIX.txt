@@ -1,0 +1,56 @@
+=================================================================
+RQ WORKER ISSUE - SOLVED
+=================================================================
+
+PROBLEM:
+--------
+RQ workers failing with misleading error:
+"ValueError: Invalid attribute name: app.tasks.ai_ingestion_worker.analyze_script_partial"
+
+ROOT CAUSE:
+-----------
+macOS fork() safety issue - NOT an import problem!
+
+When RQ forks child processes to run jobs, macOS's Objective-C runtime
+detects that multithreaded initialization is in progress (from OpenAI SDK,
+httpx, or other libraries) and crashes the process to prevent unsafe fork.
+
+RQ then catches this crash and reports the generic "Invalid attribute name"
+error, hiding the real cause.
+
+SOLUTION:
+---------
+Set environment variable to bypass macOS strict fork safety:
+
+  export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+QUICK START:
+------------
+cd backend
+./start_worker.sh
+
+FILES CREATED:
+--------------
+- backend/worker.py          : RQ worker script
+- backend/start_worker.sh    : Startup script with env vars
+- backend/RQ_WORKER_SETUP.md : Comprehensive documentation
+
+DEBUGGING JOURNEY:
+------------------
+1. Initial error appeared to be import/path issue
+2. Tried PYTHONPATH, -P flag, sys.path modifications - all failed
+3. Created custom workers with path setup - still failed
+4. Monkey-patched RQ's import_attribute - patch didn't run (fork issue)
+5. Modified RQ source directly with file-based logging - BREAKTHROUGH!
+6. Discovered real error: macOS objc fork() safety crash
+7. Applied OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES - SUCCESS!
+
+VERIFICATION:
+-------------
+✓ Import works outside worker
+✓ Import works in worker startup
+✓ Import succeeds in forked child process with env var
+✓ Jobs process successfully
+
+The error message "Invalid attribute name" was completely misleading -
+imports were working fine, but the fork() crash happened afterward.

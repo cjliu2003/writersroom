@@ -14,7 +14,7 @@ from slowapi.errors import RateLimitExceeded
 # Load environment variables from .env file
 load_dotenv()
 
-from app.routers import health_router, auth_router, script_router, fdx_router, user_router, ai_router, scene_autosave_router, script_autosave_router, websocket, script_websocket
+from app.routers import health_router, auth_router, script_router, fdx_router, user_router, ai_router, ai_ingestion_router, scene_autosave_router, script_autosave_router, websocket, script_websocket
 from app.firebase.config import initialize_firebase
 from app.middleware.payload_size_limiter import PayloadSizeLimiter
 from app.services.redis_pubsub import initialize_redis_manager, redis_pubsub_manager
@@ -71,6 +71,7 @@ app.include_router(script_autosave_router.router, prefix="/api")
 app.include_router(fdx_router.router, prefix="/api")
 app.include_router(user_router.router, prefix="/api")
 app.include_router(ai_router.router, prefix="/api")
+app.include_router(ai_ingestion_router.router, prefix="/api")
 app.include_router(websocket.router, prefix="/api", tags=["websocket"])
 app.include_router(script_websocket.router, prefix="/api", tags=["websocket"])
 

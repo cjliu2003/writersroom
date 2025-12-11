@@ -15,6 +15,7 @@ from app.models.scene_snapshot import SceneSnapshot
 from app.models.scene_write_op import SceneWriteOp
 from app.models.user import User
 from app.services.scene_service import SceneService
+from app.services.staleness_service import StalenessService
 
 router = APIRouter(prefix="/scenes", tags=["scenes"])
 
@@ -110,7 +111,34 @@ async def update_scene(
             data=scene_data,
             op_id=op_id
         )
-        
+
+        # Phase 4: Mark artifacts as stale after successful save
+        # This enables incremental AI updates
+        staleness_service = StalenessService(db=db)
+
+        # Get the updated scene
+        scene = await db.get(Scene, scene_id)
+
+        if scene:
+            # Mark artifacts as potentially stale
+            staleness_result = await staleness_service.mark_scene_changed(scene)
+
+            # Optionally trigger background scene summary refresh
+            # (debounced - RQ will deduplicate if already queued)
+            try:
+                from app.workers import queue_urgent
+                queue_urgent.enqueue(
+                    'app.workers.refresh_jobs.refresh_scene_summary',
+                    str(scene_id),
+                    job_timeout='5m',
+                    job_id=f"scene_summary_{scene_id}"  # Prevents duplicate jobs
+                )
+            except Exception as queue_error:
+                # Log but don't fail the request if queuing fails
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Failed to queue scene summary refresh: {queue_error}")
+
         # Return success response
         return SaveSuccessResponse(
             scene=SceneResponse(

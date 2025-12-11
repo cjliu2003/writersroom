@@ -13,6 +13,7 @@ from uuid import UUID
 from app.models.user import User
 from app.models.script import Script
 from app.models.scene import Scene
+from app.models.scene_character import SceneCharacter
 from app.schemas.fdx import (
     FDXUploadResponse,
     FDXParseRequest,
@@ -26,6 +27,8 @@ from app.db.base import get_db
 from app.services.fdx_parser import FDXParser, ParsedFDXResult
 from app.services.fdx_exporter import FDXExporter
 from app.services.supabase_storage import storage_service
+from app.services.scene_service import SceneService
+from app.core.config import settings
 import logging
 import tempfile
 import os
@@ -173,6 +176,11 @@ async def upload_fdx_file(
                 full_content=scene_data.full_content
             )
 
+            # Optionally compute initial hash (for efficiency)
+            # Will be updated when first analyzed anyway
+            scene_text = SceneService._construct_scene_text(db_scene)
+            db_scene.hash = SceneService.compute_scene_hash(scene_text)
+
             # DIAGNOSTIC: Log first scene DB object before adding to session
             if position == 0:
                 print(f"[DIAGNOSTIC] Scene 0 DB object BEFORE db.add:")
@@ -182,7 +190,25 @@ async def upload_fdx_file(
 
             db.add(db_scene)
             db_scenes.append(db_scene)
-        
+
+        # Flush to generate scene IDs before creating SceneCharacter records
+        await db.flush()
+
+        # Populate scene_characters junction table from parsed character data
+        print(f"Populating scene_characters junction table...")
+        character_records_created = 0
+        for db_scene in db_scenes:
+            if db_scene.characters:  # Scene.characters is a JSONB array
+                for character_name in db_scene.characters:
+                    scene_char = SceneCharacter(
+                        scene_id=db_scene.scene_id,
+                        character_name=character_name
+                    )
+                    db.add(scene_char)
+                    character_records_created += 1
+
+        print(f"Created {character_records_created} scene_character records")
+
         # Commit all changes
         await db.commit()
         await db.refresh(new_script)
@@ -202,6 +228,34 @@ async def upload_fdx_file(
             print(f"  scene_heading: {db_scenes[0].scene_heading}")
             print(f"  content_blocks: {db_scenes[0].content_blocks}")
             print(f"  summary: {db_scenes[0].summary[:100] if db_scenes[0].summary else 'None'}")
+
+        # Enqueue background analysis job
+        job_id = None
+        analysis_status = None
+        try:
+            from redis import Redis
+            from rq import Queue
+            from app.tasks.ai_ingestion_worker import analyze_script_full
+
+            redis_conn = Redis.from_url(settings.REDIS_URL)
+            queue = Queue('ai_ingestion', connection=redis_conn)
+
+            job = queue.enqueue(
+                analyze_script_full,
+                str(new_script.script_id),
+                job_timeout='30m'
+            )
+
+            job_id = job.id
+            analysis_status = "queued"
+            logger.info(f"Enqueued analysis job {job_id} for script {new_script.script_id}")
+            print(f"✅ Analysis job queued: {job_id}")
+
+        except Exception as e:
+            logger.warning(f"Failed to enqueue analysis job: {str(e)}")
+            print(f"⚠️  Analysis job not queued (worker unavailable): {str(e)}")
+            analysis_status = "manual_trigger_required"
+            # Upload still succeeded, analysis can be triggered manually
 
         # Convert scenes to response format
         scene_schemas = []
@@ -240,7 +294,9 @@ async def upload_fdx_file(
             title=parsed_result.title,
             scene_count=len(parsed_result.scenes),
             scenes=scene_schemas,
-            file_info=file_info
+            file_info=file_info,
+            job_id=job_id,
+            analysis_status=analysis_status
         )
         
     except ValueError as e:

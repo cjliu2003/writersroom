@@ -15,6 +15,8 @@ if TYPE_CHECKING:
     from app.models.scene_snapshot import SceneSnapshot  # noqa: F401
     from app.models.scene_snapshot_metadata import SceneSnapshotMetadata  # noqa: F401
     from app.models.user import User  # noqa: F401
+    from app.models.scene_summary import SceneSummary  # noqa: F401
+    from app.models.scene_character import SceneCharacter  # noqa: F401
 
 class Scene(Base):
     """Scene model representing a scene within a script."""
@@ -145,7 +147,22 @@ class Scene(Base):
         nullable=True,
         comment='SHA256 checksum of Yjs state for comparison'
     )
-    
+
+    # AI system fields (Phase 1 - Scene hashing for change detection)
+    hash: Mapped[Optional[str]] = mapped_column(
+        String(64),
+        nullable=True,
+        index=True,
+        comment='SHA-256 hash of normalized scene content for change detection'
+    )
+
+    is_key_scene: Mapped[bool] = mapped_column(
+        Integer,  # SQLite doesn't have Boolean, use 0/1
+        nullable=False,
+        default=False,
+        comment='Manually flagged as key scene (plot point, major character moment, etc.)'
+    )
+
     # Relationships
     script: Mapped['Script'] = relationship(
         'Script',
@@ -195,7 +212,23 @@ class Scene(Base):
         cascade='all, delete-orphan',
         lazy='selectin'
     )
-    
+
+    # AI system relationships (Phase 0)
+    scene_summary: Mapped['SceneSummary'] = relationship(
+        'SceneSummary',
+        back_populates='scene',
+        uselist=False,  # one-to-one relationship
+        cascade='all, delete-orphan',
+        lazy='selectin'
+    )
+
+    scene_characters: Mapped[List['SceneCharacter']] = relationship(
+        'SceneCharacter',
+        back_populates='scene',
+        cascade='all, delete-orphan',
+        lazy='selectin'
+    )
+
     def __repr__(self) -> str:
         return f"<Scene {self.scene_heading[:30]}...>"
     
@@ -216,5 +249,7 @@ class Scene(Base):
             'version': self.version,
             'updated_by': str(self.updated_by) if self.updated_by else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'hash': self.hash,
+            'is_key_scene': bool(self.is_key_scene)
         }

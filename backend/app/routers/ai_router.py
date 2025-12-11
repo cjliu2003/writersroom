@@ -3,30 +3,48 @@ AI-powered features endpoints for the WritersRoom API
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import attributes
 from typing import List
 from uuid import UUID
 from datetime import datetime, timezone
+import json
+import logging
+from anthropic import AsyncAnthropic
 
 from app.models.user import User
 from app.models.script import Script
 from app.models.scene import Scene
+from app.models.chat_conversation import ChatConversation
+from app.models.chat_message import ChatMessage as ChatMessageModel, MessageRole
+from app.models.token_usage import TokenUsage
 from app.schemas.ai import (
-    SceneSummaryRequest, 
+    SceneSummaryRequest,
     SceneSummaryResponse,
     ChatRequest,
     ChatResponse,
     ChatMessage,
-    AIErrorResponse
+    AIErrorResponse,
+    ChatMessageRequest,
+    ChatMessageResponse,
+    ToolCallMessageRequest,
+    ToolCallMessageResponse,
+    ToolCallMetadata,
+    IntentType
 )
 from app.services.openai_service import openai_service
+from app.services.ai_service import AIService
+from app.services.intent_classifier import IntentClassifier
+from app.services.context_builder import ContextBuilder
+from app.services.conversation_service import ConversationService
 from app.auth.dependencies import get_current_user
 from app.db.base import get_db
 from app.routers.script_router import get_script_if_user_has_access
 
 router = APIRouter(prefix="/ai", tags=["AI"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/scene-summary", response_model=SceneSummaryResponse)
@@ -171,11 +189,899 @@ async def ai_chat(
             success=True,
             message=response_message
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate chat response: {str(e)}"
+        )
+
+
+# ============================================================================
+# Phase 3: Chat Integration with RAG Context Assembly
+# ============================================================================
+
+async def track_token_usage(
+    user_id: UUID,
+    script_id: UUID,
+    conversation_id: UUID,
+    usage: dict,
+    db: AsyncSession
+):
+    """
+    Track token usage for analytics and billing.
+
+    Calculates cost based on Claude 3.5 Sonnet pricing:
+    - Input: $0.003/1K tokens
+    - Cache creation (write): $0.00375/1K tokens (25% premium)
+    - Cache read: $0.0003/1K tokens (90% discount)
+    - Output: $0.015/1K tokens
+    """
+    # Calculate cost
+    input_cost = (
+        usage["input_tokens"] * 0.003 / 1000 +  # Full price input
+        usage["cache_creation_input_tokens"] * 0.00375 / 1000 +  # Cache write (25% more)
+        usage["cache_read_input_tokens"] * 0.0003 / 1000  # Cache read (90% discount)
+    )
+    output_cost = usage["output_tokens"] * 0.015 / 1000
+    total_cost = input_cost + output_cost
+
+    # Store usage record
+    usage_record = TokenUsage(
+        user_id=user_id,
+        script_id=script_id,
+        conversation_id=conversation_id,
+        input_tokens=usage["input_tokens"],
+        cache_creation_tokens=usage["cache_creation_input_tokens"],
+        cache_read_tokens=usage["cache_read_input_tokens"],
+        output_tokens=usage["output_tokens"],
+        total_cost=total_cost
+    )
+
+    db.add(usage_record)
+    await db.commit()
+    await db.refresh(usage_record)
+
+    logger.info(
+        f"Token usage tracked: user={user_id}, script={script_id}, "
+        f"in={usage['input_tokens']}, out={usage['output_tokens']}, "
+        f"cache_read={usage['cache_read_input_tokens']}, cost=${total_cost:.4f}"
+    )
+
+    return usage_record
+
+
+# ============================================================================
+# Phase 6: Unified Hybrid Chat Helper Functions
+# ============================================================================
+
+def should_enable_tools(
+    request: ChatMessageRequest,
+    intent: IntentType
+) -> bool:
+    """
+    Intelligently decide whether to enable tools based on request context.
+
+    Strategy: Enable tools for analytical queries, disable for simple chat.
+
+    Args:
+        request: Chat message request
+        intent: Classified intent
+
+    Returns:
+        True if tools should be enabled, False otherwise
+    """
+    # Explicit user override takes precedence
+    if hasattr(request, 'enable_tools') and request.enable_tools is not None:
+        return request.enable_tools
+
+    # Analytical keywords suggest tool usage
+    analytical_keywords = [
+        "analyze", "pacing", "track", "find all", "search for",
+        "character appears", "plot threads", "quantitative",
+        "how many", "which scenes", "compare scenes", "show me all"
+    ]
+    message_lower = request.message.lower()
+    uses_analytical = any(kw in message_lower for kw in analytical_keywords)
+
+    if uses_analytical:
+        logger.info(f"Enabling tools: analytical keywords detected in '{request.message[:50]}...'")
+        return True
+
+    # Intent-based defaults
+    if intent in [IntentType.LOCAL_EDIT, IntentType.SCENE_FEEDBACK]:
+        # For local edits with scene_id provided, RAG context is sufficient
+        if request.current_scene_id:
+            logger.info(f"Disabling tools: LOCAL_EDIT/SCENE_FEEDBACK with scene_id provided")
+            return False
+
+    if intent == IntentType.GLOBAL_QUESTION:
+        # Global questions may benefit from precise retrieval
+        logger.info(f"Enabling tools: GLOBAL_QUESTION intent")
+        return True
+
+    # Conservative default: enable tools (let Claude decide)
+    logger.info(f"Enabling tools: default behavior for intent={intent}")
+    return True
+
+
+async def _handle_tool_loop(
+    client: AsyncAnthropic,
+    system: List[dict],
+    initial_messages: List[dict],
+    tools: List[dict],
+    max_iterations: int,
+    script_id: UUID,
+    db: AsyncSession
+) -> tuple[str, dict, ToolCallMetadata]:
+    """
+    Handle multi-turn tool calling loop.
+
+    Args:
+        client: Anthropic client
+        system: System prompt blocks
+        initial_messages: Initial message history
+        tools: Available MCP tools
+        max_iterations: Maximum tool calling iterations
+        script_id: Script ID for tool execution context
+        db: Database session
+
+    Returns:
+        Tuple of (final_message, aggregated_usage, tool_metadata)
+    """
+    from app.services.mcp_tools import MCPToolExecutor
+
+    messages = initial_messages.copy()
+    total_usage = {
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0
+    }
+    tools_used = []
+    tool_executor = MCPToolExecutor(db=db, script_id=script_id)
+
+    for iteration in range(max_iterations):
+        logger.info(f"Tool loop iteration {iteration + 1}/{max_iterations}")
+
+        # Call Claude
+        response = await client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=600,
+            system=system,
+            messages=messages,
+            tools=tools
+        )
+
+        # Aggregate token usage
+        total_usage["input_tokens"] += response.usage.input_tokens
+        total_usage["cache_creation_input_tokens"] += response.usage.cache_creation_input_tokens
+        total_usage["cache_read_input_tokens"] += response.usage.cache_read_input_tokens
+        total_usage["output_tokens"] += response.usage.output_tokens
+
+        # Check stop reason
+        if response.stop_reason == "end_turn":
+            # Natural end - extract final text
+            final_text = next(
+                (block.text for block in response.content if block.type == "text"),
+                ""
+            )
+            logger.info(f"Tool loop ended naturally after {iteration + 1} iteration(s)")
+            return final_text, total_usage, ToolCallMetadata(
+                tool_calls_made=iteration + 1,
+                tools_used=list(set(tools_used)),
+                stop_reason="end_turn"
+            )
+
+        # Extract and execute tool uses
+        tool_results = []
+        for block in response.content:
+            if block.type == "tool_use":
+                tools_used.append(block.name)
+                logger.info(f"Executing tool: {block.name} with input: {block.input}")
+
+                try:
+                    # Execute tool
+                    result = await tool_executor.execute_tool(
+                        tool_name=block.name,
+                        tool_input=block.input
+                    )
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": result
+                    })
+                    logger.info(f"Tool {block.name} executed successfully")
+                except Exception as e:
+                    # Return error to Claude (graceful degradation)
+                    logger.error(f"Tool execution failed: {e}", exc_info=True)
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": f"Error executing tool: {str(e)}",
+                        "is_error": True
+                    })
+
+        # Append assistant message and tool results to conversation
+        messages.append({"role": "assistant", "content": response.content})
+
+        # Only append tool results if there are any (avoid empty content error)
+        if tool_results:
+            messages.append({"role": "user", "content": tool_results})
+
+    # Max iterations reached - make final call to get text response
+    logger.warning(f"Tool loop reached max_iterations ({max_iterations})")
+    final_response = await client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=600,
+        system=system,
+        messages=messages
+    )
+
+    # Aggregate final call tokens
+    total_usage["input_tokens"] += final_response.usage.input_tokens
+    total_usage["cache_creation_input_tokens"] += final_response.usage.cache_creation_input_tokens
+    total_usage["cache_read_input_tokens"] += final_response.usage.cache_read_input_tokens
+    total_usage["output_tokens"] += final_response.usage.output_tokens
+
+    final_text = next(
+        (block.text for block in final_response.content if block.type == "text"),
+        ""
+    )
+
+    return final_text, total_usage, ToolCallMetadata(
+        tool_calls_made=max_iterations,
+        tools_used=list(set(tools_used)),
+        stop_reason="max_iterations"
+    )
+
+
+@router.post("/chat/message", response_model=ChatMessageResponse)
+async def chat_message(
+    request: ChatMessageRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Send message to AI assistant and get response.
+
+    Phase 3: Full integration with Phase 2 RAG components:
+    - Intent classification (heuristic + LLM fallback)
+    - Intelligent context retrieval (positional, semantic, hybrid, minimal)
+    - Conversation context management (sliding window + summaries)
+    - Prompt caching for 90% cost reduction
+    - Token budget management (quick/standard/deep tiers)
+
+    Request includes:
+    - script_id: Which script to discuss
+    - conversation_id: Existing conversation (optional)
+    - current_scene_id: Current scene context (optional)
+    - message: User's message
+    - intent_hint: Optional intent classification hint
+    - budget_tier: Token budget tier (quick/standard/deep)
+
+    Response includes:
+    - message: AI's response
+    - conversation_id: Conversation ID (created if new)
+    - usage: Token usage statistics with cache metrics
+    - context_used: What context was included
+    """
+    try:
+        # Validate script access
+        script = await get_script_if_user_has_access(
+            request.script_id,
+            current_user,
+            db,
+            allow_viewer=True
+        )
+
+        # Initialize services
+        intent_classifier = IntentClassifier()
+        context_builder = ContextBuilder(db=db)
+        ai_service = AIService()
+
+        # 1. Classify intent
+        intent = await intent_classifier.classify(
+            message=request.message,
+            hint=request.intent_hint
+        )
+
+        logger.info(f"Classified intent: {intent} for message: {request.message[:50]}...")
+
+        # 2. Get or create conversation
+        if request.conversation_id:
+            conversation_result = await db.execute(
+                select(ChatConversation).where(
+                    ChatConversation.conversation_id == request.conversation_id
+                )
+            )
+            conversation = conversation_result.scalar_one_or_none()
+
+            if not conversation:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Conversation not found"
+                )
+
+            if conversation.user_id != current_user.user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Access denied to this conversation"
+                )
+        else:
+            # Create new conversation
+            conversation = ChatConversation(
+                user_id=current_user.user_id,
+                script_id=request.script_id,
+                current_scene_id=request.current_scene_id,
+                title=request.message[:100]  # First message as title
+            )
+            db.add(conversation)
+            await db.commit()
+            await db.refresh(conversation)
+
+            logger.info(f"Created new conversation: {conversation.conversation_id}")
+
+        # 3. Build context-aware prompt
+        prompt = await context_builder.build_prompt(
+            script_id=request.script_id,
+            message=request.message,
+            intent=intent,
+            conversation_id=conversation.conversation_id,
+            current_scene_id=request.current_scene_id,
+            budget_tier=request.budget_tier or "standard"
+        )
+
+        logger.info(
+            f"Built prompt: {prompt['metadata']['tokens_used']['total']} tokens, "
+            f"budget_tier={request.budget_tier or 'standard'}, intent={intent}"
+        )
+
+        # 4. Generate AI response (Phase 6: Hybrid RAG + Tools)
+        # Determine if tools should be enabled
+        tools_enabled = should_enable_tools(request, intent)
+        tool_metadata = None
+
+        if tools_enabled:
+            # Hybrid mode: RAG context + MCP tools
+            logger.info("Hybrid mode: Enabling MCP tools with RAG context")
+
+            # Import tools and create client
+            from app.services.mcp_tools import SCREENPLAY_TOOLS
+            from app.core.config import settings
+
+            client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+
+            # Extend system prompt with tool usage instructions
+            tool_instructions = """
+
+You have access to tools that allow you to retrieve and analyze screenplay content dynamically.
+
+When answering questions:
+- Use tools to get accurate, up-to-date information from the screenplay
+- Prefer tools over cached context when precision matters (e.g., "show me all scenes with X")
+- You can call multiple tools to build comprehensive analysis
+- Provide specific scene numbers, character names, and quotes from tool results
+- The cached context gives you overview; tools give you precision
+
+Available tools:
+- get_scene: Get full scene text by index
+- get_scene_context: Get scene plus surrounding scenes
+- get_character_scenes: Track character appearances
+- search_script: Semantic/keyword search
+- analyze_pacing: Quantitative pacing metrics
+- get_plot_threads: Plot thread tracking
+"""
+            # Merge tool instructions with RAG system prompt
+            prompt["system"][0]["text"] += tool_instructions
+
+            # Call tool loop
+            final_message, usage, tool_metadata = await _handle_tool_loop(
+                client=client,
+                system=prompt["system"],
+                initial_messages=prompt["messages"],
+                tools=SCREENPLAY_TOOLS,
+                max_iterations=request.max_iterations,
+                script_id=request.script_id,
+                db=db
+            )
+
+            response = {
+                "content": final_message,
+                "usage": usage
+            }
+
+            logger.info(
+                f"Hybrid response: {usage['output_tokens']} output tokens, "
+                f"tools_used={tool_metadata.tools_used}, "
+                f"tool_calls={tool_metadata.tool_calls_made}, "
+                f"cache_read={usage['cache_read_input_tokens']}"
+            )
+        else:
+            # RAG-only mode: Use existing AIService
+            logger.info("RAG-only mode: Using cached context without tools")
+
+            response = await ai_service.generate_response(
+                prompt=prompt,
+                max_tokens=request.max_tokens or 600
+            )
+
+            logger.info(
+                f"RAG response: {response['usage']['output_tokens']} output tokens, "
+                f"cache_read={response['usage']['cache_read_input_tokens']} (cache hit={response['usage']['cache_read_input_tokens'] > 0})"
+            )
+
+        # 5. Save conversation messages
+        user_message = ChatMessageModel(
+            conversation_id=conversation.conversation_id,
+            sender="user",
+            role=MessageRole.USER,
+            content=request.message
+        )
+        db.add(user_message)
+
+        assistant_message = ChatMessageModel(
+            conversation_id=conversation.conversation_id,
+            sender="assistant",
+            role=MessageRole.ASSISTANT,
+            content=response["content"]
+        )
+        db.add(assistant_message)
+
+        await db.commit()
+
+        # 6. Track token usage
+        await track_token_usage(
+            user_id=current_user.user_id,
+            script_id=request.script_id,
+            conversation_id=conversation.conversation_id,
+            usage=response["usage"],
+            db=db
+        )
+
+        # 7. Check if conversation needs summary
+        conversation_service = ConversationService(db=db)
+        if await conversation_service.should_generate_summary(conversation.conversation_id):
+            # Trigger background summary generation
+            # TODO: Implement background job queue (RQ) for summary generation
+            logger.info(f"Conversation {conversation.conversation_id} needs summary generation")
+
+        # Calculate cache savings percentage
+        cache_savings_pct = 0
+        if response["usage"]["input_tokens"] > 0:
+            cache_savings_pct = round(
+                100 * response["usage"]["cache_read_input_tokens"] /
+                response["usage"]["input_tokens"]
+            )
+
+        return ChatMessageResponse(
+            message=response["content"],
+            conversation_id=conversation.conversation_id,
+            usage={
+                "input_tokens": response["usage"]["input_tokens"],
+                "cache_creation_input_tokens": response["usage"]["cache_creation_input_tokens"],
+                "cache_read_input_tokens": response["usage"]["cache_read_input_tokens"],
+                "output_tokens": response["usage"]["output_tokens"]
+            },
+            context_used={
+                "intent": intent,
+                "budget_tier": request.budget_tier or "standard",
+                "tokens_breakdown": prompt["metadata"]["tokens_used"],
+                "cache_hit": response["usage"]["cache_read_input_tokens"] > 0,
+                "cache_savings_pct": cache_savings_pct
+            },
+            tool_metadata=tool_metadata  # Phase 6: Include tool usage metadata (optional)
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in chat_message endpoint: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate chat response: {str(e)}"
+        )
+
+
+@router.post("/chat/message/stream")
+async def chat_message_stream(
+    request: ChatMessageRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Streaming endpoint for real-time response generation.
+
+    Same functionality as POST /chat/message but streams the response
+    token-by-token for better UX in the frontend.
+
+    Returns Server-Sent Events (SSE) stream with:
+    - content_delta events: Text chunks as they're generated
+    - message_complete event: Final usage statistics
+    """
+    try:
+        # Validate script access
+        script = await get_script_if_user_has_access(
+            request.script_id,
+            current_user,
+            db,
+            allow_viewer=True
+        )
+
+        # Initialize services
+        intent_classifier = IntentClassifier()
+        context_builder = ContextBuilder(db=db)
+        ai_service = AIService()
+
+        # 1. Classify intent
+        intent = await intent_classifier.classify(
+            message=request.message,
+            hint=request.intent_hint
+        )
+
+        # 2. Get or create conversation
+        if request.conversation_id:
+            conversation_result = await db.execute(
+                select(ChatConversation).where(
+                    ChatConversation.conversation_id == request.conversation_id
+                )
+            )
+            conversation = conversation_result.scalar_one_or_none()
+
+            if not conversation or conversation.user_id != current_user.user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Conversation not found"
+                )
+        else:
+            conversation = ChatConversation(
+                user_id=current_user.user_id,
+                script_id=request.script_id,
+                current_scene_id=request.current_scene_id,
+                title=request.message[:100]
+            )
+            db.add(conversation)
+            await db.commit()
+            await db.refresh(conversation)
+
+        # 3. Build context-aware prompt
+        prompt = await context_builder.build_prompt(
+            script_id=request.script_id,
+            message=request.message,
+            intent=intent,
+            conversation_id=conversation.conversation_id,
+            current_scene_id=request.current_scene_id,
+            budget_tier=request.budget_tier or "standard"
+        )
+
+        # 4. Generate streaming response
+        async def generate_stream():
+            """Generator for SSE stream."""
+            full_content = ""
+            final_usage = None
+
+            async for chunk in ai_service.generate_response(
+                prompt=prompt,
+                max_tokens=request.max_tokens or 600,
+                stream=True
+            ):
+                if chunk["type"] == "content_delta":
+                    full_content += chunk["text"]
+                    yield f"data: {json.dumps(chunk)}\n\n"
+                elif chunk["type"] == "message_complete":
+                    final_usage = chunk["usage"]
+                    yield f"data: {json.dumps(chunk)}\n\n"
+
+            # 5. Save messages after streaming completes
+            user_message = ChatMessageModel(
+                conversation_id=conversation.conversation_id,
+                sender="user",
+                role=MessageRole.USER,
+                content=request.message
+            )
+            db.add(user_message)
+
+            assistant_message = ChatMessageModel(
+                conversation_id=conversation.conversation_id,
+                sender="assistant",
+                role=MessageRole.ASSISTANT,
+                content=full_content
+            )
+            db.add(assistant_message)
+
+            await db.commit()
+
+            # 6. Track token usage
+            if final_usage:
+                await track_token_usage(
+                    user_id=current_user.user_id,
+                    script_id=request.script_id,
+                    conversation_id=conversation.conversation_id,
+                    usage=final_usage,
+                    db=db
+                )
+
+            # Send final event
+            yield f"data: {json.dumps({'type': 'stream_end', 'conversation_id': str(conversation.conversation_id)})}\n\n"
+
+        return StreamingResponse(
+            generate_stream(),
+            media_type="text/event-stream"
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in chat_message_stream endpoint: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate streaming response: {str(e)}"
+        )
+
+
+@router.get("/chat/conversations/{conversation_id}")
+async def get_conversation(
+    conversation_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get conversation history with all messages.
+
+    Returns:
+    - conversation: Conversation metadata (id, title, script_id, timestamps)
+    - messages: List of all messages in chronological order
+    """
+    try:
+        # Get conversation
+        conversation_result = await db.execute(
+            select(ChatConversation).where(
+                ChatConversation.conversation_id == conversation_id
+            )
+        )
+        conversation = conversation_result.scalar_one_or_none()
+
+        if not conversation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conversation not found"
+            )
+
+        # Verify access
+        if conversation.user_id != current_user.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this conversation"
+            )
+
+        # Get all messages
+        messages_result = await db.execute(
+            select(ChatMessageModel)
+            .where(ChatMessageModel.conversation_id == conversation_id)
+            .order_by(ChatMessageModel.created_at)
+        )
+        messages = messages_result.scalars().all()
+
+        return {
+            "conversation": conversation.to_dict(),
+            "messages": [msg.to_dict() for msg in messages]
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in get_conversation endpoint: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get conversation: {str(e)}"
+        )
+
+
+# ============================================================================
+# Phase 5: Tool Calling Endpoint
+# ============================================================================
+
+@router.post("/chat/message/tools", response_model=ToolCallMessageResponse)
+async def chat_message_with_tools(
+    request: ToolCallMessageRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Send message to AI assistant with tool calling support.
+
+    Phase 5: MCP tool integration for screenplay analysis:
+    - Enables Claude to use 6 screenplay tools dynamically
+    - Multi-turn tool use loops (up to max_iterations)
+    - Tools: get_scene, get_scene_context, get_character_scenes,
+             search_script, analyze_pacing, get_plot_threads
+
+    Example queries:
+    - "What happens in scene 5?" → Uses get_scene tool
+    - "Show me all scenes with SARAH" → Uses get_character_scenes tool
+    - "Find scenes about the heist" → Uses search_script tool
+    - "How's the pacing in Act 2?" → Uses analyze_pacing tool
+    - "What are the main plot threads?" → Uses get_plot_threads tool
+    - "Compare scenes 3, 5, and 7" → Uses multiple get_scene calls
+
+    Response includes:
+    - message: Final AI response after tool calls
+    - conversation_id: Conversation ID (created if new)
+    - usage: Token usage statistics
+    - tool_calls: Number of tool calling iterations used
+    - stop_reason: "end_turn" (natural end) or "max_iterations" (limit reached)
+    """
+    from app.services.mcp_tools import SCREENPLAY_TOOLS
+
+    try:
+        # Validate script access
+        script = await get_script_if_user_has_access(
+            request.script_id,
+            current_user,
+            db,
+            allow_viewer=True
+        )
+
+        logger.info(
+            f"Tool-enabled chat request from user {current_user.user_id} "
+            f"for script {request.script_id}: {request.message[:100]}"
+        )
+
+        # Get or create conversation
+        if request.conversation_id:
+            conversation_result = await db.execute(
+                select(ChatConversation).where(
+                    ChatConversation.conversation_id == request.conversation_id
+                )
+            )
+            conversation = conversation_result.scalar_one_or_none()
+
+            if not conversation:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Conversation not found"
+                )
+
+            if conversation.user_id != current_user.user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Access denied to this conversation"
+                )
+        else:
+            # Create new conversation
+            conversation = ChatConversation(
+                user_id=current_user.user_id,
+                script_id=request.script_id,
+                current_scene_id=request.current_scene_id,
+                title=request.message[:100]
+            )
+            db.add(conversation)
+            await db.commit()
+            await db.refresh(conversation)
+
+            logger.info(f"Created new tool conversation: {conversation.conversation_id}")
+
+        # Build system prompt for screenplay analysis
+        system_prompt = [
+            {
+                "type": "text",
+                "text": (
+                    "You are a professional screenplay analyst with deep expertise in "
+                    "story structure, character development, and cinematic storytelling. "
+                    "You have access to tools that allow you to retrieve and analyze "
+                    "screenplay content dynamically.\n\n"
+                    "When answering questions:\n"
+                    "- Use tools to get accurate information from the screenplay\n"
+                    "- Provide specific scene numbers and character names\n"
+                    "- Reference actual dialogue and action when relevant\n"
+                    "- Analyze story structure, pacing, and character arcs\n"
+                    "- Give actionable feedback for improving the screenplay\n\n"
+                    "Available tools:\n"
+                    "- get_scene: Get full text of a specific scene\n"
+                    "- get_scene_context: Get a scene plus neighboring scenes\n"
+                    "- get_character_scenes: Track character appearances\n"
+                    "- search_script: Search for scenes by keyword or theme\n"
+                    "- analyze_pacing: Get quantitative pacing metrics\n"
+                    "- get_plot_threads: Retrieve plot thread information"
+                )
+            }
+        ]
+
+        # Get recent conversation history for context
+        messages_result = await db.execute(
+            select(ChatMessageModel)
+            .where(ChatMessageModel.conversation_id == conversation.conversation_id)
+            .order_by(ChatMessageModel.created_at.desc())
+            .limit(10)
+        )
+        recent_messages = list(reversed(messages_result.scalars().all()))
+
+        # Build messages array with conversation history
+        messages = []
+        for msg in recent_messages:
+            messages.append({
+                "role": msg.role.value,
+                "content": msg.content
+            })
+
+        # Add current user message
+        messages.append({
+            "role": "user",
+            "content": request.message
+        })
+
+        # Build prompt structure
+        prompt = {
+            "system": system_prompt,
+            "messages": messages,
+            "model": "claude-3-7-sonnet-latest"
+        }
+
+        # Initialize AI service with database session
+        ai_service = AIService(db=db)
+
+        # Generate response with tools
+        response = await ai_service.chat_with_tools(
+            prompt=prompt,
+            tools=SCREENPLAY_TOOLS,
+            max_tokens=request.max_tokens or 1000,
+            max_iterations=request.max_iterations or 5
+        )
+
+        logger.info(
+            f"Tool chat completed: {response['tool_calls']} iterations, "
+            f"{response['usage']['output_tokens']} output tokens, "
+            f"stop_reason={response['stop_reason']}"
+        )
+
+        # Save conversation messages
+        user_message = ChatMessageModel(
+            conversation_id=conversation.conversation_id,
+            sender="user",
+            role=MessageRole.USER,
+            content=request.message
+        )
+        db.add(user_message)
+
+        assistant_message = ChatMessageModel(
+            conversation_id=conversation.conversation_id,
+            sender="assistant",
+            role=MessageRole.ASSISTANT,
+            content=response["content"]
+        )
+        db.add(assistant_message)
+
+        await db.commit()
+
+        # Track token usage
+        await track_token_usage(
+            user_id=current_user.user_id,
+            script_id=request.script_id,
+            conversation_id=conversation.conversation_id,
+            usage=response["usage"],
+            db=db
+        )
+
+        return ToolCallMessageResponse(
+            message=response["content"],
+            conversation_id=conversation.conversation_id,
+            usage={
+                "input_tokens": response["usage"]["input_tokens"],
+                "cache_creation_input_tokens": response["usage"]["cache_creation_input_tokens"],
+                "cache_read_input_tokens": response["usage"]["cache_read_input_tokens"],
+                "output_tokens": response["usage"]["output_tokens"]
+            },
+            tool_calls=response["tool_calls"],
+            stop_reason=response["stop_reason"]
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in chat_message_with_tools endpoint: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate tool-enabled chat response: {str(e)}"
         )

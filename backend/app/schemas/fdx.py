@@ -35,6 +35,8 @@ class FDXUploadResponse(BaseModel):
     scenes: List[SceneDataSchema] = Field(..., description="Parsed scene data")
     file_info: Dict[str, Any] = Field(..., description="File storage information")
     message: str = Field(default="FDX file uploaded and parsed successfully", description="Success message")
+    job_id: Optional[str] = Field(None, description="Background analysis job ID for tracking")
+    analysis_status: Optional[str] = Field(None, description="Analysis job status: 'queued' or 'manual_trigger_required'")
 
 
 class FDXParseRequest(BaseModel):

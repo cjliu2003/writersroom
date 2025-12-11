@@ -55,3 +55,8 @@ websockets==13.1
 redis==5.0.1
 aioredis==2.0.1
 y-py==0.6.2         # Python Yjs CRDT bindings
+
+# AI System (Phase 0 + Phase 6 Hybrid Chat)
+anthropic==0.75.0   # Claude API client (for AI assistant) - upgraded for tool calling support
+tiktoken==0.5.2     # Token counting for budget management
+rq==1.15.1          # Redis Queue for background jobs

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, TYPE_CHECKING
 from uuid import UUID, uuid4
 from sqlalchemy import String, Text, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -7,6 +7,13 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from sqlalchemy.sql import func
 
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.script_outline import ScriptOutline  # noqa: F401
+    from app.models.character_sheet import CharacterSheet  # noqa: F401
+    from app.models.plot_thread import PlotThread  # noqa: F401
+    from app.models.scene_relationship import SceneRelationship  # noqa: F401
+    from app.models.script_version import ScriptVersion  # noqa: F401
 
 class Script(Base):
     """
@@ -109,6 +116,26 @@ class Script(Base):
         comment='User who last updated the script'
     )
 
+    # AI system columns (Phase 0)
+    state: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default='empty',
+        comment='Script analysis state: empty, partial, analyzed'
+    )
+
+    last_state_transition: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment='When the state last changed'
+    )
+
+    hash: Mapped[Optional[str]] = mapped_column(
+        String(64),
+        nullable=True,
+        comment='SHA-256 hash for change detection'
+    )
+
     # Relationships
     owner: Mapped['User'] = relationship(
         'User',
@@ -158,8 +185,37 @@ class Script(Base):
         'ScriptVersion',
         back_populates='script',
         cascade='all, delete-orphan',
-        lazy='dynamic',
-        order_by='ScriptVersion.created_at'
+        lazy='dynamic'
+    )
+
+    # AI system relationships (Phase 0)
+    outline: Mapped[Optional['ScriptOutline']] = relationship(
+        'ScriptOutline',
+        back_populates='script',
+        uselist=False,  # one-to-one relationship
+        cascade='all, delete-orphan',
+        lazy='selectin'
+    )
+
+    character_sheets: Mapped[List['CharacterSheet']] = relationship(
+        'CharacterSheet',
+        back_populates='script',
+        cascade='all, delete-orphan',
+        lazy='selectin'
+    )
+
+    plot_threads: Mapped[List['PlotThread']] = relationship(
+        'PlotThread',
+        back_populates='script',
+        cascade='all, delete-orphan',
+        lazy='selectin'
+    )
+
+    scene_relationships: Mapped[List['SceneRelationship']] = relationship(
+        'SceneRelationship',
+        back_populates='script',
+        cascade='all, delete-orphan',
+        lazy='selectin'
     )
 
     def __repr__(self) -> str:

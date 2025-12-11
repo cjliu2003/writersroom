@@ -1,13 +1,10 @@
-Unhandled Runtime Error
-ReferenceError: Cannot access 'editor' before initialization
-
-Source
-app/test-tiptap/page.tsx (156:18) @ editor
-
-  154 |       setLoadingScript(false);
-  155 |     }
-> 156 |   }, [authToken, editor]);
-      |                  ^
-  157 |
-  158 |   // Handle script ID change
-  159 |   const handleLoadScript = () => {
+INFO:     127.0.0.1:51767 - "OPTIONS /api/ai/chat/message HTTP/1.1" 200 OK
+DEBUG: Authentication process started
+DEBUG: Token received: eyJhbGciOiJSUzI...
+DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: User lookup result: Found
+DEBUG WS: Token received: eyJhbGciOiJSUzI...
+DEBUG WS: Token verification failed: Token expired, 1764810687 < 1764968588
+DEBUG WS: Exception type: ExpiredIdTokenError
+Token verification failed: Token has expired
