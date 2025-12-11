@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import SignInPage from "@/components/SignInPage";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserScripts, uploadFDXFile, createScript, updateScript, deleteScript, getScriptContent, type ScriptSummary } from "@/lib/api";
+import { getUserScripts, getSharedScripts, uploadFDXFile, createScript, updateScript, deleteScript, getScriptContent, type ScriptSummary } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText, Plus, LogOut, User, X, Edit2, Trash2 } from "lucide-react";
@@ -33,6 +33,7 @@ export default function HomePage() {
 
   // Data state
   const [scripts, setScripts] = useState<ScriptSummary[]>([]);
+  const [sharedScripts, setSharedScripts] = useState<ScriptSummary[]>([]);
   const [loadingScripts, setLoadingScripts] = useState(false);
 
   // Separate error states for different operations
@@ -72,12 +73,13 @@ export default function HomePage() {
     }
   }, [currentError]);
 
-  // Load user's scripts when a user is present
+  // Load user's scripts and shared scripts when a user is present
   useEffect(() => {
     let mounted = true;
     if (!user) {
-      // Ensure list is cleared and not loading when signed out
+      // Ensure lists are cleared and not loading when signed out
       setScripts([]);
+      setSharedScripts([]);
       setLoadingScripts(false);
       return () => { mounted = false; };
     }
@@ -85,8 +87,15 @@ export default function HomePage() {
     const load = async () => {
       setLoadingScripts(true);
       try {
-        const result = await getUserScripts();
-        if (mounted) setScripts(result);
+        // Fetch both owned and shared scripts in parallel
+        const [ownedResult, sharedResult] = await Promise.all([
+          getUserScripts(),
+          getSharedScripts().catch(() => [] as ScriptSummary[]) // Graceful fallback
+        ]);
+        if (mounted) {
+          setScripts(ownedResult);
+          setSharedScripts(sharedResult);
+        }
       } catch (e) {
         console.error("Failed to load user scripts:", e);
       } finally {
@@ -372,7 +381,7 @@ export default function HomePage() {
 
       {/* Top Navigation Bar */}
       <div className="fixed top-0 left-0 right-0 z-30 bg-white/70 backdrop-blur-md border-b border-slate-200/50">
-        <div className="max-w-7xl mx-auto px-8 py-2">
+        <div className="px-4 py-2">
           <div className="flex items-center justify-between">
             {/* Branding */}
             <h1
@@ -497,7 +506,7 @@ export default function HomePage() {
           ) : (
             /* Has Scripts - Action Buttons Integrated into Grid */
             <div className="pt-8">
-              <h2 className="text-2xl font-semibold text-slate-700 mb-8 tracking-wide">Projects</h2>
+              <h2 className="text-2xl font-semibold text-slate-700 mb-8 tracking-wide">Your Projects</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Existing Scripts */}
                 {scripts.map((p) => (
@@ -682,6 +691,46 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Shared with me section - only shows if user has shared scripts */}
+              {sharedScripts.length > 0 && (
+                <div className="pt-12">
+                  <h2 className="text-2xl font-semibold text-slate-700 mb-8 tracking-wide">Shared with me</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {sharedScripts.map((p) => (
+                      <Card
+                        key={p.script_id}
+                        className="bg-white border-[1.5px] border-slate-300 shadow-xl transition-all duration-300 overflow-hidden group hover:border-slate-400 hover:shadow-2xl cursor-pointer hover:scale-[1.02]"
+                        onClick={() => openProject(p.script_id)}
+                      >
+                        {/* Industry-Standard Screenplay Title Page - Same styling as owned scripts */}
+                        <div className="relative h-64 bg-white flex flex-col items-center justify-center p-8">
+                          {/* Title - Uppercase, Centered, Underlined */}
+                          <h2 className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center uppercase tracking-normal text-black underline decoration-1 underline-offset-2">
+                            {p.title}
+                          </h2>
+
+                          {/* Blank lines (3 line breaks equivalent) */}
+                          <div className="h-12" aria-hidden="true" />
+
+                          {/* "Written by" */}
+                          <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
+                            Written by
+                          </div>
+
+                          {/* Blank line (1 line break) */}
+                          <div className="h-6" aria-hidden="true" />
+
+                          {/* Author Name */}
+                          <div className="font-[family-name:var(--font-courier-prime)] text-base font-normal text-center text-black">
+                            {p.description || 'Writer'}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

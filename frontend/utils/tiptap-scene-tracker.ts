@@ -140,10 +140,7 @@ function generateSceneUUID(position: number): string {
  * Uses TipTap commands to:
  * 1. Focus the editor
  * 2. Set text selection to scene start position
- * 3. Calculate scroll position accounting for fixed headers (112px + 16px buffer)
- * 4. Scroll to position using window.scrollTo() for precise control
- *
- * Note: Header offset matches script-editor implementation (64px menu + 48px controls + 16px buffer)
+ * 3. Use scrollIntoView to position scene heading at top of visible area
  *
  * @param editor - TipTap Editor instance
  * @param scene - Scene boundary to scroll to
@@ -169,38 +166,54 @@ export function scrollToScene(editor: Editor | null, scene: SceneBoundary): void
     editor.commands.focus();
     editor.commands.setTextSelection(scrollPos);
 
-    // Find the DOM element for this position and scroll with header offset
+    // Find the DOM element and scroll container, then manually scroll
     // We need to wait a tick for the selection to be set
     setTimeout(() => {
       const { view } = editor;
-      const dom = view.nodeDOM(scrollPos);
 
-      if (dom instanceof HTMLElement) {
-        // Calculate position accounting for fixed header (112px) plus padding buffer
-        // 112px = 64px top menu + 48px controls bar
-        // +16px buffer to ensure scene header is fully visible above fixed headers
-        const headerOffset = 112 + 16;
-        const elementPosition = dom.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      // Get DOM position info
+      const domAtPos = view.domAtPos(scrollPos);
+      let targetElement: HTMLElement | null = null;
 
-        // Scroll to position with smooth behavior
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+      // Find the block-level element (scene heading)
+      if (domAtPos.node instanceof HTMLElement) {
+        targetElement = domAtPos.node;
+      } else if (domAtPos.node.parentElement) {
+        targetElement = domAtPos.node.parentElement;
+      }
 
-        console.log('[TipTapSceneTracker] Scrolled to scene with header offset');
-      } else {
-        // Fallback: scroll using coordsAtPos
-        const coords = view.coordsAtPos(scrollPos);
-        if (coords) {
-          // Use same header offset calculation for consistency
-          const headerOffset = 112 + 16;
-          window.scrollTo({
-            top: coords.top + window.pageYOffset - headerOffset,
+      // Walk up to find the actual block element (scene heading node)
+      while (targetElement && !targetElement.hasAttribute('data-type') && targetElement.parentElement) {
+        targetElement = targetElement.parentElement;
+        // Stop if we hit the editor container
+        if (targetElement.classList.contains('ProseMirror')) break;
+      }
+
+      if (targetElement) {
+        // Find the scroll container (the fixed-position overflow-auto div)
+        const scrollContainer = document.querySelector('.overflow-auto') as HTMLElement;
+
+        if (scrollContainer) {
+          // Calculate the element's position relative to the scroll container
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const elementRect = targetElement.getBoundingClientRect();
+
+          // Calculate scroll position to put element at top with 24px padding
+          const scrollTop = scrollContainer.scrollTop + (elementRect.top - containerRect.top) - 24;
+
+          scrollContainer.scrollTo({
+            top: Math.max(0, scrollTop),
             behavior: 'smooth'
           });
-          console.log('[TipTapSceneTracker] Scrolled using coords fallback');
+          console.log('[TipTapSceneTracker] Scrolled container to scene');
+        } else {
+          // Fallback to scrollIntoView if container not found
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
+          });
+          console.log('[TipTapSceneTracker] Fallback: used scrollIntoView');
         }
       }
     }, 50);
@@ -222,7 +235,10 @@ export function findSceneAtPosition(
 ): number | null {
   for (let i = 0; i < boundaries.length; i++) {
     const scene = boundaries[i];
-    if (position >= scene.startIndex && position <= scene.endIndex) {
+    // Use ProseMirror positions (startPos/endPos) for accurate comparison
+    const startPos = scene.startPos ?? 0;
+    const endPos = scene.endPos ?? Infinity;
+    if (position >= startPos && position <= endPos) {
       return i;
     }
   }

@@ -16,7 +16,22 @@
       "mcp__chrome-devtools__wait_for",
       "Bash(npm view:*)",
       "mcp__sequential-thinking__sequentialthinking",
-      "Bash(npx next lint:*)"
+      "Bash(npx next lint:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)",
+      "Bash(python -m py_compile:*)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(python:*)",
+      "Bash(/usr/bin/python3:*)",
+      "Bash(pip3 list:*)",
+      "Bash(pip3 show:*)",
+      "Bash(/opt/homebrew/bin/python3.11:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(git reset:*)",
+      "mcp__playwright__browser_navigate",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []
