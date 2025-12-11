@@ -159,7 +159,7 @@ export function SceneNavBar({
                     </span>
                     {/* Scene heading */}
                     <span className="font-medium">
-                      {truncateHeading(scene.heading)}
+                      {truncateHeading(scene.heading).toUpperCase()}
                     </span>
                   </button>
                 );
@@ -196,7 +196,7 @@ export function SceneNavBar({
             fontFamily: "var(--font-courier-prime), 'Courier New', monospace"
           }}
         >
-          {hoveredScene.heading}
+          {hoveredScene.heading.toUpperCase()}
           {/* Tooltip arrow pointing up */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-2.5 h-2.5 bg-white border-l border-t border-gray-200 rotate-45" />
         </div>
