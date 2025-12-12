@@ -17,7 +17,8 @@ from app.models.scene import Scene
 from app.models.scene_version import SceneVersion
 from app.models.script_version import ScriptVersion
 from app.models.script_collaborator import ScriptCollaborator, CollaboratorRole
-from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse, ScriptWithContent
+from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse, ScriptWithContent, AddCollaboratorRequest, CollaboratorResponse
+from app.firebase.config import get_firebase_user_by_email
 from app.auth.dependencies import get_current_user
 from app.db.base import get_db
 from app.services.yjs_persistence import YjsPersistence
@@ -291,6 +292,208 @@ async def delete_script(
 
     return None
 
+
+# ============================================================================
+# Collaborator Management Endpoints
+# ============================================================================
+
+@router.get("/{script_id}/collaborators", response_model=List[CollaboratorResponse])
+async def list_collaborators(
+    script_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    List all collaborators for a script.
+
+    Requires authentication and access to the script (owner or collaborator).
+    """
+    # Verify user has access to this script
+    script = await get_script_if_user_has_access(script_id, current_user, db)
+
+    # Get all collaborators for this script
+    result = await db.execute(
+        select(ScriptCollaborator)
+        .where(ScriptCollaborator.script_id == script_id)
+        .options()
+    )
+    collaborators = result.scalars().all()
+
+    # Build response list
+    response = []
+    for collab in collaborators:
+        # Get user info
+        user_result = await db.execute(
+            select(User).where(User.user_id == collab.user_id)
+        )
+        user = user_result.scalar_one_or_none()
+
+        response.append(CollaboratorResponse(
+            user_id=str(collab.user_id),
+            display_name=user.display_name if user else None,
+            role=collab.role.value,
+            joined_at=collab.joined_at
+        ))
+
+    return response
+
+
+@router.post("/{script_id}/collaborators", response_model=CollaboratorResponse, status_code=status.HTTP_201_CREATED)
+async def add_collaborator(
+    script_id: UUID,
+    request: AddCollaboratorRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Add a collaborator to a script by email address.
+
+    Requires authentication and ownership of the script.
+    Only the script owner can add collaborators.
+    """
+    # Verify script exists and user is the owner
+    script_result = await db.execute(select(Script).where(Script.script_id == script_id))
+    script = script_result.scalar_one_or_none()
+
+    if not script:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Script with ID {script_id} not found"
+        )
+
+    if script.owner_id != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the script owner can add collaborators"
+        )
+
+    # Look up the user in Firebase by email
+    firebase_user = get_firebase_user_by_email(request.email)
+    if not firebase_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No user found with email {request.email}. They must sign up first."
+        )
+
+    # Find the user in our database by Firebase UID
+    user_result = await db.execute(
+        select(User).where(User.firebase_uid == firebase_user["uid"])
+    )
+    target_user = user_result.scalar_one_or_none()
+
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with email {request.email} has not logged in yet. They must sign in first."
+        )
+
+    # Check if user is trying to add themselves
+    if target_user.user_id == current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot add yourself as a collaborator"
+        )
+
+    # Check if user is already a collaborator
+    existing_collab = await db.execute(
+        select(ScriptCollaborator).where(
+            ScriptCollaborator.script_id == script_id,
+            ScriptCollaborator.user_id == target_user.user_id
+        )
+    )
+    if existing_collab.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"User {request.email} is already a collaborator on this script"
+        )
+
+    # Map role string to enum
+    role_map = {
+        "editor": CollaboratorRole.EDITOR,
+        "viewer": CollaboratorRole.VIEWER
+    }
+    role = role_map.get(request.role, CollaboratorRole.EDITOR)
+
+    # Create the collaborator record
+    collaborator = ScriptCollaborator(
+        script_id=script_id,
+        user_id=target_user.user_id,
+        role=role
+    )
+    db.add(collaborator)
+
+    # Update script description with both author names (owner & first collaborator)
+    owner_name = current_user.display_name or "Writer"
+    collaborator_name = target_user.display_name or "Writer"
+    script.description = f"{owner_name} & {collaborator_name}"
+
+    await db.commit()
+    await db.refresh(collaborator)
+
+    logger.info(f"Added collaborator {target_user.display_name} ({request.email}) to script {script_id} as {role.value}")
+
+    return CollaboratorResponse(
+        user_id=str(target_user.user_id),
+        display_name=target_user.display_name,
+        role=role.value,
+        joined_at=collaborator.joined_at
+    )
+
+
+@router.delete("/{script_id}/collaborators/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_collaborator(
+    script_id: UUID,
+    user_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Remove a collaborator from a script.
+
+    Requires authentication and ownership of the script.
+    Only the script owner can remove collaborators.
+    """
+    # Verify script exists and user is the owner
+    script_result = await db.execute(select(Script).where(Script.script_id == script_id))
+    script = script_result.scalar_one_or_none()
+
+    if not script:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Script with ID {script_id} not found"
+        )
+
+    if script.owner_id != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the script owner can remove collaborators"
+        )
+
+    # Find and delete the collaborator record
+    result = await db.execute(
+        select(ScriptCollaborator).where(
+            ScriptCollaborator.script_id == script_id,
+            ScriptCollaborator.user_id == user_id
+        )
+    )
+    collaborator = result.scalar_one_or_none()
+
+    if not collaborator:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Collaborator not found"
+        )
+
+    await db.delete(collaborator)
+
+    # Revert script description to just the owner's name
+    script.description = current_user.display_name or "Writer"
+
+    await db.commit()
+
+    logger.info(f"Removed collaborator {user_id} from script {script_id}")
+
+    return None
 
 
 @router.get("/{script_id}/scenes", response_model=List[Dict[str, Any]])

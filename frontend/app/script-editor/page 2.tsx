@@ -26,21 +26,19 @@ import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
 import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
 import { getScriptContent, exportFDXFile, updateScript, type ScriptWithContent } from '@/lib/api';
-import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs, type ChatPosition } from '@/utils/layoutPrefs';
+import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs } from '@/utils/layoutPrefs';
 import {
   extractSceneBoundariesFromTipTap,
   scrollToScene,
   getCurrentSceneIndex,
   type SceneBoundary
 } from '@/utils/tiptap-scene-tracker';
-import { SceneNavBar } from '@/components/scene-nav-bar';
+import { extractSlateContentFromTipTap } from '@/utils/tiptap-to-slate-format';
+import { ScriptSceneSidebar } from '@/components/script-scene-sidebar';
 import { AIChatbot } from '@/components/ai-chatbot';
 import ProcessingScreen from '@/components/ProcessingScreen';
-import { ShareDialog } from '@/components/share-dialog';
-import { EditMenuDropdown } from '@/components/edit-menu-dropdown';
-import { FileMenuDropdown } from '@/components/file-menu-dropdown';
 import { Button } from '@/components/ui/button';
-import { Home, Share2, Download, ChevronUp, ChevronDown } from 'lucide-react';
+import { Home, FileText, Pencil, Share2, Download, Menu } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '@/styles/screenplay.css';
 
@@ -57,6 +55,7 @@ export default function TestTipTapPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [userColor] = useState(getRandomColor());
+  const [userName] = useState(`User-${Math.floor(Math.random() * 1000)}`);
   const [authToken, setAuthToken] = useState<string>('');
   // Read scriptId from query params, fallback to default for testing
   const [scriptId, setScriptId] = useState<string>(() => searchParams.get('scriptId') || DEFAULT_SCRIPT_ID);
@@ -64,39 +63,20 @@ export default function TestTipTapPage() {
   const [script, setScript] = useState<ScriptWithContent | null>(null);
 
   // UI state
-  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
-  const [chatHeight, setChatHeight] = useState(220);
-  const [chatPosition, setChatPosition] = useState<ChatPosition>('bottom');
-  const [chatWidth, setChatWidth] = useState(360);
+  const [isSceneSidebarOpen, setIsSceneSidebarOpen] = useState(true);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [isLoadingScript, setIsLoadingScript] = useState(true);
 
-  // Editable title state
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editingTitle, setEditingTitle] = useState('');
-  const [isSavingTitle, setIsSavingTitle] = useState(false);
-
-  // Collapsible bar states
-  const [isTopBarCollapsed, setIsTopBarCollapsed] = useState(false);
-  const [isSceneNavCollapsed, setIsSceneNavCollapsed] = useState(false);
-
-  // Share dialog state
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-
   // Scene tracking state
   const [sceneBoundaries, setSceneBoundaries] = useState<SceneBoundary[]>([]);
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number | null>(null);
-
-  // Collaborator presence tracking
-  const [collaborators, setCollaborators] = useState<Array<{ name: string; color: string; clientId: number }>>([]);
+  const [liveSlateContent, setLiveSlateContent] = useState<any[]>([]);
 
   // Get Firebase auth from context (same pattern as other editors)
   const { user, getToken, isLoading: authLoading } = useAuth();
-
-  // Derive user name for collaboration cursor from authenticated user
-  const userName = user?.displayName || user?.email?.split('@')[0] || 'Anonymous';
 
   // Fetch auth token when user is available (needed for WebSocket)
   useEffect(() => {
@@ -187,7 +167,6 @@ export default function TestTipTapPage() {
   const {
     doc,
     provider,
-    awareness,
     syncStatus,
     connectionError,
   } = useScriptYjsCollaboration({
@@ -195,41 +174,6 @@ export default function TestTipTapPage() {
     authToken: authToken,
     enabled: !!authToken, // Only enable when we have auth token
   });
-
-  // Track collaborators via awareness for presence indicator
-  useEffect(() => {
-    if (!awareness) return;
-
-    const updateCollaborators = () => {
-      const states = awareness.getStates();
-      const localClientId = awareness.clientID;
-      const remoteUsers: Array<{ name: string; color: string; clientId: number }> = [];
-
-      states.forEach((state: any, clientId: number) => {
-        // Skip our own client
-        if (clientId === localClientId) return;
-        // Handle both TipTap CollaborationCursor format (user.name, user.color)
-        // and our hook's format (name, color at root level)
-        const name = state?.user?.name || state?.name;
-        const color = state?.user?.color || state?.color || '#888888';
-        if (name) {
-          remoteUsers.push({ name, color, clientId });
-        }
-      });
-
-      setCollaborators(remoteUsers);
-    };
-
-    // Initial update
-    updateCollaborators();
-
-    // Listen for changes
-    awareness.on('change', updateCollaborators);
-
-    return () => {
-      awareness.off('change', updateCollaborators);
-    };
-  }, [awareness]);
 
   // Initialize TipTap editor with screenplay extensions + collaboration + pagination
   const editor = useEditor({
@@ -367,128 +311,52 @@ export default function TestTipTapPage() {
   // Load layout preferences on mount
   useEffect(() => {
     const prefs = loadLayoutPrefs();
-    setIsChatCollapsed(prefs.chatCollapsed ?? false);
-    setChatHeight(prefs.chatHeight ?? 220);
-    setChatPosition(prefs.chatPosition ?? 'bottom');
-    setChatWidth(prefs.chatWidth ?? 360);
+    setIsAssistantOpen(prefs.assistantVisible ?? true);
+    setIsSceneSidebarOpen(prefs.sceneListVisible ?? true);
   }, []);
 
-  // Save layout preferences when chat state changes
+  // Save layout preferences when sidebar states change
   useEffect(() => {
-    saveLayoutPrefs({
-      chatCollapsed: isChatCollapsed,
-      chatHeight,
-      chatPosition,
-      chatWidth
-    });
-  }, [isChatCollapsed, chatHeight, chatPosition, chatWidth]);
-
-  // Handle vertical resize drag (for bottom position)
-  const handleVerticalResizeMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-
-    const startY = e.clientY;
-    const startHeight = chatHeight;
-    const collapseThreshold = 100; // Collapse if dragged below this height
-
-    const cleanup = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+    const prefs: EditorLayoutPrefs = {
+      sceneListVisible: isSceneSidebarOpen,
+      assistantVisible: isAssistantOpen
     };
+    saveLayoutPrefs(prefs);
+  }, [isSceneSidebarOpen, isAssistantOpen]);
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaY = startY - moveEvent.clientY;
-      const rawHeight = startHeight + deltaY;
-
-      // Auto-collapse immediately when dragged below threshold
-      if (rawHeight < collapseThreshold) {
-        setIsChatCollapsed(true);
-        setChatHeight(220); // Reset to default for next expand
-        cleanup();
-        return;
-      }
-
-      const newHeight = Math.min(rawHeight, window.innerHeight * 0.6);
-      setChatHeight(newHeight);
-    };
-
-    const handleMouseUp = () => {
-      cleanup();
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, [chatHeight]);
-
-  // Handle horizontal resize drag (for left/right positions)
-  const handleHorizontalResizeMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-
-    const startX = e.clientX;
-    const startWidth = chatWidth;
-    const collapseThreshold = 150; // Collapse if dragged below this width
-    const isLeftPosition = chatPosition === 'left';
-
-    const cleanup = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      // For left position: dragging right increases width
-      // For right position: dragging left increases width
-      const rawWidth = isLeftPosition ? startWidth + deltaX : startWidth - deltaX;
-
-      // Auto-collapse immediately when dragged below threshold
-      if (rawWidth < collapseThreshold) {
-        setIsChatCollapsed(true);
-        setChatWidth(360); // Reset to default for next expand
-        cleanup();
-        return;
-      }
-
-      const newWidth = Math.min(Math.max(rawWidth, 280), window.innerWidth * 0.5);
-      setChatWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      cleanup();
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, [chatWidth, chatPosition]);
-
-  // Track current scene and extract boundaries on any editor change
-  // Combined into single effect to ensure boundaries are always fresh
+  // Extract scene boundaries and live content when editor content changes
   useEffect(() => {
-    if (!editor) return;
-
-    const updateSceneState = () => {
-      // Re-extract boundaries on every change to ensure positions are accurate
+    if (editor && editor.state.doc) {
       const boundaries = extractSceneBoundariesFromTipTap(editor);
       setSceneBoundaries(boundaries);
 
-      // Use fresh boundaries for scene detection
-      const sceneIndex = getCurrentSceneIndex(editor, boundaries);
+      // Extract live content in Slate format for sidebar features
+      const slateContent = extractSlateContentFromTipTap(editor);
+      setLiveSlateContent(slateContent);
+
+      console.log('[TipTapEditor] Extracted', boundaries.length, 'scenes,', slateContent.length, 'blocks');
+    }
+  }, [editor, editor?.state.doc.content]);
+
+  // Track current scene as user navigates
+  useEffect(() => {
+    if (!editor) return;
+
+    const updateCurrentScene = () => {
+      const sceneIndex = getCurrentSceneIndex(editor, sceneBoundaries);
       setCurrentSceneIndex(sceneIndex);
     };
 
-    // Update on selection change (clicking/navigating in editor)
-    editor.on('selectionUpdate', updateSceneState);
-
-    // Update on document changes (typing, editing)
-    editor.on('update', updateSceneState);
+    // Update on selection change
+    editor.on('selectionUpdate', updateCurrentScene);
 
     // Initial update
-    updateSceneState();
+    updateCurrentScene();
 
     return () => {
-      editor.off('selectionUpdate', updateSceneState);
-      editor.off('update', updateSceneState);
+      editor.off('selectionUpdate', updateCurrentScene);
     };
-  }, [editor]);
+  }, [editor, sceneBoundaries]);
 
   // Scene navigation handler
   const handleSceneClick = useCallback((sceneIndex: number) => {
@@ -524,45 +392,6 @@ export default function TestTipTapPage() {
       console.error('[TipTapEditor] FDX export failed:', e);
     } finally {
       setIsExporting(false);
-    }
-  };
-
-  // Handle title editing
-  const handleTitleClick = () => {
-    setEditingTitle(script?.title || 'Untitled Script');
-    setIsEditingTitle(true);
-  };
-
-  const handleTitleSave = async () => {
-    const trimmedTitle = editingTitle.trim();
-    if (!trimmedTitle || trimmedTitle === script?.title) {
-      setIsEditingTitle(false);
-      return;
-    }
-
-    setIsSavingTitle(true);
-    try {
-      await updateScript(scriptId, { title: trimmedTitle });
-      // Update local state
-      setScript(prev => prev ? { ...prev, title: trimmedTitle } : prev);
-      console.log('[TipTapEditor] Title updated successfully');
-    } catch (e: any) {
-      console.error('[TipTapEditor] Failed to update title:', e);
-      // Revert to original title on error
-      setEditingTitle(script?.title || 'Untitled Script');
-    } finally {
-      setIsSavingTitle(false);
-      setIsEditingTitle(false);
-    }
-  };
-
-  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleTitleSave();
-    } else if (e.key === 'Escape') {
-      setIsEditingTitle(false);
-      setEditingTitle(script?.title || 'Untitled Script');
     }
   };
 
@@ -611,112 +440,76 @@ export default function TestTipTapPage() {
   const getStatusColor = (status: SyncStatus) => {
     switch (status) {
       case 'synced': return 'bg-green-500';
-      case 'error': return 'bg-red-500';
-      default: return 'bg-yellow-500';
+      case 'connected': return 'bg-yellow-500';
+      case 'connecting': return 'bg-gray-500';
+      case 'offline': return 'bg-red-500';
+      case 'error': return 'bg-red-700';
+      default: return 'bg-gray-400';
     }
   };
 
   return (
     <>
-      {/* Loading Screen - covers everything until editor is fully ready */}
+      {/* Loading Screen */}
       <ProcessingScreen
-        isVisible={isLoadingScript || authLoading || !script}
+        isVisible={isLoadingScript || authLoading}
         mode="open"
       />
 
       <div className="flex h-screen bg-gray-100">
-        {/* Fixed Top Header - Compact Screenplay Style (collapsible) */}
-      {!isTopBarCollapsed && (
-        <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-300 bg-white shadow-sm transition-all duration-200" style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}>
-          <div className="relative px-4 flex items-center justify-between h-12">
-            {/* Left - Collapse button + Home, File, Edit */}
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsTopBarCollapsed(true)}
-                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5 -ml-2 mr-0"
-                title="Collapse toolbar"
-              >
-                <ChevronUp className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push("/")}
-                className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
-                style={{ fontFamily: "inherit" }}
-              >
-                <Home className="w-3.5 h-3.5 mr-1.5" />
-                Home
-              </Button>
-              <FileMenuDropdown
-                onExport={handleExportFDX}
-                isExporting={isExporting}
-                scriptTitle={script?.title}
-              />
-              <EditMenuDropdown editor={editor} />
-            </div>
-
-          {/* Center - Script Title (absolutely centered on page, click to edit) */}
-          <div className="absolute left-1/2 -translate-x-1/2">
-            {isEditingTitle ? (
-              <input
-                type="text"
-                value={editingTitle}
-                onChange={(e) => setEditingTitle(e.target.value.slice(0, 30))}
-                onBlur={handleTitleSave}
-                onKeyDown={handleTitleKeyDown}
-                maxLength={30}
-                autoFocus
-                disabled={isSavingTitle}
-                className="text-gray-800 text-base tracking-wide text-center bg-transparent underline focus:outline-none px-2 py-0.5 uppercase"
-                style={{ fontFamily: "inherit", width: '34ch' }}
-              />
-            ) : (
-              <h1
-                onClick={handleTitleClick}
-                className="text-gray-800 text-base tracking-wide truncate text-center cursor-pointer hover:opacity-60 transition-opacity px-2 py-0.5 uppercase underline"
-                style={{ fontFamily: "inherit", maxWidth: '34ch' }}
-                title="Click to edit title"
-              >
-                {script?.title || 'Untitled Script'}
-              </h1>
-            )}
-          </div>
-
-          {/* Right - Collaborators, Share, Export */}
-          <div className="flex items-center gap-0.5 mr-16">
-            {/* Collaborator presence avatars - minimal, only shows when others are editing */}
-            {collaborators.length > 0 && (
-              <div className="flex items-center -space-x-1.5 mr-2 pr-2 border-r border-gray-200">
-                {collaborators.slice(0, 3).map((collab) => (
-                  <div
-                    key={collab.clientId}
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-white ring-2 ring-white"
-                    style={{ backgroundColor: collab.color }}
-                    title={collab.name}
-                  >
-                    {collab.name.charAt(0).toUpperCase()}
-                  </div>
-                ))}
-                {collaborators.length > 3 && (
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-gray-600 bg-gray-200 ring-2 ring-white"
-                    title={`${collaborators.length - 3} more`}
-                  >
-                    +{collaborators.length - 3}
-                  </div>
-                )}
-              </div>
-            )}
+        {/* Fixed Top Header - Compact Screenplay Style */}
+      <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-300 bg-white shadow-sm" style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}>
+        <div className="relative px-4 flex items-center justify-between h-12">
+          {/* Left - Home, File, Edit */}
+          <div className="flex items-center gap-0.5">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsShareDialogOpen(true)}
+              onClick={() => router.push("/")}
               className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
               style={{ fontFamily: "inherit" }}
-              title="Share this script"
+            >
+              <Home className="w-3.5 h-3.5 mr-1.5" />
+              Home
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
+              style={{ fontFamily: "inherit" }}
+              title="Coming soon"
+            >
+              <FileText className="w-3.5 h-3.5 mr-1.5" />
+              File
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
+              style={{ fontFamily: "inherit" }}
+              title="Coming soon"
+            >
+              <Pencil className="w-3.5 h-3.5 mr-1.5" />
+              Edit
+            </Button>
+          </div>
+
+          {/* Center - Script Title (absolutely centered on page) */}
+          <h1
+            className="absolute left-1/2 -translate-x-1/2 text-gray-800 text-base tracking-wide truncate max-w-[40%] text-center"
+            style={{ fontFamily: "inherit" }}
+          >
+            {script?.title || 'Untitled Script'}
+          </h1>
+
+          {/* Right - Share, Export */}
+          <div className="flex items-center gap-0.5 mr-16">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal cursor-default opacity-75"
+              style={{ fontFamily: "inherit" }}
+              title="Coming soon"
             >
               <Share2 className="w-3.5 h-3.5 mr-1.5" />
               Share
@@ -741,97 +534,38 @@ export default function TestTipTapPage() {
           >
             <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getStatusColor(syncStatus)} ${syncStatus === 'synced' ? '' : 'animate-pulse'}`} title={`Status: ${syncStatus}`}></div>
             <span className="text-[10px] text-gray-400 whitespace-nowrap" style={{ fontFamily: "inherit" }}>
-              {syncStatus === 'synced' ? 'Saved' : syncStatus === 'connecting' ? 'Syncing' : syncStatus === 'connected' ? 'Synced' : syncStatus.charAt(0).toUpperCase() + syncStatus.slice(1)}
+              {syncStatus === 'synced' ? 'Saved' : syncStatus === 'connecting' ? 'Connecting...' : syncStatus}
             </span>
           </div>
         </div>
       </div>
-      )}
 
-      {/* Expand button when top bar is collapsed */}
-      {/* When scene nav is visible: sits on left side of scene nav bar, vertically centered (frames the bar with collapse button on right) */}
-      {/* When scene nav is collapsed: moves to right side only if chat is on left (to avoid overlap) */}
-      {isTopBarCollapsed && (() => {
-        const sceneNavVisible = !isSceneNavCollapsed;
-        const chatOnLeft = chatPosition === 'left' && !isChatCollapsed;
-
-        // Horizontal: always left when scene nav visible (frames the bar), otherwise avoid chat
-        const horizontalPos = sceneNavVisible ? 'left-2' : (chatOnLeft ? 'right-2' : 'left-2');
-
-        // Vertical: center on scene nav bar when visible (top-[22px] = vertically centered on 44px bar)
-        // Otherwise top-2 for floating position
-        const verticalPos = sceneNavVisible ? 'top-[22px] -translate-y-1/2' : 'top-2';
-
-        return (
+      {/* Controls Bar */}
+      <div className="fixed top-12 left-0 right-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm px-4 py-2 flex items-center justify-between" style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}>
+        <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsTopBarCollapsed(false)}
-            className={`fixed z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm ${horizontalPos} ${verticalPos}`}
-            title="Expand toolbar"
+            onClick={() => setIsSceneSidebarOpen(!isSceneSidebarOpen)}
+            className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
+            style={{ fontFamily: "inherit" }}
           >
-            <ChevronDown className="w-4 h-4" />
+            <Menu className="w-3.5 h-3.5 mr-1.5" />
+            {isSceneSidebarOpen ? 'Hide' : 'Show'} Scenes
           </Button>
-        );
-      })()}
-
-      {/* Scene Navigation Bar */}
-      {!isSceneNavCollapsed && (
-        <div
-          className={`fixed left-0 right-0 z-40 transition-all duration-200 ${isTopBarCollapsed ? 'top-0' : 'top-12'}`}
-        >
-          <SceneNavBar
-            scenes={sceneBoundaries}
-            onSceneClick={handleSceneClick}
-            currentSceneIndex={currentSceneIndex}
-            onCollapse={() => setIsSceneNavCollapsed(true)}
-            isTopBarCollapsed={isTopBarCollapsed}
-          />
         </div>
-      )}
-
-      {/* Expand button when scene nav is collapsed */}
-      {/* Moves to left side when chat is on right (to avoid overlap) */}
-      {/* Stacks below top bar button when both collapsed and on same side */}
-      {isSceneNavCollapsed && (() => {
-        const chatOnRight = chatPosition === 'right' && !isChatCollapsed;
-        const chatOnLeft = chatPosition === 'left' && !isChatCollapsed;
-
-        // Determine horizontal position: move to left if chat is on right, otherwise stay right
-        const horizontalPos = chatOnRight ? 'left-2' : 'right-2';
-
-        // Determine vertical position:
-        // - If top bar visible: below top bar (top-14)
-        // - If top bar collapsed: check if we need to stack
-        let verticalPos = 'top-14';
-        if (isTopBarCollapsed) {
-          // Top bar button is on left (default) unless chat is on left
-          const topBarButtonOnLeft = !(chatOnLeft);
-          const topBarButtonOnRight = chatOnLeft;
-
-          // Scene nav button is on left if chat is on right, otherwise right
-          const sceneNavButtonOnLeft = chatOnRight;
-          const sceneNavButtonOnRight = !chatOnRight;
-
-          // Stack below if both buttons end up on same side
-          const bothOnLeft = topBarButtonOnLeft && sceneNavButtonOnLeft;
-          const bothOnRight = topBarButtonOnRight && sceneNavButtonOnRight;
-
-          verticalPos = (bothOnLeft || bothOnRight) ? 'top-10' : 'top-2';
-        }
-
-        return (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSceneNavCollapsed(false)}
-            className={`fixed z-50 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded p-1 shadow-sm border border-gray-200 bg-white/60 backdrop-blur-sm ${horizontalPos} ${verticalPos}`}
-            title="Expand scene navigation"
-          >
-            <ChevronDown className="w-4 h-4" />
-          </Button>
-        );
-      })()}
+        <Button
+          onClick={() => setIsAssistantOpen(!isAssistantOpen)}
+          className={`px-3 py-1.5 rounded font-normal text-sm transition-all duration-200 ${
+            isAssistantOpen
+              ? 'bg-purple-600 text-white hover:bg-purple-700'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+          style={{ fontFamily: "inherit" }}
+        >
+          AI Assistant
+        </Button>
+      </div>
 
       {/* Export Error Banner */}
       {exportError && (
@@ -849,30 +583,45 @@ export default function TestTipTapPage() {
         </div>
       )}
 
-      {/* Main Content Area - scroll container with dynamic bounds */}
+      {/* Left Sidebar - Scene Navigation */}
+      {isSceneSidebarOpen && (
+        <div className="fixed left-0 top-[92px] w-80 h-[calc(100vh-92px)] z-30 transition-all duration-300">
+          <ScriptSceneSidebar
+            scenes={sceneBoundaries}
+            onSceneClick={handleSceneClick}
+            currentSceneIndex={currentSceneIndex}
+            scriptContent={liveSlateContent}
+            scriptId={scriptId}
+            script={script || undefined}
+          />
+        </div>
+      )}
+
+      {/* Main Content Area */}
       <div
-        className="flex overflow-auto"
+        className="pt-[92px] w-full flex transition-all duration-300"
         style={{
-          position: 'fixed',
-          top: isTopBarCollapsed
-            ? (isSceneNavCollapsed ? '0' : '44px')
-            : (isSceneNavCollapsed ? '48px' : '92px'),
-          left: chatPosition === 'left' && !isChatCollapsed ? `${chatWidth}px` : 0,
-          right: chatPosition === 'right' && !isChatCollapsed ? `${chatWidth}px` : 0,
-          bottom: chatPosition === 'bottom' && !isChatCollapsed ? `${chatHeight}px` : 0,
+          marginLeft: isSceneSidebarOpen ? '320px' : '0',
+          marginRight: isAssistantOpen ? '384px' : '0'
         }}
       >
         {/* Editor Container - dynamically centered */}
         <div
-          className="flex-1 flex justify-center"
+          className="flex-1 flex justify-center transition-all duration-300"
         >
           <div
-            className="w-full"
+            className="w-full transition-all duration-300"
             style={{
-              maxWidth: '100vw'
+              maxWidth: isSceneSidebarOpen && isAssistantOpen
+                ? 'calc(100vw - 704px)' // Both sidebars: 320px + 384px
+                : isSceneSidebarOpen
+                ? 'calc(100vw - 320px)' // Scene sidebar only
+                : isAssistantOpen
+                ? 'calc(100vw - 384px)' // AI assistant only
+                : '100vw' // No sidebars
             }}
           >
-            <div className="screenplay-editor-wrapper min-h-screen pt-6">
+            <div className="screenplay-editor-wrapper min-h-screen overflow-auto">
               <div className="flex justify-center">
                 <EditorContent editor={editor} className="screenplay-editor" />
               </div>
@@ -880,74 +629,12 @@ export default function TestTipTapPage() {
           </div>
         </div>
 
-      </div>
-
-      {/* AI Chat - Position-Aware Container */}
-      <div
-        className="fixed z-30"
-        style={
-          chatPosition === 'bottom'
-            ? {
-                bottom: 0,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '88%',
-                maxWidth: '1400px',
-                height: isChatCollapsed ? 'auto' : `${chatHeight}px`,
-              }
-            : chatPosition === 'left'
-            ? {
-                left: 0,
-                top: isTopBarCollapsed
-                  ? (isSceneNavCollapsed ? '0' : '44px')
-                  : (isSceneNavCollapsed ? '48px' : '92px'),
-                bottom: 0,
-                width: isChatCollapsed ? 'auto' : `${chatWidth}px`,
-              }
-            : {
-                // right position
-                right: 0,
-                top: isTopBarCollapsed
-                  ? (isSceneNavCollapsed ? '0' : '44px')
-                  : (isSceneNavCollapsed ? '48px' : '92px'),
-                bottom: 0,
-                width: isChatCollapsed ? 'auto' : `${chatWidth}px`,
-              }
-        }
-      >
-        {/* Resize Handle - position-aware */}
-        {!isChatCollapsed && chatPosition === 'bottom' && (
-          <div
-            onMouseDown={handleVerticalResizeMouseDown}
-            className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-10"
-            style={{ marginTop: '-6px' }}
-          />
+        {/* Right Sidebar - AI Assistant */}
+        {isAssistantOpen && (
+          <div className="fixed right-0 top-[92px] w-96 h-[calc(100vh-92px)] z-30 transition-all duration-300">
+            <AIChatbot projectId={scriptId || undefined} isVisible={true} />
+          </div>
         )}
-        {!isChatCollapsed && chatPosition === 'left' && (
-          <div
-            onMouseDown={handleHorizontalResizeMouseDown}
-            className="absolute top-0 bottom-0 right-0 w-3 cursor-ew-resize z-10"
-            style={{ marginRight: '-6px' }}
-          />
-        )}
-        {!isChatCollapsed && chatPosition === 'right' && (
-          <div
-            onMouseDown={handleHorizontalResizeMouseDown}
-            className="absolute top-0 bottom-0 left-0 w-3 cursor-ew-resize z-10"
-            style={{ marginLeft: '-6px' }}
-          />
-        )}
-        <AIChatbot
-          projectId={scriptId || undefined}
-          scriptTitle={script?.title}
-          isVisible={true}
-          isCollapsed={isChatCollapsed}
-          onCollapseToggle={() => setIsChatCollapsed(!isChatCollapsed)}
-          position={chatPosition}
-          onPositionChange={setChatPosition}
-          isTopBarCollapsed={isTopBarCollapsed}
-          isSceneNavCollapsed={isSceneNavCollapsed}
-        />
       </div>
 
       {/* Custom Styles for Screenplay Editor */}
@@ -1007,16 +694,6 @@ export default function TestTipTapPage() {
           white-space: nowrap;
         }
       `}</style>
-
-      {/* Share Dialog */}
-      {/* Note: isOwner defaults to true - backend enforces actual permissions */}
-      <ShareDialog
-        isOpen={isShareDialogOpen}
-        onClose={() => setIsShareDialogOpen(false)}
-        scriptId={scriptId}
-        scriptTitle={script?.title}
-        isOwner={true}
-      />
       </div>
     </>
   );
