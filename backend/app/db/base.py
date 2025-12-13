@@ -20,9 +20,11 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 if DB_HOST and DB_PORT and DB_USER and DB_PASSWORD and DB_NAME:
     # Session pooler supports prepared statements, so we can use a clean URL
     connection_url = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    print(f"✅ Using connection pooler: {DB_HOST}:{DB_PORT}")
 else:
     # Use legacy URL as-is
     connection_url = DB_URL_ASYNC
+    print(f"⚠️  Using direct connection: {DB_URL_ASYNC[:50]}...")
 
 # Create async engine - session pooler supports prepared statements
 ssl_ctx = ssl.create_default_context()
@@ -34,13 +36,14 @@ engine = create_async_engine(
     echo=False,  # Disable SQL query logging for cleaner output
     future=True,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-    pool_recycle=300,
-    pool_timeout=30,
+    pool_size=20,  # Increased for demo (websockets + HTTP endpoints under high load)
+    max_overflow=30,  # Allow bursts during concurrent operations
+    pool_recycle=3600,  # Recycle connections after 1 hour
+    pool_timeout=10,  # Allow more time for connection acquisition during contention
     connect_args={
         "ssl": ssl_ctx,
         "statement_cache_size": 0,  # Disable prepared statement cache for pooler compatibility
+        "command_timeout": 60,  # Query timeout - increased for high-latency connections (Croatia → California)
     },
 )
 

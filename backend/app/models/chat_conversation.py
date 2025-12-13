@@ -1,12 +1,15 @@
 from datetime import datetime
 from uuid import UUID, uuid4
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from sqlalchemy import String, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.sql import func
 
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.conversation_summary import ConversationSummary  # noqa: F401
 
 class ChatConversation(Base):
     """
@@ -90,7 +93,16 @@ class ChatConversation(Base):
         lazy='selectin',
         order_by='ChatMessage.created_at'
     )
-    
+
+    # AI system relationships (Phase 0)
+    summaries: Mapped[List['ConversationSummary']] = relationship(
+        'ConversationSummary',
+        back_populates='conversation',
+        cascade='all, delete-orphan',
+        lazy='selectin',
+        order_by='ConversationSummary.created_at.desc()'
+    )
+
     def __repr__(self) -> str:
         return f"<ChatConversation {self.title} (User: {self.user_id}, Script: {self.script_id})>"
     

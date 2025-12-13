@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Dict, Any, Optional, List, Union, cast
 from uuid import UUID
+import hashlib
+import re
 
 from fastapi import HTTPException, status
 from sqlalchemy import select, update, and_, func
@@ -368,7 +370,7 @@ class SceneService:
         try:
             # Debug the query execution
             print(f"DEBUG: Finding scene {scene_id} with script")
-            
+
             # Use an explicit join to ensure script is loaded
             from app.models.script import Script
             stmt = (
@@ -379,13 +381,123 @@ class SceneService:
             )
             result = await self.db.execute(stmt)
             scene = result.scalar_one_or_none()
-            
+
             if scene:
                 print(f"DEBUG: Found scene {scene_id} with script_id {scene.script_id}")
             else:
                 print(f"DEBUG: Scene {scene_id} NOT FOUND")
-                
+
             return scene
         except Exception as e:
             print(f"DEBUG: Error in _get_scene_with_script: {str(e)}")
             raise
+
+    # Scene Hashing Methods (Phase 1 - AI System)
+
+    @staticmethod
+    def _construct_scene_text(scene: Scene) -> str:
+        """
+        Reconstruct scene text from content blocks.
+
+        Priority:
+        1. content_blocks (primary editor state)
+        2. full_content (fallback for imports)
+        3. scene_heading (last resort)
+
+        Args:
+            scene: Scene object
+
+        Returns:
+            Full scene text as string
+        """
+        # Try content_blocks first (structured format)
+        if scene.content_blocks:
+            lines = []
+            for block in scene.content_blocks:
+                if isinstance(block, dict) and 'text' in block:
+                    lines.append(block['text'])
+            return '\n'.join(lines)
+
+        # Fall back to full_content if available
+        if scene.full_content:
+            return scene.full_content
+
+        # Last resort: scene_heading only
+        return scene.scene_heading or ""
+
+    @staticmethod
+    def normalize_scene_text(text: str) -> str:
+        """
+        Normalize scene text for consistent hashing.
+
+        Eliminates formatting differences that don't represent content changes:
+        - Strips leading/trailing whitespace
+        - Normalizes line endings (CRLF → LF)
+        - Collapses multiple spaces to single space (within lines)
+        - Preserves line breaks (important for screenplay structure)
+
+        Args:
+            text: Raw scene text
+
+        Returns:
+            Normalized text suitable for hashing
+        """
+        # Strip leading/trailing whitespace
+        normalized = text.strip()
+
+        # Normalize line endings
+        normalized = normalized.replace('\r\n', '\n')
+
+        # Collapse multiple spaces within lines (but preserve line breaks)
+        # Process each line separately to maintain screenplay structure
+        lines = normalized.split('\n')
+        normalized_lines = [re.sub(r'\s+', ' ', line.strip()) for line in lines]
+
+        # Filter out empty lines (collapse consecutive newlines)
+        normalized_lines = [line for line in normalized_lines if line]
+
+        # Rejoin with single newlines
+        return '\n'.join(normalized_lines)
+
+    @staticmethod
+    def compute_scene_hash(scene_text: str) -> str:
+        """
+        Compute SHA-256 hash of normalized scene content.
+
+        Args:
+            scene_text: Scene text to hash
+
+        Returns:
+            64-character hex digest
+        """
+        normalized = SceneService.normalize_scene_text(scene_text)
+        return hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+
+    async def detect_scene_changes(self, scene: Scene) -> bool:
+        """
+        Detect if scene content has changed since last analysis.
+
+        Compares current content hash against stored scene.hash.
+        If changed, updates hash to mark current state as "analyzed".
+
+        Args:
+            scene: Scene object to check
+
+        Returns:
+            True if content changed (needs re-analysis), False otherwise
+        """
+        # Construct current scene text
+        current_text = self._construct_scene_text(scene)
+
+        # Compute current content hash
+        current_hash = self.compute_scene_hash(current_text)
+
+        # Compare with stored hash
+        if scene.hash != current_hash:
+            # Content has changed - update hash to current state
+            scene.hash = current_hash
+            await self.db.commit()
+            return True
+
+        # No change detected
+        return False

@@ -3,7 +3,7 @@ Script management endpoints for the WritersRoom API
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, desc, func
+from sqlalchemy import select, update, desc, func, and_
 from typing import List, Dict, Any
 import logging
 
@@ -14,52 +14,90 @@ logger = logging.getLogger(__name__)
 from app.models.user import User
 from app.models.script import Script
 from app.models.scene import Scene
-from app.models.scene_version import SceneVersion
 from app.models.script_version import ScriptVersion
 from app.models.script_collaborator import ScriptCollaborator, CollaboratorRole
 from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse, ScriptWithContent, AddCollaboratorRequest, CollaboratorResponse
 from app.firebase.config import get_firebase_user_by_email
 from app.auth.dependencies import get_current_user
 from app.db.base import get_db
-from app.services.yjs_persistence import YjsPersistence
 
 router = APIRouter(prefix="/scripts", tags=["Scripts"])
 
 
 async def get_script_if_user_has_access(
-    script_id: UUID, 
+    script_id: UUID,
     user: User,
     db: AsyncSession,
     allow_viewer: bool = True
 ) -> Script:
     """
     Helper function to get a script if the user has access to it.
-    
+
+    OPTIMIZATION: Selects only the columns actually used in get_script_with_content()
+    to prevent loading 8 unnecessary relationships via lazy='selectin'.
+    Reduces 9 queries (1 main + 8 relationships) to 1 lightweight query.
+
     Args:
         script_id: UUID of the script to retrieve
         user: Current authenticated user
         db: Database session
         allow_viewer: Whether to allow users with VIEWER role
-        
+
     Returns:
         Script object if user has access
-        
+
     Raises:
         HTTPException: 404 if script not found or 403 if user doesn't have access
     """
-    # First, try to find the script
-    script_result = await db.execute(select(Script).where(Script.script_id == script_id))
-    script = script_result.scalar_one_or_none()
-    
-    if not script:
+    # First, try to find the script - select only the columns we actually use
+    # This prevents loading 8 eager-loaded relationships (scenes, collaborators, etc.)
+    script_result = await db.execute(
+        select(
+            Script.script_id,
+            Script.owner_id,
+            Script.title,
+            Script.description,
+            Script.current_version,
+            Script.created_at,
+            Script.updated_at,
+            Script.imported_fdx_path,
+            Script.exported_fdx_path,
+            Script.exported_pdf_path,
+            Script.content_blocks,
+            Script.version,
+            Script.updated_by,
+            Script.scene_summaries
+        ).where(Script.script_id == script_id)
+    )
+    row = script_result.one_or_none()
+
+    if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Script with ID {script_id} not found"
         )
-    
+
     # Check if user is the owner
-    if script.owner_id == user.user_id:
-        return script
+    if row.owner_id == user.user_id:
+        # Reconstruct a Script-like object from the row
+        class ScriptData:
+            def __init__(self, row):
+                self.script_id = row.script_id
+                self.owner_id = row.owner_id
+                self.title = row.title
+                self.description = row.description
+                self.current_version = row.current_version
+                self.created_at = row.created_at
+                self.updated_at = row.updated_at
+                self.imported_fdx_path = row.imported_fdx_path
+                self.exported_fdx_path = row.exported_fdx_path
+                self.exported_pdf_path = row.exported_pdf_path
+                self.content_blocks = row.content_blocks
+                self.version = row.version
+                self.updated_by = row.updated_by
+                self.scene_summaries = row.scene_summaries
+
+        return ScriptData(row)
         
     # Check if user is a collaborator with sufficient permissions
     collab_query = select(ScriptCollaborator).where(
@@ -75,14 +113,109 @@ async def get_script_if_user_has_access(
         
     collab_result = await db.execute(collab_query)
     collaborator = collab_result.scalar_one_or_none()
-    
+
     if not collaborator:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to access this script"
         )
-        
-    return script
+
+    # User is a collaborator - return the script data
+    class ScriptData:
+        def __init__(self, row):
+            self.script_id = row.script_id
+            self.owner_id = row.owner_id
+            self.title = row.title
+            self.description = row.description
+            self.current_version = row.current_version
+            self.created_at = row.created_at
+            self.updated_at = row.updated_at
+            self.imported_fdx_path = row.imported_fdx_path
+            self.exported_fdx_path = row.exported_fdx_path
+            self.exported_pdf_path = row.exported_pdf_path
+            self.content_blocks = row.content_blocks
+            self.version = row.version
+            self.updated_by = row.updated_by
+            self.scene_summaries = row.scene_summaries
+
+    return ScriptData(row)
+
+
+async def validate_script_access(
+    script_id: UUID,
+    user: User,
+    db: AsyncSession,
+    allow_viewer: bool = True
+) -> None:
+    """
+    Validate user has access to script without loading script data.
+
+    Optimized for authorization-only checks where script data is not needed.
+    Uses single LEFT JOIN query instead of 2 separate queries.
+
+    Security: Checks both ownership and collaborator permissions.
+    Performance: Loads only 3 columns instead of 13, single query instead of 2.
+
+    Args:
+        script_id: UUID of script to validate access for
+        user: Currently authenticated user
+        db: Async database session
+        allow_viewer: If True, VIEWER role has access. If False, requires EDITOR+ role.
+
+    Returns:
+        None (returns void on success)
+
+    Raises:
+        HTTPException 404: Script not found
+        HTTPException 403: User does not have permission to access script
+    """
+    # Single optimized query with LEFT JOIN
+    # Only load minimal columns needed for access check
+    query = (
+        select(
+            Script.script_id,
+            Script.owner_id,
+            ScriptCollaborator.role
+        )
+        .outerjoin(
+            ScriptCollaborator,
+            and_(
+                ScriptCollaborator.script_id == Script.script_id,
+                ScriptCollaborator.user_id == user.user_id
+            )
+        )
+        .where(Script.script_id == script_id)
+    )
+
+    result = await db.execute(query)
+    row = result.one_or_none()
+
+    # Script doesn't exist
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Script with ID {script_id} not found"
+        )
+
+    # User is owner - always has access
+    if row.owner_id == user.user_id:
+        return
+
+    # User is collaborator - check role permissions
+    if row.role is not None:
+        if allow_viewer:
+            # All roles have access when viewers allowed
+            return
+        else:
+            # Only EDITOR and OWNER roles have access
+            if row.role in [CollaboratorRole.EDITOR, CollaboratorRole.OWNER]:
+                return
+
+    # No access
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="You do not have permission to access this script"
+    )
 
 
 @router.post("/", response_model=ScriptResponse, status_code=status.HTTP_201_CREATED)
@@ -153,27 +286,32 @@ async def get_script_with_content(
 
     # Migration fallback: rebuild from scenes if content_blocks is null
     if content_blocks is None:
-        # Get all scenes ordered by position
+        # OPTIMIZATION: Select only the columns we need (position, content_blocks)
+        # This prevents loading 3 eager-loaded relationships per scene (script, last_editor, versions)
+        # For 10 scenes: reduces from 31 queries (1 main + 10 scenes × 3 relationships) to 1 query
         scenes_result = await db.execute(
-            select(Scene)
+            select(
+                Scene.position,
+                Scene.content_blocks
+            )
             .where(Scene.script_id == script_id)
             .order_by(Scene.position)
         )
-        scenes = scenes_result.scalars().all()
+        scene_rows = scenes_result.all()
 
-        logger.info(f"[GET /content] Rebuilding from scenes: found {len(scenes)} scenes")
+        logger.info(f"[GET /content] Rebuilding from scenes: found {len(scene_rows)} scenes")
 
-        if scenes:
+        if scene_rows:
             # Rebuild full script content from scenes
             content_blocks = []
-            for i, scene in enumerate(scenes):
-                scene_block_count = len(scene.content_blocks) if scene.content_blocks else 0
-                logger.info(f"[GET /content] Scene {i+1}: position={scene.position}, blocks={scene_block_count}, has_content={scene.content_blocks is not None}")
-                if scene.content_blocks:
-                    content_blocks.extend(scene.content_blocks)
+            for i, row in enumerate(scene_rows):
+                scene_block_count = len(row.content_blocks) if row.content_blocks else 0
+                logger.info(f"[GET /content] Scene {i+1}: position={row.position}, blocks={scene_block_count}, has_content={row.content_blocks is not None}")
+                if row.content_blocks:
+                    content_blocks.extend(row.content_blocks)
 
             content_source = "scenes"
-            logger.info(f"[GET /content] Rebuilt {len(content_blocks)} total blocks from {len(scenes)} scenes")
+            logger.info(f"[GET /content] Rebuilt {len(content_blocks)} total blocks from {len(scene_rows)} scenes")
 
             # Optional: Store rebuilt content back to script table for future requests
             # This can be done asynchronously or deferred to first autosave
@@ -496,131 +634,3 @@ async def remove_collaborator(
     return None
 
 
-@router.get("/{script_id}/scenes", response_model=List[Dict[str, Any]])
-async def get_script_scenes(
-    script_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Get all scenes for a script (compatible with Express.js memory API format).
-
-    Yjs-Primary Architecture:
-    - Prefers Yjs data if available (source='yjs')
-    - Falls back to REST snapshot if no Yjs data (source='rest')
-    - Includes metadata for transparency about data source and freshness
-    """
-    try:
-        # Verify script access
-        script_result = await db.execute(
-            select(Script).where(Script.script_id == script_id, Script.owner_id == current_user.user_id)
-        )
-        script = script_result.scalar_one_or_none()
-
-        if not script:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Script not found or access denied"
-            )
-
-        # Get scenes
-        scenes_result = await db.execute(
-            select(Scene)
-            .where(Scene.script_id == script_id)
-            .order_by(Scene.position)
-        )
-        scenes = scenes_result.scalars().all()
-
-        # Initialize Yjs persistence service
-        yjs_persistence = YjsPersistence(db)
-
-        # Convert to Express.js compatible format with Yjs-primary logic
-        scene_data = []
-        for scene in scenes:
-            # Determine content source and derive content accordingly
-            content_blocks = scene.content_blocks
-            source = "rest"
-            yjs_update_count = 0
-
-            try:
-                # Check if Yjs data exists for this scene
-                has_yjs = await yjs_persistence.has_updates(scene.scene_id)
-
-                if has_yjs:
-                    # Compare timestamps to determine which source is newer
-                    # Get latest Yjs update timestamp
-                    yjs_stmt = (
-                        select(SceneVersion.created_at)
-                        .where(SceneVersion.scene_id == scene.scene_id)
-                        .order_by(desc(SceneVersion.created_at))
-                        .limit(1)
-                    )
-                    yjs_result = await db.execute(yjs_stmt)
-                    latest_yjs_update = yjs_result.scalar_one_or_none()
-
-                    rest_updated_at = scene.updated_at
-
-                    # CRITICAL: If REST is newer than Yjs, use REST (offline saves case)
-                    # This handles the case where offline queue saved to REST but Yjs is stale
-                    if latest_yjs_update and rest_updated_at > latest_yjs_update:
-                        # REST has newer content (likely from offline queue)
-                        content_blocks = scene.content_blocks
-                        source = "rest"
-                        yjs_update_count = await yjs_persistence.get_update_count(scene.scene_id)
-                        print(f">>> Using REST content (newer than Yjs): REST={rest_updated_at} > Yjs={latest_yjs_update}")
-                    else:
-                        # Yjs data is current (PRIMARY SOURCE OF TRUTH for online editing)
-                        slate_json = await yjs_persistence.get_scene_snapshot(scene.scene_id)
-                        # Extract blocks array from {"blocks": [...]} format
-                        content_blocks = slate_json.get("blocks", [])
-                        yjs_update_count = await yjs_persistence.get_update_count(scene.scene_id)
-                        source = "yjs"
-                else:
-                    # Use REST snapshot (FALLBACK)
-                    content_blocks = scene.content_blocks
-                    source = scene.snapshot_source or "rest"
-
-            except Exception as yjs_error:
-                # Graceful fallback to REST snapshot on Yjs errors
-                print(f"Warning: Yjs retrieval failed for scene {scene.scene_id}, using REST snapshot: {yjs_error}")
-                content_blocks = scene.content_blocks
-                source = "rest_fallback"
-
-            scene_dict = {
-                "projectId": str(script_id),
-                "slugline": scene.scene_heading,
-                # Legacy sceneId kept for compatibility with older clients
-                "sceneId": f"{script_id}_{scene.position}",
-                # Real database UUID for this scene (use this for writes/autosave)
-                "sceneUUID": str(scene.scene_id),
-                # Current version for optimistic concurrency (metadata only in Yjs-primary)
-                "version": scene.version,
-                "sceneIndex": scene.position,
-                "characters": scene.characters or [],
-                "summary": scene.summary or "",
-                "tone": None,  # Could be extracted from themes
-                "themeTags": scene.themes or [],
-                "tokens": scene.tokens or 0,
-                "timestamp": scene.created_at.isoformat() if scene.created_at else None,
-                "wordCount": scene.word_count or 0,
-                "fullContent": scene.full_content,
-                "projectTitle": script.title,
-                "contentBlocks": content_blocks,
-                # Yjs-Primary Metadata (transparency about data source)
-                "metadata": {
-                    "source": source,  # 'yjs' | 'rest' | 'migrated' | 'rest_fallback'
-                    "snapshot_at": scene.snapshot_at.isoformat() if scene.snapshot_at else None,
-                    "yjs_update_count": yjs_update_count,
-                    "last_modified": scene.updated_at.isoformat() if scene.updated_at else None
-                }
-            }
-            scene_data.append(scene_dict)
-
-        return scene_data
-
-    except Exception as e:
-        print(f"Error retrieving script scenes: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve scenes: {str(e)}"
-        )

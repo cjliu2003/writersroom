@@ -1,13 +1,6 @@
-Unhandled Runtime Error
-ReferenceError: Cannot access 'editor' before initialization
-
-Source
-app/test-tiptap/page.tsx (156:18) @ editor
-
-  154 |       setLoadingScript(false);
-  155 |     }
-> 156 |   }, [authToken, editor]);
-      |                  ^
-  157 |
-  158 |   // Handle script ID change
-  159 |   const handleLoadScript = () => {
+10:42:50 ai_ingestion: app.tasks.ai_ingestion_worker.analyze_script_full('b9265801-3835-45f2-89d2-69743f754526') (d37bcb1d-e866-4291-b32e-9d485e8abda1)
+Character sheet generation failed: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
+Embedding generation failed: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
+PHASE 2 completed with errors: sheets: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce); embeddings: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
+10:44:13 ai_ingestion: Job OK (d37bcb1d-e866-4291-b32e-9d485e8abda1)
+10:44:13 Result is kept for 500 seconds

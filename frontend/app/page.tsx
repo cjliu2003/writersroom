@@ -86,15 +86,27 @@ export default function HomePage() {
 
     const load = async () => {
       setLoadingScripts(true);
+      console.log('[HomePage] Loading scripts for user:', user?.uid);
+
       try {
         // Fetch both owned and shared scripts in parallel
         const [ownedResult, sharedResult] = await Promise.all([
           getUserScripts(),
-          getSharedScripts().catch(() => [] as ScriptSummary[]) // Graceful fallback
+          getSharedScripts().catch((err) => {
+            console.error('[HomePage] getSharedScripts failed:', err);
+            console.error('[HomePage] Error details:', err.response?.data || err.message);
+            return [] as ScriptSummary[];
+          })
         ]);
+
+        console.log('[HomePage] Owned scripts count:', ownedResult.length);
+        console.log('[HomePage] Shared scripts count:', sharedResult.length);
+        console.log('[HomePage] Shared scripts data:', sharedResult);
+
         if (mounted) {
           setScripts(ownedResult);
           setSharedScripts(sharedResult);
+          console.log('[HomePage] State updated - sharedScripts now set to:', sharedResult);
         }
       } catch (e) {
         console.error("Failed to load user scripts:", e);
@@ -455,7 +467,7 @@ export default function HomePage() {
           <input type="file" accept=".fdx" onChange={handleFileSelect} className="hidden" id="fdx-upload" disabled={isUploading} />
 
           {/* Conditional Layout Based on Script Existence */}
-          {!loadingScripts && scripts.length === 0 ? (
+          {!loadingScripts && scripts.length === 0 && sharedScripts.length === 0 ? (
             /* Empty State - Hero Action Buttons Center Stage */
             <div className="min-h-screen flex items-center justify-center">
               <div className="max-w-4xl mx-auto w-full px-4">

@@ -3,14 +3,15 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send, Loader2, ChevronDown, ChevronLeft, ChevronRight, Sparkles, PanelLeft, PanelRight, PanelBottom } from "lucide-react"
-import { sendChatMessage, type ChatMessage } from "@/lib/api"
+import { Send, Loader2, ChevronDown, ChevronLeft, ChevronRight, Sparkles, PanelLeft, PanelRight, PanelBottom, Trash2 } from "lucide-react"
+import { sendChatMessageWithStatusStream, type ChatMessage, type ToolCallMetadata, type ChatStreamEvent } from "@/lib/api"
 import { type ChatPosition } from "@/utils/layoutPrefs"
 
 interface AIChatbotProps {
   projectId?: string
   scriptTitle?: string
   isVisible?: boolean
+  currentSceneId?: string
   isCollapsed?: boolean
   onCollapseToggle?: () => void
   position?: ChatPosition
@@ -20,10 +21,16 @@ interface AIChatbotProps {
   isSceneNavCollapsed?: boolean
 }
 
+// Extended message type to include tool metadata
+interface ExtendedChatMessage extends ChatMessage {
+  tool_metadata?: ToolCallMetadata
+}
+
 export function AIChatbot({
   projectId,
   scriptTitle,
   isVisible = true,
+  currentSceneId,
   isCollapsed = false,
   onCollapseToggle,
   position = 'bottom',
@@ -31,9 +38,12 @@ export function AIChatbot({
   isTopBarCollapsed = false,
   isSceneNavCollapsed = false
 }: AIChatbotProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<ExtendedChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [statusMessage, setStatusMessage] = useState<string>('')  // Real-time status from AI
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)  // Confirmation state for clear
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -95,23 +105,70 @@ export function AIChatbot({
     setMessages(prev => [...prev, userMessage])
     setInputValue('')
     setIsLoading(true)
+    setStatusMessage('Thinking...')
     inputRef.current?.focus()
 
     // Scroll immediately when user sends message
     scrollToBottom()
 
     try {
-      const response = await sendChatMessage({
+      // Use streaming endpoint with real-time status updates
+      const stream = sendChatMessageWithStatusStream({
         script_id: projectId,
-        messages: [...messages, userMessage],
-        include_scenes: true
+        conversation_id: conversationId,
+        current_scene_id: currentSceneId,
+        message: userMessage.content,
+        budget_tier: 'standard' // Can be 'quick', 'standard', or 'deep'
       })
 
-      if (response.success && response.message) {
-        setMessages(prev => [...prev, response.message!])
-      } else {
-        throw new Error(response.error || 'Failed to get response')
+      let finalMessage = ''
+      let toolMetadata: ToolCallMetadata | undefined
+
+      // Process SSE events as they arrive
+      for await (const event of stream) {
+        switch (event.type) {
+          case 'thinking':
+            setStatusMessage(event.message)
+            break
+
+          case 'status':
+            // User-friendly status messages from tool execution
+            setStatusMessage(event.message)
+            break
+
+          case 'complete':
+            finalMessage = event.message
+            toolMetadata = event.tool_metadata as ToolCallMetadata | undefined
+            setStatusMessage('')
+
+            // Log usage metrics for debugging
+            console.log('AI Response Complete:', {
+              output_tokens: event.usage.output_tokens,
+              cache_read: event.usage.cache_read_input_tokens,
+              tool_metadata: toolMetadata || null
+            })
+            break
+
+          case 'stream_end':
+            // Update conversation ID for future messages
+            if (!conversationId && event.conversation_id) {
+              setConversationId(event.conversation_id)
+            }
+            break
+        }
       }
+
+      // Create assistant message from final response
+      if (finalMessage) {
+        const assistantMessage: ExtendedChatMessage = {
+          role: 'assistant',
+          content: finalMessage,
+          timestamp: new Date().toISOString(),
+          tool_metadata: toolMetadata
+        }
+        setMessages(prev => [...prev, assistantMessage])
+      }
+
     } catch (error) {
       console.error('Chat error:', error)
       const errorMessage: ChatMessage = {
@@ -122,6 +179,7 @@ export function AIChatbot({
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+      setStatusMessage('')
     }
   }
 
@@ -130,6 +188,17 @@ export function AIChatbot({
       e.preventDefault()
       sendMessage()
     }
+  }
+
+  // Clear chat history (both localStorage and state)
+  const clearChat = () => {
+    if (projectId) {
+      localStorage.removeItem(`chat-${projectId}`)
+    }
+    setMessages([])
+    setConversationId(undefined)
+    setShowClearConfirm(false)
+    inputRef.current?.focus()
   }
 
   // Generate personalized placeholder
@@ -235,8 +304,39 @@ export function AIChatbot({
         </div>
 
         <div className="flex items-center gap-0.5">
+          {/* Clear chat button - only show when there are messages */}
+          {messages.length > 0 && !showClearConfirm && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowClearConfirm(true)}
+              className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded p-0.5"
+              title="Clear chat"
+              disabled={isLoading}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          )}
+          {/* Clear confirmation */}
+          {showClearConfirm && (
+            <div className="flex items-center gap-1 text-[9px]">
+              <span className="text-gray-500">Clear?</span>
+              <button
+                onClick={clearChat}
+                className="text-red-500 hover:text-red-700 font-medium px-1"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="text-gray-500 hover:text-gray-700 px-1"
+              >
+                No
+              </button>
+            </div>
+          )}
           {/* Position toggle button - cycles through positions */}
-          {onPositionChange && (
+          {onPositionChange && !showClearConfirm && (
             <Button
               variant="ghost"
               size="sm"
@@ -259,15 +359,17 @@ export function AIChatbot({
             </Button>
           )}
           {/* Collapse button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onCollapseToggle}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5 -mr-1"
-            title="Minimize"
-          >
-            <CollapseIcon className="w-3.5 h-3.5" />
-          </Button>
+          {!showClearConfirm && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onCollapseToggle}
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5 -mr-1"
+              title="Minimize"
+            >
+              <CollapseIcon className="w-3.5 h-3.5" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -311,7 +413,7 @@ export function AIChatbot({
               <div className="text-[12pt] leading-[16pt] text-gray-600 bg-purple-50/70 border-l-2 border-purple-300 rounded px-2 py-1.5">
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-500" />
-                  <span>Thinking...</span>
+                  <span>{statusMessage || 'Thinking...'}</span>
                 </div>
               </div>
             )}
@@ -327,7 +429,7 @@ export function AIChatbot({
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder={getPlaceholder()}
             disabled={!projectId}
             rows={1}

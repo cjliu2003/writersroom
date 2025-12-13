@@ -60,16 +60,16 @@ class WebSocketManager:
         logger.info("WebSocketManager initialized")
     
     async def connect(
-        self, 
-        websocket: WebSocket, 
-        scene_id: UUID, 
+        self,
+        websocket: WebSocket,
+        scene_id: UUID,
         user_id: UUID,
         user_name: str,
         notify_participants: bool = False
     ) -> ConnectionInfo:
         """
         Register a new WebSocket connection to a scene room.
-        
+
         Args:
             websocket: The WebSocket connection
             scene_id: UUID of the scene being edited
@@ -77,7 +77,7 @@ class WebSocketManager:
             user_name: Display name of the user
             notify_participants: If True, broadcast user_joined/left JSON messages.
                                Set to False for y-websocket connections (binary only).
-            
+
         Returns:
             ConnectionInfo object for the connection
         """
