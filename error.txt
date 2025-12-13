@@ -1,10 +1,6 @@
-INFO:     127.0.0.1:51767 - "OPTIONS /api/ai/chat/message HTTP/1.1" 200 OK
-DEBUG: Authentication process started
-DEBUG: Token received: eyJhbGciOiJSUzI...
-DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG: User lookup result: Found
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verification failed: Token expired, 1764810687 < 1764968588
-DEBUG WS: Exception type: ExpiredIdTokenError
-Token verification failed: Token has expired
+10:42:50 ai_ingestion: app.tasks.ai_ingestion_worker.analyze_script_full('b9265801-3835-45f2-89d2-69743f754526') (d37bcb1d-e866-4291-b32e-9d485e8abda1)
+Character sheet generation failed: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
+Embedding generation failed: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
+PHASE 2 completed with errors: sheets: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce); embeddings: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
+10:44:13 ai_ingestion: Job OK (d37bcb1d-e866-4291-b32e-9d485e8abda1)
+10:44:13 Result is kept for 500 seconds

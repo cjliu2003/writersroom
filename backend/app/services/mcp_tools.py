@@ -14,9 +14,82 @@ by allowing it to dynamically retrieve exactly the information it needs.
 """
 
 from uuid import UUID
+
+
+# User-friendly status messages for each tool
+# These are shown to non-technical users while the AI works
+TOOL_STATUS_MESSAGES = {
+    "get_scene": {
+        "active": "Reading scene {scene_index}...",
+        "active_default": "Reading the scene...",
+        "complete": "Finished reading scene"
+    },
+    "get_scene_context": {
+        "active": "Looking at scene {scene_index} and surrounding scenes...",
+        "active_default": "Looking at the scene and its context...",
+        "complete": "Finished reviewing scene context"
+    },
+    "get_character_scenes": {
+        "active": "Tracking {character_name}'s appearances...",
+        "active_default": "Tracking character appearances...",
+        "complete": "Finished tracking character"
+    },
+    "search_script": {
+        "active": "Searching the screenplay...",
+        "active_default": "Searching the screenplay...",
+        "complete": "Finished searching"
+    },
+    "analyze_pacing": {
+        "active": "Analyzing the pacing and structure...",
+        "active_default": "Analyzing the pacing and structure...",
+        "complete": "Finished pacing analysis"
+    },
+    "get_plot_threads": {
+        "active": "Reviewing storylines and plot threads...",
+        "active_default": "Reviewing storylines and plot threads...",
+        "complete": "Finished reviewing storylines"
+    }
+}
+
+
+def get_tool_status_message(tool_name: str, tool_input: dict, status: str = "active") -> str:
+    """
+    Get a user-friendly status message for a tool execution.
+
+    Args:
+        tool_name: Name of the tool being executed
+        tool_input: Input parameters for the tool
+        status: "active" for in-progress, "complete" for finished
+
+    Returns:
+        User-friendly status message string
+    """
+    messages = TOOL_STATUS_MESSAGES.get(tool_name, {
+        "active": "Analyzing your screenplay...",
+        "active_default": "Analyzing your screenplay...",
+        "complete": "Analysis complete"
+    })
+
+    if status == "complete":
+        return messages["complete"]
+
+    # Try to format with tool input parameters
+    try:
+        # Handle scene_index - convert to 1-based for users
+        if "scene_index" in tool_input:
+            formatted_input = {**tool_input, "scene_index": tool_input["scene_index"] + 1}
+        else:
+            formatted_input = tool_input
+
+        return messages["active"].format(**formatted_input)
+    except (KeyError, TypeError):
+        return messages["active_default"]
+
+
 from typing import Optional, List, Dict, Any
 from sqlalchemy import select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.models.scene import Scene
 from app.models.scene_character import SceneCharacter
@@ -206,8 +279,11 @@ class MCPToolExecutor:
         scene_index: int
     ) -> str:
         """Get full scene text by index."""
+        # OPTIMIZATION: noload prevents eager loading of Scene's 8 relationships
+        # Scene has selectin relationships that cascade to Script->ALL scenes
         scene = await self.db.scalar(
             select(Scene)
+            .options(noload('*'))
             .where(
                 Scene.script_id == script_id,
                 Scene.position == scene_index
@@ -241,8 +317,10 @@ class MCPToolExecutor:
         end_index = scene_index + neighbor_count
 
         # Query scenes in range
+        # OPTIMIZATION: noload prevents eager loading of Scene's 8 relationships
         scenes = await self.db.execute(
             select(Scene)
+            .options(noload('*'))
             .where(
                 Scene.script_id == script_id,
                 Scene.position >= start_index,
@@ -277,8 +355,10 @@ class MCPToolExecutor:
     ) -> str:
         """Get all scenes where a character appears."""
         # Query scenes with this character
+        # OPTIMIZATION: noload prevents eager loading of SceneCharacter relationships
         scene_chars = await self.db.execute(
             select(SceneCharacter)
+            .options(noload('*'))
             .join(Scene, SceneCharacter.scene_id == Scene.scene_id)
             .where(
                 Scene.script_id == script_id,
@@ -293,9 +373,11 @@ class MCPToolExecutor:
             return f"Character '{character_name}' not found in any scenes"
 
         # Get actual scenes
+        # OPTIMIZATION: noload prevents eager loading of Scene's 8 relationships
         scene_ids = [sc.scene_id for sc in char_scenes]
         scenes = await self.db.execute(
             select(Scene)
+            .options(noload('*'))
             .where(Scene.scene_id.in_(scene_ids))
             .order_by(Scene.position)
         )
@@ -368,8 +450,11 @@ class MCPToolExecutor:
 
         Analyzes scene lengths, dialogue ratios, and act distribution.
         """
+        # OPTIMIZATION: noload prevents eager loading of Scene's 8 relationships
+        # This query could load ALL scenes + relationships = massive cascade
         scenes = await self.db.execute(
             select(Scene)
+            .options(noload('*'))
             .where(Scene.script_id == script_id)
             .order_by(Scene.position)
         )
@@ -459,7 +544,12 @@ Pacing Notes:
     ) -> str:
         """Get plot threads and their associated scenes."""
         # Build query
-        query = select(PlotThread).where(PlotThread.script_id == script_id)
+        # OPTIMIZATION: noload prevents eager loading of PlotThread relationships
+        query = (
+            select(PlotThread)
+            .options(noload('*'))
+            .where(PlotThread.script_id == script_id)
+        )
 
         if thread_type:
             query = query.where(PlotThread.thread_type == thread_type)

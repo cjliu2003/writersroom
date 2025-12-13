@@ -63,6 +63,9 @@ node_modules/
 out/
 build/
 
+# TypeScript build info
+tsconfig.tsbuildinfo
+
 # Next.js environment variables
 .env.local
 .env.development.local

@@ -1,15 +1,21 @@
 """
 Script State Service - Manage script analysis state machine and trigger ingestion
+
+Optimizations:
+- Phase 2 parallelization: outline, character sheets, and embeddings run concurrently
+- All three write to different tables with no conflicts
 """
 
+import asyncio
 import logging
-from typing import Optional
+from typing import Optional, Tuple, Any
 from uuid import UUID
 from datetime import datetime
 
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.base import async_session_maker
 from app.models.script import Script
 from app.models.scene import Scene
 from app.models.script_state import ScriptState
@@ -136,45 +142,116 @@ class ScriptStateService:
     async def trigger_full_analysis(self, script_id: UUID) -> None:
         """
         Trigger full analysis pipeline:
-        1. Generate scene summaries (if not already done)
-        2. Generate script outline
-        3. Generate character sheets
-        4. Generate embeddings (if not already done)
+
+        PHASE 1 (Sequential - dependency):
+        1. Generate scene summaries (MUST complete first)
+
+        PHASE 2 (Parallel - no conflicts):
+        2. Generate script outline     |
+        3. Generate character sheets   | Run concurrently
+        4. Generate embeddings         |
+
+        CONCURRENCY FIX: Each Phase 2 task creates its own database session.
+        SQLAlchemy AsyncSession is NOT safe for concurrent use - sharing a session
+        across asyncio.gather() causes "concurrent operations are not permitted" errors.
 
         Args:
             script_id: Script ID
         """
         logger.info(f"Starting full analysis for script {script_id}")
 
-        # Step 1: Ensure scene summaries exist
-        logger.info("Ensuring scene summaries exist...")
+        # ==========================================
+        # PHASE 1: Scene Summaries (Sequential)
+        # All subsequent phases depend on summaries
+        # Uses self.db session (safe - no concurrency here)
+        # ==========================================
+        logger.info("PHASE 1: Generating scene summaries...")
         summaries = await self.ingestion_service.batch_generate_scene_summaries(
             script_id,
             progress_callback=self._log_progress("Scene summaries")
         )
+        logger.info(f"PHASE 1 complete: {len(summaries)} scene summaries")
 
-        logger.info(f"Scene summaries: {len(summaries)}")
+        # Commit Phase 1 results before starting parallel Phase 2
+        # This ensures scene summaries are visible to Phase 2 tasks
+        await self.db.commit()
 
-        # Step 2: Generate script outline
-        logger.info("Generating script outline...")
-        outline = await self.ingestion_service.generate_script_outline(script_id)
+        # ==========================================
+        # PHASE 2: Parallel Execution
+        # Outline, character sheets, and embeddings:
+        # - All READ from scene_summaries (no conflicts)
+        # - All WRITE to different tables (no conflicts)
+        #
+        # CRITICAL: Each task creates its own session to avoid
+        # SQLAlchemy "concurrent operations not permitted" error
+        # ==========================================
+        logger.info("PHASE 2: Starting parallel analysis (outline, sheets, embeddings)...")
 
-        logger.info(f"Script outline generated ({outline.tokens_estimate} tokens)")
+        # Define async tasks for parallel execution - each with its own session
+        async def generate_outline_task():
+            """Generate script outline with error handling and dedicated session."""
+            try:
+                async with async_session_maker() as task_db:
+                    service = IngestionService(task_db)
+                    outline = await service.generate_script_outline(script_id)
+                    await task_db.commit()
+                    logger.info(f"Outline complete ({outline.tokens_estimate} tokens)")
+                    return ("outline", outline, None)
+            except Exception as e:
+                logger.error(f"Outline generation failed: {str(e)}")
+                return ("outline", None, e)
 
-        # Step 3: Generate character sheets
-        logger.info("Generating character sheets...")
-        sheets = await self.ingestion_service.batch_generate_character_sheets(
-            script_id,
-            progress_callback=self._log_progress("Character sheets")
+        async def generate_character_sheets_task():
+            """Generate character sheets with error handling and dedicated session."""
+            try:
+                async with async_session_maker() as task_db:
+                    service = IngestionService(task_db)
+                    sheets = await service.batch_generate_character_sheets(
+                        script_id,
+                        progress_callback=self._log_progress("Character sheets")
+                    )
+                    await task_db.commit()
+                    logger.info(f"Character sheets complete: {len(sheets)} sheets")
+                    return ("sheets", sheets, None)
+            except Exception as e:
+                logger.error(f"Character sheet generation failed: {str(e)}")
+                return ("sheets", None, e)
+
+        async def generate_embeddings_task():
+            """Generate embeddings with error handling and dedicated session."""
+            try:
+                async with async_session_maker() as task_db:
+                    service = EmbeddingService(task_db)
+                    embeddings = await service.batch_embed_scene_summaries(script_id)
+                    await task_db.commit()
+                    logger.info(f"Embeddings complete: {len(embeddings)} embeddings")
+                    return ("embeddings", embeddings, None)
+            except Exception as e:
+                logger.error(f"Embedding generation failed: {str(e)}")
+                return ("embeddings", None, e)
+
+        # Execute all Phase 2 tasks concurrently
+        results = await asyncio.gather(
+            generate_outline_task(),
+            generate_character_sheets_task(),
+            generate_embeddings_task(),
+            return_exceptions=False  # We handle exceptions within each task
         )
 
-        logger.info(f"Generated {len(sheets)} character sheets")
+        # Process results and check for failures
+        errors = []
+        for task_name, result, error in results:
+            if error:
+                errors.append(f"{task_name}: {str(error)}")
 
-        # Step 4: Generate embeddings
-        logger.info("Generating embeddings...")
-        embeddings = await self.embedding_service.batch_embed_scene_summaries(script_id)
+        if errors:
+            error_summary = "; ".join(errors)
+            logger.error(f"PHASE 2 completed with errors: {error_summary}")
+            # Continue despite partial failures - outline, sheets, embeddings are independent
+            # The script can still function with partial analysis
+        else:
+            logger.info("PHASE 2 complete: all tasks succeeded")
 
-        logger.info(f"Generated {len(embeddings)} embeddings")
         logger.info(f"Full analysis complete for script {script_id}")
 
     async def count_scenes(self, script_id: UUID) -> int:

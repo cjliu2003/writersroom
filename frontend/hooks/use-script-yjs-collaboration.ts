@@ -187,7 +187,7 @@ export function useScriptYjsCollaboration({
         {
           connect: true,
           resyncInterval: -1,  // Disable automatic resync (use -1 to disable)
-          maxBackoffTime: 10000,  // Max backoff for reconnection (10 seconds)
+          maxBackoffTime: 30000,  // Increased to 30 seconds for high-latency connections (e.g., Croatia → California)
           params: { token: authToken },  // Add token as query parameter
         }
       );

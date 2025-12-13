@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Tuple
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 import tiktoken
 
 from app.models.script_outline import ScriptOutline
@@ -86,43 +87,67 @@ class ContextBuilder:
         Returns:
             Dict with model, max_tokens, system, messages, and metadata
         """
+        import time
+        import logging
+        logger = logging.getLogger(__name__)
+
         total_budget = self.BUDGET_TIERS[budget_tier]
 
         # 1. System prompt (cacheable)
+        step_start = time.perf_counter()
         system_prompt = self._get_system_prompt(intent)
         system_tokens = self._count_tokens(system_prompt)
+        logger.info(f"[CONTEXT] System prompt generation took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
         # 2. Global context (cacheable)
+        step_start = time.perf_counter()
         global_context = await self._get_global_context(script_id, intent)
         global_tokens = self._count_tokens(global_context)
+        logger.info(f"[CONTEXT] Global context fetch took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
         # 3. Retrieved scene cards (cacheable)
+        step_start = time.perf_counter()
         retrieval_result = await self.retrieval_service.retrieve_for_intent(
             script_id=script_id,
             message=message,
             intent=intent,
             current_scene_id=current_scene_id
         )
+        logger.info(f"[CONTEXT] Retrieval service took {(time.perf_counter() - step_start) * 1000:.2f}ms")
+
+        step_start = time.perf_counter()
         scene_cards = self._format_scene_cards(retrieval_result["scenes"])
         scene_tokens = self._count_tokens(scene_cards)
+        logger.info(f"[CONTEXT] Scene card formatting took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
         # 4. Conversation context (not cached)
+        # conv_data is used later for building proper alternating messages
         conv_context = ""
         conv_tokens = 0
+        conv_data = None
         if conversation_id:
             conv_data = await self.conversation_service.get_conversation_context(
                 conversation_id,
                 token_budget=min(300, total_budget // 6)
             )
-            conv_context = self._format_conversation(conv_data)
-            conv_tokens = self._count_tokens(conv_context)
+            # We no longer format conversation into a single text block
+            # Instead, conv_data is used directly to build proper alternating messages
+            # conv_context = self._format_conversation(conv_data)
+            # conv_tokens = self._count_tokens(conv_context)
+            # Estimate tokens for the raw conversation messages
+            for msg in conv_data.get("recent_messages", []):
+                conv_tokens += self._count_tokens(msg.get("content", ""))
 
         # 5. Local context (not cached)
+        # Use noload to prevent eager loading of Scene's 8 relationships
+        # Scene has selectin relationships that cascade to Script->ALL scenes (148!)
         local_context = ""
         local_tokens = 0
         if current_scene_id and intent == IntentType.LOCAL_EDIT:
             scene_result = await self.db.execute(
-                select(Scene).where(Scene.scene_id == current_scene_id)
+                select(Scene)
+                .options(noload('*'))
+                .where(Scene.scene_id == current_scene_id)
             )
             scene = scene_result.scalar_one_or_none()
             if scene:
@@ -153,11 +178,16 @@ class ContextBuilder:
             )
 
         # Build Claude API message format with cache control
-        content_blocks = []
+        # IMPORTANT: Build proper alternating user/assistant messages for conversation history
+        # Embedding assistant responses as text in a user message causes Claude to "continue"
+        # the previous response instead of starting fresh.
+
+        # Build context content blocks (for the first/context message)
+        context_blocks = []
 
         # Global context (cached)
         if global_context:
-            content_blocks.append({
+            context_blocks.append({
                 "type": "text",
                 "text": global_context,
                 "cache_control": {"type": "ephemeral"}
@@ -165,31 +195,78 @@ class ContextBuilder:
 
         # Scene cards (cached)
         if scene_cards:
-            content_blocks.append({
+            context_blocks.append({
                 "type": "text",
                 "text": scene_cards,
                 "cache_control": {"type": "ephemeral"}
             })
 
-        # Conversation context (not cached)
-        if conv_context:
-            content_blocks.append({
-                "type": "text",
-                "text": conv_context
-            })
-
         # Local context (not cached)
         if local_context:
-            content_blocks.append({
+            context_blocks.append({
                 "type": "text",
                 "text": local_context
             })
 
-        # User message (not cached)
-        content_blocks.append({
-            "type": "text",
-            "text": message
-        })
+        # Build messages array with proper alternation
+        messages = []
+
+        # If we have context, start with a context-setting user message
+        if context_blocks:
+            context_blocks.append({
+                "type": "text",
+                "text": "Above is context about the screenplay. Please use it to inform your responses."
+            })
+            messages.append({
+                "role": "user",
+                "content": context_blocks
+            })
+            # Add a brief assistant acknowledgment to maintain alternation
+            messages.append({
+                "role": "assistant",
+                "content": "I understand. I've reviewed the screenplay context provided. How can I help you with your screenplay?"
+            })
+
+        # Add conversation history as properly alternating messages
+        # Claude API requires alternating user/assistant messages
+        if conv_data and conv_data.get("recent_messages"):
+            for msg in conv_data["recent_messages"]:
+                role = msg['role'].value if hasattr(msg['role'], 'value') else str(msg['role'])
+                role = role.lower()
+
+                # Ensure alternation - if last message has same role, skip or merge
+                if messages and messages[-1]["role"] == role:
+                    # Same role as last message - merge content
+                    if isinstance(messages[-1]["content"], str):
+                        messages[-1]["content"] += "\n\n" + msg['content']
+                    else:
+                        # Content is a list of blocks, append new text block
+                        messages[-1]["content"].append({
+                            "type": "text",
+                            "text": msg['content']
+                        })
+                else:
+                    messages.append({
+                        "role": role,
+                        "content": msg['content']
+                    })
+
+        # Add the current user message
+        # Ensure we don't have consecutive user messages
+        if messages and messages[-1]["role"] == "user":
+            # Last message is already a user message - merge with current
+            if isinstance(messages[-1]["content"], str):
+                messages[-1]["content"] += "\n\n" + message
+            else:
+                messages[-1]["content"].append({
+                    "type": "text",
+                    "text": message
+                })
+        else:
+            messages.append({
+                "role": "user",
+                "content": message
+            })
 
         return {
             "model": "claude-haiku-4-5",
@@ -201,12 +278,7 @@ class ContextBuilder:
                     "cache_control": {"type": "ephemeral"}
                 }
             ],
-            "messages": [
-                {
-                    "role": "user",
-                    "content": content_blocks
-                }
-            ],
+            "messages": messages,
             "metadata": {
                 "intent": intent,
                 "budget_tier": budget_tier,
@@ -240,7 +312,9 @@ Key guidelines:
 - Focus on showing not telling
 - Maintain character voice consistency
 - Consider pacing and visual storytelling
-- Provide specific, actionable feedback"""
+- Provide specific, actionable feedback
+
+IMPORTANT: When conversation history is provided, it is for CONTEXT ONLY. Always start your response fresh and complete - never continue or complete a previous response. Each of your responses should stand alone as a complete answer."""
 
         intent_additions = {
             IntentType.LOCAL_EDIT: "\n\nFocus on improving dialogue and action lines. Be concise and specific.",
@@ -267,9 +341,11 @@ Key guidelines:
         if intent == IntentType.BRAINSTORM:
             return ""
 
-        # Get script outline
+        # Get script outline - use noload to prevent eager loading of script relationship
+        # ScriptOutline has selectin relationship to Script which cascades to load ALL scenes
         outline_result = await self.db.execute(
             select(ScriptOutline)
+            .options(noload('*'))
             .where(ScriptOutline.script_id == script_id)
             .order_by(ScriptOutline.version.desc())
             .limit(1)
@@ -280,8 +356,10 @@ Key guidelines:
             return ""
 
         # Get main character sheets (top 3 by appearance count)
+        # Use noload to prevent eager loading of script relationship
         character_sheets_result = await self.db.execute(
             select(CharacterSheet)
+            .options(noload('*'))
             .where(CharacterSheet.script_id == script_id)
             .order_by(CharacterSheet.dirty_scene_count.desc())
             .limit(3)
@@ -325,6 +403,10 @@ Key guidelines:
         """
         Format conversation context for prompt.
 
+        IMPORTANT: The conversation history is formatted with clear delimiters to
+        prevent Claude from "continuing" a previous response. Each message is
+        explicitly marked as complete historical context.
+
         Args:
             conv_data: Conversation data from conversation_service
 
@@ -334,13 +416,18 @@ Key guidelines:
         parts = []
 
         if conv_data.get("summary"):
-            parts.append("CONVERSATION SUMMARY:")
+            parts.append("=== CONVERSATION SUMMARY (for context only) ===")
             parts.append(conv_data["summary"])
+            parts.append("=== END SUMMARY ===")
 
         if conv_data.get("recent_messages"):
-            parts.append("\nRECENT MESSAGES:")
+            parts.append("\n=== PREVIOUS MESSAGES (for context only - do NOT continue these) ===")
             for msg in conv_data["recent_messages"]:
-                parts.append(f"{msg['role'].upper()}: {msg['content']}")
+                role = msg['role'].value if hasattr(msg['role'], 'value') else str(msg['role'])
+                parts.append(f"[{role.upper()}]: {msg['content']}")
+                parts.append("---")  # Clear separator between messages
+            parts.append("=== END PREVIOUS MESSAGES ===")
+            parts.append("\nThe user's NEW question follows. Respond ONLY to the new question below, starting fresh:")
 
         return "\n".join(parts)
 

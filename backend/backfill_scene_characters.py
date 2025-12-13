@@ -16,6 +16,7 @@ from sqlalchemy import select, text
 from app.db.base import async_session_maker
 from app.models.scene import Scene
 from app.models.scene_character import SceneCharacter
+from app.utils.character_normalization import normalize_character_name
 
 # Script ID to backfill (or None for all scripts)
 SCRIPT_ID = UUID('05006f9d-2c40-4ffc-a041-f0c3ac62a4ed')
@@ -60,22 +61,25 @@ async def backfill_scene_characters(script_id: UUID = None):
                 scenes_with_characters += 1
 
                 for character_name in scene.characters:
+                    # Normalize character name before checking/creating
+                    normalized_name = normalize_character_name(character_name)
+
                     # Check if record already exists
                     existing = await db.execute(
                         select(SceneCharacter)
                         .where(SceneCharacter.scene_id == scene.scene_id)
-                        .where(SceneCharacter.character_name == character_name)
+                        .where(SceneCharacter.character_name == normalized_name)
                     )
 
                     if existing.scalar_one_or_none() is None:
                         # Create new record
                         scene_char = SceneCharacter(
                             scene_id=scene.scene_id,
-                            character_name=character_name
+                            character_name=normalized_name
                         )
                         db.add(scene_char)
                         total_records_created += 1
-                        unique_characters.add(character_name)
+                        unique_characters.add(normalized_name)
 
         # Commit all changes
         await db.commit()

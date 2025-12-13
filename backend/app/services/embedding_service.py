@@ -1,10 +1,15 @@
 """
 Embedding Service - Generate and manage vector embeddings for scene summaries
+
+Optimizations:
+- Batch embedding API calls (100 texts in 1 API call instead of 100 calls)
+- Pre-fetch existing embeddings to eliminate N+1 queries
+- Batch commits to reduce transaction overhead
 """
 
 import logging
 import math
-from typing import List, Optional
+from typing import List, Optional, Dict, Tuple
 from uuid import UUID
 
 import httpx
@@ -18,6 +23,10 @@ from app.core.config import settings
 from app.services.scene_service import SceneService
 
 logger = logging.getLogger(__name__)
+
+# OpenAI batch embedding limits
+# Max 2048 inputs per request, but we use a smaller batch for safety
+MAX_BATCH_SIZE = getattr(settings, 'EMBEDDING_BATCH_SIZE', 100)
 
 
 class EmbeddingService:
@@ -92,6 +101,97 @@ class EmbeddingService:
             logger.error(f"Error generating embedding: {str(e)}")
             raise
 
+    async def generate_batch_embeddings(
+        self,
+        texts: List[str],
+        batch_size: int = MAX_BATCH_SIZE
+    ) -> List[List[float]]:
+        """
+        Generate embeddings for multiple texts in a single API call.
+
+        OpenAI's embeddings API natively supports batching - passing an array
+        of strings returns an array of embeddings in the same order.
+        This is ~25x faster than individual calls for 100 texts.
+
+        Args:
+            texts: List of texts to embed (max 2048 per request)
+            batch_size: Maximum texts per API call (default: 100)
+
+        Returns:
+            List of embedding vectors in same order as input texts
+
+        Raises:
+            Exception: If OpenAI API call fails
+        """
+        if not texts:
+            return []
+
+        # Filter out empty texts and track their indices
+        valid_texts = []
+        valid_indices = []
+        for i, text in enumerate(texts):
+            if text and text.strip():
+                valid_texts.append(text)
+                valid_indices.append(i)
+
+        if not valid_texts:
+            logger.warning("No valid texts to embed")
+            return [[] for _ in texts]
+
+        logger.info(f"Generating batch embeddings for {len(valid_texts)} texts")
+
+        all_embeddings: List[List[float]] = []
+
+        # Process in batches if needed (OpenAI limit is 2048)
+        for batch_start in range(0, len(valid_texts), batch_size):
+            batch_texts = valid_texts[batch_start:batch_start + batch_size]
+
+            try:
+                async with httpx.AsyncClient(timeout=60.0) as client:  # Longer timeout for batch
+                    response = await client.post(
+                        f"{self.base_url}/embeddings",
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": self.EMBEDDING_MODEL,
+                            "input": batch_texts,  # Array of texts!
+                            "encoding_format": "float"
+                        }
+                    )
+
+                    if response.status_code != 200:
+                        logger.error(f"OpenAI batch embeddings API error: {response.status_code} - {response.text}")
+                        raise Exception(f"OpenAI batch embeddings API error: {response.status_code}")
+
+                    data = response.json()
+
+                    # Extract embeddings in order (API returns them sorted by index)
+                    batch_embeddings = sorted(data["data"], key=lambda x: x["index"])
+                    for item in batch_embeddings:
+                        embedding = item["embedding"]
+                        if len(embedding) != self.EMBEDDING_DIMENSIONS:
+                            raise Exception(f"Unexpected embedding dimensions: {len(embedding)}")
+                        all_embeddings.append(embedding)
+
+                    logger.debug(f"Generated {len(batch_embeddings)} embeddings in batch")
+
+            except httpx.TimeoutException:
+                logger.error("OpenAI batch embeddings API request timed out")
+                raise Exception("OpenAI batch embeddings API request timed out")
+            except Exception as e:
+                logger.error(f"Error generating batch embeddings: {str(e)}")
+                raise
+
+        # Reconstruct full result list with empty lists for invalid texts
+        result = [[] for _ in texts]
+        for i, embedding in zip(valid_indices, all_embeddings):
+            result[i] = embedding
+
+        logger.info(f"Batch embedding generation complete: {len(all_embeddings)} embeddings")
+        return result
+
     async def embed_scene_summary(
         self,
         scene_summary: SceneSummary,
@@ -147,45 +247,119 @@ class EmbeddingService:
 
     async def batch_embed_scene_summaries(
         self,
-        script_id: UUID
+        script_id: UUID,
+        force_regenerate: bool = False
     ) -> List[SceneEmbedding]:
         """
         Generate embeddings for all scene summaries in a script.
 
+        Optimizations:
+        - Pre-fetches all existing embeddings (eliminates N+1 queries)
+        - Uses batch embedding API (1 API call instead of N)
+        - Batch commits at the end (reduces transaction overhead)
+
         Args:
             script_id: Script ID
+            force_regenerate: If True, regenerate all embeddings even if they exist
 
         Returns:
             List of SceneEmbedding objects
         """
-        # Get all scene summaries for script
+        # Step 1: Get all scene summaries for script with scene info
         summaries_result = await self.db.execute(
-            select(SceneSummary)
+            select(SceneSummary, Scene)
             .join(Scene, SceneSummary.scene_id == Scene.scene_id)
             .where(Scene.script_id == script_id)
             .order_by(Scene.position)
         )
+        summary_scene_pairs = summaries_result.all()
 
-        summaries = summaries_result.scalars().all()
-        embeddings = []
+        if not summary_scene_pairs:
+            logger.info(f"No scene summaries found for script {script_id}")
+            return []
 
-        for summary in summaries:
-            try:
-                embedding = await self.embed_scene_summary(summary)
-                embeddings.append(embedding)
-                logger.info(f"Generated embedding for scene {summary.scene_id}")
+        summaries = [pair[0] for pair in summary_scene_pairs]
+        scenes = [pair[1] for pair in summary_scene_pairs]
 
-            except Exception as e:
-                logger.error(f"Failed to embed scene {summary.scene_id}: {str(e)}")
-                # Continue with other scenes
+        logger.info(f"Processing {len(summaries)} scene summaries for embeddings")
+
+        # Step 2: Pre-fetch ALL existing embeddings (eliminates N+1 queries)
+        scene_ids = [s.scene_id for s in summaries]
+        existing_result = await self.db.execute(
+            select(SceneEmbedding).where(SceneEmbedding.scene_id.in_(scene_ids))
+        )
+        existing_map: Dict[UUID, SceneEmbedding] = {
+            e.scene_id: e for e in existing_result.scalars().all()
+        }
+
+        # Step 3: Determine which summaries need embedding
+        if force_regenerate:
+            summaries_to_embed = list(zip(summaries, scenes))
+        else:
+            summaries_to_embed = [
+                (summary, scene) for summary, scene in zip(summaries, scenes)
+                if summary.scene_id not in existing_map
+            ]
+
+        if not summaries_to_embed:
+            logger.info("All embeddings already exist, skipping")
+            return list(existing_map.values())
+
+        logger.info(f"Generating embeddings for {len(summaries_to_embed)} scenes")
+
+        # Step 4: Collect texts for batch embedding
+        texts = [summary.summary_text for summary, _ in summaries_to_embed]
+
+        # Step 5: Generate all embeddings in a single batch API call
+        try:
+            embedding_vectors = await self.generate_batch_embeddings(texts)
+        except Exception as e:
+            logger.error(f"Batch embedding generation failed: {str(e)}")
+            raise
+
+        # Step 6: Create/update embedding records (no commit yet)
+        result_embeddings: List[SceneEmbedding] = []
+
+        for i, (summary, scene) in enumerate(summaries_to_embed):
+            embedding_vector = embedding_vectors[i]
+
+            if not embedding_vector:
+                logger.warning(f"Empty embedding for scene {summary.scene_id}, skipping")
                 continue
 
-        return embeddings
+            existing = existing_map.get(summary.scene_id)
+            if existing:
+                # Update existing embedding
+                existing.embedding = embedding_vector
+                result_embeddings.append(existing)
+            else:
+                # Create new embedding
+                new_embedding = SceneEmbedding(
+                    script_id=script_id,
+                    scene_id=summary.scene_id,
+                    embedding=embedding_vector
+                )
+                self.db.add(new_embedding)
+                result_embeddings.append(new_embedding)
+
+        # Step 7: Batch commit all changes at once
+        await self.db.commit()
+
+        logger.info(f"Successfully embedded {len(result_embeddings)} scenes")
+
+        # Include existing embeddings that weren't regenerated
+        if not force_regenerate:
+            for scene_id, embedding in existing_map.items():
+                if embedding not in result_embeddings:
+                    result_embeddings.append(embedding)
+
+        return result_embeddings
 
     async def batch_generate_scene_embeddings(
         self,
         script_id: UUID,
-        db: AsyncSession
+        db: AsyncSession = None,
+        force_regenerate: bool = False
     ) -> List[SceneEmbedding]:
         """
         Alias for batch_embed_scene_summaries for consistency with IngestionService naming.
@@ -193,12 +367,13 @@ class EmbeddingService:
 
         Args:
             script_id: Script ID
-            db: Database session (for compatibility with test signature)
+            db: Database session (for compatibility with test signature, ignored)
+            force_regenerate: If True, regenerate all embeddings even if they exist
 
         Returns:
             List of SceneEmbedding objects
         """
-        return await self.batch_embed_scene_summaries(script_id)
+        return await self.batch_embed_scene_summaries(script_id, force_regenerate=force_regenerate)
 
     async def should_reembed(self, scene: Scene) -> bool:
         """

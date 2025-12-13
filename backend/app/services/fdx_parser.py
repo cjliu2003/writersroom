@@ -11,6 +11,8 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
+from app.utils.character_normalization import normalize_character_name
+
 
 class ScreenplayBlockType(str, Enum):
     SCENE_HEADING = "scene_heading"
@@ -283,10 +285,11 @@ class FDXParser:
                 # Add content to current scene
                 current_content.append(element.text)
                 current_elements.append(element)
-                
-                # Track characters
+
+                # Track characters (normalize to remove parentheticals like (O.S.), (V.O.), etc.)
                 if element.type == ScreenplayBlockType.CHARACTER:
-                    current_characters.add(element.text)
+                    normalized_name = normalize_character_name(element.text)
+                    current_characters.add(normalized_name)
         
         # Save last scene
         if current_scene:

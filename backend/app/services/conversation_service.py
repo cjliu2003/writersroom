@@ -9,6 +9,7 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 from anthropic import AsyncAnthropic
 import tiktoken
 
@@ -53,18 +54,21 @@ class ConversationService:
         Returns:
             Dict with summary and recent_messages
         """
-        # Get recent messages
+        # Get recent messages - use noload to prevent loading conversation relationship
+        # ChatMessage has selectin relationship to conversation which cascades to Script
         recent_messages_result = await self.db.execute(
             select(ChatMessage)
+            .options(noload('*'))
             .where(ChatMessage.conversation_id == conversation_id)
             .order_by(ChatMessage.created_at.desc())
             .limit(self.SLIDING_WINDOW_SIZE)
         )
         recent = list(reversed(recent_messages_result.scalars().all()))
 
-        # Get conversation summary (if exists)
+        # Get conversation summary (if exists) - use noload to prevent loading conversation relationship
         summary_result = await self.db.execute(
             select(ConversationSummary)
+            .options(noload('*'))
             .where(ConversationSummary.conversation_id == conversation_id)
             .order_by(ConversationSummary.created_at.desc())
             .limit(1)
@@ -130,9 +134,10 @@ class ConversationService:
         )
         message_count = message_count_result.scalar() or 0
 
-        # Get last summary
+        # Get last summary - use noload to prevent eager loading
         last_summary_result = await self.db.execute(
             select(ConversationSummary)
+            .options(noload('*'))
             .where(ConversationSummary.conversation_id == conversation_id)
             .order_by(ConversationSummary.created_at.desc())
             .limit(1)
@@ -165,9 +170,10 @@ class ConversationService:
         Returns:
             ConversationSummary object
         """
-        # Get all messages
+        # Get all messages - use noload to prevent eager loading
         messages_result = await self.db.execute(
             select(ChatMessage)
+            .options(noload('*'))
             .where(ChatMessage.conversation_id == conversation_id)
             .order_by(ChatMessage.created_at)
         )

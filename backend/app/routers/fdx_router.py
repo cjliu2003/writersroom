@@ -29,6 +29,7 @@ from app.services.fdx_exporter import FDXExporter
 from app.services.supabase_storage import storage_service
 from app.services.scene_service import SceneService
 from app.core.config import settings
+from app.utils.character_normalization import normalize_character_name
 import logging
 import tempfile
 import os
@@ -200,9 +201,11 @@ async def upload_fdx_file(
         for db_scene in db_scenes:
             if db_scene.characters:  # Scene.characters is a JSONB array
                 for character_name in db_scene.characters:
+                    # Normalize as safety check (should already be normalized from parser)
+                    normalized_name = normalize_character_name(character_name)
                     scene_char = SceneCharacter(
                         scene_id=db_scene.scene_id,
-                        character_name=character_name
+                        character_name=normalized_name
                     )
                     db.add(scene_char)
                     character_records_created += 1

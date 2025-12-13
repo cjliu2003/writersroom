@@ -47,20 +47,36 @@ async def get_script_and_verify_access(
     Raises:
         HTTPException: If script not found or access denied
     """
-    # Get the script
-    stmt = select(Script).where(Script.script_id == script_id)
-    result = await db.execute(stmt)
-    script = result.scalar_one_or_none()
+    print(f"[get_script_and_verify_access] Checking access for user {user_id} to script {script_id}")
 
-    if not script:
+    # Get the script - OPTIMIZATION: Select only needed columns to prevent loading relationships
+    # This prevents 8 additional relationship queries via lazy='selectin'
+    # Need: script_id, owner_id, title (access checks)
+    #       updated_at, content_blocks (Yjs initialization logic)
+    print(f"[get_script_and_verify_access] Querying database for script...")
+    stmt = select(
+        Script.script_id,
+        Script.owner_id,
+        Script.title,
+        Script.updated_at,
+        Script.content_blocks
+    ).where(Script.script_id == script_id)
+    result = await db.execute(stmt)
+    row = result.one_or_none()
+    print(f"[get_script_and_verify_access] Script found: {row is not None}")
+
+    if not row:
+        print(f"[get_script_and_verify_access] ERROR: Script not found")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Script not found"
         )
 
     # Check if user owns the script or is a collaborator
-    if script.owner_id != user_id:
+    print(f"[get_script_and_verify_access] Script owner: {row.owner_id}, User: {user_id}")
+    if row.owner_id != user_id:
         # Check collaborators
+        print(f"[get_script_and_verify_access] User is not owner, checking collaborators...")
         from app.models.script_collaborator import ScriptCollaborator
         stmt = select(ScriptCollaborator).where(
             ScriptCollaborator.script_id == script_id,
@@ -68,14 +84,37 @@ async def get_script_and_verify_access(
         )
         result = await db.execute(stmt)
         collaborator = result.scalar_one_or_none()
+        print(f"[get_script_and_verify_access] Collaborator found: {collaborator is not None}")
 
         if not collaborator:
+            print(f"[get_script_and_verify_access] ERROR: Access denied")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to this script"
             )
+    else:
+        print(f"[get_script_and_verify_access] User is the owner")
 
-    return script
+    print(f"[get_script_and_verify_access] Access verified successfully")
+
+    # Reconstruct a minimal Script object for compatibility
+    # Needs: script_id, owner_id, title (access checks)
+    #        updated_at, content_blocks (Yjs initialization logic)
+    class ScriptAccessInfo:
+        def __init__(self, script_id, owner_id, title, updated_at, content_blocks):
+            self.script_id = script_id
+            self.owner_id = owner_id
+            self.title = title
+            self.updated_at = updated_at
+            self.content_blocks = content_blocks
+
+    return ScriptAccessInfo(
+        row.script_id,
+        row.owner_id,
+        row.title,
+        row.updated_at,
+        row.content_blocks
+    )
 
 
 @router.websocket("/ws/scripts/{script_id}")
@@ -83,7 +122,7 @@ async def script_collaboration_websocket(
     websocket: WebSocket,
     script_id: UUID,
     token: str = Query(..., description="JWT authentication token"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """
     WebSocket endpoint for real-time collaborative editing of entire script.
@@ -98,67 +137,106 @@ async def script_collaboration_websocket(
     - MESSAGE_AWARENESS (1): Cursor/presence updates
     - MESSAGE_QUERY_AWARENESS (3): Request awareness state
     """
-    logger.info(f"Script WebSocket connection attempt: {script_id}")
+    # CRITICAL: Log at the very start to confirm endpoint is called
+    print(f"\n>>> SCRIPT WEBSOCKET ENDPOINT CALLED for script {script_id} <<<")
+    logger.info(f">>> SCRIPT WEBSOCKET ENDPOINT CALLED for script {script_id} <<<")
 
     user_info = None
     connection_info = None
     ydoc: Optional[YDoc] = None
 
     try:
+        # IMPORTANT: Accept the WebSocket connection FIRST to prevent timeout
+        # during slow authentication/database queries (especially with high latency)
+        print(f"[SCRIPT WS] Step 1: Accepting WebSocket connection...")
+        await websocket.accept()
+        print(f"[SCRIPT WS] Step 2: WebSocket accepted successfully")
+        logger.info(f"WebSocket connection accepted for script {script_id}")
+
         # Verify JWT token
+        print(f"[SCRIPT WS] Step 3: Starting token verification for script {script_id}")
         logger.info(f"Verifying token for WebSocket connection to script {script_id}")
 
         try:
+            print(f"[SCRIPT WS] Step 4: Calling verify_token_websocket()...")
             user_info = await verify_token_websocket(token)
+            print(f"[SCRIPT WS] Step 5: Token verification succeeded!")
             logger.info(f"Token verified successfully for script {script_id}")
         except HTTPException as auth_error:
+            print(f"[SCRIPT WS] ERROR: HTTPException during token verification: {auth_error.detail}")
             logger.error(f"Token verification failed: {auth_error.detail}")
             await websocket.close(code=4001, reason=f"Authentication failed: {auth_error.detail}")
             return
         except Exception as auth_error:
+            print(f"[SCRIPT WS] ERROR: Exception during token verification: {str(auth_error)}")
             logger.error(f"Unexpected error during token verification: {str(auth_error)}")
             await websocket.close(code=4001, reason="Authentication error")
             return
 
         # Firebase tokens have 'uid' or 'user_id'
+        print(f"[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...")
         firebase_uid = user_info.get("uid") or user_info.get("user_id")
         if not firebase_uid:
+            print(f"[SCRIPT WS] ERROR: No firebase_uid found in token")
             await websocket.close(code=4001, reason="Invalid token: missing user ID")
             return
+        print(f"[SCRIPT WS] Step 7: firebase_uid = {firebase_uid}")
 
         # Look up the user in the database
+        print(f"[SCRIPT WS] Step 8: Looking up user in database...")
         stmt = select(User).where(User.firebase_uid == firebase_uid)
         result = await db.execute(stmt)
         user = result.scalar_one_or_none()
+        print(f"[SCRIPT WS] Step 9: Database lookup complete, user found = {user is not None}")
 
         if not user:
+            print(f"[SCRIPT WS] ERROR: User not found in database")
             await websocket.close(code=4001, reason="User not found")
             return
 
         user_id = user.user_id  # This is the UUID from the database
         user_name = user_info.get("name", user_info.get("email", "Anonymous"))
+        print(f"[SCRIPT WS] Step 10: User identified - {user_name} ({user_id})")
 
         logger.info(f"WebSocket connection attempt by user {user_name} to script {script_id}")
 
         # Verify script access
+        print(f"[SCRIPT WS] Step 11: Verifying script access...")
         try:
             script = await get_script_and_verify_access(script_id, user_id, db)
+            print(f"[SCRIPT WS] Step 12: Script access verified! Script title: {script.title}")
         except HTTPException as e:
+            print(f"[SCRIPT WS] ERROR: Script access denied - {e.status_code}: {e.detail}")
             logger.error(f"Script access denied: {e.detail}")
             await websocket.close(code=4003, reason=e.detail)
             return
+        except Exception as e:
+            print(f"[SCRIPT WS] ERROR: Unexpected error verifying script access: {type(e).__name__}: {str(e)}")
+            logger.error(f"Unexpected error verifying script access: {str(e)}")
+            await websocket.close(code=1011, reason="Internal server error")
+            return
 
-        logger.info(f"Connecting WebSocket for user {user_name} to script {script_id}")
+        print(f"[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...")
+        logger.info(f"Registering WebSocket for user {user_name} to script {script_id}")
 
-        # Connect to WebSocket manager
-        # Reuse scene_id parameter for script_id (websocket_manager is generic)
-        connection_info = await websocket_manager.connect(
-            websocket=websocket,
-            scene_id=script_id,  # Reuse scene_id parameter for script_id
-            user_id=user_id,
-            user_name=user_name,
-            notify_participants=False  # y-websocket uses binary protocol only
+        # Register with WebSocket manager WITHOUT calling accept again
+        # (we already accepted at the start to prevent timeout)
+        from app.services.websocket_manager import ConnectionInfo
+        connection_info = ConnectionInfo(websocket, user_id, user_name)
+
+        # Add to room
+        if script_id not in websocket_manager.active_connections:
+            websocket_manager.active_connections[script_id] = set()
+        websocket_manager.active_connections[script_id].add(connection_info)
+
+        # Add to lookup
+        websocket_manager.connection_lookup[websocket] = connection_info
+
+        logger.info(
+            f"User {user_name} ({user_id}) connected to script {script_id}. "
+            f"Room now has {len(websocket_manager.active_connections[script_id])} participant(s)"
         )
+        print(f"[SCRIPT WS] Step 14: WebSocket registered successfully")
 
         logger.info(f"WebSocket connection established for script {script_id}")
 

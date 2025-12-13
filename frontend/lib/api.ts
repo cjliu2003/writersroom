@@ -3,13 +3,28 @@ import { getCurrentUserToken } from './firebase';
 const API_BASE_URL = 'http://localhost:8000/api';
 
 // Small fetch helper with timeout to avoid indefinite hangs in UI
+// Timeout increased to 30s to accommodate high latency when traveling (e.g., Croatia → California = ~25s)
 async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & { timeoutMs?: number } = {}) {
-  const { timeoutMs = 15000, ...rest } = init
+  const { timeoutMs = 30000, ...rest } = init
   const controller = new AbortController()
-  const id = setTimeout(() => controller.abort(), timeoutMs)
+  const startTime = Date.now()
+
+  const id = setTimeout(() => {
+    const elapsed = Date.now() - startTime
+    console.log(`[fetchWithTimeout] TIMEOUT triggered after ${elapsed}ms (configured: ${timeoutMs}ms) for:`, input)
+    controller.abort(new Error(`Request timeout after ${timeoutMs}ms`))
+  }, timeoutMs)
+
   try {
+    console.log(`[fetchWithTimeout] Starting fetch to:`, input, `with timeout ${timeoutMs}ms`)
     const res = await fetch(input, { ...rest, signal: controller.signal })
+    const elapsed = Date.now() - startTime
+    console.log(`[fetchWithTimeout] Fetch completed in ${elapsed}ms for:`, input)
     return res
+  } catch (err: any) {
+    const elapsed = Date.now() - startTime
+    console.error(`[fetchWithTimeout] Fetch failed after ${elapsed}ms:`, err.name, err.message, 'for:', input)
+    throw err
   } finally {
     clearTimeout(id)
   }
@@ -20,7 +35,7 @@ export async function authenticatedFetch(
   endpoint: string,
   options: RequestInit & { timeoutMs?: number; _retryCount?: number } = {}
 ): Promise<Response> {
-  const { _retryCount = 0, timeoutMs = 15000, ...requestOptions } = options;
+  const { _retryCount = 0, timeoutMs = 30000, ...requestOptions } = options;
 
   // Try to get cached token first, then force refresh if this is a retry
   const token = await getCurrentUserToken(_retryCount > 0);
@@ -375,11 +390,12 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
 
 // NEW: RAG-enabled chat endpoint with intelligent context retrieval
 export async function sendChatMessageWithRAG(request: ChatMessageRequest): Promise<ChatMessageResponse> {
-  // Increase timeout for chat requests (AI generation can take 15-30 seconds)
+  // Increase timeout for chat requests (AI generation with tools can take 60-180 seconds)
+  // With multi-tool calls, RAG context building, and geographic latency, responses can be slow
   const response = await authenticatedFetch('/ai/chat/message', {
     method: 'POST',
     body: JSON.stringify(request),
-    timeoutMs: 45000, // 45 seconds for AI chat
+    timeoutMs: 180000, // 3 minutes for AI chat with tools
   });
 
   if (!response.ok) {
@@ -388,6 +404,110 @@ export async function sendChatMessageWithRAG(request: ChatMessageRequest): Promi
   }
 
   return response.json();
+}
+
+// Status event types from SSE stream
+export interface StatusEvent {
+  type: 'status';
+  message: string;
+  tool?: string;
+}
+
+export interface ThinkingEvent {
+  type: 'thinking';
+  message: string;
+}
+
+export interface CompleteEvent {
+  type: 'complete';
+  message: string;
+  usage: TokenUsage;
+  tool_metadata?: {
+    tool_calls_made: number;
+    tools_used: string[];
+    stop_reason: string;
+  };
+}
+
+export interface StreamEndEvent {
+  type: 'stream_end';
+  conversation_id: string;
+}
+
+export type ChatStreamEvent = StatusEvent | ThinkingEvent | CompleteEvent | StreamEndEvent;
+
+// NEW: Streaming chat endpoint with real-time status updates
+// Returns an async generator that yields events as they arrive
+export async function* sendChatMessageWithStatusStream(
+  request: ChatMessageRequest
+): AsyncGenerator<ChatStreamEvent, void, unknown> {
+  const token = await getCurrentUserToken();
+
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/ai/chat/message/stream-with-status`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to send chat message');
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('No response body');
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data.trim()) {
+            try {
+              const event = JSON.parse(data) as ChatStreamEvent;
+              yield event;
+            } catch (e) {
+              console.warn('Failed to parse SSE event:', data, e);
+            }
+          }
+        }
+      }
+    }
+
+    // Process any remaining data in buffer
+    if (buffer.startsWith('data: ')) {
+      const data = buffer.slice(6);
+      if (data.trim()) {
+        try {
+          const event = JSON.parse(data) as ChatStreamEvent;
+          yield event;
+        } catch (e) {
+          console.warn('Failed to parse final SSE event:', data, e);
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 // Collaborator API functions

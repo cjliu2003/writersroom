@@ -1,171 +1,105 @@
-[SmartBreaks] Computing decorations...
-smart-breaks-plugin.ts:262 [SmartBreaks] Found 20 pagination headers
-smart-breaks-plugin.ts:320 [SmartBreaks] No --rm-page-height CSS variable found
-smart-breaks-plugin.ts:359 [SmartBreaks] Using page height: 1056 px (fallback)
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 0: top=-18123.6, bottom=-17040.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 1: top=-17039.6, bottom=-15956.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 2: top=-15955.6, bottom=-14872.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 3: top=-14871.6, bottom=-13788.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 4: top=-13787.6, bottom=-12704.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 5: top=-12703.6, bottom=-11620.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 6: top=-11619.6, bottom=-10536.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 7: top=-10535.6, bottom=-9452.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 8: top=-9451.6, bottom=-8368.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 9: top=-8367.6, bottom=-7284.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 10: top=-7283.6, bottom=-6200.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 11: top=-6199.6, bottom=-5116.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 12: top=-5115.6, bottom=-4032.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 13: top=-4031.6, bottom=-2948.7, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 14: top=-2947.7, bottom=-1864.7, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 15: top=-1863.7, bottom=-780.7, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 16: top=-779.7, bottom=303.3, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 17: top=304.3, bottom=1387.3, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 18: top=1388.3, bottom=-1.0, height=-1389.3
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 19: top=0.0, bottom=1056.0, height=1056.0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19124.35546875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19108.359375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19092.36328125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19060.37109375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19044.375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19012.3828125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18996.38671875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18964.39453125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18948.3984375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18932.40234375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18932.40234375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18916.40625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18900.41015625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18884.4140625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18868.41796875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18852.421875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18852.421875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18836.42578125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18820.4296875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18804.43359375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18804.43359375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18772.44140625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18756.4453125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18740.44921875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18740.44921875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18724.453125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18708.45703125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18692.4609375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18676.46484375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18660.46875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18660.46875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18628.4765625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18612.48046875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18596.484375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18564.4921875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18548.49609375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18532.5 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18484.51171875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18468.515625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18404.53125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18388.53515625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18372.5390625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18372.5390625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18340.546875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18324.55078125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18308.5546875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18292.55859375 is before first page, clamping to 0
-smart-breaks-plugin.ts:405 [SmartBreaks] Y coordinate 1452.328125 is after last page, clamping to 19
-smart-breaks-plugin.ts:490 [SmartBreaks] Collected 510 screenplay blocks
-smart-breaks-plugin.ts:497 [SmartBreaks] Block types: {sceneHeading: 8, action: 101, character: 163, dialogue: 194, parenthetical: 42, …}
-smart-breaks-plugin.ts:502 [SmartBreaks] Blocks spanning pages: 18
-smart-breaks-plugin.ts:504   - dialogue at pos 2099: page 0 → 1
-smart-breaks-plugin.ts:504   - dialogue at pos 2906: page 1 → 2
-smart-breaks-plugin.ts:504   - dialogue at pos 3865: page 2 → 3
-smart-breaks-plugin.ts:504   - dialogue at pos 5010: page 3 → 4
-smart-breaks-plugin.ts:504   - character at pos 5960: page 4 → 5
-smart-breaks-plugin.ts:504   - character at pos 6961: page 5 → 6
-smart-breaks-plugin.ts:504   - character at pos 7699: page 6 → 7
-smart-breaks-plugin.ts:504   - action at pos 8406: page 7 → 8
-smart-breaks-plugin.ts:504   - dialogue at pos 9517: page 8 → 9
-smart-breaks-plugin.ts:504   - dialogue at pos 10531: page 9 → 10
-smart-breaks-plugin.ts:504   - parenthetical at pos 11470: page 10 → 11
-smart-breaks-plugin.ts:504   - dialogue at pos 12243: page 11 → 12
-smart-breaks-plugin.ts:504   - action at pos 13265: page 12 → 13
-smart-breaks-plugin.ts:504   - action at pos 14232: page 13 → 14
-smart-breaks-plugin.ts:504   - action at pos 15511: page 14 → 15
-smart-breaks-plugin.ts:504   - character at pos 16728: page 15 → 16
-smart-breaks-plugin.ts:504   - action at pos 17490: page 16 → 17
-smart-breaks-plugin.ts:504   - action at pos 18302: page 17 → 19
-smart-breaks-plugin.ts:277 [SmartBreaks] Tier 2: Data collection complete, returning empty decorations
-smart-breaks-plugin.ts:278 [SmartBreaks] Next steps: Tier 3 (decoration builders), Tier 4 (rules)
-smart-breaks-plugin.ts:155 [SmartBreaks] Computed 0 decorations
+[fetchWithTimeout] Fetch completed in 7466ms for: http://localhost:8000/api/users/me/scripts
+api.ts:22 [fetchWithTimeout] Fetch completed in 16958ms for: http://localhost:8000/api/users/me/collaborations
+page.tsx:102 [HomePage] Owned scripts count: 1
+page.tsx:103 [HomePage] Shared scripts count: 2
+page.tsx:104 [HomePage] Shared scripts data: Array(2)
+page.tsx:109 [HomePage] State updated - sharedScripts now set to: Array(2)
+hot-reloader-client.js:187 [Fast Refresh] rebuilding
+hot-reloader-client.js:44 [Fast Refresh] done in 637ms
+index.js:986 Tiptap Error: SSR has been detected, please set `immediatelyRender` explicitly to `false` to avoid hydration mismatches.
+getInitialEditor @ index.js:986Understand this warning
+tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: Object
 smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
 smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-breaks-plugin.ts:151 [SmartBreaks] Computing decorations...
-smart-breaks-plugin.ts:262 [SmartBreaks] Found 20 pagination headers
-smart-breaks-plugin.ts:320 [SmartBreaks] No --rm-page-height CSS variable found
-smart-breaks-plugin.ts:359 [SmartBreaks] Using page height: 1056 px (fallback)
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 0: top=-18123.6, bottom=-17040.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 1: top=-17039.6, bottom=-15956.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 2: top=-15955.6, bottom=-14872.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 3: top=-14871.6, bottom=-13788.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 4: top=-13787.6, bottom=-12704.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 5: top=-12703.6, bottom=-11620.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 6: top=-11619.6, bottom=-10536.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 7: top=-10535.6, bottom=-9452.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 8: top=-9451.6, bottom=-8368.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 9: top=-8367.6, bottom=-7284.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 10: top=-7283.6, bottom=-6200.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 11: top=-6199.6, bottom=-5116.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 12: top=-5115.6, bottom=-4032.6, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 13: top=-4031.6, bottom=-2948.7, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 14: top=-2947.7, bottom=-1864.7, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 15: top=-1863.7, bottom=-780.7, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 16: top=-779.7, bottom=303.3, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 17: top=304.3, bottom=1387.3, height=1083.0
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 18: top=1388.3, bottom=-1.0, height=-1389.3
-smart-breaks-plugin.ts:375 [SmartBreaks] Page 19: top=0.0, bottom=1056.0, height=1056.0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19124.35546875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19108.359375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19092.36328125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19060.37109375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19044.375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -19012.3828125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18996.38671875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18964.39453125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18948.3984375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18932.40234375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18932.40234375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18916.40625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18900.41015625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18884.4140625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18868.41796875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18852.421875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18852.421875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18836.42578125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18820.4296875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18804.43359375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18804.43359375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18772.44140625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18756.4453125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18740.44921875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18740.44921875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18724.453125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18708.45703125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18692.4609375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18676.46484375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18660.46875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18660.46875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18628.4765625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18612.48046875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18596.484375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18564.4921875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18548.49609375 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18532.5 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18484.51171875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18468.515625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18404.53125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18388.53515625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18372.5390625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18372.5390625 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18340.546875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18324.55078125 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18308.5546875 is before first page, clamping to 0
-smart-breaks-plugin.ts:401 [SmartBreaks] Y coordinate -18292.55859375 is before first page, clamping to 0
-smart-breaks-plugin.ts:405 [SmartBreaks] Y coordinate 1452.328125 is after last page, clamping to 19
-smart-breaks-plugin.ts:490 
+page.tsx:123 [TipTapEditor] Fetching script content for: 01ddb380-6cf4-4c5c-821a-924f04bdf85f
+use-script-yjs-collaboration.ts:174 [ScriptYjsCollaboration] Connecting to: ws://localhost:8000/api/ws/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f?token=***
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
+smart-enter-plugin.ts:58 [SmartEnter] Current node: Object
+smart-enter-plugin.ts:118 [SmartEnter] Skipped - pos <= 1
+smart-enter-plugin.ts:121 [SmartEnter] Modified: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
+smart-enter-plugin.ts:58 [SmartEnter] Current node: Object
+smart-enter-plugin.ts:118 [SmartEnter] Skipped - pos <= 1
+smart-enter-plugin.ts:121 [SmartEnter] Modified: false
+tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: Object
+tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: Object
+api.ts:43 [api] requesting http://localhost:8000/api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content token? true retry: 0
+api.ts:19 [fetchWithTimeout] Starting fetch to: http://localhost:8000/api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content with timeout 30000ms
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+api.ts:22 [fetchWithTimeout] Fetch completed in 6868ms for: http://localhost:8000/api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content
+page.tsx:128 [TipTapEditor] Script content received: Object
+page.tsx:157 [TipTapEditor] Converted to TipTap document: Object
+page.tsx:163 [TipTapEditor] Storing content for application to editor
+page.tsx:173 [TipTapEditor] Yjs updates exist, keeping loading screen until sync completes
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connected
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: offline
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connected
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: offline
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connected
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+hot-reloader-client.js:187 [Fast Refresh] rebuilding
+hot-reloader-client.js:44 [Fast Refresh] done in 21ms
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: true, code: 1005, reason: '', type: 'close', …}
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: offline
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connected
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
+smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'sceneHeading', pos: 0, contentSize: 55, nodeContent: 'INT. HALLWAY - SASKATOON POLICE DEPARTMENT – NIGHT TEST'}
+smart-enter-plugin.ts:118 [SmartEnter] Skipped - pos <= 1
+smart-enter-plugin.ts:121 [SmartEnter] Modified: false
+tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: {sceneCount: 148, totalBlocks: 3317, scenes: Array(148)}
+use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 251968, origin: 'WebsocketProvider'}
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
+page.tsx:328 [TestTipTap] Skipping setContent - Yjs updates exist in database (Yjs is source of truth)
+page.tsx:362 [TipTapEditor] Yjs sync complete, hiding loading screen
+smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
+smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false

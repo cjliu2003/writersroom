@@ -9,6 +9,7 @@ from typing import Optional, List, Tuple, Dict
 from uuid import UUID
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.models.scene import Scene
 from app.models.scene_summary import SceneSummary
@@ -47,8 +48,14 @@ class RetrievalService:
         Returns:
             List of (Scene, SceneSummary, similarity_score) tuples
         """
+        import time
+        import logging
+        logger = logging.getLogger(__name__)
+
         # Generate query embedding
+        step_start = time.perf_counter()
         query_embedding = await self.embedding_service.generate_scene_embedding(query)
+        logger.info(f"[RETRIEVAL] Embedding generation took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
         # Build base query using pgvector cosine distance
         stmt = (
@@ -124,8 +131,10 @@ class RetrievalService:
         """
 
         # Execute with named parameters as dictionary
+        step_start = time.perf_counter()
         result = await self.db.execute(text(query_sql), params)
         rows = result.fetchall()
+        logger.info(f"[RETRIEVAL] Vector search query execution took {(time.perf_counter() - step_start) * 1000:.2f}ms (returned {len(rows)} results)")
 
         # Map results to tuples
         results = []
@@ -165,18 +174,22 @@ class RetrievalService:
         Returns:
             List of (Scene, SceneSummary) tuples in order
         """
-        # Get target scene
+        # Get target scene - use noload to prevent eager loading of 8 relationships
+        # Scene has selectin relationships that cascade to Script->ALL scenes (148!)
         target_scene_result = await self.db.execute(
-            select(Scene).where(Scene.scene_id == scene_id)
+            select(Scene)
+            .options(noload('*'))
+            .where(Scene.scene_id == scene_id)
         )
         target_scene = target_scene_result.scalar_one_or_none()
 
         if not target_scene:
             return []
 
-        # Get neighbors by position
+        # Get neighbors by position - use noload on both Scene and SceneSummary
         stmt = (
             select(Scene, SceneSummary)
+            .options(noload('*'))  # Prevent loading Scene relationships
             .join(SceneSummary, Scene.scene_id == SceneSummary.scene_id)
             .where(
                 and_(
