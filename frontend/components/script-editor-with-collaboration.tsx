@@ -124,7 +124,7 @@ export function ScriptEditorWithCollaboration({
     if (doc) {
       try {
         const sharedRoot = doc.getArray('content');
-        e = withYjs(e as any, sharedRoot) as any;
+        e = withYjs(e as any, sharedRoot as any) as any;
       } catch (err) {
         console.warn('[ScriptEditor] Failed to init Yjs binding:', err);
       }

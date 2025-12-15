@@ -51,7 +51,9 @@ class ContextBuilder:
         intent: IntentType,
         conversation_id: Optional[UUID] = None,
         current_scene_id: Optional[UUID] = None,
-        budget_tier: BudgetTier = BudgetTier.STANDARD
+        budget_tier: BudgetTier = BudgetTier.STANDARD,
+        skip_scene_retrieval: bool = False,
+        tools_enabled: bool = False
     ) -> Dict:
         """
         Build optimized prompt with caching structure.
@@ -70,6 +72,7 @@ class ContextBuilder:
         [CACHEABLE - Updates on retrieval change]
         3. Scene cards (~300 tokens)
            - Retrieved scene summaries
+           - SKIPPED when tools_enabled=True (Claude can fetch via tools)
 
         [NOT CACHED - Every request]
         4. Conversation context (~200 tokens)
@@ -83,6 +86,8 @@ class ContextBuilder:
             conversation_id: Optional conversation ID
             current_scene_id: Optional current scene
             budget_tier: Token budget tier
+            skip_scene_retrieval: If True, skip scene card retrieval (use when tools enabled)
+            tools_enabled: If True, adjust system prompt for tool-assisted mode
 
         Returns:
             Dict with model, max_tokens, system, messages, and metadata
@@ -93,9 +98,9 @@ class ContextBuilder:
 
         total_budget = self.BUDGET_TIERS[budget_tier]
 
-        # 1. System prompt (cacheable)
+        # 1. System prompt (cacheable) - adjust for tools mode
         step_start = time.perf_counter()
-        system_prompt = self._get_system_prompt(intent)
+        system_prompt = self._get_system_prompt(intent, tools_enabled=tools_enabled)
         system_tokens = self._count_tokens(system_prompt)
         logger.info(f"[CONTEXT] System prompt generation took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
@@ -105,20 +110,27 @@ class ContextBuilder:
         global_tokens = self._count_tokens(global_context)
         logger.info(f"[CONTEXT] Global context fetch took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
-        # 3. Retrieved scene cards (cacheable)
-        step_start = time.perf_counter()
-        retrieval_result = await self.retrieval_service.retrieve_for_intent(
-            script_id=script_id,
-            message=message,
-            intent=intent,
-            current_scene_id=current_scene_id
-        )
-        logger.info(f"[CONTEXT] Retrieval service took {(time.perf_counter() - step_start) * 1000:.2f}ms")
+        # 3. Retrieved scene cards (cacheable) - SKIP if tools enabled
+        # When tools are enabled, Claude can fetch scenes dynamically via tools,
+        # so including pre-fetched scene cards creates redundancy and confusion
+        scene_cards = ""
+        scene_tokens = 0
+        if not skip_scene_retrieval:
+            step_start = time.perf_counter()
+            retrieval_result = await self.retrieval_service.retrieve_for_intent(
+                script_id=script_id,
+                message=message,
+                intent=intent,
+                current_scene_id=current_scene_id
+            )
+            logger.info(f"[CONTEXT] Retrieval service took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
-        step_start = time.perf_counter()
-        scene_cards = self._format_scene_cards(retrieval_result["scenes"])
-        scene_tokens = self._count_tokens(scene_cards)
-        logger.info(f"[CONTEXT] Scene card formatting took {(time.perf_counter() - step_start) * 1000:.2f}ms")
+            step_start = time.perf_counter()
+            scene_cards = self._format_scene_cards(retrieval_result["scenes"])
+            scene_tokens = self._count_tokens(scene_cards)
+            logger.info(f"[CONTEXT] Scene card formatting took {(time.perf_counter() - step_start) * 1000:.2f}ms")
+        else:
+            logger.info(f"[CONTEXT] Skipping scene retrieval (tools_enabled={tools_enabled})")
 
         # 4. Conversation context (not cached)
         # conv_data is used later for building proper alternating messages
@@ -294,12 +306,13 @@ class ContextBuilder:
             }
         }
 
-    def _get_system_prompt(self, intent: IntentType) -> str:
+    def _get_system_prompt(self, intent: IntentType, tools_enabled: bool = False) -> str:
         """
-        Get system prompt tailored to intent.
+        Get system prompt tailored to intent and tool mode.
 
         Args:
             intent: User intent type
+            tools_enabled: If True, adjust prompt for tool-assisted mode
 
         Returns:
             System prompt string
@@ -315,6 +328,30 @@ Key guidelines:
 - Provide specific, actionable feedback
 
 IMPORTANT: When conversation history is provided, it is for CONTEXT ONLY. Always start your response fresh and complete - never continue or complete a previous response. Each of your responses should stand alone as a complete answer."""
+
+        # When tools are enabled, add tool-specific guidance
+        # This replaces the inline tool instructions that were appended in ai_router.py
+        if tools_enabled:
+            base += """
+
+TOOL USAGE INSTRUCTIONS:
+You have access to tools that allow you to retrieve and analyze screenplay content dynamically.
+
+When answering questions:
+- Use tools to get accurate, up-to-date information from the screenplay
+- Prefer tools for precision when the question requires specific details (e.g., "show me all scenes with X")
+- You can call multiple tools to build comprehensive analysis
+- Provide specific scene numbers, character names, and quotes from tool results
+- The global context above (outline, characters) gives you overview; tools give you precision
+- After gathering information, synthesize it into a clear, well-organized answer
+
+Available tools:
+- get_scene: Get full scene text by index (0-based)
+- get_scene_context: Get scene plus surrounding scenes for context
+- get_character_scenes: Track all appearances of a character
+- search_script: Semantic/keyword search across the script
+- analyze_pacing: Get quantitative pacing metrics (scene lengths, dialogue ratio)
+- get_plot_threads: Retrieve plot thread and thematic information"""
 
         intent_additions = {
             IntentType.LOCAL_EDIT: "\n\nFocus on improving dialogue and action lines. Be concise and specific.",

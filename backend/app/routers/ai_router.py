@@ -46,6 +46,17 @@ from app.routers.script_router import get_script_if_user_has_access, validate_sc
 router = APIRouter(prefix="/ai", tags=["AI"])
 logger = logging.getLogger(__name__)
 
+# ============================================================================
+# Constants for Tool Loop Configuration
+# ============================================================================
+
+# Final synthesis gets more tokens to produce complete, well-structured answers
+# after gathering information from multiple tool calls
+FINAL_SYNTHESIS_MAX_TOKENS = 1200  # Double the normal limit (was 600)
+
+# Standard max tokens for intermediate tool loop iterations
+TOOL_LOOP_MAX_TOKENS = 600
+
 
 @router.post("/scene-summary", response_model=SceneSummaryResponse)
 async def generate_scene_summary(
@@ -348,10 +359,10 @@ async def _handle_tool_loop(
     for iteration in range(max_iterations):
         logger.info(f"Tool loop iteration {iteration + 1}/{max_iterations}")
 
-        # Call Claude
+        # Call Claude with standard token limit for intermediate iterations
         response = await client.messages.create(
             model="claude-haiku-4-5",
-            max_tokens=600,
+            max_tokens=TOOL_LOOP_MAX_TOKENS,
             system=system,
             messages=messages,
             tools=tools
@@ -413,11 +424,27 @@ async def _handle_tool_loop(
         if tool_results:
             messages.append({"role": "user", "content": tool_results})
 
-    # Max iterations reached - make final call to get text response
+    # Max iterations reached - add synthesis instruction and make final call
     logger.warning(f"Tool loop reached max_iterations ({max_iterations})")
+
+    # Add explicit synthesis instruction to guide final response
+    # This ensures Claude produces a complete, well-organized answer instead of
+    # intermediate thinking or incomplete synthesis
+    synthesis_instruction = {
+        "role": "user",
+        "content": (
+            "Based on all the information you've gathered from the tools above, "
+            "please provide a complete, well-organized answer to the original question. "
+            "Synthesize the key findings and be specific with scene numbers and details. "
+            "Do not mention the tools you used - just provide the final answer."
+        )
+    }
+    messages.append(synthesis_instruction)
+
+    # Use increased token limit for final synthesis to allow complete responses
     final_response = await client.messages.create(
         model="claude-haiku-4-5",
-        max_tokens=600,
+        max_tokens=FINAL_SYNTHESIS_MAX_TOKENS,
         system=system,
         messages=messages
     )
@@ -489,10 +516,10 @@ async def _handle_tool_loop_with_status(
     for iteration in range(max_iterations):
         logger.info(f"Tool loop iteration {iteration + 1}/{max_iterations}")
 
-        # Call Claude
+        # Call Claude with standard token limit for intermediate iterations
         response = await client.messages.create(
             model="claude-haiku-4-5",
-            max_tokens=600,
+            max_tokens=TOOL_LOOP_MAX_TOKENS,
             system=system,
             messages=messages,
             tools=tools
@@ -569,13 +596,28 @@ async def _handle_tool_loop_with_status(
         # After tools complete, show thinking again
         yield {"type": "thinking", "message": "Analyzing results..."}
 
-    # Max iterations reached - make final call to get text response
+    # Max iterations reached - add synthesis instruction and make final call
     logger.warning(f"Tool loop reached max_iterations ({max_iterations})")
-    yield {"type": "thinking", "message": "Preparing response..."}
+    yield {"type": "thinking", "message": "Synthesizing findings..."}
 
+    # Add explicit synthesis instruction to guide final response
+    # This ensures Claude produces a complete, well-organized answer instead of
+    # intermediate thinking or incomplete synthesis
+    synthesis_instruction = {
+        "role": "user",
+        "content": (
+            "Based on all the information you've gathered from the tools above, "
+            "please provide a complete, well-organized answer to the original question. "
+            "Synthesize the key findings and be specific with scene numbers and details. "
+            "Do not mention the tools you used - just provide the final answer."
+        )
+    }
+    messages.append(synthesis_instruction)
+
+    # Use increased token limit for final synthesis to allow complete responses
     final_response = await client.messages.create(
         model="claude-haiku-4-5",
-        max_tokens=600,
+        max_tokens=FINAL_SYNTHESIS_MAX_TOKENS,
         system=system,
         messages=messages
     )
@@ -710,7 +752,13 @@ async def chat_message(
         step_duration = (time.perf_counter() - step_start) * 1000
         logger.info(f"[CHAT] ✅ Conversation handling took {step_duration:.2f}ms (conversation_id: {conversation.conversation_id})")
 
-        # 3. Build context-aware prompt
+        # 3. Determine if tools should be enabled BEFORE building context
+        # This allows us to optimize context (skip scene retrieval when tools enabled)
+        tools_enabled = should_enable_tools(request, intent)
+        tool_metadata = None
+        logger.info(f"[CHAT] 🔧 Tools enabled: {tools_enabled}")
+
+        # 4. Build context-aware prompt (optimized based on tools_enabled)
         step_start = time.perf_counter()
         prompt = await context_builder.build_prompt(
             script_id=request.script_id,
@@ -718,25 +766,22 @@ async def chat_message(
             intent=intent,
             conversation_id=conversation.conversation_id,
             current_scene_id=request.current_scene_id,
-            budget_tier=request.budget_tier or "standard"
+            budget_tier=request.budget_tier or "standard",
+            skip_scene_retrieval=tools_enabled,  # Skip scene cards when tools enabled
+            tools_enabled=tools_enabled  # Adjust system prompt for tool mode
         )
         step_duration = (time.perf_counter() - step_start) * 1000
-        logger.info(f"[CHAT] ✅ Context building took {step_duration:.2f}ms - {prompt['metadata']['tokens_used']['total']} tokens")
+        logger.info(f"[CHAT] ✅ Context building took {step_duration:.2f}ms - {prompt['metadata']['tokens_used']['total']} tokens (skip_scenes={tools_enabled})")
 
         logger.info(
             f"Built prompt: {prompt['metadata']['tokens_used']['total']} tokens, "
-            f"budget_tier={request.budget_tier or 'standard'}, intent={intent}"
+            f"budget_tier={request.budget_tier or 'standard'}, intent={intent}, tools_enabled={tools_enabled}"
         )
 
-        # 4. Generate AI response (Phase 6: Hybrid RAG + Tools)
-        # Determine if tools should be enabled
-        tools_enabled = should_enable_tools(request, intent)
-        tool_metadata = None
-        logger.info(f"[CHAT] 🔧 Tools enabled: {tools_enabled}")
-
+        # 5. Generate AI response (Phase 6: Hybrid RAG + Tools)
         if tools_enabled:
-            # Hybrid mode: RAG context + MCP tools
-            logger.info("Hybrid mode: Enabling MCP tools with RAG context")
+            # Hybrid mode: RAG context (thin) + MCP tools
+            logger.info("Hybrid mode: Enabling MCP tools with thin RAG context")
             step_start = time.perf_counter()
 
             # Import tools and create client
@@ -747,28 +792,9 @@ async def chat_message(
             setup_duration = (time.perf_counter() - step_start) * 1000
             logger.info(f"[CHAT] ✅ Tool setup took {setup_duration:.2f}ms")
 
-            # Extend system prompt with tool usage instructions
-            tool_instructions = """
-
-You have access to tools that allow you to retrieve and analyze screenplay content dynamically.
-
-When answering questions:
-- Use tools to get accurate, up-to-date information from the screenplay
-- Prefer tools over cached context when precision matters (e.g., "show me all scenes with X")
-- You can call multiple tools to build comprehensive analysis
-- Provide specific scene numbers, character names, and quotes from tool results
-- The cached context gives you overview; tools give you precision
-
-Available tools:
-- get_scene: Get full scene text by index
-- get_scene_context: Get scene plus surrounding scenes
-- get_character_scenes: Track character appearances
-- search_script: Semantic/keyword search
-- analyze_pacing: Quantitative pacing metrics
-- get_plot_threads: Plot thread tracking
-"""
-            # Merge tool instructions with RAG system prompt
-            prompt["system"][0]["text"] += tool_instructions
+            # NOTE: Tool instructions are now included in system prompt via
+            # context_builder.build_prompt(tools_enabled=True)
+            # No need to append inline instructions here
 
             # Call tool loop
             step_start = time.perf_counter()
@@ -1106,22 +1132,25 @@ async def chat_message_stream_with_status(
 
             logger.info(f"[STREAM] Created new conversation: {conversation.conversation_id}")
 
-        # 3. Build context-aware prompt
+        # 3. Determine if tools should be enabled BEFORE building context
+        tools_enabled = should_enable_tools(request, intent)
+        logger.info(f"[STREAM] Tools enabled: {tools_enabled}")
+
+        # 4. Build context-aware prompt (optimized based on tools_enabled)
         prompt = await context_builder.build_prompt(
             script_id=request.script_id,
             message=request.message,
             intent=intent,
             conversation_id=conversation.conversation_id,
             current_scene_id=request.current_scene_id,
-            budget_tier=request.budget_tier or "standard"
+            budget_tier=request.budget_tier or "standard",
+            skip_scene_retrieval=tools_enabled,  # Skip scene cards when tools enabled
+            tools_enabled=tools_enabled  # Adjust system prompt for tool mode
         )
 
         logger.info(
-            f"[STREAM] Built prompt: {prompt['metadata']['tokens_used']['total']} tokens"
+            f"[STREAM] Built prompt: {prompt['metadata']['tokens_used']['total']} tokens (skip_scenes={tools_enabled})"
         )
-
-        # Determine if tools should be enabled
-        tools_enabled = should_enable_tools(request, intent)
 
         # Store these for use in the generator closure
         user_id = current_user.user_id
@@ -1137,33 +1166,15 @@ async def chat_message_stream_with_status(
             tool_metadata = None
 
             if tools_enabled:
-                # Hybrid mode: RAG context + MCP tools with status events
+                # Hybrid mode: RAG context (thin) + MCP tools with status events
                 from app.services.mcp_tools import SCREENPLAY_TOOLS
                 from app.core.config import settings
 
                 client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
-                # Extend system prompt with tool usage instructions
-                tool_instructions = """
-
-You have access to tools that allow you to retrieve and analyze screenplay content dynamically.
-
-When answering questions:
-- Use tools to get accurate, up-to-date information from the screenplay
-- Prefer tools over cached context when precision matters (e.g., "show me all scenes with X")
-- You can call multiple tools to build comprehensive analysis
-- Provide specific scene numbers, character names, and quotes from tool results
-- The cached context gives you overview; tools give you precision
-
-Available tools:
-- get_scene: Get full scene text by index
-- get_scene_context: Get scene plus surrounding scenes
-- get_character_scenes: Track character appearances
-- search_script: Semantic/keyword search
-- analyze_pacing: Quantitative pacing metrics
-- get_plot_threads: Plot thread tracking
-"""
-                prompt["system"][0]["text"] += tool_instructions
+                # NOTE: Tool instructions are now included in system prompt via
+                # context_builder.build_prompt(tools_enabled=True)
+                # No need to append inline instructions here
 
                 # Use the status-yielding tool loop
                 async for event in _handle_tool_loop_with_status(
