@@ -2,7 +2,7 @@
 <FinalDraft DocumentType="Script" Template="No" Version="5">
 
   <Content>
-    <Paragraph Number="1" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="5/8" Page="1" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -63,7 +63,7 @@
     <Paragraph Type="Action">
       <Text>Sam nods. Takes a breath. Then, he opens the door...</Text>
     </Paragraph>
-    <Paragraph Number="2" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="5 2/8" Page="1" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -526,7 +526,7 @@
     <Paragraph Type="Action">
       <Text>Atlas glances at Sam. He smirks. Then disappears. Richard shrieks. Crumples into a ball. Sam stands over him. Bewildered. He hesitates. Then exits.</Text>
     </Paragraph>
-    <Paragraph Number="3" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="6/8" Page="7" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -593,7 +593,7 @@
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="4" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2 3/8" Page="7" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="LAUREN">
@@ -827,7 +827,7 @@
     <Paragraph Type="Action">
       <Text>Sam grabs his coat. Shuts the door. His son begins to cry.</Text>
     </Paragraph>
-    <Paragraph Number="5" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4 5/8" Page="10" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -1273,7 +1273,7 @@
     <Paragraph Type="Action">
       <Text>Sam shrugs. He exits.</Text>
     </Paragraph>
-    <Paragraph Number="6" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="14" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -1294,7 +1294,7 @@
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="7" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 4/8" Page="14" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -1425,7 +1425,7 @@
     <Paragraph Type="Dialogue">
       <Text>Let’s get started...</Text>
     </Paragraph>
-    <Paragraph Number="8" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3 1/8" Page="16" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -1689,7 +1689,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Action">
       <Text>He takes a breath. The room goes dark...</Text>
     </Paragraph>
-    <Paragraph Number="9" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2" Page="19" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -1853,7 +1853,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Action">
       <Text>The room falls dark...</Text>
     </Paragraph>
-    <Paragraph Number="10" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="6/8" Page="21" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -1920,7 +1920,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Action">
       <Text>Sam studies him. Nods. They board the train.</Text>
     </Paragraph>
-    <Paragraph Number="11" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2 7/8" Page="22" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -2165,7 +2165,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Action">
       <Text>Atlas looks at him. Smiles. </Text>
     </Paragraph>
-    <Paragraph Number="12" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4 4/8" Page="24" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -2578,7 +2578,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="13" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="5/8" Page="29" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="BOUNCER">
@@ -2626,7 +2626,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Action">
       <Text>He steps aside. Atlas enters.</Text>
     </Paragraph>
-    <Paragraph Number="14" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2 2/8" Page="30" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -2821,7 +2821,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="15" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4/8" Page="32" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="GAUNT MAN">
@@ -2855,7 +2855,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="16" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="32" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="DR. MIND">
@@ -2883,7 +2883,7 @@ severe narcissism and borderline traits. The ‘911’ points there too.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="17" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 6/8" Page="33" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="MOM">
@@ -3012,7 +3012,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>CUT TO:</Text>
     </Paragraph>
-    <Paragraph Number="18" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="34" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -3031,7 +3031,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Action">
       <Text>Sam watches her. Gaunt. Green. After a moment, he enters.</Text>
     </Paragraph>
-    <Paragraph Number="19" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3 6/8" Page="35" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -3397,7 +3397,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="20" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2" Page="38" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -3602,7 +3602,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="21" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="5/8" Page="40" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -3660,7 +3660,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Action">
       <Text>They reach the barn door. Atlas brushes his suit. Knocks. Then, he tests the handle. It’s unlocked. He pushes it open.</Text>
     </Paragraph>
-    <Paragraph Number="22" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3 4/8" Page="41" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -4014,7 +4014,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="23" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="44" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -4035,7 +4035,7 @@ Songs about rainbows...?</Text>
       <Text AdornmentStyle="-1">FBI</Text>
       <Text> DIRECTOR ISAIAH SHAW. Sam pushes it open...</Text>
     </Paragraph>
-    <Paragraph Number="24" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 4/8" Page="45" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -4188,7 +4188,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="25" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="46" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -4200,7 +4200,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Action">
       <Text>He moves towards a cracked door. Peers in. He sees his son. Asleep in his crib. Sam watches him. For a moment. Then, he leaves. Enters his room.</Text>
     </Paragraph>
-    <Paragraph Number="26" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2 6/8" Page="46" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -4449,7 +4449,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="27" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 3/8" Page="49" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -4582,7 +4582,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="28" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="50" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -4594,7 +4594,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Action">
       <Text>The city should be alive. But it isn’t. The sidewalks are lined with tents and encampments, but not a soul stirs. It’s New York. But silent. Empty.</Text>
     </Paragraph>
-    <Paragraph Number="29" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="51" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -4608,7 +4608,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Action">
       <Text>Inside the car: pure focus. Sam flicks the wheel, drifts around a wide turn, tires howling. He spins it again, tires shrieking on wet pavement. Drifts a 180. Stops on a dime.</Text>
     </Paragraph>
-    <Paragraph Number="30" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="51" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -4639,7 +4639,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="31" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="51" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -4667,7 +4667,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="32" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 5/8" Page="51" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -4823,7 +4823,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="33" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="53" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -4864,7 +4864,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="34" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4/8" Page="53" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -4912,7 +4912,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="35" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="6/8" Page="54" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -4993,7 +4993,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="36" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4/8" Page="54" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -5039,7 +5039,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="37" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 1/8" Page="55" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -5145,7 +5145,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="38" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="5/8" Page="56" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -5200,7 +5200,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="39" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4/8" Page="57" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -5240,7 +5240,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="40" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="6/8" Page="57" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -5307,7 +5307,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="41" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="58" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -5340,7 +5340,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Dialogue">
       <Text>Hurry!</Text>
     </Paragraph>
-    <Paragraph Number="42" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="58" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -5352,7 +5352,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Action">
       <Text>He moves fast. Down the hall. Past collapsed kennels. Towards a faint light beneath a metal door. Sam yanks it open.</Text>
     </Paragraph>
-    <Paragraph Number="43" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="58" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="SAM">
@@ -5386,7 +5386,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Dialogue">
       <Text>Let him out...</Text>
     </Paragraph>
-    <Paragraph Number="44" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="59" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -5408,7 +5408,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Dialogue">
       <Text>He hit the node. He’s coming...</Text>
     </Paragraph>
-    <Paragraph Number="45" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="6/8" Page="59" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="PREYBOY">
@@ -5472,7 +5472,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="46" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 2/8" Page="60" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -5594,7 +5594,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="47" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="8 1/8" Page="61" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -6368,7 +6368,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="48" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4 1/8" Page="69" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -6821,7 +6821,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Dialogue">
       <Text>Just about me.</Text>
     </Paragraph>
-    <Paragraph Number="49" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 6/8" Page="73" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -6981,7 +6981,7 @@ Songs about rainbows...?</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="50" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="75" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7004,7 +7004,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="51" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2 4/8" Page="75" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -7239,7 +7239,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="52" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4/8" Page="78" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7266,7 +7266,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="53" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1" Page="78" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -7366,7 +7366,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="54" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="79" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7378,7 +7378,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="55" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="80" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7390,7 +7390,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="56" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="80" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7402,7 +7402,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="57" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="80" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7414,7 +7414,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="58" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="80" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -7442,7 +7442,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="59" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="80" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7454,7 +7454,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="60" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="80" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -7476,7 +7476,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="61" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1" Page="81" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -7555,7 +7555,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="62" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="82" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7567,7 +7567,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="63" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="82" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ELLA">
@@ -7591,7 +7591,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="64" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="82" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -7619,7 +7619,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="65" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="82" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAREGIVER">
@@ -7644,7 +7644,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="66" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="82" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7656,7 +7656,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="67" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="83" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="AVA">
@@ -7693,7 +7693,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="68" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="83" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -7718,7 +7718,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="69" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2 3/8" Page="83" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -7948,7 +7948,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="70" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="86" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7960,7 +7960,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="71" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="86" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -7972,7 +7972,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>A woman waves from the edge. Ella groans. We swim over.</Text>
     </Paragraph>
-    <Paragraph Number="72" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="86" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="MARLA">
@@ -7991,7 +7991,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Tell me everything...</Text>
     </Paragraph>
-    <Paragraph Number="73" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="86" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="AVA">
@@ -8013,7 +8013,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Marla help!</Text>
     </Paragraph>
-    <Paragraph Number="74" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="86" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="MARLA">
@@ -8035,7 +8035,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="75" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="87" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -8047,7 +8047,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="76" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="87" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="AVA">
@@ -8086,7 +8086,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Ella snorts. Salutes. We both laugh. </Text>
     </Paragraph>
-    <Paragraph Number="77" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="87" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="AVA">
@@ -8120,7 +8120,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="5.50" RightIndent="7.10" SpaceBefore="12" Spacing="1" StartsNewPage="No" Type="Transition">
       <Text>FLASH TO:</Text>
     </Paragraph>
-    <Paragraph Number="78" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="87" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -8151,7 +8151,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="5.50" RightIndent="7.10" SpaceBefore="12" Spacing="1" StartsNewPage="No" Type="Transition">
       <Text>CUT TO:</Text>
     </Paragraph>
-    <Paragraph Number="79" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="7/8" Page="88" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -8244,7 +8244,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Alignment="Left" FirstIndent="0.00" Leading="Regular" LeftIndent="5.50" RightIndent="7.10" SpaceBefore="12" Spacing="1" StartsNewPage="No" Type="Transition">
       <Text>CUT TO:</Text>
     </Paragraph>
-    <Paragraph Number="80" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3 6/8" Page="88" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -8592,7 +8592,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Atlas looks at him. Cigarette still in hand. Shaking. Sam rushes off. Atlas walks slow, after him. Takes a pull. </Text>
     </Paragraph>
-    <Paragraph Number="81" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4/8" Page="92" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -8641,7 +8641,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Shots fired! Go now!</Text>
     </Paragraph>
-    <Paragraph Number="82" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 7/8" Page="93" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -8812,7 +8812,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="83" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 4/8" Page="94" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="LAUREN">
@@ -8956,7 +8956,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="84" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="96" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -8984,7 +8984,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Sam steps past him. Into the silence.</Text>
     </Paragraph>
-    <Paragraph Number="85" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 5/8" Page="96" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -9143,7 +9143,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="86" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 2/8" Page="98" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -9270,7 +9270,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
       <Text Style="Underline">Steps through the wall</Text>
       <Text>.</Text>
     </Paragraph>
-    <Paragraph Number="87" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="99" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -9279,7 +9279,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Atlas emerges from the mirror. Still no reflection. The light is harsh. Pale. Fluorescent. Ella sits, fidgeting her wrists. Atlas studies her. Silent. Measured.</Text>
     </Paragraph>
-    <Paragraph Number="88" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="99" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -9298,7 +9298,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Here we go.</Text>
     </Paragraph>
-    <Paragraph Number="89" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 5/8" Page="99" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -9461,7 +9461,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>You failed. </Text>
     </Paragraph>
-    <Paragraph Number="90" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4/8" Page="101" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -9510,7 +9510,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Sam doesn’t look up. Camila studies him. After a moment, she turns back to the glass.</Text>
     </Paragraph>
-    <Paragraph Number="91" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2 4/8" Page="101" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -9777,7 +9777,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Atlas turns the mirror. He takes his bureau badge. Drops it.</Text>
     </Paragraph>
-    <Paragraph Number="92" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="5/8" Page="104" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="DIRECTOR SHAW">
@@ -9844,7 +9844,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Don’t you fucking dare!</Text>
     </Paragraph>
-    <Paragraph Number="93" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="5/8" Page="104" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -9904,7 +9904,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>The same man Sam’s father caught all those years ago. </Text>
     </Paragraph>
-    <Paragraph Number="94" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1" Page="105" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -10015,7 +10015,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>He storms out. Slams the door. </Text>
     </Paragraph>
-    <Paragraph Number="95" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="6/8" Page="106" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -10098,7 +10098,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>She puts it on the table. Sits back.</Text>
     </Paragraph>
-    <Paragraph Number="96" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="107" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -10120,7 +10120,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Director Shaw shakes his head. Watching. Biting his lip. </Text>
     </Paragraph>
-    <Paragraph Number="97" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="107" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -10163,7 +10163,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="98" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="107" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10172,7 +10172,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>The kitchen table. Dust clings to the legs. Screaming above us. Glass shatters. Our mother slaps our father. He grabs her by the hair, slams her head into the fridge. She crumples.</Text>
     </Paragraph>
-    <Paragraph Number="99" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="107" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10181,7 +10181,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>We open the door. Steam. The woman from before. In the tub. Red water. Blue lips. A needle floating beside her. </Text>
     </Paragraph>
-    <Paragraph Number="100" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="107" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10190,7 +10190,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Our father drags us by the arm. We hit the floor. His boot slams into our stomach. We cough. He growls.</Text>
     </Paragraph>
-    <Paragraph Number="101" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="107" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10199,7 +10199,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Blue lights reflect in the windows. Two CPS AGENTS crouch in front of us. Dad’s in cuffs. Screaming. Thrashing.</Text>
     </Paragraph>
-    <Paragraph Number="102" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="108" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10208,7 +10208,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>We hold a trash bag full of clothes. A woman waves at us. Children glance up, disinterested.</Text>
     </Paragraph>
-    <Paragraph Number="103" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="108" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="YOUNG AVA">
@@ -10233,7 +10233,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>You can sleep down here.</Text>
     </Paragraph>
-    <Paragraph Number="104" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="108" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10242,7 +10242,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>A quiet valley under a golden sky. We sit in a gaming chair coding, surrounded by shifting nature. We’re building this world. It’s responsive. Alive. </Text>
     </Paragraph>
-    <Paragraph Number="105" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="108" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAREGIVER">
@@ -10261,7 +10261,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Our little secret.</Text>
     </Paragraph>
-    <Paragraph Number="106" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="108" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ELLA">
@@ -10283,7 +10283,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>The supervisor nods. Barely. Eyes glazed. Drifting.</Text>
     </Paragraph>
-    <Paragraph Number="107" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="108" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="AVA">
@@ -10305,7 +10305,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>There’s a small ring on our shoulder. We take it. Put it on. </Text>
     </Paragraph>
-    <Paragraph Number="108" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="109" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAREGIVER">
@@ -10324,7 +10324,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Room for one more?</Text>
     </Paragraph>
-    <Paragraph Number="109" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="109" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10333,7 +10333,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>We sit in the gaming chair. A thin razor in our hand. We dig it into our thigh. Slash it open. Over and over.</Text>
     </Paragraph>
-    <Paragraph Number="110" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="109" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="AVA">
@@ -10363,7 +10363,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
       <Text AdornmentStyle="-1" Style="Bold">Marlayago</Text>
       <Text Style="Bold">.</Text>
     </Paragraph>
-    <Paragraph Number="111" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="109" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAREGIVER">
@@ -10382,7 +10382,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>You missed me.</Text>
     </Paragraph>
-    <Paragraph Number="112" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="109" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="MARLA">
@@ -10401,7 +10401,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>That’s enough.</Text>
     </Paragraph>
-    <Paragraph Number="113" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="109" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="MARLA">
@@ -10429,7 +10429,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>If you went missing... Anyone who’d miss you?</Text>
     </Paragraph>
-    <Paragraph Number="114" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="110" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="MARLA">
@@ -10448,7 +10448,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>You’re being transferred. I just want to show the place.</Text>
     </Paragraph>
-    <Paragraph Number="115" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="110" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10463,7 +10463,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Peeling walls. A MAN in a gray jacket stands by the elevator. Marla hands him a folder. Then a phone. She glances at us. Then walks out. We stand there. Alone. Footsteps behind us. We turn. A bag covers our head. </Text>
     </Paragraph>
-    <Paragraph Number="116" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="110" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10472,7 +10472,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Metal walls. No windows. A camera in the corner. Blinking red. We sit in the center. Cross-legged. Still.</Text>
     </Paragraph>
-    <Paragraph Number="117" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="110" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -10505,7 +10505,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>I’m gonna save you. I promise. </Text>
     </Paragraph>
-    <Paragraph Number="118" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="110" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10517,7 +10517,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Our stomach growls. Chains click. Doors open. A man stands in front of us. Hooded. In a medical mask. </Text>
     </Paragraph>
-    <Paragraph Number="119" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="111" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="JACK">
@@ -10536,7 +10536,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Lucky girl.</Text>
     </Paragraph>
-    <Paragraph Number="120" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="111" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10548,7 +10548,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>The buzz is louder. By our ear. He drives it into our cheek.</Text>
     </Paragraph>
-    <Paragraph Number="121" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="111" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10562,7 +10562,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>We begin to cry. We turn. Jack’s tattoo gun rests on a table beside us. We fight the chains. Pull ourself close. We drive it into our neck. Rip it across. Blood sprays. Vision blurs. Jack sprints...</Text>
     </Paragraph>
-    <Paragraph Number="122" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="111" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10576,7 +10576,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
       <Text Style="Bold">Drive it into his neck.</Text>
       <Text> He gurgles. Twitches. Grabs us. Strikes us. Reaches for his neck...</Text>
     </Paragraph>
-    <Paragraph Number="123" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="111" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10585,7 +10585,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>The trunk pops. We reach for his mask. Hesitate. Stop. We lift him. Dump him. Jack falls. Rolls into the ditch.</Text>
     </Paragraph>
-    <Paragraph Number="124" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="111" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10600,7 +10600,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Ava laughs with a younger girl. From behind a fence, we watch. We wipe our tears. Turn. Leave.</Text>
     </Paragraph>
-    <Paragraph Number="125" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="112" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ELLA">
@@ -10619,7 +10619,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Dialogue">
       <Text>Sleep Ella...</Text>
     </Paragraph>
-    <Paragraph Number="126" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="112" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10631,7 +10631,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Jack’s basement forms around us. We climb on the gurney. Close our eyes.</Text>
     </Paragraph>
-    <Paragraph Number="127" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="112" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10643,7 +10643,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>We enter. She looks up. Her smile darkens, replaced by disgust, then by fear.</Text>
     </Paragraph>
-    <Paragraph Number="128" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="112" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10655,7 +10655,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>A number appears. $27,600. We begin to cry.</Text>
     </Paragraph>
-    <Paragraph Number="129" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="112" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10664,7 +10664,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Glass shatters. We gasp awake. A homeless man grabs at us. We shriek. Kick free. Grab the laptop. Peel away. </Text>
     </Paragraph>
-    <Paragraph Number="130" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="112" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10685,7 +10685,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
       <Text Style="Bold">our vision shifts. </Text>
       <Text>We’re in the mask. Ella stands in front of us. We circle her. Staring down at her. </Text>
     </Paragraph>
-    <Paragraph Number="131" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="113" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10696,7 +10696,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
       <Text AdornmentStyle="-1">Preyboy</Text>
       <Text>.</Text>
     </Paragraph>
-    <Paragraph Number="132" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="113" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10707,7 +10707,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
       <Text Style="Bold+Italic">Boom</Text>
       <Text Style="Bold">.</Text>
     </Paragraph>
-    <Paragraph Number="133" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="113" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10719,7 +10719,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="134" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="113" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ELLA">
@@ -10744,7 +10744,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="135" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="113" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="CAMILA">
@@ -10778,13 +10778,13 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Camila nods. Runs out of the room. </Text>
     </Paragraph>
-    <Paragraph Number="136" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="113" Title="">
         <SceneArcBeats/>
       </SceneProperties>
       <Text>MONTAGE – GLOBAL RAID SEQUENCE – VARIOUS LOCATIONS</Text>
     </Paragraph>
-    <Paragraph Number="137" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="113" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10793,7 +10793,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>Floodlights blaze. Polish SWAT officers storm a concrete basement. Caged girls tremble as the lights flicker. </Text>
     </Paragraph>
-    <Paragraph Number="138" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="114" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10802,7 +10802,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>A rusted container is pried open. Inside, three teens blink against the sunlight. One sobs.</Text>
     </Paragraph>
-    <Paragraph Number="139" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1/8" Page="114" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10811,7 +10811,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>A glowing laptop screen reflects a masked man’s face. Glass shatters. He bolts for the door. He’s tackled. </Text>
     </Paragraph>
-    <Paragraph Number="140" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="114" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10823,7 +10823,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
       <Text AdornmentStyle="-1">camo</Text>
       <Text> zip through a barbed-wire fence. Inside a prefab unit, a teenage girl screams. One agent spots her, throws his weapon down.</Text>
     </Paragraph>
-    <Paragraph Number="141" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="3/8" Page="114" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -10846,7 +10846,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="142" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 5/8" Page="114" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -10999,7 +10999,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="143" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2" Page="116" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="ATLAS">
@@ -11201,7 +11201,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Action">
       <Text>He takes a long, deep pull and hands the cigarette to Sam. Then, he casually salutes him. He turns. Enters the center. </Text>
     </Paragraph>
-    <Paragraph Number="144" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="4/8" Page="118" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -11229,7 +11229,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="145" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="118" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -11244,7 +11244,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Flash to:</Text>
     </Paragraph>
-    <Paragraph Number="146" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="118" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -11258,7 +11258,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="147" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="1 1/8" Page="119" Title="">
         <SceneArcBeats>
           <CharacterArcBeat Name="HOPE">
@@ -11400,7 +11400,7 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <Paragraph Type="Transition">
       <Text>Cut to:</Text>
     </Paragraph>
-    <Paragraph Number="148" Type="Scene Heading">
+    <Paragraph Type="Scene Heading">
       <SceneProperties Length="2/8" Page="120" Title="">
         <SceneArcBeats/>
       </SceneProperties>
@@ -11468,9 +11468,9 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <AutoCastList AddParentheses="Yes" AutomaticallyGenerate="Yes" CastListElement="Cast List"/>
   </PageLayout>
 
-  <WindowState Height="837" Left="586" Mode="Normal" Top="28" Width="471"/>
+  <WindowState Height="838" Left="0" Mode="Normal" Top="37" Width="1440"/>
 
-  <TextState Scaling="100" Selection="1020,1020" ShowInvisibles="No"/>
+  <TextState Scaling="100" Selection="112,112" ShowInvisibles="No"/>
 
   <ElementSettings Type="General">
     <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""/>

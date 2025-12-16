@@ -52,12 +52,12 @@
 /* Character Name (Character Cue) */
 .screenplay-editor .screenplay-character,
 .screenplay-editor [data-type="character"] {
-  /* Standard: 4.0" from page left edge = 2.5" from 1.5" left margin */
-  /* 2.5" = 63.5mm additional indent */
+  /* Standard: 3.7" from page left edge = 2.2" from 1.5" left margin */
+  /* 2.2" = 55.88mm additional indent */
   /* !important needed to override Tailwind prose styles */
   width: fit-content !important;
   max-width: none !important;
-  margin-left: 63.5mm !important; /* 4.0" from page left edge */
+  margin-left: 51mm !important; /* ~3.5" from page left edge */
   margin-right: auto !important;
   text-transform: uppercase;
   margin-top: 12pt !important; /* Single-space before */
@@ -89,14 +89,14 @@
 /* Parenthetical */
 .screenplay-editor .screenplay-parenthetical,
 .screenplay-editor [data-type="parenthetical"] {
-  /* Standard: 3.5" from page left edge = 2.0" from 1.5" left margin */
-  /* Right margin at 2.5" from page right = width of 3.0" */
-  /* 2.0" = 50.8mm additional indent, 3.0" = 76.2mm width */
+  /* Standard: 3.0" from page left edge = 1.5" from 1.5" left margin */
+  /* Right margin at 2.5" from page right = width of 2.0" */
+  /* 1.5" = 38.1mm additional indent, 2.0" = 50.8mm width */
   /* !important needed to override Tailwind prose styles */
-  width: 76.2mm !important; /* 3.0 inches wide */
-  max-width: 76.2mm !important;
-  margin-left: 50.8mm !important; /* 3.5" from page left edge */
-  margin-right: 63.5mm !important; /* 2.5" from page right edge */
+  width: 50.8mm !important; /* 2.0 inches wide */
+  max-width: 50.8mm !important;
+  margin-left: 35.75mm !important; /* ~2.9" from page left edge */
+  margin-right: 101.6mm !important; /* adjusted for narrower width */
   font-style: normal; /* NOT italic - standard screenplay format */
   margin-top: 0 !important; /* No space before (follows character/dialogue immediately) */
   margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */
