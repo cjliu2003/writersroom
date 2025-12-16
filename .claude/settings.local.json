@@ -59,7 +59,8 @@
       "Bash(fi)",
       "Bash(curl:*)",
       "Bash(npx tsc:*)",
-      "Bash(pip freeze:*)"
+      "Bash(pip freeze:*)",
+      "mcp__playwright__browser_navigate"
     ],
     "deny": [],
     "ask": []
