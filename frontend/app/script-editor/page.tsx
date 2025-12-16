@@ -274,7 +274,7 @@ export default function TestTipTapPage() {
         footerRight: '',
       
         // screenplay margins (in px)
-        marginTop: 48,           // 1.0in Total (stacks with header height)
+        marginTop: 48,           // Standard gap between header and content
         marginBottom: 96,        // 1.0in
         marginLeft: 144,         // 1.5in
         marginRight: 96,         // 1.0in
@@ -302,8 +302,10 @@ export default function TestTipTapPage() {
       .rm-with-pagination { counter-reset: page-number 1 !important; }
 
       /* Hide first page header content (number and dot) but keep spacing */
-      .rm-with-pagination .rm-first-page-header {
+      /* Higher specificity (0-3-0) to override plugin's (0-2-0) rule */
+      .rm-with-pagination.screenplay-editor .rm-first-page-header {
         visibility: hidden !important;
+        margin-top: 16px !important;  /* Reduced from 48px for better first page positioning */
       }
     `;
     document.head.appendChild(style);
@@ -705,14 +707,14 @@ export default function TestTipTapPage() {
                 maxLength={30}
                 autoFocus
                 disabled={isSavingTitle}
-                className="text-gray-800 text-base tracking-wide text-center bg-transparent underline focus:outline-none px-2 py-0.5 uppercase"
-                style={{ fontFamily: "inherit", width: '34ch' }}
+                className="text-slate-700 text-xl tracking-wider text-center bg-transparent focus:outline-none px-3 py-0.5 uppercase"
+                style={{ fontFamily: "inherit", width: '40ch' }}
               />
             ) : (
               <h1
                 onClick={handleTitleClick}
-                className="text-gray-800 text-base tracking-wide truncate text-center cursor-pointer hover:opacity-60 transition-opacity px-2 py-0.5 uppercase underline"
-                style={{ fontFamily: "inherit", maxWidth: '34ch' }}
+                className="text-slate-700 text-xl tracking-wider truncate text-center cursor-pointer hover:opacity-70 transition-opacity px-3 py-0.5 uppercase"
+                style={{ fontFamily: "inherit", maxWidth: '40ch' }}
                 title="Click to edit title"
               >
                 {script?.title || 'Untitled Script'}

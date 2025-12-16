@@ -28,9 +28,15 @@
   margin-left: 0 !important; /* Flush with left margin */
   max-width: none !important;
   text-transform: uppercase;
-  font-weight: bold;
+  /* Note: Scene headings are NOT bold in standard screenplay format */
   margin-top: 24pt !important; /* Double-space before */
   margin-bottom: 12pt !important; /* Single-space after */
+}
+
+/* First element on a page should not have top margin */
+.screenplay-editor .rm-page-body > *:first-child,
+.screenplay-editor .rm-page-content > *:first-child {
+  margin-top: 0 !important;
 }
 
 /* Action (Scene Description) */
