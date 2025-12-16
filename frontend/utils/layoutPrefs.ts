@@ -13,6 +13,7 @@ export interface EditorLayoutPrefs {
   chatHeight?: number;         // Height of chat panel in pixels when docked at bottom (default: 220)
   chatPosition?: ChatPosition; // Which edge the chat is docked to (default: 'bottom')
   chatWidth?: number;          // Width of chat panel in pixels when docked left/right (default: 360)
+  chatBottomWidth?: number;    // Width of chat panel in pixels when docked at bottom (default: 1200)
 }
 
 const STORAGE_KEY = 'editorLayoutPrefs';
@@ -38,7 +39,8 @@ export function loadLayoutPrefs(): EditorLayoutPrefs {
     chatCollapsed: false,
     chatHeight: 220,
     chatPosition: 'bottom',
-    chatWidth: 360
+    chatWidth: 360,
+    chatBottomWidth: 1200
   };
 }
 

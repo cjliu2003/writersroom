@@ -68,6 +68,7 @@ export default function TestTipTapPage() {
   const [chatHeight, setChatHeight] = useState(220);
   const [chatPosition, setChatPosition] = useState<ChatPosition>('bottom');
   const [chatWidth, setChatWidth] = useState(360);
+  const [chatBottomWidth, setChatBottomWidth] = useState(1200);
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -371,6 +372,7 @@ export default function TestTipTapPage() {
     setChatHeight(prefs.chatHeight ?? 220);
     setChatPosition(prefs.chatPosition ?? 'bottom');
     setChatWidth(prefs.chatWidth ?? 360);
+    setChatBottomWidth(prefs.chatBottomWidth ?? 1200);
   }, []);
 
   // Save layout preferences when chat state changes
@@ -379,9 +381,10 @@ export default function TestTipTapPage() {
       chatCollapsed: isChatCollapsed,
       chatHeight,
       chatPosition,
-      chatWidth
+      chatWidth,
+      chatBottomWidth
     });
-  }, [isChatCollapsed, chatHeight, chatPosition, chatWidth]);
+  }, [isChatCollapsed, chatHeight, chatPosition, chatWidth, chatBottomWidth]);
 
   // Handle vertical resize drag (for bottom position)
   const handleVerticalResizeMouseDown = useCallback((e: React.MouseEvent) => {
@@ -459,6 +462,38 @@ export default function TestTipTapPage() {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, [chatWidth, chatPosition]);
+
+  // Handle horizontal resize drag for bottom position (symmetric, stays centered)
+  const handleBottomHorizontalResizeMouseDown = useCallback((e: React.MouseEvent, side: 'left' | 'right') => {
+    e.preventDefault();
+
+    const startX = e.clientX;
+    const startWidth = chatBottomWidth;
+    const minWidth = 816; // Match script page width (letter size at 96 DPI)
+    const maxWidth = Math.min(window.innerWidth * 0.95, 1600);
+
+    const cleanup = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      // Multiply by 2 because we're resizing symmetrically from center
+      // Left side: dragging left increases width, dragging right decreases
+      // Right side: dragging right increases width, dragging left decreases
+      const widthDelta = side === 'left' ? -deltaX * 2 : deltaX * 2;
+      const newWidth = Math.min(Math.max(startWidth + widthDelta, minWidth), maxWidth);
+      setChatBottomWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      cleanup();
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [chatBottomWidth]);
 
   // Track current scene and extract boundaries on any editor change
   // Combined into single effect to ensure boundaries are always fresh
@@ -887,14 +922,23 @@ export default function TestTipTapPage() {
         className="fixed z-30"
         style={
           chatPosition === 'bottom'
-            ? {
-                bottom: 0,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '88%',
-                maxWidth: '1400px',
-                height: isChatCollapsed ? 'auto' : `${chatHeight}px`,
-              }
+            ? isChatCollapsed
+              ? {
+                  // Collapsed: anchor to left side
+                  bottom: 0,
+                  left: '24px',
+                  width: 'auto',
+                  height: 'auto',
+                }
+              : {
+                  // Expanded: centered
+                  bottom: 0,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: `${chatBottomWidth}px`,
+                  maxWidth: '95vw',
+                  height: `${chatHeight}px`,
+                }
             : chatPosition === 'left'
             ? {
                 left: 0,
@@ -915,13 +959,29 @@ export default function TestTipTapPage() {
               }
         }
       >
-        {/* Resize Handle - position-aware */}
+        {/* Resize Handles - position-aware */}
+        {/* Bottom position: vertical handle (top) + horizontal handles (left & right) */}
         {!isChatCollapsed && chatPosition === 'bottom' && (
-          <div
-            onMouseDown={handleVerticalResizeMouseDown}
-            className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-10"
-            style={{ marginTop: '-6px' }}
-          />
+          <>
+            {/* Top edge - vertical resize */}
+            <div
+              onMouseDown={handleVerticalResizeMouseDown}
+              className="absolute top-0 left-4 right-4 h-3 cursor-ns-resize z-10"
+              style={{ marginTop: '-6px' }}
+            />
+            {/* Left edge - horizontal resize */}
+            <div
+              onMouseDown={(e) => handleBottomHorizontalResizeMouseDown(e, 'left')}
+              className="absolute top-0 bottom-0 left-0 w-3 cursor-ew-resize z-10"
+              style={{ marginLeft: '-6px' }}
+            />
+            {/* Right edge - horizontal resize */}
+            <div
+              onMouseDown={(e) => handleBottomHorizontalResizeMouseDown(e, 'right')}
+              className="absolute top-0 bottom-0 right-0 w-3 cursor-ew-resize z-10"
+              style={{ marginRight: '-6px' }}
+            />
+          </>
         )}
         {!isChatCollapsed && chatPosition === 'left' && (
           <div
