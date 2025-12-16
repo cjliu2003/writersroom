@@ -1033,9 +1033,9 @@ export default function TestTipTapPage() {
 
         .screenplay-editor .ProseMirror {
           padding: 0rem;
-          font-family: 'Courier', 'Courier New', monospace;
+          font-family: var(--font-courier-prime), 'Courier Prime', 'Courier New', monospace;
           font-size: 12pt;
-          line-height: 12pt;
+          /* line-height inherited from screenplay.css */
           color: #000;
         }
 

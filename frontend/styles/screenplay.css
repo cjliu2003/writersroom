@@ -10,9 +10,10 @@
 
 /* Global Screenplay Editor Styles */
 .screenplay-editor {
-  font-family: 'Courier', 'Courier New', monospace;
+  font-family: var(--font-courier-prime), 'Courier Prime', 'Courier New', monospace;
   font-size: 12pt;
-  line-height: 12pt;
+  line-height: 12.5pt;  /* Empirically tuned to approximate Final Draft's vertical rhythm */
+  letter-spacing: -0.02em;  /* Tighten characters to match Final Draft's rendering */
   color: #000;
   background: #fff;
 }
@@ -45,7 +46,7 @@
   margin-left: 0 !important; /* Flush with left margin */
   max-width: none !important;
   margin-bottom: 12pt !important; /* Single-space after */
-  line-height: 12pt;
+  /* line-height inherited from .screenplay-editor */
 }
 
 /* Character Name (Character Cue) */
