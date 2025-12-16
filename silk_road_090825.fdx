@@ -846,26 +846,19 @@
       </SceneProperties>
       <Text>Int. </Text>
       <Text AdornmentStyle="-1">CBAU</Text>
-      <Text> BRIEFING ROOM – </Text>
-      <Text AdornmentStyle="-1">QUANTICO</Text>
-      <Text> - Base reality – afternoon</Text>
+      <Text> BRIEFING ROOM – QUANTICO - Base reality – afternoon</Text>
     </Paragraph>
     <Paragraph Type="Action">
-      <Text>Sam enters. Harsh overheads illuminate the windowless briefing room. SENATOR LEWIS </Text>
-      <Text AdornmentStyle="-1">WHITMORE</Text>
-      <Text> (50s, military buzz, wrinkled suit) paces. Fuming. </Text>
+      <Text>Sam enters. Harsh overheads illuminate the windowless briefing room. SENATOR LEWIS WHITMORE (50s, military buzz, wrinkled suit) paces. Fuming. </Text>
     </Paragraph>
     <Paragraph Type="Character">
-      <Text>SenATOR </Text>
-      <Text AdornmentStyle="-1">WHITMORE</Text>
+      <Text>SenATOR WHITMORE</Text>
     </Paragraph>
     <Paragraph Type="Dialogue">
       <Text>There’s a camera in every head in the country! Where is she?</Text>
     </Paragraph>
     <Paragraph Type="Action">
-      <Text>Sam sits beside Camila. </Text>
-      <Text AdornmentStyle="-1">FBI</Text>
-      <Text> DIRECTOR ISAIAH SHAW (60s, deep-set eyes, coffee-stained teeth) sits at the head of the table. He rubs his brow. Tired. Impatient. </Text>
+      <Text>Sam sits beside Camila. FBI DIRECTOR ISAIAH SHAW (60s, deep-set eyes, coffee-stained teeth) sits at the head of the table. He rubs his brow. Tired. Impatient. </Text>
     </Paragraph>
     <Paragraph Type="Character">
       <Text>DIRECTOR SHAW</Text>
@@ -886,8 +879,7 @@
       <Text>No one saw her.</Text>
     </Paragraph>
     <Paragraph Type="Character">
-      <Text>SENATOR </Text>
-      <Text AdornmentStyle="-1">WHITMORE</Text>
+      <Text>SENATOR WHITMORE</Text>
     </Paragraph>
     <Paragraph Type="Dialogue">
       <Text>Then what? How do we find her?</Text>
@@ -11476,9 +11468,9 @@ Before Atlas: The Archive. The Ouroboros. The dim blue glow.</Text>
     <AutoCastList AddParentheses="Yes" AutomaticallyGenerate="Yes" CastListElement="Cast List"/>
   </PageLayout>
 
-  <WindowState Height="838" Left="780" Mode="Normal" Top="24" Width="632"/>
+  <WindowState Height="837" Left="586" Mode="Normal" Top="28" Width="471"/>
 
-  <TextState Scaling="125" Selection="3,3" ShowInvisibles="No"/>
+  <TextState Scaling="100" Selection="1020,1020" ShowInvisibles="No"/>
 
   <ElementSettings Type="General">
     <FontSpec AdornmentStyle="0" Background="#FFFFFFFFFFFF" Color="#000000000000" Font="Courier Final Draft" RevisionID="0" Size="12" Style=""/>

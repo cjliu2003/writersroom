@@ -78,6 +78,14 @@
   margin-bottom: 12pt !important; /* Single-space after */
 }
 
+/* Dialogue followed by parenthetical should have no bottom margin */
+.screenplay-editor .screenplay-dialogue:has(+ .screenplay-parenthetical),
+.screenplay-editor .screenplay-dialogue:has(+ [data-type="parenthetical"]),
+.screenplay-editor [data-type="dialogue"]:has(+ .screenplay-parenthetical),
+.screenplay-editor [data-type="dialogue"]:has(+ [data-type="parenthetical"]) {
+  margin-bottom: 0 !important;
+}
+
 /* Parenthetical */
 .screenplay-editor .screenplay-parenthetical,
 .screenplay-editor [data-type="parenthetical"] {
@@ -89,7 +97,8 @@
   max-width: 76.2mm !important;
   margin-left: 50.8mm !important; /* 3.5" from page left edge */
   margin-right: 63.5mm !important; /* 2.5" from page right edge */
-  font-style: italic;
+  font-style: normal; /* NOT italic - standard screenplay format */
+  margin-top: 0 !important; /* No space before (follows character/dialogue immediately) */
   margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */
 }
 
