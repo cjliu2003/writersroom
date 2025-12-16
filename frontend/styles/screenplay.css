@@ -12,7 +12,7 @@
 .screenplay-editor {
   font-family: var(--font-courier-prime), 'Courier Prime', 'Courier New', monospace;
   font-size: 12pt;
-  line-height: 12.5pt;  /* Empirically tuned to approximate Final Draft's vertical rhythm */
+  line-height: 12pt;  /* Match Final Draft's 6 lines per inch (12pt baseline-to-baseline) */
   letter-spacing: -0.02em;  /* Tighten characters to match Final Draft's rendering */
   color: #000;
   background: #fff;
