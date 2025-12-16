@@ -34,9 +34,9 @@
   margin-bottom: 12pt !important; /* Single-space after */
 }
 
-/* First element on a page should not have top margin */
-.screenplay-editor .rm-page-body > *:first-child,
-.screenplay-editor .rm-page-content > *:first-child {
+/* First element on page should not have top margin */
+/* Target element immediately after pagination container (which follows the header decorations) */
+.screenplay-editor [data-rm-pagination] + * {
   margin-top: 0 !important;
 }
 

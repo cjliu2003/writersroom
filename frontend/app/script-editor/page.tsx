@@ -305,7 +305,7 @@ export default function TestTipTapPage() {
       /* Higher specificity (0-3-0) to override plugin's (0-2-0) rule */
       .rm-with-pagination.screenplay-editor .rm-first-page-header {
         visibility: hidden !important;
-        margin-top: 16px !important;  /* Reduced from 48px for better first page positioning */
+        margin-top: 45px !important;  /* Tuned to match Final Draft top margin */
       }
     `;
     document.head.appendChild(style);
