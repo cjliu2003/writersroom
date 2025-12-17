@@ -57,7 +57,7 @@
   /* !important needed to override Tailwind prose styles */
   width: fit-content !important;
   max-width: none !important;
-  margin-left: 51mm !important; /* ~3.5" from page left edge */
+  margin-left: 50.5mm !important; /* ~3.5" from page left edge */
   margin-right: auto !important;
   text-transform: uppercase;
   margin-top: 12pt !important; /* Single-space before */

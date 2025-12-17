@@ -258,8 +258,9 @@ export default function TestTipTapPage() {
       ] : []),
       // Pagination
       PaginationPlus.configure({
-        // geometry
+        // geometry - override PAGE_SIZES.LETTER with correct US Letter @ 96 DPI
         ...PAGE_SIZES.LETTER,
+        pageHeight: 960,           // Adjusted for Final Draft match
         // chrome between pages
         pageGap: 24,
         pageGapBorderSize: 1,
