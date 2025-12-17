@@ -120,7 +120,7 @@ describe('text-metrics', () => {
           action: 60,
           character: 35,
           dialogue: 35,
-          parenthetical: 30,
+          parenthetical: 27,  // Final Draft standard including parens
           transition: 60,
           shot: 60,
           general: 60,
@@ -276,7 +276,7 @@ describe('text-metrics', () => {
       expect(ELEMENT_WIDTHS.action).toBe(6.0);
       expect(ELEMENT_WIDTHS.character).toBe(3.5);
       expect(ELEMENT_WIDTHS.dialogue).toBe(3.5);
-      expect(ELEMENT_WIDTHS.parenthetical).toBe(3.0);
+      expect(ELEMENT_WIDTHS.parenthetical).toBe(2.7);
       expect(ELEMENT_WIDTHS.transition).toBe(6.0);
       expect(ELEMENT_WIDTHS.shot).toBe(6.0);
       expect(ELEMENT_WIDTHS.general).toBe(6.0);
@@ -293,7 +293,7 @@ describe('text-metrics', () => {
       expect(ELEMENT_WIDTHS.dialogue).toBe(3.5);
 
       // Very narrow (parenthetical)
-      expect(ELEMENT_WIDTHS.parenthetical).toBe(3.0);
+      expect(ELEMENT_WIDTHS.parenthetical).toBe(2.7);
     });
   });
 
@@ -333,7 +333,7 @@ describe('text-metrics', () => {
           action: 60,
           character: 35,
           dialogue: 35,
-          parenthetical: 30,
+          parenthetical: 27,  // Final Draft standard including parens
           transition: 60,
         },
         dpi: 96,

@@ -24,7 +24,7 @@ jest.mock('../../utils/text-metrics', () => ({
       action: 60,
       character: 35,
       dialogue: 35,
-      parenthetical: 30,
+      parenthetical: 27,  // Final Draft standard including parens
       transition: 60,
       shot: 60,
       general: 60,

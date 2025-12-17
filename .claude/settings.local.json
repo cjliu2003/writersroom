@@ -60,7 +60,13 @@
       "Bash(curl:*)",
       "Bash(npx tsc:*)",
       "Bash(pip freeze:*)",
-      "mcp__playwright__browser_navigate"
+      "mcp__playwright__browser_navigate",
+      "WebFetch(domain:www.studiobinder.com)",
+      "Bash(ls:*)",
+      "Bash(npx jest --testPathPattern=\"text-metrics\" --no-coverage)",
+      "Bash(npx jest --testPathPatterns=\"text-metrics\" --no-coverage)",
+      "Bash(pip3 show:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

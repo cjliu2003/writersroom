@@ -213,8 +213,9 @@ class FDXParser:
             'Dialogue': {'type': 'dialogue', 'text': text},
             'Parenthetical': {
                 'type': 'parenthetical',
-                # Strip parentheses - CSS will add them back via ::before and ::after
-                'text': text.strip('()').strip()
+                # Keep parentheses as real text - they are now editable characters
+                # Ensure text is wrapped in parens if not already
+                'text': text if (text.startswith('(') and text.endswith(')')) else f"({text.strip('()').strip()})"
             },
             'Transition': {
                 'type': 'transition',

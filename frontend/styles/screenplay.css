@@ -89,29 +89,20 @@
 /* Parenthetical */
 .screenplay-editor .screenplay-parenthetical,
 .screenplay-editor [data-type="parenthetical"] {
-  /* Standard: 3.0" from page left edge = 1.5" from 1.5" left margin */
-  /* Right margin at 2.5" from page right = width of 2.0" */
-  /* 1.5" = 38.1mm additional indent, 2.0" = 50.8mm width */
+  /* Final Draft standard: 27 characters per line including parentheses */
+  /* 27 chars ÷ 10 chars/inch = 2.7 inches = 68.58mm width */
   /* !important needed to override Tailwind prose styles */
-  width: 50.8mm !important; /* 2.0 inches wide */
-  max-width: 50.8mm !important;
+  width: 68.58mm !important; /* 2.7 inches = 27 chars at 10 cpi */
+  max-width: 68.58mm !important;
   margin-left: 35.75mm !important; /* ~2.9" from page left edge */
-  margin-right: 101.6mm !important; /* adjusted for narrower width */
+  margin-right: 86.25mm !important; /* adjusted for 66mm width */
   font-style: normal; /* NOT italic - standard screenplay format */
   margin-top: 0 !important; /* No space before (follows character/dialogue immediately) */
   margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */
 }
 
-/* Auto-wrap parenthetical content in parentheses */
-.screenplay-editor .screenplay-parenthetical::before,
-.screenplay-editor [data-type="parenthetical"]::before {
-  content: '(';
-}
-
-.screenplay-editor .screenplay-parenthetical::after,
-.screenplay-editor [data-type="parenthetical"]::after {
-  content: ')';
-}
+/* Parentheses are now real text characters in the document, not CSS pseudo-elements.
+   This allows users to edit/delete parentheses like normal text. */
 
 /* Transition */
 .screenplay-editor .screenplay-transition,

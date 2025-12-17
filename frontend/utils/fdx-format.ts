@@ -101,7 +101,7 @@ function getMaxCharactersForType(type: ScreenplayBlockType): number {
     case 'character':
       return 20 // Centered, shorter
     case 'parenthetical':
-      return 25 // Indented
+      return 27 // Final Draft standard: 27 chars including parens
     case 'dialogue':
       return 35 // Standard dialogue width
     case 'transition':

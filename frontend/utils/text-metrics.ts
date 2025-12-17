@@ -35,7 +35,7 @@ export const ELEMENT_WIDTHS: ElementWidths = {
   action: 6.0,          // Full width
   character: 3.5,       // Narrow (centered)
   dialogue: 3.5,        // Narrow
-  parenthetical: 3.0,   // Very narrow
+  parenthetical: 2.7,   // Final Draft standard: 27 chars including parens
   transition: 6.0,      // Full width (right-aligned)
   shot: 6.0,           // Full width
   general: 6.0,        // Full width
@@ -122,7 +122,7 @@ function getDefaultMetrics(): TextMetrics {
     action: 60,
     character: 35,
     dialogue: 35,
-    parenthetical: 30,
+    parenthetical: 27,  // Final Draft standard including parens
     transition: 60,
     shot: 60,
     general: 60,
