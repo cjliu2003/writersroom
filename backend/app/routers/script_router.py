@@ -3,7 +3,7 @@ Script management endpoints for the WritersRoom API
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, desc, func, and_
+from sqlalchemy import select, update, delete, desc, func, and_
 from typing import List, Dict, Any
 import logging
 
@@ -424,8 +424,9 @@ async def delete_script(
             detail="Only the script owner can delete it"
         )
 
-    # Delete script (cascades to related records via DB constraints)
-    await db.delete(script)
+    # Delete script using direct SQL (script is a ScriptData object, not ORM instance)
+    # Cascades to related records via DB constraints
+    await db.execute(delete(Script).where(Script.script_id == script_id))
     await db.commit()
 
     return None
