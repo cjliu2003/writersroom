@@ -76,10 +76,10 @@
   /* Width adjusted from 88.9mm (3.5") to 86mm to compensate for letter-spacing: -0.02em */
   /* This ensures exactly 35 characters per line, matching Final Draft */
   /* !important needed to override Tailwind prose styles */
-  width: 88.5mm !important; /* ~335px for 35 chars with letter-spacing */
-  max-width: 88.5mm !important;
+  width: 88.332mm !important; /* ~335px for 35 chars with letter-spacing */
+  max-width: 88.332mm !important;
   margin-left: 25.4mm !important; /* 2.5" from page left edge */
-  margin-right: 63.9mm !important; /* adjusted for 88.5mm width */
+  margin-right: 64.068mm !important; /* adjusted for 88.332mm width */
   margin-bottom: 12pt !important; /* Single-space after */
 }
 
