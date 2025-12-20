@@ -318,13 +318,13 @@ export default function HomePage() {
     try {
       await updateScript(scriptId, {
         title: trimmedTitle,
-        description: trimmedAuthor || null
+        description: trimmedAuthor || undefined
       });
     } catch (e: any) {
       // On error, revert to stored original values
       setScripts(prev => prev.map(s =>
         s.script_id === scriptId
-          ? { ...s, title: originalTitle || trimmedTitle, description: originalDescription }
+          ? { ...s, title: originalTitle || trimmedTitle, description: originalDescription ?? null }
           : s
       ));
       setEditError(e?.message || "Failed to update script");

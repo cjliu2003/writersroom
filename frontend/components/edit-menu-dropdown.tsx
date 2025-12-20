@@ -12,7 +12,6 @@ export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   // Check undo/redo availability from editor's history state
-  const historyState = editor?.state?.history$
   const canUndo = editor ? (editor.state as any).history$?.done?.eventCount > 0 : false
   const canRedo = editor ? (editor.state as any).history$?.undone?.eventCount > 0 : false
 
