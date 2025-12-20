@@ -73,13 +73,13 @@
 .screenplay-editor .screenplay-dialogue,
 .screenplay-editor [data-type="dialogue"] {
   /* Standard: 2.5" from page left edge = 1.0" from 1.5" left margin */
-  /* Right margin at 2.5" from page right = width of 3.5" */
-  /* 1.0" = 25.4mm additional indent, 3.5" = 88.9mm width */
+  /* Width adjusted from 88.9mm (3.5") to 86mm to compensate for letter-spacing: -0.02em */
+  /* This ensures exactly 35 characters per line, matching Final Draft */
   /* !important needed to override Tailwind prose styles */
-  width: 88.9mm !important; /* 3.5 inches wide */
-  max-width: 88.9mm !important;
+  width: 88.5mm !important; /* ~335px for 35 chars with letter-spacing */
+  max-width: 88.5mm !important;
   margin-left: 25.4mm !important; /* 2.5" from page left edge */
-  margin-right: 63.5mm !important; /* 2.5" from page right edge */
+  margin-right: 63.9mm !important; /* adjusted for 88.5mm width */
   margin-bottom: 12pt !important; /* Single-space after */
 }
 
@@ -97,10 +97,10 @@
   /* Final Draft standard: 27 characters per line including parentheses */
   /* 27 chars ÷ 10 chars/inch = 2.7 inches = 68.58mm width */
   /* !important needed to override Tailwind prose styles */
-  width: 68.58mm !important; /* 2.7 inches = 27 chars at 10 cpi */
-  max-width: 68.58mm !important;
+  width: 65mm !important; /* ~246px for 27 chars with letter-spacing */
+  max-width: 65mm !important;
   margin-left: 35.75mm !important; /* ~2.9" from page left edge */
-  margin-right: 86.25mm !important; /* adjusted for 66mm width */
+  margin-right: 89.83mm !important; /* adjusted for 65mm width */
   font-style: normal; /* NOT italic - standard screenplay format */
   margin-top: 0 !important; /* No space before (follows character/dialogue immediately) */
   margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */
