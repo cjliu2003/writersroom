@@ -66,7 +66,8 @@
       "Bash(npx jest --testPathPattern=\"text-metrics\" --no-coverage)",
       "Bash(npx jest --testPathPatterns=\"text-metrics\" --no-coverage)",
       "Bash(pip3 show:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "mcp__playwright__browser_snapshot"
     ],
     "deny": [],
     "ask": []

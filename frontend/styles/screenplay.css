@@ -34,8 +34,13 @@
   margin-bottom: 12pt !important; /* Single-space after */
 }
 
-/* First element on page should not have top margin */
-/* Target element immediately after pagination container (which follows the header decorations) */
+/* First element on each page should not have top margin.
+ * [data-rm-pagination] is inserted by PaginationPlus at position 0 with side: -1,
+ * AFTER .rm-first-page-header (side: -2). So this rule targets:
+ * - Page 1: The first content element (scene heading, action, etc.)
+ * - Pages 2+: The first content element after each page break
+ * Without this, scene headings would add 24pt (32px) margin pushing content down.
+ */
 .screenplay-editor [data-rm-pagination] + * {
   margin-top: 0 !important;
 }

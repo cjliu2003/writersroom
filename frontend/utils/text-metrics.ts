@@ -155,6 +155,8 @@ export function calculateElementLines(
   const textLength = text.length;
   const textLines = textLength > 0 ? Math.ceil(textLength / maxCols) : 0;
 
+  console.log('[LineCount]', { type: elementType, text: text.slice(0, 30), baseLines, textLines, total: baseLines + textLines });
+
   return baseLines + textLines;
 }
 

@@ -496,6 +496,13 @@ export function ScriptEditorWithCollaboration({
     const { element, attributes, children } = props;
     const screenplayElement = element as ScreenplayElement;
 
+    // Check if this element is at a page break or is the first element
+    const path = ReactEditor.findPath(editor, element);
+    const elementIndex = path[0];
+    const isAtPageBreak = pageBreaks.includes(elementIndex);
+    // First element on page 1 should have no top margin (container padding provides it)
+    const isFirstElement = elementIndex === 0;
+
     const baseStyles: React.CSSProperties = {
       fontFamily: 'Courier, monospace',
       fontSize: '12pt',
@@ -504,165 +511,182 @@ export function ScriptEditorWithCollaboration({
       wordWrap: 'break-word',
     };
 
+    // Page break component - adds spacing to jump from current page to next page
+    // Page boxes are rendered separately (absolutely positioned), so this just handles content flow
+    // Spacing: bottom margin (1in) + gap (2rem) + top margin (1in) = 2in + 2rem
+    const pageBreakElement = isAtPageBreak ? (
+      <div
+        contentEditable={false}
+        style={{
+          userSelect: 'none',
+          // Total spacing to align content with next page box
+          height: 'calc(2in + 2rem)',
+          // No background - the page boxes handle visuals
+        }}
+      />
+    ) : null;
+
     switch (screenplayElement.type) {
       case 'scene_heading':
+        // baseLines=2: 24px marginTop matches 2 lines of spacing
         return (
-          <div
-            {...attributes}
-            className="font-bold uppercase text-black"
-            style={{
-              ...baseStyles,
-              marginTop: '24px',
-              marginBottom: '12px',
-            }}
-          >
-            {children}
-          </div>
+          <>
+                        {pageBreakElement}
+            <div
+              {...attributes}
+              className="font-bold uppercase text-black"
+              style={{
+                ...baseStyles,
+                marginTop: (isAtPageBreak || isFirstElement) ? '0' : '24px',
+                marginBottom: '12px',
+              }}
+            >
+              {children}
+            </div>
+          </>
         );
 
       case 'action':
+        // baseLines=1: no extra top margin needed
         return (
-          <div
-            {...attributes}
-            className="text-black"
-            style={{
-              ...baseStyles,
-              marginBottom: '12px',
-              width: '100%',
-            }}
-          >
-            {children}
-          </div>
+          <>
+                        {pageBreakElement}
+            <div
+              {...attributes}
+              className="text-black"
+              style={{
+                ...baseStyles,
+                marginTop: (isAtPageBreak || isFirstElement) ? '0' : undefined,
+                marginBottom: '12px',
+                width: '100%',
+              }}
+            >
+              {children}
+            </div>
+          </>
         );
 
       case 'character':
+        // baseLines=2: 24px marginTop matches 2 lines of spacing (synced with pagination)
         return (
-          <div
-            {...attributes}
-            className="uppercase text-black"
-            style={{
-              ...baseStyles,
-              textAlign: 'left',
-              marginLeft: '220px',
-              marginTop: '12px',
-              marginBottom: '0px',
-            }}
-          >
-            {children}
-          </div>
+          <>
+                        {pageBreakElement}
+            <div
+              {...attributes}
+              className="uppercase text-black"
+              style={{
+                ...baseStyles,
+                textAlign: 'left',
+                marginLeft: '220px',
+                marginTop: (isAtPageBreak || isFirstElement) ? '0' : '24px',
+                marginBottom: '0px',
+              }}
+            >
+              {children}
+            </div>
+          </>
         );
 
       case 'parenthetical':
+        // baseLines=1: no extra top margin needed
         return (
-          <div
-            {...attributes}
-            className="text-black"
-            style={{
-              ...baseStyles,
-              textAlign: 'left',
-              marginLeft: '160px',
-              marginBottom: '0px',
-            }}
-          >
-            <span>(</span>{children}<span>)</span>
-          </div>
+          <>
+                        {pageBreakElement}
+            <div
+              {...attributes}
+              className="text-black"
+              style={{
+                ...baseStyles,
+                textAlign: 'left',
+                marginLeft: '160px',
+                marginTop: (isAtPageBreak || isFirstElement) ? '0' : undefined,
+                marginBottom: '0px',
+              }}
+            >
+              <span>(</span>{children}<span>)</span>
+            </div>
+          </>
         );
 
       case 'dialogue':
+        // baseLines=1: no extra top margin needed
         return (
-          <div
-            {...attributes}
-            className="text-black"
-            style={{
-              ...baseStyles,
-              marginLeft: screenplayElement.isDualDialogue ? '100px' : '100px',
-              marginRight: screenplayElement.isDualDialogue ? '100px' : '150px',
-              marginBottom: '12px',
-              maxWidth: '350px',
-              wordWrap: 'break-word',
-            }}
-          >
-            {children}
-          </div>
+          <>
+                        {pageBreakElement}
+            <div
+              {...attributes}
+              className="text-black"
+              style={{
+                ...baseStyles,
+                marginLeft: screenplayElement.isDualDialogue ? '100px' : '100px',
+                marginRight: screenplayElement.isDualDialogue ? '100px' : '150px',
+                marginTop: (isAtPageBreak || isFirstElement) ? '0' : undefined,
+                marginBottom: '12px',
+                maxWidth: '350px',
+                wordWrap: 'break-word',
+              }}
+            >
+              {children}
+            </div>
+          </>
         );
 
       case 'transition':
+        // baseLines=2: 24px marginTop matches 2 lines of spacing (synced with pagination)
         return (
-          <div
-            {...attributes}
-            className="uppercase text-black"
-            style={{
-              ...baseStyles,
-              textAlign: 'right',
-              marginTop: '12px',
-              marginBottom: '24px',
-            }}
-          >
-            {children}
-          </div>
+          <>
+                        {pageBreakElement}
+            <div
+              {...attributes}
+              className="uppercase text-black"
+              style={{
+                ...baseStyles,
+                textAlign: 'right',
+                marginTop: (isAtPageBreak || isFirstElement) ? '0' : '24px',
+                marginBottom: '24px',
+              }}
+            >
+              {children}
+            </div>
+          </>
         );
 
       case 'shot':
+        // baseLines=1: 12px marginTop is close to 1 line of spacing
         return (
-          <div
-            {...attributes}
-            className="uppercase text-black"
-            style={{
-              ...baseStyles,
-              marginTop: '12px',
-              marginBottom: '6px',
-            }}
-          >
-            {children}
-          </div>
+          <>
+                        {pageBreakElement}
+            <div
+              {...attributes}
+              className="uppercase text-black"
+              style={{
+                ...baseStyles,
+                marginTop: (isAtPageBreak || isFirstElement) ? '0' : '12px',
+                marginBottom: '6px',
+              }}
+            >
+              {children}
+            </div>
+          </>
         );
 
       default:
+        // baseLines=1: no extra top margin needed
         return (
-          <div {...attributes} style={baseStyles}>
-            {children}
-          </div>
+          <>
+                        {pageBreakElement}
+            <div {...attributes} style={{...baseStyles, marginTop: (isAtPageBreak || isFirstElement) ? '0' : undefined}}>
+              {children}
+            </div>
+          </>
         );
     }
-  }, []);
+  }, [editor, pageBreaks]);
 
-  // Render text leaf (for formatting like bold, italic, and page breaks)
+  // Render text leaf (for formatting like bold, italic)
+  // Note: Page breaks are now handled in renderElement for proper margin control
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     let { attributes, children, leaf } = props;
-
-    // Handle page break decorations (Phase 2.1 - Simple separator)
-    if ('pageBreak' in leaf && leaf.pageBreak) {
-      return (
-        <span {...attributes}>
-          {/* Full-viewport-width separator - simple and consistent */}
-          <div
-            className="page-break-separator"
-            contentEditable={false}
-            style={{
-              display: 'block',
-              width: '100vw',  // Full viewport width
-              height: '2rem',  // Spacing between pages
-              background: '#f3f4f6',  // Match outer container (gray-100)
-              position: 'relative',
-              left: '50%',
-              right: '50%',
-              marginLeft: '-50vw',  // Offset to left edge of viewport
-              marginRight: '-50vw',  // Offset to right edge of viewport
-              userSelect: 'none',
-            }}
-          />
-          {/* Top margin for new page */}
-          <div
-            contentEditable={false}
-            style={{
-              height: '1in',  // Match paddingTop to create consistent page start
-              userSelect: 'none',
-            }}
-          />
-          {children}
-        </span>
-      );
-    }
 
     // Handle text formatting (existing)
     if (leaf.bold) {
@@ -735,19 +759,39 @@ export function ScriptEditorWithCollaboration({
       {/* Sync status indicator */}
       {renderSyncStatus()}
 
-      {/* Simple white container - Phase 2.2: Decoration-based pagination */}
+      {/* Scroll container with gray background */}
       <div className="flex-1 overflow-auto py-8 px-4 bg-gray-100">
+        {/* Page container - relative positioning for absolute page boxes */}
         <div className="screenplay-container" style={{
           width: '8.5in',
-          minHeight: '11in',
           margin: '0 auto',
-          background: 'white',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #e5e7eb',
+          position: 'relative',
+          // Total height: all pages + gaps between them
+          minHeight: `calc(${totalPages} * 11in + ${Math.max(0, totalPages - 1)} * 2rem)`,
         }}>
+          {/* Fixed-height page boxes - absolutely positioned */}
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                top: `calc(${i} * (11in + 2rem))`,
+                left: 0,
+                width: '8.5in',
+                height: '11in',
+                background: 'white',
+                border: '1px solid #e5e7eb',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px rgba(0, 0, 0, 0.05)',
+                boxSizing: 'border-box',
+              }}
+            />
+          ))}
+
+          {/* Content wrapper - flows on top of page boxes */}
           <div style={{
-            padding: '1in 1in 1in 1.5in',
-            paddingTop: '1in',
+            position: 'relative',
+            zIndex: 1,
+            padding: '1in 1in 0 1.5in',
             fontFamily: '"Courier Prime", Courier, monospace',
             fontSize: '12pt',
             lineHeight: '12pt',

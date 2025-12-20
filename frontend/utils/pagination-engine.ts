@@ -13,9 +13,10 @@ import { Node, Element, Path } from 'slate';
 import { TextMetrics, calculateElementLines, hashString } from './text-metrics';
 
 /**
- * Industry standard: 55 lines per screenplay page
+ * Lines per screenplay page - tuned to match Final Draft output
+ * Standard is 55, but adjusted to 58 to account for margin rendering
  */
-export const LINES_PER_PAGE = 55;
+export const LINES_PER_PAGE = 58;
 
 /**
  * Page break decoration interface for Slate

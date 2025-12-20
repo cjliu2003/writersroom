@@ -258,29 +258,30 @@ export default function TestTipTapPage() {
       ] : []),
       // Pagination
       PaginationPlus.configure({
-        // geometry - override PAGE_SIZES.LETTER with correct US Letter @ 96 DPI
-        ...PAGE_SIZES.LETTER,
-        pageHeight: 960,           // Adjusted for Final Draft match
-        // chrome between pages
+        // US Letter at 96 DPI
+        pageHeight: 1056,            // 11" × 96 DPI
+        pageWidth: 816,              // 8.5" × 96 DPI
+
+        // Gap between pages in editor view
         pageGap: 24,
         pageGapBorderSize: 1,
         pageBreakBackground: '#f1f3f5',
 
-        // header/footer (set to 0 if you don't want page numbers)
-        pageHeaderHeight: 48,    // ~0.5in @ 96 DPI
+        // Header: page number sits 0.5" from top edge
+        pageHeaderHeight: 48,        // 0.5" × 96 DPI
         pageFooterHeight: 0,
         headerLeft: '',
         headerRight: '<span class="rm-page-number"></span>.',
         footerLeft: '',
         footerRight: '',
-      
-        // screenplay margins (in px)
-        marginTop: 48,           // Standard gap between header and content
-        marginBottom: 96,        // 1.0in
-        marginLeft: 144,         // 1.5in
-        marginRight: 96,         // 1.0in
 
-        // extra padding inside content area (keep 0)
+        // Margins: headerHeight + marginTop = 1" from page top to content
+        marginTop: 48,               // 48 + 48 (header) = 96px = 1"
+        marginBottom: 96,            // 1" × 96 DPI
+        marginLeft: 144,             // 1.5" × 96 DPI
+        marginRight: 96,             // 1" × 96 DPI
+
+        // No extra content padding
         contentMarginTop: 0,
         contentMarginBottom: 0,
       }),
@@ -303,10 +304,8 @@ export default function TestTipTapPage() {
       .rm-with-pagination { counter-reset: page-number 1 !important; }
 
       /* Hide first page header content (number and dot) but keep spacing */
-      /* Higher specificity (0-3-0) to override plugin's (0-2-0) rule */
       .rm-with-pagination.screenplay-editor .rm-first-page-header {
         visibility: hidden !important;
-        margin-top: 45px !important;  /* Tuned to match Final Draft top margin */
       }
     `;
     document.head.appendChild(style);
