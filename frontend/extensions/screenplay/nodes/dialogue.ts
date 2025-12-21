@@ -33,29 +33,41 @@ export const Dialogue = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      // Tab: Dialogue → Parenthetical (add wryly, beat, etc.)
+      // Tab: Dialogue → Parenthetical (add wryly, beat, etc.) - only if empty
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
         const node = $from.parent;
+        const isEmpty = node.textContent.trim().length === 0;
 
         // Only handle Tab if we're actually in a dialogue block
         if (node.type.name !== this.name) {
           return false; // Let other handlers process this
         }
 
-        const nextType = getNextElementType(this.name);
-        return this.editor.commands.setNode(nextType);
+        // Only change block type if empty - otherwise do nothing
+        if (!isEmpty) {
+          return false;
+        }
+
+        // Use setParenthetical to get automatic () insertion
+        return this.editor.commands.setParenthetical();
       },
 
-      // Shift-Tab: Dialogue → Character (go back to who's speaking)
+      // Shift-Tab: Dialogue → Character (go back to who's speaking) - only if empty
       'Shift-Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
         const node = $from.parent;
+        const isEmpty = node.textContent.trim().length === 0;
 
         // Only handle Shift-Tab if we're actually in a dialogue block
         if (node.type.name !== this.name) {
+          return false;
+        }
+
+        // Only change block type if empty - otherwise do nothing
+        if (!isEmpty) {
           return false;
         }
 

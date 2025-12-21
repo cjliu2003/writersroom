@@ -91,6 +91,36 @@ export function TipTapBlockTypeDropdown({ editor, className = '' }: TipTapBlockT
   const handleTypeChange = useCallback((type: TipTapBlockType) => {
     if (!editor) return
 
+    const { $from } = editor.state.selection
+    const currentNode = $from.parent
+    const currentType = currentNode.type.name
+
+    // When leaving parenthetical, strip the parentheses first
+    if (currentType === 'parenthetical' && type !== 'parenthetical') {
+      const textContent = currentNode.textContent
+      const hasParens = textContent.startsWith('(') && textContent.endsWith(')')
+      if (hasParens && textContent.length > 2) {
+        // Strip parentheses and set new type
+        const innerContent = textContent.slice(1, -1)
+        editor.chain()
+          .focus()
+          .command(({ tr, state, dispatch }) => {
+            const range = state.selection.$from.blockRange()
+            if (!range) return false
+            // Delete all content
+            tr.delete(range.start + 1, range.end - 1)
+            // Insert content without parens
+            tr.insertText(innerContent, range.start + 1)
+            if (dispatch) dispatch(tr)
+            return true
+          })
+          .setNode(type)
+          .run()
+        setIsOpen(false)
+        return
+      }
+    }
+
     // Use the appropriate command for each type
     switch (type) {
       case 'sceneHeading':
@@ -169,7 +199,7 @@ export function TipTapBlockTypeDropdown({ editor, className = '' }: TipTapBlockT
 
             {/* Help text */}
             <div className="px-3 py-2 text-[10px] text-gray-400 bg-gray-50/50">
-              <span className="tracking-wide">Tab to cycle • Enter for smart transition</span>
+              <span className="tracking-wide">Tab cycles (empty blocks) • Enter for smart transition</span>
             </div>
           </div>
         </>

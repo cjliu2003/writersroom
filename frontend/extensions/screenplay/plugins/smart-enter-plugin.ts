@@ -46,6 +46,21 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
         return null;
       }
 
+      // Check if this is a true Enter (split) by verifying the document GAINED nodes
+      // setNode operations change node type but keep the same node count
+      // Enter operations split a node, increasing the total count
+      const oldNodeCount = oldState.doc.childCount;
+      const newNodeCount = newState.doc.childCount;
+      const gainedNodes = newNodeCount > oldNodeCount;
+
+      console.log('[SmartEnter] Node count check:', { oldNodeCount, newNodeCount, gainedNodes });
+
+      // Only proceed if we gained nodes (true Enter/split)
+      if (!gainedNodes) {
+        console.log('[SmartEnter] Skipping - no new nodes (likely setNode from Tab)');
+        return null;
+      }
+
       // Check if this looks like an Enter press (node split)
       // Handle both 'replace' and 'replaceAround' step types
       const hasSplit = transactions.some(transaction => {
@@ -105,11 +120,20 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
           // Only transform if:
           // 1. Previous node has a transition defined
           // 2. Current node is either 'paragraph' (StarterKit default) OR a screenplay type that needs changing
-          // 3. Current node is empty (newly created by Enter press)
+          // 3. Current node is empty (newly created by Enter press) OR is a parenthetical remnant
           // 4. Current node type is different from the desired transition type
           const needsTransform = currentType !== transitionType;
           const isDefaultOrScreenplay = currentType === 'paragraph' || currentType === prevType;
-          const shouldTransform = transitionType && isDefaultOrScreenplay && needsTransform && currentNode.content.size === 0;
+          const currentContent = currentNode.textContent;
+          const isEmpty = currentNode.content.size === 0;
+
+          // Special case: when splitting a parenthetical, the closing ")" may end up in the new node
+          // We should still transform and clean up the stray parenthesis
+          const isParentheticalRemnant = prevType === 'parenthetical' &&
+            currentType === 'parenthetical' &&
+            (currentContent === ')' || currentContent.trim() === ')');
+
+          const shouldTransform = transitionType && isDefaultOrScreenplay && needsTransform && (isEmpty || isParentheticalRemnant);
 
           console.log('[SmartEnter] Should transform?', {
             hasTransition: !!transitionType,
@@ -117,7 +141,8 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
             transitionType,
             needsTransform,
             isDefaultOrScreenplay,
-            isEmpty: currentNode.content.size === 0,
+            isEmpty,
+            isParentheticalRemnant,
             shouldTransform
           });
 
@@ -126,7 +151,22 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
 
             if (nextNodeType) {
               console.log('[SmartEnter] Applying transformation:', prevType, '→', transitionType);
-              // Transform the current (newly created empty) node to the transition type
+
+              // If this is a parenthetical remnant with just ")", move it back to the previous node
+              if (isParentheticalRemnant) {
+                // First, delete the ")" from the current node
+                const nodeStart = pos + 1; // After node opening
+                const nodeEnd = pos + 1 + currentNode.content.size; // Before node closing
+                tr.delete(nodeStart, nodeEnd);
+
+                // Then, insert ")" at the end of the previous node (before its closing tag)
+                const prevNodeEnd = pos - 1; // Position just before previous node's closing
+                tr.insertText(')', prevNodeEnd);
+
+                console.log('[SmartEnter] Moved ")" back to parenthetical');
+              }
+
+              // Transform the current node to the transition type
               tr.setNodeMarkup(pos, nextNodeType);
               modified = true;
             } else {

@@ -39,19 +39,21 @@ export const Action = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      // Tab: Smart detection for scene headings, otherwise Action → Character
+      // Tab: Smart detection for scene headings, otherwise Action → Character (only if empty)
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
         const node = $from.parent;
         const text = node.textContent;
         const textUpper = text.toUpperCase().trim();
+        const isEmpty = text.trim().length === 0;
 
         console.log('[Action Tab] Handler triggered', {
           nodeType: node.type.name,
           thisName: this.name,
           text,
           textUpper,
+          isEmpty,
           isSceneHeadingMatch: /^(INT|EXT|I\/E)$/i.test(textUpper),
         });
 
@@ -75,20 +77,32 @@ export const Action = Node.create({
           return result;
         }
 
-        // Default behavior: Action → Character
-        console.log('[Action Tab] Default behavior: converting to Character');
+        // Only change block type if empty - otherwise do nothing
+        if (!isEmpty) {
+          console.log('[Action Tab] Block has text, ignoring Tab');
+          return false;
+        }
+
+        // Default behavior: Action → Character (only when empty)
+        console.log('[Action Tab] Empty block, converting to Character');
         const nextType = getNextElementType(this.name);
         return this.editor.commands.setNode(nextType);
       },
 
-      // Shift-Tab: Action → Dialogue (go back to speech)
+      // Shift-Tab: Action → Dialogue (go back to speech) - only if empty
       'Shift-Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
         const node = $from.parent;
+        const isEmpty = node.textContent.trim().length === 0;
 
         // Only handle Shift-Tab if we're in action or paragraph
         if (node.type.name !== this.name && node.type.name !== 'paragraph') {
+          return false;
+        }
+
+        // Only change block type if empty - otherwise do nothing
+        if (!isEmpty) {
           return false;
         }
 

@@ -71,7 +71,8 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
       "WebFetch(domain:kb.finaldraft.com)",
-      "mcp__playwright__browser_console_messages"
+      "mcp__playwright__browser_console_messages",
+      "Bash(sips:*)"
     ],
     "deny": [],
     "ask": []

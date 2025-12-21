@@ -36,29 +36,41 @@ export const Transition = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      // Tab: Transition → Scene Heading (start new scene)
+      // Tab: Transition → Scene Heading (start new scene) - only if empty
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
         const node = $from.parent;
+        const isEmpty = node.textContent.trim().length === 0;
 
         // Only handle Tab if we're actually in a transition block
         if (node.type.name !== this.name) {
           return false; // Let other handlers process this
         }
 
+        // Only change block type if empty - otherwise do nothing
+        if (!isEmpty) {
+          return false;
+        }
+
         const nextType = getNextElementType(this.name);
         return this.editor.commands.setNode(nextType);
       },
 
-      // Shift-Tab: Transition → Action (go back to scene description)
+      // Shift-Tab: Transition → Action (go back to scene description) - only if empty
       'Shift-Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
         const node = $from.parent;
+        const isEmpty = node.textContent.trim().length === 0;
 
         // Only handle Shift-Tab if we're actually in a transition block
         if (node.type.name !== this.name) {
+          return false;
+        }
+
+        // Only change block type if empty - otherwise do nothing
+        if (!isEmpty) {
           return false;
         }
 
