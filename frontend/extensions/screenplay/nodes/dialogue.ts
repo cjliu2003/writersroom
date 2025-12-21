@@ -7,6 +7,7 @@
 
 import { Node, mergeAttributes } from '@tiptap/core';
 import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
+import { createAutoCapitalizeRules } from '../utils/auto-capitalize';
 
 export const Dialogue = Node.create({
   name: 'dialogue',
@@ -73,5 +74,9 @@ export const Dialogue = Node.create({
         return commands.setNode(this.name);
       },
     };
+  },
+
+  addInputRules() {
+    return createAutoCapitalizeRules();
   },
 });

@@ -12,6 +12,7 @@
 
 import { Node, mergeAttributes } from '@tiptap/core';
 import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
+import { createAutoCapitalizeRules } from '../utils/auto-capitalize';
 
 export const Action = Node.create({
   name: 'action',
@@ -106,5 +107,9 @@ export const Action = Node.create({
         return commands.setNode(this.name);
       },
     };
+  },
+
+  addInputRules() {
+    return createAutoCapitalizeRules();
   },
 });

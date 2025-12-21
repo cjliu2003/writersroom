@@ -12,6 +12,7 @@
 import { Node, mergeAttributes, CommandProps } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
+import { createAutoCapitalizeRules } from '../utils/auto-capitalize';
 
 // Declare the custom command type
 declare module '@tiptap/core' {
@@ -134,5 +135,9 @@ export const Parenthetical = Node.create({
         }
       },
     };
+  },
+
+  addInputRules() {
+    return createAutoCapitalizeRules();
   },
 });
