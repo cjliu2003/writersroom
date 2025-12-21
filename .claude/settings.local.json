@@ -67,7 +67,11 @@
       "Bash(npx jest --testPathPatterns=\"text-metrics\" --no-coverage)",
       "Bash(pip3 show:*)",
       "Bash(grep:*)",
-      "mcp__playwright__browser_snapshot"
+      "mcp__playwright__browser_snapshot",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "WebFetch(domain:kb.finaldraft.com)",
+      "mcp__playwright__browser_console_messages"
     ],
     "deny": [],
     "ask": []

@@ -37,11 +37,21 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
 
       console.log('[SmartEnter] appendTransaction called');
 
+      // Filter out Yjs sync/undo transactions - only process user-initiated transactions
+      const hasUserTransaction = transactions.some(tr =>
+        !tr.getMeta('y-sync$') && !tr.getMeta('y-undo$') && tr.getMeta('addToHistory') !== false
+      );
+      if (!hasUserTransaction) {
+        console.log('[SmartEnter] Skipping - Yjs sync/undo transaction');
+        return null;
+      }
+
       // Check if this looks like an Enter press (node split)
+      // Handle both 'replace' and 'replaceAround' step types
       const hasSplit = transactions.some(transaction => {
         return transaction.docChanged && transaction.steps.some(step => {
           const stepJSON = step.toJSON();
-          return stepJSON.stepType === 'replace' && stepJSON.slice;
+          return (stepJSON.stepType === 'replace' || stepJSON.stepType === 'replaceAround') && stepJSON.slice;
         });
       });
 
@@ -62,12 +72,19 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
         nodeContent: currentNode.textContent
       });
 
-      // Check if there's a previous node
-      if (pos > 1) {
+      // Check if there's a previous node using nodeBefore (actual sibling, not parent)
+      if (pos > 0) {
         try {
-          // Resolve position before the current node to get the previous node
-          const $prevPos = newState.doc.resolve(pos - 1);
-          const prevNode = $prevPos.parent;
+          // Use nodeBefore to get the actual preceding sibling node
+          const $beforePos = newState.doc.resolve(pos);
+          const prevNode = $beforePos.nodeBefore;
+
+          // If no previous sibling, skip transformation
+          if (!prevNode) {
+            console.log('[SmartEnter] No previous sibling node found');
+            return null;
+          }
+
           const prevType = prevNode.type.name;
 
           console.log('[SmartEnter] Previous node:', {
@@ -87,13 +104,19 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
 
           // Only transform if:
           // 1. Previous node has a transition defined
-          // 2. Current node is 'paragraph' (default node created by Enter in StarterKit)
+          // 2. Current node is either 'paragraph' (StarterKit default) OR a screenplay type that needs changing
           // 3. Current node is empty (newly created by Enter press)
-          const shouldTransform = transitionType && currentType === 'paragraph' && currentNode.content.size === 0;
+          // 4. Current node type is different from the desired transition type
+          const needsTransform = currentType !== transitionType;
+          const isDefaultOrScreenplay = currentType === 'paragraph' || currentType === prevType;
+          const shouldTransform = transitionType && isDefaultOrScreenplay && needsTransform && currentNode.content.size === 0;
 
           console.log('[SmartEnter] Should transform?', {
             hasTransition: !!transitionType,
-            isParagraph: currentType === 'paragraph',
+            currentType,
+            transitionType,
+            needsTransform,
+            isDefaultOrScreenplay,
             isEmpty: currentNode.content.size === 0,
             shouldTransform
           });
@@ -115,7 +138,7 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
           console.warn('[SmartEnter] Failed to resolve previous node:', err);
         }
       } else {
-        console.log('[SmartEnter] Skipped - pos <= 1');
+        console.log('[SmartEnter] Skipped - pos <= 0 (at document start)');
       }
 
       console.log('[SmartEnter] Modified:', modified);

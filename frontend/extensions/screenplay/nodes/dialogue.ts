@@ -6,7 +6,7 @@
  */
 
 import { Node, mergeAttributes } from '@tiptap/core';
-import { getNextElementType } from '../utils/keyboard-navigation';
+import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
 
 export const Dialogue = Node.create({
   name: 'dialogue',
@@ -32,10 +32,34 @@ export const Dialogue = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      // Tab cycles to next element type
+      // Tab: Dialogue → Parenthetical (add wryly, beat, etc.)
       'Tab': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle Tab if we're actually in a dialogue block
+        if (node.type.name !== this.name) {
+          return false; // Let other handlers process this
+        }
+
         const nextType = getNextElementType(this.name);
         return this.editor.commands.setNode(nextType);
+      },
+
+      // Shift-Tab: Dialogue → Character (go back to who's speaking)
+      'Shift-Tab': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle Shift-Tab if we're actually in a dialogue block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        const prevType = getPreviousElementType(this.name);
+        return this.editor.commands.setNode(prevType);
       },
 
       // Cmd/Ctrl+Alt+4: Direct shortcut to Dialogue

@@ -34,11 +34,15 @@ export const ELEMENT_CYCLE: ScreenplayElementType[] = [
 
 /**
  * Smart Enter transition map
+ *
+ * Defines what element type to create when pressing Enter at the end of each element.
+ * Matches Final Draft behavior for natural screenplay writing flow.
  */
 export const SMART_ENTER_TRANSITIONS: ElementTransitionMap = {
-  'sceneHeading': 'action',
-  'character': 'dialogue',
-  'parenthetical': 'dialogue',
-  'transition': 'sceneHeading',
-  // 'action' and 'dialogue' use default Enter behavior
+  'sceneHeading': 'action',      // Scene heading → describe what happens
+  'action': 'action',            // Action continues as action
+  'character': 'dialogue',       // Character name → their words
+  'dialogue': 'action',          // Dialogue ends → back to action
+  'parenthetical': 'dialogue',   // Direction → back to speech
+  'transition': 'sceneHeading',  // CUT TO: → next scene
 };

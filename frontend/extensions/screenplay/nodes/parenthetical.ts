@@ -11,7 +11,7 @@
 
 import { Node, mergeAttributes, CommandProps } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
-import { getNextElementType } from '../utils/keyboard-navigation';
+import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
 
 // Declare the custom command type
 declare module '@tiptap/core' {
@@ -46,10 +46,34 @@ export const Parenthetical = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      // Tab cycles to next element type
+      // Tab: Parenthetical → Dialogue (back to speech after direction)
       'Tab': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle Tab if we're actually in a parenthetical block
+        if (node.type.name !== this.name) {
+          return false; // Let other handlers process this
+        }
+
         const nextType = getNextElementType(this.name);
         return this.editor.commands.setNode(nextType);
+      },
+
+      // Shift-Tab: Parenthetical → Character (go back to character name)
+      'Shift-Tab': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle Shift-Tab if we're actually in a parenthetical block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        const prevType = getPreviousElementType(this.name);
+        return this.editor.commands.setNode(prevType);
       },
 
       // Cmd/Ctrl+Alt+5: Direct shortcut to Parenthetical

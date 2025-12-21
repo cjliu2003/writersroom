@@ -7,7 +7,7 @@
  */
 
 import { Node, mergeAttributes } from '@tiptap/core';
-import { getNextElementType } from '../utils/keyboard-navigation';
+import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
 
 export const Character = Node.create({
   name: 'character',
@@ -33,10 +33,37 @@ export const Character = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      // Tab cycles to next element type
+      // Tab: Character behavior depends on content (Final Draft style)
+      // - Empty character → Transition (changed mind, want transition instead)
+      // - Character with text → Parenthetical (add direction before dialogue)
       'Tab': () => {
-        const nextType = getNextElementType(this.name);
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle Tab if we're actually in a character block
+        if (node.type.name !== this.name) {
+          return false; // Let other handlers process this
+        }
+
+        const isEmpty = node.textContent.trim().length === 0;
+        const nextType = getNextElementType(this.name, isEmpty);
         return this.editor.commands.setNode(nextType);
+      },
+
+      // Shift-Tab: Character → Action (go back to scene description)
+      'Shift-Tab': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle Shift-Tab if we're actually in a character block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        const prevType = getPreviousElementType(this.name);
+        return this.editor.commands.setNode(prevType);
       },
 
       // Cmd/Ctrl+Alt+3: Direct shortcut to Character

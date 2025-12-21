@@ -39,6 +39,7 @@ import ProcessingScreen from '@/components/ProcessingScreen';
 import { ShareDialog } from '@/components/share-dialog';
 import { EditMenuDropdown } from '@/components/edit-menu-dropdown';
 import { FileMenuDropdown } from '@/components/file-menu-dropdown';
+import { TipTapBlockTypeDropdown } from '@/components/tiptap-block-type-dropdown';
 import { Button } from '@/components/ui/button';
 import { Home, Share2, Download, ChevronUp, ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -235,11 +236,15 @@ export default function TestTipTapPage() {
   // Initialize TipTap editor with screenplay extensions + collaboration + pagination
   const editor = useEditor({
     extensions: [
-      // Configure StarterKit to disable conflicting extensions
+      // Screenplay formatting FIRST - ensures screenplay keyboard handlers take precedence
+      ScreenplayKit.configure({
+        enableSmartPageBreaks: false,
+      }),
+      // StarterKit AFTER screenplay - disable conflicting extensions
       StarterKit.configure({
-        history: false, // Yjs provides undo/redo
-        heading: false, // ScreenplayKit provides scene headings
-        // Note: paragraph is kept enabled as a fallback and for compatibility with pagination
+        history: false,    // Yjs provides undo/redo
+        heading: false,    // ScreenplayKit provides scene headings
+        // Note: paragraph kept enabled for schema compatibility; Action handlers check for it
       }),
       // Collaboration
       ...(doc ? [
@@ -284,10 +289,6 @@ export default function TestTipTapPage() {
         // No extra content padding
         contentMarginTop: 0,
         contentMarginBottom: 0,
-      }),
-      // Screenplay formatting extensions
-      ScreenplayKit.configure({
-        enableSmartPageBreaks: false,  // Enable smart page breaks
       }),
     ],
     editorProps: {
@@ -693,6 +694,10 @@ export default function TestTipTapPage() {
                 scriptTitle={script?.title}
               />
               <EditMenuDropdown editor={editor} />
+              {/* Separator */}
+              <div className="w-px h-5 bg-gray-200 mx-1" />
+              {/* Block Type Selector */}
+              <TipTapBlockTypeDropdown editor={editor} />
             </div>
 
           {/* Center - Script Title (absolutely centered on page, click to edit) */}

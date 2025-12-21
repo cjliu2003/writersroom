@@ -8,7 +8,7 @@
  */
 
 import { Node, mergeAttributes } from '@tiptap/core';
-import { getNextElementType } from '../utils/keyboard-navigation';
+import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
 
 export const Transition = Node.create({
   name: 'transition',
@@ -36,10 +36,34 @@ export const Transition = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      // Tab cycles to next element type
+      // Tab: Transition → Scene Heading (start new scene)
       'Tab': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle Tab if we're actually in a transition block
+        if (node.type.name !== this.name) {
+          return false; // Let other handlers process this
+        }
+
         const nextType = getNextElementType(this.name);
         return this.editor.commands.setNode(nextType);
+      },
+
+      // Shift-Tab: Transition → Action (go back to scene description)
+      'Shift-Tab': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle Shift-Tab if we're actually in a transition block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        const prevType = getPreviousElementType(this.name);
+        return this.editor.commands.setNode(prevType);
       },
 
       // Cmd/Ctrl+Alt+6: Direct shortcut to Transition
