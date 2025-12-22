@@ -36,6 +36,34 @@ export const Transition = Node.create({
 
   addKeyboardShortcuts() {
     return {
+      // Enter: Only works at the END of text - creates new Scene Heading block
+      // In the middle of text, Enter does nothing (Final Draft behavior)
+      'Enter': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle if we're in a transition block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        // Check if cursor is at the very end of the node content
+        const isAtEnd = $from.parentOffset === node.content.size;
+
+        if (!isAtEnd) {
+          // Block Enter in the middle of transition
+          return true;
+        }
+
+        // At end: insert new Scene Heading block after this node
+        const endOfNode = $from.after();
+        return this.editor.chain()
+          .insertContentAt(endOfNode, { type: 'sceneHeading' })
+          .focus(endOfNode + 1)
+          .run();
+      },
+
       // Tab: Transition → Scene Heading (start new scene) - only if empty
       'Tab': () => {
         const { state } = this.editor;

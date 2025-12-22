@@ -50,6 +50,7 @@
 .screenplay-editor [data-type="action"] {
   margin-left: 0 !important; /* Flush with left margin */
   max-width: none !important;
+  margin-top: 12pt !important; /* Single-space before (matches Character for seamless Tab switching) */
   margin-bottom: 12pt !important; /* Single-space after */
   /* line-height inherited from .screenplay-editor */
 }
@@ -81,6 +82,14 @@
   margin-left: 25.4mm !important; /* 2.5" from page left edge */
   margin-right: 64.068mm !important; /* adjusted for 88.332mm width */
   margin-bottom: 12pt !important; /* Single-space after */
+}
+
+/* Dialogue followed by more dialogue (multi-paragraph speech) should have no bottom margin */
+.screenplay-editor .screenplay-dialogue:has(+ .screenplay-dialogue),
+.screenplay-editor .screenplay-dialogue:has(+ [data-type="dialogue"]),
+.screenplay-editor [data-type="dialogue"]:has(+ .screenplay-dialogue),
+.screenplay-editor [data-type="dialogue"]:has(+ [data-type="dialogue"]) {
+  margin-bottom: 0 !important;
 }
 
 /* Dialogue followed by parenthetical should have no bottom margin */
@@ -117,12 +126,17 @@
   max-width: none !important;
   margin-top: 12pt !important; /* Single-space before */
   margin-bottom: 12pt !important; /* Single-space after */
+  position: relative;
+  padding-right: 0.6em; /* Space for the colon */
 }
 
-/* Auto-add colon to transitions */
+/* Auto-add colon to transitions - absolutely positioned to stay after text */
 .screenplay-editor .screenplay-transition::after,
 .screenplay-editor [data-type="transition"]::after {
   content: ':';
+  position: absolute;
+  right: 0;
+  top: 0; /* Pin to first line even when empty */
 }
 
 /* Collaboration Cursor Styling (preserve from POC) */

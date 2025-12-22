@@ -60,6 +60,42 @@ export const Parenthetical = Node.create({
 
   addKeyboardShortcuts() {
     return {
+      // Enter: Only works just before closing ")" or at end - creates new Dialogue block
+      // In the middle of parenthetical text, Enter does nothing (Final Draft behavior)
+      'Enter': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle if we're in a parenthetical block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        const text = node.textContent;
+        const cursorPos = $from.parentOffset;
+        const contentSize = node.content.size;
+
+        // Check if cursor is at the very end of content
+        const isAtEnd = cursorPos === contentSize;
+
+        // Check if cursor is just before the closing ")"
+        // e.g., "(beat|)" where | is cursor - cursorPos would be contentSize - 1
+        const isBeforeClosingParen = text.endsWith(')') && cursorPos === contentSize - 1;
+
+        if (!isAtEnd && !isBeforeClosingParen) {
+          // Block Enter in the middle of parenthetical
+          return true;
+        }
+
+        // At end or before ")": insert new Dialogue block after this node
+        const endOfNode = $from.after();
+        return this.editor.chain()
+          .insertContentAt(endOfNode, { type: 'dialogue' })
+          .focus(endOfNode + 1)
+          .run();
+      },
+
       // Tab: Parenthetical → Dialogue (back to speech after direction) - only if empty
       'Tab': () => {
         const { state } = this.editor;

@@ -42,6 +42,34 @@ export const SceneHeading = Node.create({
 
   addKeyboardShortcuts() {
     return {
+      // Enter: Only works at the END of text - creates new Action block
+      // In the middle of text, Enter does nothing (Final Draft behavior)
+      'Enter': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle if we're in a scene heading
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        // Check if cursor is at the very end of the node content
+        const isAtEnd = $from.parentOffset === node.content.size;
+
+        if (!isAtEnd) {
+          // Block Enter in the middle of scene heading
+          return true;
+        }
+
+        // At end: insert new Action block after this node
+        const endOfNode = $from.after();
+        return this.editor.chain()
+          .insertContentAt(endOfNode, { type: 'action' })
+          .focus(endOfNode + 1)
+          .run();
+      },
+
       // Tab: Build scene heading structure (NEVER changes element type)
       'Tab': () => {
         const { state } = this.editor;
@@ -62,11 +90,9 @@ export const SceneHeading = Node.create({
         const nodeStart = $from.start();
         const nodeEnd = $from.end();
 
-        // STEP 1: Empty → default to "INT. "
+        // STEP 1: Empty → convert to Action (cycle to next element type)
         if (textUpper === '') {
-          return this.editor.chain()
-            .insertContentAt({ from: nodeStart, to: nodeEnd }, 'INT. ')
-            .run();
+          return this.editor.commands.setNode('action');
         }
 
         // STEP 2: Partial or complete prefix without period

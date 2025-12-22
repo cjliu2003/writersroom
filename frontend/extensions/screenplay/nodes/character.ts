@@ -33,6 +33,34 @@ export const Character = Node.create({
 
   addKeyboardShortcuts() {
     return {
+      // Enter: Only works at the END of text - creates new Dialogue block
+      // In the middle of text, Enter does nothing (Final Draft behavior)
+      'Enter': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle if we're in a character block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        // Check if cursor is at the very end of the node content
+        const isAtEnd = $from.parentOffset === node.content.size;
+
+        if (!isAtEnd) {
+          // Block Enter in the middle of character name
+          return true;
+        }
+
+        // At end: insert new Dialogue block after this node
+        const endOfNode = $from.after();
+        return this.editor.chain()
+          .insertContentAt(endOfNode, { type: 'dialogue' })
+          .focus(endOfNode + 1)
+          .run();
+      },
+
       // Tab: Only works when empty - converts to Transition
       // (If block has text, Tab does nothing to preserve content)
       'Tab': () => {

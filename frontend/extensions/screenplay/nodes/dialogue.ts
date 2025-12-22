@@ -33,6 +33,34 @@ export const Dialogue = Node.create({
 
   addKeyboardShortcuts() {
     return {
+      // Enter: At END creates new Action block, in MIDDLE allows split (new dialogue paragraph)
+      // This matches Final Draft behavior for continuing long speeches
+      'Enter': () => {
+        const { state } = this.editor;
+        const { $from } = state.selection;
+        const node = $from.parent;
+
+        // Only handle if we're in a dialogue block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        // Check if cursor is at the very end of the node content
+        const isAtEnd = $from.parentOffset === node.content.size;
+
+        if (!isAtEnd) {
+          // In middle: allow default split behavior (creates new dialogue paragraph)
+          return false;
+        }
+
+        // At end: insert new Action block after this node
+        const endOfNode = $from.after();
+        return this.editor.chain()
+          .insertContentAt(endOfNode, { type: 'action' })
+          .focus(endOfNode + 1)
+          .run();
+      },
+
       // Tab: Dialogue → Parenthetical (add wryly, beat, etc.) - only if empty
       'Tab': () => {
         const { state } = this.editor;
