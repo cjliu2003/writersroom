@@ -210,53 +210,29 @@ export function AIChatbot({
 
   if (!isVisible) return null
 
-  // Collapsed state - subtle tab that matches the expanded header
+  // Collapsed state - minimal circle button
   if (isCollapsed) {
-    // Position-specific styling for collapsed tab
-    const collapsedStyles = {
-      bottom: {
-        container: "flex justify-start",
-        button: "flex items-center gap-2 bg-slate-50/95 hover:bg-slate-100 text-slate-500 hover:text-slate-700 border border-slate-200/80 border-b-0 rounded-t-lg px-4 py-2 transition-all duration-200 shadow-lg shadow-black/10 hover:shadow-xl backdrop-blur-sm",
-      },
-      left: {
-        container: "flex flex-col justify-end h-full pb-4",
-        button: "flex items-center gap-1.5 bg-slate-50/95 hover:bg-slate-100 text-slate-500 hover:text-slate-700 border border-slate-200/80 border-l-0 rounded-r-lg px-2 py-3 transition-all duration-200 shadow-lg shadow-black/10 hover:shadow-xl backdrop-blur-sm",
-      },
-      right: {
-        container: "flex flex-col justify-end h-full pb-4",
-        button: "flex items-center gap-1.5 bg-slate-50/95 hover:bg-slate-100 text-slate-500 hover:text-slate-700 border border-slate-200/80 border-r-0 rounded-l-lg px-2 py-3 transition-all duration-200 shadow-lg shadow-black/10 hover:shadow-xl backdrop-blur-sm",
-      }
-    }
-
-    const styles = collapsedStyles[position]
-
-    // Text faces outward toward screen edge:
-    // LEFT: vertical-lr → characters face LEFT (outward), reads bottom-to-top
-    // RIGHT: vertical-rl → characters face RIGHT (outward), reads top-to-bottom
-    const getWritingMode = () => {
-      if (position === 'left') return 'vertical-lr'
-      if (position === 'right') return 'vertical-rl'
-      return undefined
-    }
-
-    const isVertical = position === 'left' || position === 'right'
-
     return (
-      <div className={styles.container}>
-        <button
-          onClick={onCollapseToggle}
-          className={styles.button}
-          style={{
-            fontFamily: "var(--font-courier-prime), 'Courier New', monospace",
-            writingMode: getWritingMode(),
-            textOrientation: isVertical ? 'mixed' : undefined
-          }}
-          title="Open The Room"
-        >
-          <Sparkles className="w-3 h-3 text-purple-500" />
-          <span className="text-[9px] uppercase tracking-widest font-medium">The Room</span>
-        </button>
-      </div>
+      <button
+        onClick={onCollapseToggle}
+        className="
+          group
+          w-11 h-11
+          flex items-center justify-center
+          bg-white/90 backdrop-blur-sm
+          border border-gray-200/80
+          rounded-full
+          shadow-md
+          transition-all duration-200 ease-out
+          hover:shadow-lg hover:shadow-purple-500/20
+          hover:border-purple-300
+          hover:scale-105
+          active:scale-95
+        "
+        title="Open The Room"
+      >
+        <Sparkles className="w-5 h-5 text-purple-500 group-hover:text-purple-600 transition-colors" />
+      </button>
     )
   }
 
@@ -292,15 +268,15 @@ export function AIChatbot({
   // Expanded state - popup chat interface
   return (
     <div
-      className={`h-full flex flex-col bg-slate-50/95 border border-slate-200/80 shadow-2xl shadow-black/15 backdrop-blur-sm overflow-hidden ${panelStyles.container}`}
+      className={`h-full flex flex-col bg-gray-50/95 border border-gray-200/80 shadow-2xl shadow-black/15 backdrop-blur-sm overflow-hidden ${panelStyles.container}`}
       style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
       onClick={handlePanelClick}
     >
       {/* Header - Compact */}
-      <div className={`h-8 min-h-[32px] border-b border-slate-200/60 bg-gradient-to-r from-slate-100/90 to-purple-50/40 px-3 flex items-center justify-between ${panelStyles.header}`}>
+      <div className={`h-8 min-h-[32px] border-b border-gray-200/60 bg-gradient-to-r from-gray-100/90 to-purple-50/40 px-3 flex items-center justify-between ${panelStyles.header}`}>
         <div className="flex items-center gap-1.5">
           <Sparkles className="w-3 h-3 text-purple-500" />
-          <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium">The Room</span>
+          <span className="text-[10px] text-gray-600 uppercase tracking-widest font-medium">The Room</span>
         </div>
 
         <div className="flex items-center gap-0.5">
@@ -310,7 +286,7 @@ export function AIChatbot({
               variant="ghost"
               size="sm"
               onClick={() => setShowClearConfirm(true)}
-              className="text-slate-400 hover:text-red-500 hover:bg-red-50/80 rounded p-0.5"
+              className="text-gray-400 hover:text-red-500 hover:bg-red-50/80 rounded p-0.5"
               title="Clear chat"
               disabled={isLoading}
             >
@@ -320,7 +296,7 @@ export function AIChatbot({
           {/* Clear confirmation */}
           {showClearConfirm && (
             <div className="flex items-center gap-1 text-[9px]">
-              <span className="text-slate-500">Clear?</span>
+              <span className="text-gray-500">Clear?</span>
               <button
                 onClick={clearChat}
                 className="text-red-500 hover:text-red-700 font-medium px-1"
@@ -329,7 +305,7 @@ export function AIChatbot({
               </button>
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className="text-slate-500 hover:text-slate-700 px-1"
+                className="text-gray-500 hover:text-gray-700 px-1"
               >
                 No
               </button>
@@ -346,7 +322,7 @@ export function AIChatbot({
                 const nextIndex = (currentIndex + 1) % positions.length;
                 onPositionChange(positions[nextIndex]);
               }}
-              className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 rounded p-0.5"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-200/60 rounded p-0.5"
               title={`Move to ${position === 'bottom' ? 'right' : position === 'right' ? 'left' : 'bottom'}`}
             >
               {position === 'bottom' ? (
@@ -364,7 +340,7 @@ export function AIChatbot({
               variant="ghost"
               size="sm"
               onClick={onCollapseToggle}
-              className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 rounded p-0.5 -mr-1"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-200/60 rounded p-0.5 -mr-1"
               title="Minimize"
             >
               <CollapseIcon className="w-3.5 h-3.5" />
@@ -380,14 +356,14 @@ export function AIChatbot({
             {messages.length === 0 ? (
               <div className="py-8 text-center">
                 <Sparkles className="w-5 h-5 text-purple-300 mx-auto mb-3" />
-                <p className="text-[11pt] text-slate-500 leading-relaxed">
+                <p className="text-[11pt] text-gray-500 leading-relaxed">
                   {scriptTitle ? (
-                    <>Let&apos;s talk about <span className="text-slate-600 font-medium">{scriptTitle.toUpperCase()}</span>...</>
+                    <>Let&apos;s talk about <span className="text-gray-600 font-medium">{scriptTitle.toUpperCase()}</span>...</>
                   ) : (
                     <>Let&apos;s talk about your screenplay...</>
                   )}
                 </p>
-                <p className="text-[9pt] text-slate-400 mt-2">
+                <p className="text-[9pt] text-gray-400 mt-2">
                   Ask about characters, plot, structure, or anything else
                 </p>
               </div>
@@ -402,7 +378,7 @@ export function AIChatbot({
                     className={`max-w-[85%] text-[11pt] leading-[16pt] px-3.5 py-2 ${
                       message.role === 'user'
                         ? 'bg-purple-600 text-white rounded-2xl rounded-br-md shadow-sm'
-                        : 'bg-white text-slate-700 border border-slate-200/80 rounded-2xl rounded-bl-md shadow-sm'
+                        : 'bg-white text-gray-700 border border-gray-200/80 rounded-2xl rounded-bl-md shadow-sm'
                     }`}
                   >
                     <p className="whitespace-pre-wrap m-0">{message.content}</p>
@@ -413,14 +389,14 @@ export function AIChatbot({
 
             {isLoading && (
               <div className="flex justify-start animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
-                <div className="bg-white text-slate-500 border border-slate-200/80 rounded-2xl rounded-bl-md shadow-sm px-4 py-3">
+                <div className="bg-white text-gray-500 border border-gray-200/80 rounded-2xl rounded-bl-md shadow-sm px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1">
                       <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                       <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
                       <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                     </div>
-                    <span className="text-[10pt] text-slate-400">{statusMessage || 'Thinking...'}</span>
+                    <span className="text-[10pt] text-gray-400">{statusMessage || 'Thinking...'}</span>
                   </div>
                 </div>
               </div>
@@ -430,8 +406,8 @@ export function AIChatbot({
       </div>
 
       {/* Input */}
-      <div className="border-t border-slate-200/60 bg-slate-100/80 p-3">
-        <div className="flex items-center gap-2 bg-white rounded-xl border border-slate-200/80 px-3 py-2.5 shadow-sm">
+      <div className="border-t border-gray-200/60 bg-gray-100/80 p-3">
+        <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-200/80 px-3 py-2.5 shadow-sm">
           <textarea
             ref={inputRef}
             value={inputValue}
@@ -440,7 +416,7 @@ export function AIChatbot({
             placeholder={getPlaceholder()}
             disabled={!projectId}
             rows={1}
-            className="flex-1 bg-transparent text-[11pt] text-slate-700 placeholder-slate-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none leading-[20px] min-h-[20px] py-0"
+            className="flex-1 bg-transparent text-[11pt] text-gray-700 placeholder-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none leading-[20px] min-h-[20px] py-0"
             style={{ fontFamily: "inherit", fieldSizing: "content" } as React.CSSProperties}
           />
           <Button
@@ -450,7 +426,7 @@ export function AIChatbot({
             className={`p-1.5 rounded-lg transition-all duration-150 flex-shrink-0 ${
               inputValue.trim() && projectId && !isLoading
                 ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
-                : 'bg-slate-100 text-slate-400'
+                : 'bg-gray-100 text-gray-400'
             }`}
           >
             {isLoading ? (

@@ -270,7 +270,7 @@ export default function TestTipTapPage() {
         // Gap between pages in editor view
         pageGap: 24,
         pageGapBorderSize: 1,
-        pageBreakBackground: '#f1f3f5',
+        pageBreakBackground: '#e0e2e6',
 
         // Header: page number sits 0.5" from top edge
         pageHeaderHeight: 48,        // 0.5" × 96 DPI
@@ -690,7 +690,7 @@ export default function TestTipTapPage() {
         mode="open"
       />
 
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-[#e0e2e6]">
         {/* Fixed Top Header - Compact Screenplay Style (collapsible) */}
       {!isTopBarCollapsed && (
         <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-300 bg-white shadow-sm transition-all duration-200" style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}>
@@ -951,24 +951,32 @@ export default function TestTipTapPage() {
       <div
         className="fixed z-30"
         style={
-          chatPosition === 'bottom'
-            ? isChatCollapsed
+          isChatCollapsed
+            ? chatPosition === 'left'
               ? {
-                  // Collapsed: anchor to left side
-                  bottom: 0,
-                  left: '24px',
+                  // Collapsed left: floating circle on left side
+                  bottom: '24px',
+                  left: '16px',
                   width: 'auto',
                   height: 'auto',
                 }
               : {
-                  // Expanded: centered
-                  bottom: 0,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: `${chatBottomWidth}px`,
-                  maxWidth: '95vw',
-                  height: `${chatHeight}px`,
+                  // Collapsed bottom/right: floating circle on right side
+                  bottom: '24px',
+                  right: '16px',
+                  width: 'auto',
+                  height: 'auto',
                 }
+            : chatPosition === 'bottom'
+            ? {
+                // Expanded bottom: centered
+                bottom: 0,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: `${chatBottomWidth}px`,
+                maxWidth: '95vw',
+                height: `${chatHeight}px`,
+              }
             : chatPosition === 'left'
             ? {
                 left: 0,
@@ -976,7 +984,7 @@ export default function TestTipTapPage() {
                   ? (isSceneNavCollapsed ? '0' : '44px')
                   : (isSceneNavCollapsed ? '48px' : '92px'),
                 bottom: 0,
-                width: isChatCollapsed ? 'auto' : `${chatWidth}px`,
+                width: `${chatWidth}px`,
               }
             : {
                 // right position
@@ -985,7 +993,7 @@ export default function TestTipTapPage() {
                   ? (isSceneNavCollapsed ? '0' : '44px')
                   : (isSceneNavCollapsed ? '48px' : '92px'),
                 bottom: 0,
-                width: isChatCollapsed ? 'auto' : `${chatWidth}px`,
+                width: `${chatWidth}px`,
               }
         }
       >
@@ -1043,7 +1051,7 @@ export default function TestTipTapPage() {
       {/* Custom Styles for Screenplay Editor */}
       <style jsx global>{`
         :root {
-          --app-chrome-bg: #f1f3f5;
+          --app-chrome-bg: #e0e2e6;
         }
 
         .screenplay-editor-wrapper {
@@ -1056,7 +1064,11 @@ export default function TestTipTapPage() {
 
         .rm-with-pagination .page {
           background: #fff;
-          box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+          box-shadow:
+            0 2px 4px rgba(0,0,0,.1),
+            0 8px 16px rgba(0,0,0,.12),
+            0 16px 32px rgba(0,0,0,.14),
+            0 24px 48px rgba(0,0,0,.08);
         }
 
         .screenplay-editor .ProseMirror {
