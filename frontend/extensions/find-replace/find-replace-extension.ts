@@ -14,6 +14,7 @@ import {
   dispatchFindReplaceAction,
   getFindReplaceState,
 } from './find-replace-plugin';
+import { preserveCase } from './find-replace-utils';
 
 export interface FindReplaceOptions {
   // Future options can be added here
@@ -139,31 +140,53 @@ export const FindReplaceExtension = Extension.create<FindReplaceOptions>({
 
       findNext:
         () =>
-        ({ view, state }) => {
+        ({ tr, dispatch, state, view }) => {
           const pluginState = getFindReplaceState(state);
           if (!pluginState || pluginState.matches.length === 0) {
             return false;
           }
 
-          // Calculate the new index BEFORE dispatching (same logic as getNextMatchIndex)
+          // Calculate the new index
           const { currentIndex, matches } = pluginState;
           let newIndex = currentIndex === -1 ? 0 : currentIndex + 1;
           if (newIndex >= matches.length) newIndex = 0;
 
-          // Update plugin state
-          dispatchFindReplaceAction(view, { type: 'nextMatch' });
-
-          // Scroll to the match using our pre-calculated index
           const match = matches[newIndex];
-          if (match) {
-            // Use setTimeout to ensure state is updated before scrolling
-            setTimeout(() => {
-              const tr = view.state.tr.setSelection(
-                TextSelection.near(view.state.doc.resolve(match.from))
-              );
-              tr.scrollIntoView();
-              view.dispatch(tr);
-            }, 0);
+          if (!match) {
+            return false;
+          }
+
+          if (dispatch) {
+            // Single transaction: update plugin state + set selection + scroll
+            const newTr = tr
+              .setMeta(FindReplacePluginKey, { type: 'nextMatch' })
+              .setSelection(TextSelection.near(state.doc.resolve(match.from)))
+              .scrollIntoView();
+            dispatch(newTr);
+
+            // After dispatch, manually scroll with offset for fixed headers
+            requestAnimationFrame(() => {
+              try {
+                const domAtPos = view.domAtPos(match.from);
+                if (domAtPos?.node) {
+                  const element = domAtPos.node instanceof Element
+                    ? domAtPos.node
+                    : domAtPos.node.parentElement;
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }
+              } catch (e) {
+                // Fallback: use coordinates-based scroll
+                const coords = view.coordsAtPos(match.from);
+                if (coords) {
+                  window.scrollTo({
+                    top: window.scrollY + coords.top - 150,
+                    behavior: 'smooth'
+                  });
+                }
+              }
+            });
           }
 
           return true;
@@ -171,30 +194,53 @@ export const FindReplaceExtension = Extension.create<FindReplaceOptions>({
 
       findPrevious:
         () =>
-        ({ view, state }) => {
+        ({ tr, dispatch, state, view }) => {
           const pluginState = getFindReplaceState(state);
           if (!pluginState || pluginState.matches.length === 0) {
             return false;
           }
 
-          // Calculate the new index BEFORE dispatching (same logic as getNextMatchIndex)
+          // Calculate the new index
           const { currentIndex, matches } = pluginState;
           let newIndex = currentIndex === -1 ? matches.length - 1 : currentIndex - 1;
           if (newIndex < 0) newIndex = matches.length - 1;
 
-          // Update plugin state
-          dispatchFindReplaceAction(view, { type: 'previousMatch' });
-
-          // Scroll to the match using our pre-calculated index
           const match = matches[newIndex];
-          if (match) {
-            setTimeout(() => {
-              const tr = view.state.tr.setSelection(
-                TextSelection.near(view.state.doc.resolve(match.from))
-              );
-              tr.scrollIntoView();
-              view.dispatch(tr);
-            }, 0);
+          if (!match) {
+            return false;
+          }
+
+          if (dispatch) {
+            // Single transaction: update plugin state + set selection + scroll
+            const newTr = tr
+              .setMeta(FindReplacePluginKey, { type: 'previousMatch' })
+              .setSelection(TextSelection.near(state.doc.resolve(match.from)))
+              .scrollIntoView();
+            dispatch(newTr);
+
+            // After dispatch, manually scroll with offset for fixed headers
+            requestAnimationFrame(() => {
+              try {
+                const domAtPos = view.domAtPos(match.from);
+                if (domAtPos?.node) {
+                  const element = domAtPos.node instanceof Element
+                    ? domAtPos.node
+                    : domAtPos.node.parentElement;
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }
+              } catch (e) {
+                // Fallback: use coordinates-based scroll
+                const coords = view.coordsAtPos(match.from);
+                if (coords) {
+                  window.scrollTo({
+                    top: window.scrollY + coords.top - 150,
+                    behavior: 'smooth'
+                  });
+                }
+              }
+            });
           }
 
           return true;
@@ -228,7 +274,9 @@ export const FindReplaceExtension = Extension.create<FindReplaceOptions>({
             // Chain off the provided tr - do NOT create new transaction
             let newTr = tr.delete(match.from, match.to);
             if (pluginState.replaceText !== '') {
-              newTr = newTr.insertText(pluginState.replaceText, match.from);
+              // Preserve the capitalization pattern of the original match
+              const adjustedReplacement = preserveCase(match.text, pluginState.replaceText);
+              newTr = newTr.insertText(adjustedReplacement, match.from);
             }
             // Add meta action to trigger plugin state refresh
             newTr = newTr.setMeta(FindReplacePluginKey, { type: 'replace' });
@@ -278,7 +326,9 @@ export const FindReplaceExtension = Extension.create<FindReplaceOptions>({
             for (const match of sortedMatches) {
               newTr = newTr.delete(match.from, match.to);
               if (replaceText !== '') {
-                newTr = newTr.insertText(replaceText, match.from);
+                // Preserve the capitalization pattern of each individual match
+                const adjustedReplacement = preserveCase(match.text, replaceText);
+                newTr = newTr.insertText(adjustedReplacement, match.from);
               }
             }
 

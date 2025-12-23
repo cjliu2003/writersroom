@@ -942,7 +942,11 @@ export default function TestTipTapPage() {
                 <div className="relative">
                   <EditorContent editor={editor} className="screenplay-editor" />
                   <SmartTypePopup editor={editor} />
-                  <FindReplacePopup editor={editor} />
+                  <FindReplacePopup
+                    editor={editor}
+                    isTopBarCollapsed={isTopBarCollapsed}
+                    isSceneNavCollapsed={isSceneNavCollapsed}
+                  />
                 </div>
               </div>
             </div>

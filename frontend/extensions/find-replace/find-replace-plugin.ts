@@ -36,6 +36,8 @@ export interface FindReplaceState {
   options: SearchOptions;
   /** Decoration set for highlighting */
   decorations: DecorationSet;
+  /** Increments when focus should be triggered (for re-focusing on repeated shortcut) */
+  focusTrigger: number;
 }
 
 /**
@@ -49,6 +51,7 @@ const INITIAL_STATE: Omit<FindReplaceState, 'decorations'> = {
   matches: [],
   currentIndex: -1,
   options: DEFAULT_SEARCH_OPTIONS,
+  focusTrigger: 0,
 };
 
 /**
@@ -168,6 +171,8 @@ export function createFindReplacePlugin(): Plugin<FindReplaceState> {
               matches,
               currentIndex,
               decorations,
+              // Increment focusTrigger to signal the popup to refocus the input
+              focusTrigger: prev.focusTrigger + 1,
             };
           }
 

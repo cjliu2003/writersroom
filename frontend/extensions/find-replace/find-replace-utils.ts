@@ -179,3 +179,45 @@ export function findClosestMatchIndex(
 export function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+/**
+ * Preserve the capitalization pattern of the original text in the replacement
+ *
+ * Detects three patterns:
+ * - ALL CAPS: "HELLO" → replacement becomes "GOODBYE"
+ * - Title Case: "Hello" → replacement becomes "Goodbye"
+ * - lowercase/other: "hello" → replacement stays as-is
+ *
+ * @param originalText - The matched text with its original capitalization
+ * @param replacementText - The replacement text to adjust
+ * @returns Replacement text with capitalization matching the original pattern
+ */
+export function preserveCase(originalText: string, replacementText: string): string {
+  // Empty strings or single character edge cases
+  if (!originalText || !replacementText) {
+    return replacementText;
+  }
+
+  // Check if original is ALL CAPS (and has at least one letter)
+  const hasLetters = /[a-zA-Z]/.test(originalText);
+  if (hasLetters && originalText === originalText.toUpperCase()) {
+    return replacementText.toUpperCase();
+  }
+
+  // Check if original is Title Case (first letter uppercase, rest lowercase)
+  // Only apply if the original has more than one character
+  if (
+    originalText.length > 0 &&
+    originalText[0] === originalText[0].toUpperCase() &&
+    originalText[0] !== originalText[0].toLowerCase() // Ensure first char is a letter
+  ) {
+    // Check if rest of string is lowercase (for true title case)
+    const rest = originalText.slice(1);
+    if (rest === rest.toLowerCase()) {
+      return replacementText.charAt(0).toUpperCase() + replacementText.slice(1).toLowerCase();
+    }
+  }
+
+  // Default: return replacement as-is (preserves user's intended casing)
+  return replacementText;
+}

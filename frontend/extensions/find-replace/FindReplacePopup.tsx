@@ -14,14 +14,31 @@ import { ChevronUp, ChevronDown, X, ALargeSmall } from 'lucide-react';
 
 interface FindReplacePopupProps {
   editor: Editor | null;
+  isTopBarCollapsed?: boolean;
+  isSceneNavCollapsed?: boolean;
 }
 
-export function FindReplacePopup({ editor }: FindReplacePopupProps) {
+export function FindReplacePopup({
+  editor,
+  isTopBarCollapsed = false,
+  isSceneNavCollapsed = false
+}: FindReplacePopupProps) {
   const [state, setState] = useState<FindReplaceState | null>(null);
   const [localQuery, setLocalQuery] = useState('');
   const [localReplaceText, setLocalReplaceText] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
+
+  // Calculate top position based on toolbar/nav bar state
+  // Top bar: 48px, Scene nav: 44px
+  const topPosition = isTopBarCollapsed
+    ? (isSceneNavCollapsed ? 28 : 72)   // below top edge, or below scene nav
+    : (isSceneNavCollapsed ? 76 : 120); // below top bar, or below both
+
+  // Calculate right position based on scene nav state
+  // When scene nav is expanded, shift closer to right edge
+  // When collapsed, move slightly away from edge to avoid floating button
+  const rightPosition = isSceneNavCollapsed ? 56 : 16;
 
   // Subscribe to Find/Replace plugin state changes
   useEffect(() => {
@@ -53,13 +70,13 @@ export function FindReplacePopup({ editor }: FindReplacePopupProps) {
     };
   }, [editor]);
 
-  // Focus search input when panel opens
+  // Focus search input when panel opens or when shortcut is pressed again
   useEffect(() => {
     if (state?.isOpen && searchInputRef.current) {
       searchInputRef.current.focus();
       searchInputRef.current.select();
     }
-  }, [state?.isOpen]);
+  }, [state?.isOpen, state?.focusTrigger]);
 
   // Handle search input change
   const handleSearchChange = useCallback(
@@ -168,11 +185,10 @@ export function FindReplacePopup({ editor }: FindReplacePopupProps) {
 
   return (
     <div
-      className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg"
+      className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-[top,right] duration-200"
       style={{
-        top: '120px',
-        right: '24px',
-        width: '300px',
+        top: `${topPosition}px`,
+        right: `${rightPosition}px`,
         fontFamily: "var(--font-courier-prime), 'Courier New', monospace",
       }}
       onMouseDown={(e) => {
@@ -185,7 +201,7 @@ export function FindReplacePopup({ editor }: FindReplacePopupProps) {
       <div className="p-2 space-y-1.5">
         {/* Find row */}
         <div className="flex items-center gap-1">
-          <div className="relative" style={{ width: '156px' }}>
+          <div className="relative" style={{ width: '130px' }}>
             <input
               ref={searchInputRef}
               type="text"
@@ -254,7 +270,7 @@ export function FindReplacePopup({ editor }: FindReplacePopupProps) {
             onKeyDown={handleReplaceKeyDown}
             placeholder="Replace"
             className="pl-2 pr-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            style={{ fontFamily: 'inherit', width: '156px' }}
+            style={{ fontFamily: 'inherit', width: '130px' }}
           />
           <button
             onClick={handleReplaceCurrent}
