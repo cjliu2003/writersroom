@@ -186,3 +186,15 @@
   padding-top: 2rem;
   page-break-after: always;
 }
+
+/* Find/Replace Match Highlighting */
+.screenplay-editor .find-match {
+  background-color: #fef08a; /* Yellow-200 */
+  border-radius: 2px;
+}
+
+.screenplay-editor .find-current-match {
+  background-color: #fb923c; /* Orange-400 */
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.5);
+}
