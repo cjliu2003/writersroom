@@ -697,7 +697,7 @@ export default function TestTipTapPage() {
         {/* Fixed Top Header - Compact Screenplay Style (collapsible) */}
       {!isTopBarCollapsed && (
         <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-300 bg-white shadow-sm transition-all duration-200" style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}>
-          <div className="relative px-4 flex items-center justify-between h-12">
+          <div className="relative px-4 flex items-center justify-between h-11">
             {/* Left - Collapse button + Home, File, Edit */}
             <div className="flex items-center">
               <Button
@@ -842,7 +842,7 @@ export default function TestTipTapPage() {
       {/* Scene Navigation Bar */}
       {!isSceneNavCollapsed && (
         <div
-          className={`fixed left-0 right-0 z-40 transition-all duration-200 ${isTopBarCollapsed ? 'top-0' : 'top-12'}`}
+          className={`fixed left-0 right-0 z-40 transition-all duration-200 ${isTopBarCollapsed ? 'top-0' : 'top-11'}`}
         >
           <SceneNavBar
             scenes={sceneBoundaries}
@@ -920,7 +920,7 @@ export default function TestTipTapPage() {
           position: 'fixed',
           top: isTopBarCollapsed
             ? (isSceneNavCollapsed ? '0' : '44px')
-            : (isSceneNavCollapsed ? '48px' : '92px'),
+            : (isSceneNavCollapsed ? '44px' : '88px'),
           left: chatPosition === 'left' && !isChatCollapsed ? `${chatWidth}px` : 0,
           right: chatPosition === 'right' && !isChatCollapsed ? `${chatWidth}px` : 0,
           bottom: chatPosition === 'bottom' && !isChatCollapsed ? `${chatHeight}px` : 0,
@@ -990,7 +990,7 @@ export default function TestTipTapPage() {
                 left: 0,
                 top: isTopBarCollapsed
                   ? (isSceneNavCollapsed ? '0' : '44px')
-                  : (isSceneNavCollapsed ? '48px' : '92px'),
+                  : (isSceneNavCollapsed ? '44px' : '88px'),
                 bottom: 0,
                 width: `${chatWidth}px`,
               }
@@ -999,7 +999,7 @@ export default function TestTipTapPage() {
                 right: 0,
                 top: isTopBarCollapsed
                   ? (isSceneNavCollapsed ? '0' : '44px')
-                  : (isSceneNavCollapsed ? '48px' : '92px'),
+                  : (isSceneNavCollapsed ? '44px' : '88px'),
                 bottom: 0,
                 width: `${chatWidth}px`,
               }

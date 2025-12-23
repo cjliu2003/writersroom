@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard } from 'lucide-react'
+import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard, Search } from 'lucide-react'
 import { Editor } from '@tiptap/react'
 
 interface EditMenuDropdownProps {
@@ -74,6 +74,16 @@ export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
       action: () => {
         editor?.commands.focus()
         editor?.commands.selectAll()
+      },
+      disabled: !editor,
+    },
+    { type: 'separator' as const },
+    {
+      label: 'Find & Replace',
+      icon: Search,
+      shortcut: '⌘F',
+      action: () => {
+        editor?.commands.openFind()
       },
       disabled: !editor,
     },
