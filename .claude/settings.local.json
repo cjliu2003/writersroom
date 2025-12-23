@@ -72,7 +72,12 @@
       "mcp__context7__get-library-docs",
       "WebFetch(domain:kb.finaldraft.com)",
       "mcp__playwright__browser_console_messages",
-      "Bash(sips:*)"
+      "Bash(sips:*)",
+      "WebFetch(domain:defkey.com)",
+      "WebFetch(domain:www.finaldraft.com)",
+      "Skill(sc:brainstorm)",
+      "Skill(sc:analyze)",
+      "Bash(node /tmp/test-prefix.js:*)"
     ],
     "deny": [],
     "ask": []

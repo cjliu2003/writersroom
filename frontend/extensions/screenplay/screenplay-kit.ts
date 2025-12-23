@@ -31,6 +31,9 @@ import { Transition } from './nodes/transition';
 import { SmartEnterPlugin } from './plugins/smart-enter-plugin';
 import { SmartBreaksPlugin } from './plugins/smart-breaks-plugin';
 
+// SmartType autocomplete
+import { SmartTypeExtension } from './smart-type';
+
 export interface ScreenplayKitOptions {
   /**
    * Enable/disable Smart Enter plugin for element transitions
@@ -43,6 +46,12 @@ export interface ScreenplayKitOptions {
    * @default false
    */
   enableSmartPageBreaks?: boolean;
+
+  /**
+   * Enable/disable SmartType autocomplete for characters and locations
+   * @default true
+   */
+  enableSmartType?: boolean;
 }
 
 // Valid screenplay element types for type checking
@@ -52,7 +61,9 @@ export const ScreenplayKit = Extension.create<ScreenplayKitOptions>({
   name: 'screenplayKit',
 
   addExtensions() {
-    return [
+    // Use any[] to allow mixing Node and Extension types
+    // TipTap's addExtensions() accepts any extension type
+    const extensions: any[] = [
       SceneHeading,
       Action,
       Character,
@@ -60,6 +71,13 @@ export const ScreenplayKit = Extension.create<ScreenplayKitOptions>({
       Parenthetical,
       Transition,
     ];
+
+    // Add SmartType if enabled (default: true)
+    if (this.options.enableSmartType !== false) {
+      extensions.push(SmartTypeExtension);
+    }
+
+    return extensions;
   },
 
   addKeyboardShortcuts() {
@@ -138,3 +156,7 @@ export { SceneHeading, Action, Character, Dialogue, Parenthetical, Transition };
 // Export types
 export type { ScreenplayElementType } from './types';
 export { ELEMENT_CYCLE, SMART_ENTER_TRANSITIONS } from './types';
+
+// Export SmartType for external use (popup component)
+export { SmartTypeExtension, SmartTypePopup, SmartTypePluginKey } from './smart-type';
+export type { SmartTypeState, SmartTypeOptions } from './smart-type';

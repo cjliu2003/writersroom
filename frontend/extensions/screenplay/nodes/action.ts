@@ -39,52 +39,24 @@ export const Action = Node.create({
 
   addKeyboardShortcuts() {
     return {
-      // Tab: Smart detection for scene headings, otherwise Action → Character (only if empty)
+      // Tab: Action → Character (only if empty)
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
         const node = $from.parent;
-        const text = node.textContent;
-        const textUpper = text.toUpperCase().trim();
-        const isEmpty = text.trim().length === 0;
-
-        console.log('[Action Tab] Handler triggered', {
-          nodeType: node.type.name,
-          thisName: this.name,
-          text,
-          textUpper,
-          isEmpty,
-          isSceneHeadingMatch: /^(INT|EXT|I\/E)$/i.test(textUpper),
-        });
+        const isEmpty = node.textContent.trim().length === 0;
 
         // Only handle Tab if we're in an action block OR a paragraph (default block type)
-        // Paragraphs are treated as action blocks since action is our default element
         if (node.type.name !== this.name && node.type.name !== 'paragraph') {
-          console.log('[Action Tab] Skipping - not action or paragraph, returning false');
           return false; // Let other handlers process this
-        }
-
-        // Detect scene heading prefix (INT, EXT, I/E)
-        // If found, convert to scene heading AND insert ". " in one step
-        if (/^(INT|EXT|I\/E)$/i.test(textUpper)) {
-          console.log('[Action Tab] Scene heading prefix detected, converting to sceneHeading');
-          const result = this.editor.chain()
-            .setTextSelection($from.end())
-            .setNode('sceneHeading')
-            .insertContent('. ')
-            .run();
-          console.log('[Action Tab] Chain result:', result);
-          return result;
         }
 
         // Only change block type if empty - otherwise do nothing
         if (!isEmpty) {
-          console.log('[Action Tab] Block has text, ignoring Tab');
           return false;
         }
 
-        // Default behavior: Action → Character (only when empty)
-        console.log('[Action Tab] Empty block, converting to Character');
+        // Empty action → Character
         const nextType = getNextElementType(this.name);
         return this.editor.commands.setNode(nextType);
       },

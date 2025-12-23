@@ -22,7 +22,7 @@ import * as Y from 'yjs';
 // @ts-ignore - pagination extension may not have types
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useAuth } from '@/contexts/AuthContext';
-import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
+import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
 import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
 import { getScriptContent, exportFDXFile, updateScript, type ScriptWithContent } from '@/lib/api';
@@ -916,7 +916,11 @@ export default function TestTipTapPage() {
           >
             <div className="screenplay-editor-wrapper min-h-screen pt-6">
               <div className="flex justify-center">
-                <EditorContent editor={editor} className="screenplay-editor" />
+                {/* Relative container for editor + SmartType popup */}
+                <div className="relative">
+                  <EditorContent editor={editor} className="screenplay-editor" />
+                  <SmartTypePopup editor={editor} />
+                </div>
               </div>
             </div>
           </div>

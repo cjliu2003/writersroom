@@ -70,7 +70,10 @@ export const SceneHeading = Node.create({
           .run();
       },
 
-      // Tab: Build scene heading structure (NEVER changes element type)
+      // Tab: Scene heading Tab behavior
+      // - Empty: convert to Action
+      // - With prefix + location: add dash separator for multi-segment headings
+      // - Prefix suggestions are handled by SmartType
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -84,46 +87,17 @@ export const SceneHeading = Node.create({
         const text = node.textContent;
         const textUpper = text.toUpperCase().trim();
 
-        console.log('[SceneHeading Tab]', { text, textUpper });
-
-        // Get node boundaries for reliable text replacement
-        const nodeStart = $from.start();
+        // Get node boundaries
         const nodeEnd = $from.end();
 
-        // STEP 1: Empty → convert to Action (cycle to next element type)
+        // Empty → convert to Action (cycle to next element type)
         if (textUpper === '') {
           return this.editor.commands.setNode('action');
         }
 
-        // STEP 2: Partial or complete prefix without period
-        // I, IN → INT.    |  E, EX → EXT.    |  I/ → I/E.    |  INT, EXT, I/E → add ". "
-        if (/^I$/i.test(textUpper) || /^IN$/i.test(textUpper)) {
-          return this.editor.chain()
-            .insertContentAt({ from: nodeStart, to: nodeEnd }, 'INT. ')
-            .run();
-        }
-        if (/^E$/i.test(textUpper) || /^EX$/i.test(textUpper)) {
-          return this.editor.chain()
-            .insertContentAt({ from: nodeStart, to: nodeEnd }, 'EXT. ')
-            .run();
-        }
-        if (/^I\/$/i.test(textUpper)) {
-          return this.editor.chain()
-            .insertContentAt({ from: nodeStart, to: nodeEnd }, 'I/E. ')
-            .run();
-        }
-        if (/^(INT|EXT|I\/E)$/i.test(textUpper)) {
-          // Preserve case, just add ". "
-          return this.editor.chain()
-            .setTextSelection(nodeEnd)
-            .insertContent('. ')
-            .run();
-        }
-
-        // STEP 3: Has "PREFIX." with content after → add dash separator
-        // This repeats as many times as user wants (for multi-segment headings)
-        // e.g., "INT. COFFEE SHOP - BACK ROOM - DAY"
-        const prefixMatch = textUpper.match(/^(INT|EXT|I\/E)\.\s*/i);
+        // Has "PREFIX." with content after → add dash separator
+        // This supports multi-segment headings: "INT. COFFEE SHOP - BACK ROOM - DAY"
+        const prefixMatch = textUpper.match(/^(INT|EXT|I\/E|INT\.?\/?EXT\.?|EXT\.?\/?INT\.?)\.\s*/i);
         if (prefixMatch) {
           const afterPrefix = textUpper.slice(prefixMatch[0].length);
 
@@ -138,9 +112,8 @@ export const SceneHeading = Node.create({
           }
         }
 
-        // STEP 4: Just "INT. " with no content yet - do nothing, wait for typing
-        console.log('[SceneHeading Tab] Waiting for content');
-        return true;
+        // Otherwise, let SmartType handle it or do nothing
+        return false;
       },
 
       // Shift-Tab: Go to previous element type (Transition)
