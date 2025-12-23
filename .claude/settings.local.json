@@ -77,7 +77,10 @@
       "WebFetch(domain:www.finaldraft.com)",
       "Skill(sc:brainstorm)",
       "Skill(sc:analyze)",
-      "Bash(node /tmp/test-prefix.js:*)"
+      "Bash(node /tmp/test-prefix.js:*)",
+      "Bash(mkdir:*)",
+      "Bash(playwright install chromium)",
+      "Bash(/Users/ltw/miniconda3/bin/python -m pip install:*)"
     ],
     "deny": [],
     "ask": []

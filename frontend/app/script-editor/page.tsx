@@ -25,7 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
 import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
-import { getScriptContent, exportFDXFile, updateScript, type ScriptWithContent } from '@/lib/api';
+import { getScriptContent, exportFDXFile, exportPDFFile, updateScript, type ScriptWithContent } from '@/lib/api';
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs, type ChatPosition } from '@/utils/layoutPrefs';
 import {
   extractSceneBoundariesFromTipTap,
@@ -41,7 +41,7 @@ import { EditMenuDropdown } from '@/components/edit-menu-dropdown';
 import { FileMenuDropdown } from '@/components/file-menu-dropdown';
 import { TipTapBlockTypeDropdown } from '@/components/tiptap-block-type-dropdown';
 import { Button } from '@/components/ui/button';
-import { Home, Share2, Download, ChevronUp, ChevronDown } from 'lucide-react';
+import { Home, Share2, ChevronUp, ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '@/styles/screenplay.css';
 
@@ -556,10 +556,38 @@ export default function TestTipTapPage() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      console.log('[TipTapEditor] Export successful');
+      console.log('[TipTapEditor] FDX export successful');
     } catch (e: any) {
       setExportError(e?.message || 'Export failed. Please try again.');
       console.error('[TipTapEditor] FDX export failed:', e);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Export PDF handler
+  const handleExportPDF = async () => {
+    if (!scriptId) {
+      setExportError('No script loaded.');
+      return;
+    }
+    setIsExporting(true);
+    setExportError(null);
+
+    try {
+      const blob = await exportPDFFile(scriptId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${script?.title || 'script'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      console.log('[TipTapEditor] PDF export successful');
+    } catch (e: any) {
+      setExportError(e?.message || 'PDF export failed. Please try again.');
+      console.error('[TipTapEditor] PDF export failed:', e);
     } finally {
       setIsExporting(false);
     }
@@ -678,18 +706,9 @@ export default function TestTipTapPage() {
               >
                 <ChevronUp className="w-3.5 h-3.5" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push("/")}
-                className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
-                style={{ fontFamily: "inherit" }}
-              >
-                <Home className="w-3.5 h-3.5 mr-1.5" />
-                Home
-              </Button>
               <FileMenuDropdown
-                onExport={handleExportFDX}
+                onExportFDX={handleExportFDX}
+                onExportPDF={handleExportPDF}
                 isExporting={isExporting}
                 scriptTitle={script?.title}
               />
@@ -766,13 +785,13 @@ export default function TestTipTapPage() {
             <Button
               variant="ghost"
               size="sm"
-              disabled={isExporting}
-              onClick={handleExportFDX}
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => router.push("/")}
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
               style={{ fontFamily: "inherit" }}
+              title="Go to home"
             >
-              <Download className="w-3.5 h-3.5 mr-1.5" />
-              {isExporting ? 'Exporting...' : 'Export'}
+              <Home className="w-3.5 h-3.5 mr-1.5" />
+              Home
             </Button>
           </div>
 
