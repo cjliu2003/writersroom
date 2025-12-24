@@ -83,7 +83,8 @@
       "Bash(/Users/ltw/miniconda3/bin/python -m pip install:*)",
       "Bash(npm install:*)",
       "mcp__chrome-devtools__list_pages",
-      "WebFetch(domain:discuss.yjs.dev)"
+      "WebFetch(domain:discuss.yjs.dev)",
+      "mcp__playwright__browser_wait_for"
     ],
     "deny": [],
     "ask": []

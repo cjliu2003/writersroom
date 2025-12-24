@@ -26,7 +26,9 @@ export const Action = Node.create({
   parseHTML() {
     return [
       { tag: 'p[data-type="action"]' },
-      { tag: 'p:not([data-type])' }, // Also parse plain <p> as action
+      // REMOVED: { tag: 'p:not([data-type])' }
+      // This catch-all was causing new scripts to display as action instead of sceneHeading
+      // Plain <p> tags now fall through to StarterKit's paragraph extension
     ];
   },
 

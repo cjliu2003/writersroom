@@ -25,6 +25,7 @@ import { yUndoPluginKey } from 'y-prosemirror';
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
+import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
 import { FindReplaceExtension, FindReplacePopup } from '@/extensions/find-replace';
 import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
@@ -243,12 +244,16 @@ export default function TestTipTapPage() {
   // Initialize TipTap editor with screenplay extensions + collaboration + pagination
   const editor = useEditor({
     extensions: [
-      // Screenplay formatting FIRST - ensures screenplay keyboard handlers take precedence
+      // Custom Document FIRST - enforces sceneHeading as first block for new scripts
+      // This ensures ProseMirror's createAndFill() creates sceneHeading, not paragraph
+      ScreenplayDocument,
+      // Screenplay formatting - ensures screenplay keyboard handlers take precedence
       ScreenplayKit.configure({
         enableSmartPageBreaks: false,
       }),
       // StarterKit AFTER screenplay - disable conflicting extensions
       StarterKit.configure({
+        document: false,   // Using ScreenplayDocument instead (enforces sceneHeading first)
         history: false,    // Yjs provides undo/redo
         heading: false,    // ScreenplayKit provides scene headings
         // Note: paragraph kept enabled for schema compatibility; Action handlers check for it
@@ -405,45 +410,29 @@ export default function TestTipTapPage() {
     }
   }, [script, syncStatus, isLoadingScript]);
 
-  // PRAGMATIC FIX: Ensure new scripts start with scene heading, not action
-  // After sync completes, if the document is empty (no text), convert first block to sceneHeading
-  // This runs fast enough that users won't notice the conversion
+  // Verify that ScreenplayDocument schema fix is working
+  // The custom Document with content: 'sceneHeading block*' should ensure
+  // new empty documents start with sceneHeading, not paragraph
   useEffect(() => {
     if (!editor || syncStatus !== 'synced') return;
 
-    // Only run once after initial sync - use a small delay to ensure editor is fully ready
+    // Log first node type after sync to verify the schema fix is working
     const timer = setTimeout(() => {
+      const firstNode = editor.state.doc.firstChild;
       const docText = editor.state.doc.textContent.trim();
 
-      // Only act on empty documents
-      if (docText.length > 0) return;
+      console.log('[TipTapEditor] Document initialized:', {
+        firstNodeType: firstNode?.type.name,
+        isEmpty: docText.length === 0,
+        nodeCount: editor.state.doc.childCount,
+      });
 
-      const firstNode = editor.state.doc.firstChild;
-      if (!firstNode) return;
-
-      // If first node is not a sceneHeading, convert it
-      if (firstNode.type.name !== 'sceneHeading') {
-        console.log('[TipTapEditor] Converting empty first block from', firstNode.type.name, 'to sceneHeading');
-
-        // Select the first block and convert to scene heading
-        editor.chain()
-          .setTextSelection(1)
-          .setNode('sceneHeading')
-          .run();
-
-        // Clear undo stack so this conversion isn't undoable
-        setTimeout(() => {
-          try {
-            const undoManager = yUndoPluginKey.getState(editor.state)?.undoManager;
-            if (undoManager) {
-              undoManager.clear();
-            }
-          } catch (e) {
-            // Ignore errors
-          }
-        }, 0);
+      // If first node is NOT sceneHeading on an empty doc, log a warning
+      // This shouldn't happen with the ScreenplayDocument schema fix
+      if (docText.length === 0 && firstNode?.type.name !== 'sceneHeading') {
+        console.warn('[TipTapEditor] Unexpected first block type for empty document:', firstNode?.type.name);
       }
-    }, 50); // Small delay to ensure editor state is settled
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [editor, syncStatus]);
