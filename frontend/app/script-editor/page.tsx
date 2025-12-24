@@ -570,6 +570,7 @@ export default function TestTipTapPage() {
   // Track current scene and extract boundaries on any editor change
   // Combined into single effect to ensure boundaries are always fresh
   const sceneUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousSceneIndexRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!editor) return;
@@ -581,6 +582,25 @@ export default function TestTipTapPage() {
 
       // Use fresh boundaries for scene detection
       const sceneIndex = getCurrentSceneIndex(editor, boundaries);
+
+      // Guard: Detect spurious selection jumps to position 1 (Scene 1)
+      // This happens when clicking in pagination gaps or outside content areas.
+      // The editor resets selection to doc start, falsely highlighting Scene 1.
+      const currentPos = editor.state.selection.anchor;
+      const prevIndex = previousSceneIndexRef.current;
+
+      if (
+        sceneIndex === 0 &&           // New scene would be Scene 1
+        currentPos <= 2 &&            // Selection is at very start of document
+        prevIndex !== null &&         // We had a previous scene
+        prevIndex !== 0               // We were NOT already in Scene 1
+      ) {
+        // Suspicious jump to position 1 from a different scene - ignore this update
+        console.log('[TipTapEditor] Ignoring spurious selection jump to position 1');
+        return;
+      }
+
+      previousSceneIndexRef.current = sceneIndex;
       setCurrentSceneIndex(sceneIndex);
     };
 
