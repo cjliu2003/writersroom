@@ -7,6 +7,7 @@
 
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import {
   extractCharacterName,
@@ -18,6 +19,8 @@ import {
   isInTimeContext,
   getTimeQuery,
   filterTimeSuggestions,
+  isCompleteSceneHeading,
+  getGhostText,
 } from './smart-type-utils';
 
 export interface SmartTypeStorage {
@@ -397,18 +400,30 @@ export const SmartTypeExtension = Extension.create<SmartTypeOptions, SmartTypeSt
 
             // Check if we're in a SceneHeading element
             if (nodeType === 'sceneHeading') {
+              // FIRST: Check if scene heading is already complete (has prefix, location, and valid time)
+              // Don't show any suggestions for complete headings
+              if (isCompleteSceneHeading(text)) {
+                return inactiveState(true);
+              }
+
               // Check if prefix is complete
               if (hasCompletePrefix(text)) {
                 // Check for time-of-day context FIRST (after " - ")
                 if (isInTimeContext(text)) {
                   const timeQuery = getTimeQuery(text);
 
+                  // Require at least 1 character after dash to show time suggestions
+                  // This prevents popup from appearing immediately after typing " - "
+                  if (timeQuery.length === 0) {
+                    return inactiveState(true);
+                  }
+
                   // If text ends with what we just accepted, don't show suggestions yet
                   if (prev.lastAccepted && text.toUpperCase().endsWith(prev.lastAccepted.toUpperCase())) {
                     return inactiveState();
                   }
 
-                  // Show time suggestions (even for empty query after dash)
+                  // Show time suggestions
                   const timeSuggestions = filterTimeSuggestions(timeQuery, extension.options.maxSuggestions);
 
                   // Don't show if exact match
@@ -500,6 +515,45 @@ export const SmartTypeExtension = Extension.create<SmartTypeOptions, SmartTypeSt
 
             // Not in a SmartType context
             return inactiveState(true);
+          },
+        },
+      }),
+
+      // Ghost text decoration plugin - shows inline preview of what Tab would complete
+      new Plugin({
+        props: {
+          decorations(state) {
+            const smartState = SmartTypePluginKey.getState(state);
+
+            // Only show ghost text when popup is active with suggestions
+            if (!smartState?.active || smartState.suggestions.length === 0) {
+              return DecorationSet.empty;
+            }
+
+            const suggestion = smartState.suggestions[smartState.selectedIndex];
+            const query = smartState.query;
+
+            // Calculate ghost text (the completion portion)
+            const ghostText = getGhostText(suggestion, query, smartState.type);
+            if (!ghostText) {
+              return DecorationSet.empty;
+            }
+
+            const { from } = state.selection;
+
+            // Create inline widget decoration with ghost text
+            const widget = Decoration.widget(
+              from,
+              () => {
+                const span = document.createElement('span');
+                span.textContent = ghostText;
+                span.className = 'smart-type-ghost';
+                return span;
+              },
+              { side: 1 } // Appears after cursor
+            );
+
+            return DecorationSet.create(state.doc, [widget]);
           },
         },
       }),

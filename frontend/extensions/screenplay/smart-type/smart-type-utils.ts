@@ -338,3 +338,54 @@ export function filterTimeSuggestions(query: string, maxResults: number = 7): st
     .filter(time => time.startsWith(upperQuery))
     .slice(0, maxResults);
 }
+
+/**
+ * Check if a scene heading is complete (has prefix, location, and valid time)
+ * Used to prevent SmartType from showing suggestions on already-complete headings
+ *
+ * @param text - Scene heading text
+ * @returns True if scene heading has all components complete
+ */
+export function isCompleteSceneHeading(text: string): boolean {
+  if (!text) return false;
+
+  const trimmed = text.trim().toUpperCase();
+
+  // Pattern: PREFIX. LOCATION - TIME
+  // Where TIME must be an exact match from TIME_OF_DAY
+  const pattern = /^(?:INT\.?\/?\s*EXT\.?|EXT\.?\/?\s*INT\.?|INT\.?|EXT\.?|I\/E\.?)\.\s+.+\s-\s+(.+)$/i;
+  const match = trimmed.match(pattern);
+
+  if (!match) return false;
+
+  const timeCandidate = match[1].trim().toUpperCase();
+  return TIME_OF_DAY.includes(timeCandidate);
+}
+
+/**
+ * Get the ghost text (completion preview) for current suggestion
+ * Returns the portion of the suggestion that would be inserted on Tab
+ *
+ * @param suggestion - The full suggestion text
+ * @param query - Current query/typed text
+ * @param type - Type of suggestion
+ * @returns Ghost text to display, or empty string
+ */
+export function getGhostText(
+  suggestion: string,
+  query: string,
+  type: 'character' | 'location' | 'prefix' | 'time' | null
+): string {
+  if (!suggestion || !type) return '';
+
+  const upperSuggestion = suggestion.toUpperCase();
+  const upperQuery = query.toUpperCase();
+
+  // For all types, show the remaining portion of the suggestion
+  if (upperSuggestion.startsWith(upperQuery)) {
+    return suggestion.slice(query.length);
+  }
+
+  // If query doesn't match start (shouldn't happen), show full suggestion
+  return suggestion;
+}

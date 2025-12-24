@@ -20,6 +20,7 @@ import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { JSONContent } from '@tiptap/core';
 import * as Y from 'yjs';
+import { yUndoPluginKey } from 'y-prosemirror';
 // @ts-ignore - pagination extension may not have types
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useAuth } from '@/contexts/AuthContext';
@@ -363,6 +364,21 @@ export default function TestTipTapPage() {
       console.log('[TestTipTap] Seeding editor - no content found after sync');
       editor.commands.setContent(pendingContent);
       console.log('[TestTipTap] Content applied successfully');
+
+      // Clear undo stack after seeding to prevent "undo removes entire script" edge case
+      // The initial content seeding should not be undoable - only user edits should be
+      setTimeout(() => {
+        try {
+          const undoManager = yUndoPluginKey.getState(editor.state)?.undoManager;
+          if (undoManager) {
+            undoManager.clear();
+            console.log('[TestTipTap] Cleared undo stack after content seeding');
+          }
+        } catch (e) {
+          console.warn('[TestTipTap] Failed to clear undo stack:', e);
+        }
+      }, 0);
+
       setPendingContent(null); // Clear after applying
     }
   }, [editor, pendingContent, doc, syncStatus, script]);

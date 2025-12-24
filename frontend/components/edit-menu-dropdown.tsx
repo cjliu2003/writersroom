@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard, Search, Bold, Italic, Underline } from 'lucide-react'
 import { Editor } from '@tiptap/react'
+import { yUndoPluginKey } from 'y-prosemirror'
 
 interface EditMenuDropdownProps {
   editor: Editor | null
@@ -11,9 +12,11 @@ interface EditMenuDropdownProps {
 export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Check undo/redo availability from editor's history state
-  const canUndo = editor ? (editor.state as any).history$?.done?.eventCount > 0 : false
-  const canRedo = editor ? (editor.state as any).history$?.undone?.eventCount > 0 : false
+  // Check undo/redo availability from Yjs UndoManager (not ProseMirror history plugin)
+  // When using TipTap Collaboration extension, undo/redo is managed by y-prosemirror's UndoManager
+  const undoManager = editor ? yUndoPluginKey.getState(editor.state)?.undoManager : null
+  const canUndo = undoManager ? undoManager.undoStack.length > 0 : false
+  const canRedo = undoManager ? undoManager.redoStack.length > 0 : false
 
   // Check if there's a text selection for cut/copy
   const hasSelection = editor ? !editor.state.selection.empty : false
