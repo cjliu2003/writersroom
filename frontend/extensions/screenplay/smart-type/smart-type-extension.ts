@@ -21,6 +21,9 @@ import {
   filterTimeSuggestions,
   isCompleteSceneHeading,
   getGhostText,
+  isInExtensionContext,
+  getExtensionQuery,
+  filterExtensionSuggestions,
 } from './smart-type-utils';
 
 export interface SmartTypeStorage {
@@ -34,7 +37,7 @@ export interface SmartTypeStorage {
 
 export interface SmartTypeState {
   active: boolean;
-  type: 'character' | 'location' | 'prefix' | 'time' | null;
+  type: 'character' | 'location' | 'prefix' | 'time' | 'extension' | null;
   query: string;
   suggestions: string[];
   selectedIndex: number;
@@ -165,6 +168,22 @@ export const SmartTypeExtension = Extension.create<SmartTypeOptions, SmartTypeSt
 
         // Use the type directly instead of re-detecting from text
         // This prevents mismatches between detection and insertion
+
+        if (type === 'extension' && nodeType === 'character') {
+          // Extension insertion: find the opening paren and replace from there to cursor
+          // Then add the extension value and closing paren
+          const parenIndex = text.lastIndexOf('(');
+          if (parenIndex !== -1) {
+            // Calculate position after the opening paren
+            const replaceFrom = nodeStart + parenIndex + 1;
+            const replaceTo = nodeEnd;
+            // Insert: "V.O.)" - extension + closing paren
+            tr.insertText(value + ')', replaceFrom, replaceTo);
+            acceptAndDispatch();
+            return true;
+          }
+          return false;
+        }
 
         if (type === 'character' && nodeType === 'character') {
           // Replace entire node content with character name
@@ -364,6 +383,39 @@ export const SmartTypeExtension = Extension.create<SmartTypeOptions, SmartTypeSt
 
             // Check if we're in a Character element
             if (nodeType === 'character') {
+              // FIRST: Check for extension context (after "(" in character line)
+              // This takes priority over character name suggestions
+              if (isInExtensionContext(text)) {
+                const extQuery = getExtensionQuery(text);
+
+                // If text ends with what we just accepted + ")", don't show suggestions
+                if (prev.lastAccepted && text.toUpperCase().includes('(' + prev.lastAccepted.toUpperCase() + ')')) {
+                  return inactiveState();
+                }
+
+                // Show extension suggestions (V.O., O.S., etc.)
+                const extSuggestions = filterExtensionSuggestions(extQuery, extension.options.maxSuggestions);
+
+                // Don't show if exact match
+                const exactMatch = extSuggestions.length === 1 &&
+                  extSuggestions[0].toUpperCase() === extQuery.toUpperCase();
+
+                if (extSuggestions.length > 0 && !exactMatch) {
+                  return {
+                    active: true,
+                    type: 'extension',
+                    query: extQuery,
+                    suggestions: extSuggestions,
+                    selectedIndex: 0,
+                    position: null,
+                    lastAccepted: null,
+                  };
+                }
+
+                // If in extension context but no matching suggestions, stay inactive
+                return inactiveState(true);
+              }
+
               const query = text.trim();
 
               // Only show suggestions after at least 1 character is typed

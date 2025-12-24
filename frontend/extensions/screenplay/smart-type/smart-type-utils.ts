@@ -22,6 +22,18 @@ const CHARACTER_EXTENSIONS = [
 ];
 
 /**
+ * Character extension suggestions for autocomplete (in priority order)
+ * These appear when user types "(" after a character name
+ */
+export const CHARACTER_EXTENSION_SUGGESTIONS = [
+  "V.O.",
+  "O.S.",
+  "O.C.",
+  "CONT'D",
+  "SUBTITLE",
+];
+
+/**
  * Common time of day suffixes in scene headings
  * Exported for SmartType suggestions
  */
@@ -374,18 +386,77 @@ export function isCompleteSceneHeading(text: string): boolean {
 export function getGhostText(
   suggestion: string,
   query: string,
-  type: 'character' | 'location' | 'prefix' | 'time' | null
+  type: 'character' | 'location' | 'prefix' | 'time' | 'extension' | null
 ): string {
   if (!suggestion || !type) return '';
 
   const upperSuggestion = suggestion.toUpperCase();
   const upperQuery = query.toUpperCase();
 
-  // For all types, show the remaining portion of the suggestion
+  // For extension type, show remaining portion + closing paren
+  if (type === 'extension') {
+    if (upperSuggestion.startsWith(upperQuery)) {
+      return suggestion.slice(query.length) + ')';
+    }
+    return suggestion + ')';
+  }
+
+  // For all other types, show the remaining portion of the suggestion
   if (upperSuggestion.startsWith(upperQuery)) {
     return suggestion.slice(query.length);
   }
 
   // If query doesn't match start (shouldn't happen), show full suggestion
   return suggestion;
+}
+
+/**
+ * Check if cursor is in extension context within a character element
+ * This means: character name followed by opening parenthesis
+ *
+ * @param text - Character element text
+ * @returns True if in extension context (after "(" in character line)
+ */
+export function isInExtensionContext(text: string): boolean {
+  if (!text) return false;
+
+  // Match: "CHARACTER NAME (" or "CHARACTER NAME(" at end
+  // Must have at least one valid character name character before the paren
+  return /^[A-Z][A-Z0-9\s.\-']*\s*\([A-Z.]*$/i.test(text.trim());
+}
+
+/**
+ * Get the extension query portion after "(" in a character element
+ *
+ * @param text - Character element text
+ * @returns Query string after opening paren, or empty string if not in context
+ */
+export function getExtensionQuery(text: string): string {
+  if (!text) return '';
+
+  // Find the opening paren and get everything after it
+  const match = text.match(/\(\s*([A-Z.']*)$/i);
+  return match ? match[1].toUpperCase() : '';
+}
+
+/**
+ * Filter character extension suggestions based on query
+ *
+ * @param query - Search query (partial extension like "V" or "V.")
+ * @param maxResults - Maximum results to return
+ * @returns Filtered extension suggestions
+ */
+export function filterExtensionSuggestions(
+  query: string,
+  maxResults: number = 5
+): string[] {
+  if (!query || query.trim().length === 0) {
+    return CHARACTER_EXTENSION_SUGGESTIONS.slice(0, maxResults);
+  }
+
+  const upperQuery = query.trim().toUpperCase();
+
+  return CHARACTER_EXTENSION_SUGGESTIONS
+    .filter(ext => ext.startsWith(upperQuery))
+    .slice(0, maxResults);
 }
