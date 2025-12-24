@@ -103,13 +103,13 @@
 /* Parenthetical */
 .screenplay-editor .screenplay-parenthetical,
 .screenplay-editor [data-type="parenthetical"] {
-  /* Final Draft standard: 27 characters per line including parentheses */
-  /* 27 chars ÷ 10 chars/inch = 2.7 inches = 68.58mm width */
+  /* 26 characters per line including parentheses */
+  /* 26 chars ÷ 10 chars/inch = 2.6 inches = 66.04mm width */
   /* !important needed to override Tailwind prose styles */
-  width: 65mm !important; /* ~246px for 27 chars with letter-spacing */
-  max-width: 65mm !important;
+  width: 62.5mm !important; /* ~236px for 26 chars with letter-spacing */
+  max-width: 62.5mm !important;
   margin-left: 35.75mm !important; /* ~2.9" from page left edge */
-  margin-right: 89.83mm !important; /* adjusted for 65mm width */
+  margin-right: 92.33mm !important; /* adjusted for 62.5mm width */
   font-style: normal; /* NOT italic - standard screenplay format */
   margin-top: 0 !important; /* No space before (follows character/dialogue immediately) */
   margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */

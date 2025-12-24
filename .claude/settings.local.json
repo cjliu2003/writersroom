@@ -82,7 +82,8 @@
       "Bash(playwright install chromium)",
       "Bash(/Users/ltw/miniconda3/bin/python -m pip install:*)",
       "Bash(npm install:*)",
-      "mcp__chrome-devtools__list_pages"
+      "mcp__chrome-devtools__list_pages",
+      "WebFetch(domain:discuss.yjs.dev)"
     ],
     "deny": [],
     "ask": []

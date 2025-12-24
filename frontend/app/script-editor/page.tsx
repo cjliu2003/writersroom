@@ -148,9 +148,12 @@ export default function TestTipTapPage() {
           console.warn('[TipTapEditor] No content_blocks found in script');
 
           // If Yjs has updates, keep loading screen visible until Yjs sync completes
-          // Otherwise, hide loading screen and show empty editor
+          // Otherwise, set initial content with scene heading and show editor
           if (!scriptData.has_yjs_updates) {
-            console.log('[TipTapEditor] No Yjs updates, showing empty editor');
+            console.log('[TipTapEditor] No Yjs updates, setting initial scene heading document');
+            // Use contentBlocksToTipTap to get default document (starts with scene heading)
+            const initialDoc = contentBlocksToTipTap([]);
+            setPendingContent(initialDoc);
             setIsLoadingScript(false);
           } else {
             console.log('[TipTapEditor] Yjs updates exist, waiting for sync before hiding loading screen');
@@ -342,19 +345,30 @@ export default function TestTipTapPage() {
         return;
       }
 
-      // After sync completes, check if Yjs document already has content
+      // After sync completes, check if Yjs document already has MEANINGFUL content
+      // IMPORTANT: y-prosemirror creates a default empty paragraph when syncing with an
+      // empty server document. This means yjsFragment.length > 0 is TRUE even for "empty"
+      // documents. We must check actual text content, not just structural element count.
+      // See: https://discuss.yjs.dev/t/whats-the-correct-way-to-set-default-content-for-y-prosemirror/1129
       const yjsFragment = doc.get('default', Y.XmlFragment);
-      const yjsHasContent = yjsFragment && yjsFragment.length > 0;
 
-      // Check if editor already has content
-      const editorHasContent = editor.state.doc.content.size > 2; // >2 accounts for empty doc structure
+      // Extract text content from Yjs fragment (strip XML tags, check for actual characters)
+      const yjsXmlString = yjsFragment ? yjsFragment.toString() : '';
+      const yjsTextContent = yjsXmlString.replace(/<[^>]*>/g, '').trim();
+      const yjsHasContent = yjsTextContent.length > 0;
+
+      // Check if editor already has MEANINGFUL content (actual text, not just empty structure)
+      // Previously used `content.size > 2` but that's true even for an empty paragraph
+      // which causes the scene heading seed to be skipped for new scripts
+      const editorHasContent = editor.state.doc.textContent.trim().length > 0;
 
       if (yjsHasContent || editorHasContent) {
         console.log('[TestTipTap] Skipping setContent - content already exists:', {
-          yjsLength: yjsFragment?.length || 0,
-          editorSize: editor.state.doc.content.size,
+          yjsFragmentLength: yjsFragment?.length || 0,
+          yjsTextLength: yjsTextContent.length,
+          editorTextLength: editor.state.doc.textContent.trim().length,
           syncStatus: syncStatus,
-          reason: yjsHasContent ? 'Yjs has content (from sync)' : 'Editor has content'
+          reason: yjsHasContent ? 'Yjs has text content (from sync)' : 'Editor has text content'
         });
         setPendingContent(null); // Clear pending content to prevent retry
         return;
@@ -390,6 +404,49 @@ export default function TestTipTapPage() {
       setIsLoadingScript(false);
     }
   }, [script, syncStatus, isLoadingScript]);
+
+  // PRAGMATIC FIX: Ensure new scripts start with scene heading, not action
+  // After sync completes, if the document is empty (no text), convert first block to sceneHeading
+  // This runs fast enough that users won't notice the conversion
+  useEffect(() => {
+    if (!editor || syncStatus !== 'synced') return;
+
+    // Only run once after initial sync - use a small delay to ensure editor is fully ready
+    const timer = setTimeout(() => {
+      const docText = editor.state.doc.textContent.trim();
+
+      // Only act on empty documents
+      if (docText.length > 0) return;
+
+      const firstNode = editor.state.doc.firstChild;
+      if (!firstNode) return;
+
+      // If first node is not a sceneHeading, convert it
+      if (firstNode.type.name !== 'sceneHeading') {
+        console.log('[TipTapEditor] Converting empty first block from', firstNode.type.name, 'to sceneHeading');
+
+        // Select the first block and convert to scene heading
+        editor.chain()
+          .setTextSelection(1)
+          .setNode('sceneHeading')
+          .run();
+
+        // Clear undo stack so this conversion isn't undoable
+        setTimeout(() => {
+          try {
+            const undoManager = yUndoPluginKey.getState(editor.state)?.undoManager;
+            if (undoManager) {
+              undoManager.clear();
+            }
+          } catch (e) {
+            // Ignore errors
+          }
+        }, 0);
+      }
+    }, 50); // Small delay to ensure editor state is settled
+
+    return () => clearTimeout(timer);
+  }, [editor, syncStatus]);
 
   // Load layout preferences on mount
   useEffect(() => {

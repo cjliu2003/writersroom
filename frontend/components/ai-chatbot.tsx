@@ -257,10 +257,12 @@ export function AIChatbot({
   // Get the appropriate collapse icon based on position
   const CollapseIcon = position === 'left' ? ChevronLeft : position === 'right' ? ChevronRight : ChevronDown
 
-  // Focus input when clicking anywhere in chat panel (except buttons)
+  // Focus input when clicking anywhere in chat panel (except buttons or when selecting text)
   const handlePanelClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
-    if (!target.closest('button') && !target.closest('input')) {
+    // Don't steal focus if user has selected text
+    const hasSelection = window.getSelection()?.toString()
+    if (!target.closest('button') && !target.closest('input') && !hasSelection) {
       inputRef.current?.focus()
     }
   }
@@ -268,7 +270,7 @@ export function AIChatbot({
   // Expanded state - popup chat interface
   return (
     <div
-      className={`h-full flex flex-col bg-gray-50/95 border border-gray-200/80 shadow-2xl shadow-black/15 backdrop-blur-sm overflow-hidden ${panelStyles.container}`}
+      className={`h-full flex flex-col bg-neutral-50/95 border border-gray-200/80 shadow-2xl shadow-black/15 backdrop-blur-sm overflow-hidden ${panelStyles.container}`}
       style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
       onClick={handlePanelClick}
     >
@@ -364,7 +366,7 @@ export function AIChatbot({
                   )}
                 </p>
                 <p className="text-[9pt] text-gray-400 mt-2">
-                  Ask about characters, plot, structure, or anything else
+                  Ask about characters, plot, structure, or anything else!
                 </p>
               </div>
             ) : (

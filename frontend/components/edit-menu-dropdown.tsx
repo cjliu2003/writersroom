@@ -149,7 +149,7 @@ export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
           >
             {menuItems.map((item, index) => {
               if ('type' in item && item.type === 'separator') {
-                return <div key={index} className="border-t border-gray-100 my-1" />
+                return <div key={index} className="my-1 border-t border-gray-200" />
               }
 
               const Icon = item.icon
