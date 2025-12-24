@@ -80,7 +80,9 @@
       "Bash(node /tmp/test-prefix.js:*)",
       "Bash(mkdir:*)",
       "Bash(playwright install chromium)",
-      "Bash(/Users/ltw/miniconda3/bin/python -m pip install:*)"
+      "Bash(/Users/ltw/miniconda3/bin/python -m pip install:*)",
+      "Bash(npm install:*)",
+      "mcp__chrome-devtools__list_pages"
     ],
     "deny": [],
     "ask": []

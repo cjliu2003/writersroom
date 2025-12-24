@@ -10,6 +10,7 @@ import GlobalChunkGuard from "@/components/GlobalChunkGuard"
 const inter = Inter({ subsets: ["latin"] })
 const courierPrime = Courier_Prime({
   weight: ['400', '700'],
+  style: ['normal', 'italic'],  // Load all variants to prevent faux synthesis
   subsets: ["latin"],
   variable: '--font-courier-prime'
 })

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard, Search } from 'lucide-react'
+import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard, Search, Bold, Italic, Underline } from 'lucide-react'
 import { Editor } from '@tiptap/react'
 
 interface EditMenuDropdownProps {
@@ -76,6 +76,28 @@ export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
         editor?.commands.selectAll()
       },
       disabled: !editor,
+    },
+    { type: 'separator' as const },
+    {
+      label: 'Bold',
+      icon: Bold,
+      shortcut: '⌘B',
+      action: () => editor?.chain().focus().toggleBold().run(),
+      disabled: !editor || !hasSelection,
+    },
+    {
+      label: 'Italic',
+      icon: Italic,
+      shortcut: '⌘I',
+      action: () => editor?.chain().focus().toggleItalic().run(),
+      disabled: !editor || !hasSelection,
+    },
+    {
+      label: 'Underline',
+      icon: Underline,
+      shortcut: '⌘U',
+      action: () => editor?.chain().focus().toggleUnderline().run(),
+      disabled: !editor || !hasSelection,
     },
     { type: 'separator' as const },
     {

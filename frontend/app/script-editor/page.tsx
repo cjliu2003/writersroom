@@ -15,6 +15,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { JSONContent } from '@tiptap/core';
@@ -41,6 +42,7 @@ import { ShareDialog } from '@/components/share-dialog';
 import { EditMenuDropdown } from '@/components/edit-menu-dropdown';
 import { FileMenuDropdown } from '@/components/file-menu-dropdown';
 import { TipTapBlockTypeDropdown } from '@/components/tiptap-block-type-dropdown';
+import { FormattingToolbar } from '@/components/formatting-toolbar';
 import { Button } from '@/components/ui/button';
 import { Home, Share2, ChevronUp, ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -247,6 +249,8 @@ export default function TestTipTapPage() {
         heading: false,    // ScreenplayKit provides scene headings
         // Note: paragraph kept enabled for schema compatibility; Action handlers check for it
       }),
+      // Text formatting marks (Underline not in StarterKit)
+      Underline,
       // Collaboration
       ...(doc ? [
         Collaboration.configure({
@@ -749,8 +753,12 @@ export default function TestTipTapPage() {
             )}
           </div>
 
-          {/* Right - Collaborators, Share, Export */}
+          {/* Right - Formatting, Collaborators, Share, Export */}
           <div className="flex items-center gap-0.5 mr-16">
+            {/* Formatting Toolbar */}
+            <FormattingToolbar editor={editor} />
+            {/* Separator */}
+            <div className="w-px h-5 bg-gray-200 mx-1" />
             {/* Collaborator presence avatars - minimal, only shows when others are editing */}
             {collaborators.length > 0 && (
               <div className="flex items-center -space-x-1.5 mr-2 pr-2 border-r border-gray-200">

@@ -198,3 +198,38 @@
   border-radius: 2px;
   box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.5);
 }
+
+/* ============================================
+   Text Formatting Marks (Bold, Italic, Underline)
+
+   Using synthetic styles to maintain monospace character width.
+   This prevents pagination/line-break shifts when formatting text.
+
+   Shortcuts:
+   - Bold: Cmd+B / Ctrl+B
+   - Italic: Cmd+I / Ctrl+I
+   - Underline: Cmd+U / Ctrl+U
+   ============================================ */
+
+/* Bold - uses Courier Prime Bold (700) font variant
+   Courier Prime Bold has identical character widths to Regular */
+.screenplay-editor strong,
+.screenplay-editor b {
+  font-weight: 700;  /* Use loaded Courier Prime Bold */
+  font-synthesis: none;  /* Prevent browser from synthesizing */
+}
+
+/* Italic - uses Courier Prime Italic font variant
+   Courier Prime Italic has identical character widths to Regular */
+.screenplay-editor em,
+.screenplay-editor i {
+  font-style: italic;  /* Use loaded Courier Prime Italic */
+  font-synthesis: none;  /* Prevent browser from synthesizing */
+}
+
+/* Underline - already width-stable, just style it nicely */
+.screenplay-editor u {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
