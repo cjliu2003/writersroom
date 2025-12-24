@@ -36,8 +36,6 @@ export function SceneNavBar({
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  // Track if user has explicitly clicked to navigate (vs system detecting cursor position)
-  const userNavigatedRef = useRef(false);
   const previousSceneCountRef = useRef(0);
 
   // Reset scroll to beginning when scenes are first loaded (e.g., after FDX upload)
@@ -51,13 +49,8 @@ export function SceneNavBar({
     }
   }, [scenes.length]);
 
-  // Auto-scroll to keep active scene visible ONLY when user explicitly clicked a scene
+  // Auto-scroll to keep active scene visible when currentSceneIndex changes
   useEffect(() => {
-    // Only auto-scroll if user explicitly navigated (clicked a scene)
-    if (!userNavigatedRef.current) {
-      return;
-    }
-
     if (activeItemRef.current && scrollContainerRef.current) {
       const container = scrollContainerRef.current;
       const activeItem = activeItemRef.current;
@@ -75,14 +68,10 @@ export function SceneNavBar({
         });
       }
     }
-
-    // Reset the flag after handling
-    userNavigatedRef.current = false;
   }, [currentSceneIndex]);
 
-  // Handler for scene click - marks that user explicitly navigated
+  // Handler for scene click
   const handleSceneClick = (index: number) => {
-    userNavigatedRef.current = true;
     onSceneClick(index);
   };
 

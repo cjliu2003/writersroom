@@ -939,7 +939,8 @@ export default function TestTipTapPage() {
 
       {/* Main Content Area - scroll container with dynamic bounds */}
       <div
-        className="flex overflow-auto"
+        id="editor-scroll-container"
+        className="flex overflow-auto h-full"
         style={{
           position: 'fixed',
           top: isTopBarCollapsed
