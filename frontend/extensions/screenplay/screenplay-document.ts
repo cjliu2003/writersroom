@@ -2,13 +2,14 @@
  * Screenplay Document Extension
  *
  * Custom Document node that enforces screenplay structure:
- * - First block MUST be a sceneHeading (screenplay convention)
+ * - First block defaults to sceneHeading (screenplay convention)
+ * - User can change first block to any screenplay element type
  * - Followed by any number of block elements
  *
- * This ensures ProseMirror's createAndFill() always creates a sceneHeading
- * as the first block for new/empty documents, fixing the issue where
- * y-prosemirror would default to paragraph due to StarterKit's Document
- * having content: 'block+'.
+ * This ensures ProseMirror's createAndFill() creates a sceneHeading
+ * as the first block for new/empty documents (since it's listed first
+ * in the alternation), while still allowing users to Tab-cycle or
+ * manually switch to other element types.
  *
  * Usage:
  * ```typescript
@@ -32,14 +33,15 @@ export const ScreenplayDocument = Node.create({
   topNode: true,
 
   /**
-   * Content schema: sceneHeading followed by any blocks
+   * Content schema: any screenplay element first, followed by any blocks
    *
-   * - 'sceneHeading': Required first element (screenplay convention)
+   * - First position: sceneHeading listed first (default for empty docs)
+   *   but allows any screenplay element type for flexibility
    * - 'block*': Zero or more additional block elements
    *
    * When ProseMirror needs to create an empty document (via createAndFill()),
-   * it will create a sceneHeading as the first child because the schema
-   * requires it.
+   * it will try sceneHeading first since it's the first option in the
+   * alternation. Users can then Tab-cycle or use shortcuts to change it.
    */
-  content: 'sceneHeading block*',
+  content: '(sceneHeading | action | character | dialogue | parenthetical | transition) block*',
 });
