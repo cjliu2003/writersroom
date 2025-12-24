@@ -28,6 +28,8 @@ export interface SmartTypeStorage {
   locations: string[];
   characterFrequency: Map<string, number>;
   locationFrequency: Map<string, number>;
+  /** Timeout ID for debounced list rebuilding */
+  rebuildTimeout: ReturnType<typeof setTimeout> | null;
 }
 
 export interface SmartTypeState {
@@ -87,6 +89,7 @@ export const SmartTypeExtension = Extension.create<SmartTypeOptions, SmartTypeSt
       locations: [] as string[],
       characterFrequency: new Map<string, number>(),
       locationFrequency: new Map<string, number>(),
+      rebuildTimeout: null as ReturnType<typeof setTimeout> | null,
     };
   },
 
@@ -560,13 +563,26 @@ export const SmartTypeExtension = Extension.create<SmartTypeOptions, SmartTypeSt
     ];
   },
 
-  // Update lists when document changes
+  // Update lists when document changes (debounced for performance)
   onTransaction({ transaction }) {
     if (transaction.docChanged) {
-      // Debounce list rebuilding for performance
-      // Use a simple approach: rebuild on document changes
-      // In production, you might want to be more selective
-      this.editor.commands.rebuildSmartTypeLists();
+      // Clear any pending rebuild
+      if (this.storage.rebuildTimeout) {
+        clearTimeout(this.storage.rebuildTimeout);
+      }
+      // Debounce list rebuilding by 250ms to reduce CPU usage during rapid typing
+      this.storage.rebuildTimeout = setTimeout(() => {
+        this.editor.commands.rebuildSmartTypeLists();
+        this.storage.rebuildTimeout = null;
+      }, 250);
+    }
+  },
+
+  // Clean up timeout on destroy
+  onDestroy() {
+    if (this.storage.rebuildTimeout) {
+      clearTimeout(this.storage.rebuildTimeout);
+      this.storage.rebuildTimeout = null;
     }
   },
 });

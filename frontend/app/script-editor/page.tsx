@@ -12,7 +12,7 @@
 
 "use client"
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -569,6 +569,8 @@ export default function TestTipTapPage() {
 
   // Track current scene and extract boundaries on any editor change
   // Combined into single effect to ensure boundaries are always fresh
+  const sceneUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     if (!editor) return;
 
@@ -582,18 +584,29 @@ export default function TestTipTapPage() {
       setCurrentSceneIndex(sceneIndex);
     };
 
-    // Update on selection change (clicking/navigating in editor)
+    // Debounced version for document changes (typing) - reduces CPU usage
+    const debouncedUpdateSceneState = () => {
+      if (sceneUpdateTimeoutRef.current) {
+        clearTimeout(sceneUpdateTimeoutRef.current);
+      }
+      sceneUpdateTimeoutRef.current = setTimeout(updateSceneState, 200);
+    };
+
+    // Update on selection change (clicking/navigating in editor) - immediate for responsive highlighting
     editor.on('selectionUpdate', updateSceneState);
 
-    // Update on document changes (typing, editing)
-    editor.on('update', updateSceneState);
+    // Update on document changes (typing, editing) - debounced for performance
+    editor.on('update', debouncedUpdateSceneState);
 
     // Initial update
     updateSceneState();
 
     return () => {
       editor.off('selectionUpdate', updateSceneState);
-      editor.off('update', updateSceneState);
+      editor.off('update', debouncedUpdateSceneState);
+      if (sceneUpdateTimeoutRef.current) {
+        clearTimeout(sceneUpdateTimeoutRef.current);
+      }
     };
   }, [editor]);
 
