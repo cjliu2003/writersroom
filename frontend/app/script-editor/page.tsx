@@ -946,40 +946,42 @@ export default function TestTipTapPage() {
             )}
           </div>
 
-          {/* Right - Formatting, Collaborators, Share, Export */}
-          <div className="flex items-center gap-0.5 mr-16">
+          {/* Right - Formatting, Collaborators, Share, Home, Save Status */}
+          <div className="flex items-center gap-0.5 pr-0">
             {/* Formatting Toolbar */}
-            <FormattingToolbar editor={editor} />
+            <FormattingToolbar editor={editor} className="flex-shrink-0" />
             {/* Separator */}
-            <div className="w-px h-5 bg-gray-200 mx-1" />
+            <div className="w-px h-5 bg-gray-200 mx-1 flex-shrink-0" />
             {/* Collaborator presence avatars - minimal, only shows when others are editing */}
             {collaborators.length > 0 && (
-              <div className="flex items-center -space-x-1.5 mr-2 pr-2 border-r border-gray-200">
-                {collaborators.slice(0, 3).map((collab) => (
-                  <div
-                    key={collab.clientId}
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-white ring-2 ring-white"
-                    style={{ backgroundColor: collab.color }}
-                    title={collab.name}
-                  >
-                    {collab.name.charAt(0).toUpperCase()}
-                  </div>
-                ))}
-                {collaborators.length > 3 && (
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-gray-600 bg-gray-200 ring-2 ring-white"
-                    title={`${collaborators.length - 3} more`}
-                  >
-                    +{collaborators.length - 3}
-                  </div>
-                )}
+              <div className="flex items-center flex-shrink-0 mr-1">
+                <div className="flex items-center -space-x-1.5">
+                  {collaborators.slice(0, 3).map((collab) => (
+                    <div
+                      key={collab.clientId}
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-white ring-2 ring-white"
+                      style={{ backgroundColor: collab.color }}
+                      title={collab.name}
+                    >
+                      {collab.name.charAt(0).toUpperCase()}
+                    </div>
+                  ))}
+                  {collaborators.length > 3 && (
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-gray-600 bg-gray-200 ring-2 ring-white"
+                      title={`${collaborators.length - 3} more`}
+                    >
+                      +{collaborators.length - 3}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsShareDialogOpen(true)}
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal flex-shrink-0"
               style={{ fontFamily: "inherit" }}
               title="Share this script"
             >
@@ -990,27 +992,25 @@ export default function TestTipTapPage() {
               variant="ghost"
               size="sm"
               onClick={() => router.push("/")}
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal flex-shrink-0"
               style={{ fontFamily: "inherit" }}
               title="Go to home"
             >
               <Home className="w-3.5 h-3.5 mr-1.5" />
               Home
             </Button>
-          </div>
-
-          {/* Autosave indicator - dot anchored, text extends rightward */}
-          <div
-            className="absolute flex items-center gap-1 pl-2 border-l border-gray-200"
-            style={{ left: 'calc(100% - 100px)' }}
-          >
-            <div
-              className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${combinedStatus.color} ${combinedStatus.animate ? 'animate-pulse' : ''}`}
-              title={`Yjs: ${syncStatus}, Autosave: ${autosaveState.saveState}`}
-            ></div>
-            <span className="text-[10px] text-gray-400 whitespace-nowrap" style={{ fontFamily: "inherit" }}>
-              {combinedStatus.text}
-            </span>
+            {/* Separator */}
+            <div className="w-px h-5 bg-gray-200 ml-0.5 mr-[10px] flex-shrink-0" />
+            {/* Save status indicator - fixed width to prevent layout shift */}
+            <div className="flex items-center gap-1 flex-shrink-0 w-16">
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${combinedStatus.color} ${combinedStatus.animate ? 'animate-pulse' : ''}`}
+                title={`Yjs: ${syncStatus}, Autosave: ${autosaveState.saveState}`}
+              />
+              <span className="text-[10px] text-gray-400 whitespace-nowrap" style={{ fontFamily: "inherit" }}>
+                {combinedStatus.text}
+              </span>
+            </div>
           </div>
         </div>
       </div>
