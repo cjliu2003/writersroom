@@ -23,12 +23,13 @@ import * as Y from 'yjs';
 import { yUndoPluginKey } from 'y-prosemirror';
 // @ts-ignore - pagination extension may not have types
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
+import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
 import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
 import { FindReplaceExtension, FindReplacePopup } from '@/extensions/find-replace';
 import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
-import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
+import { contentBlocksToTipTap, tipTapToContentBlocks } from '@/utils/content-blocks-converter';
 import { getScriptContent, exportFDXFile, exportPDFFile, updateScript, type ScriptWithContent } from '@/lib/api';
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs, type ChatPosition } from '@/utils/layoutPrefs';
 import {
@@ -206,6 +207,63 @@ export default function TestTipTapPage() {
     enabled: !!authToken, // Only enable when we have auth token
   });
 
+  // Editor ref for autosave content extraction (set after editor is created)
+  const editorRef = useRef<ReturnType<typeof useEditor>>(null);
+
+  // Content extraction function for REST autosave fallback
+  // Converts TipTap ProseMirror JSON to backend content_blocks format
+  const getContentBlocks = useCallback((): any[] => {
+    if (!editorRef.current) {
+      console.warn('[Autosave] No editor available for content extraction');
+      return [];
+    }
+    const tipTapDoc = editorRef.current.getJSON();
+    const blocks = tipTapToContentBlocks(tipTapDoc);
+    console.log('[Autosave] Extracted content blocks:', blocks.length);
+    return blocks;
+  }, []);
+
+  // REST autosave hook as fallback when Yjs WebSocket fails
+  // This ensures edits are NEVER lost, even if Yjs has connection issues
+  const [autosaveState, autosaveActions] = useScriptAutosave(
+    scriptId,
+    script?.current_version || 1,
+    getContentBlocks,
+    authToken,
+    {
+      debounceMs: 2000,    // Slightly longer debounce than scene-level (2s vs 1.5s)
+      maxWaitMs: 8000,     // Force save after 8 seconds of changes
+      maxRetries: 3,
+      enableOfflineQueue: true,
+    }
+  );
+
+  // CRITICAL: Trigger REST autosave when Yjs sync is NOT healthy
+  // This is the fallback that prevents data loss
+  useEffect(() => {
+    const currentEditor = editorRef.current;
+    if (!currentEditor) return;
+
+    const handleUpdate = () => {
+      // Conditions that should trigger REST autosave fallback:
+      // 1. Yjs sync status is 'error' (connection failed)
+      // 2. Yjs sync status is 'offline' (browser/network offline)
+      // 3. Yjs is still 'connecting' for too long (connection stuck)
+      const yjsUnhealthy = syncStatus === 'error' || syncStatus === 'offline' || syncStatus === 'connecting';
+
+      if (yjsUnhealthy) {
+        console.log('[Autosave] Yjs unhealthy, triggering REST fallback save. Status:', syncStatus);
+        autosaveActions.markChanged();
+      }
+    };
+
+    currentEditor.on('update', handleUpdate);
+
+    return () => {
+      currentEditor.off('update', handleUpdate);
+    };
+  }, [syncStatus, autosaveActions]);
+
   // Track collaborators via awareness for presence indicator
   useEffect(() => {
     if (!awareness) return;
@@ -312,6 +370,13 @@ export default function TestTipTapPage() {
     },
     content: !doc ? '<p>Connecting to collaboration server...</p>' : undefined,
   }, [doc, provider]);
+
+  // Keep editorRef in sync with editor instance for autosave content extraction
+  useEffect(() => {
+    if (editor) {
+      (editorRef as React.MutableRefObject<typeof editor>).current = editor;
+    }
+  }, [editor]);
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -776,13 +841,46 @@ export default function TestTipTapPage() {
   }
 
   // Get sync status color
-  const getStatusColor = (status: SyncStatus) => {
-    switch (status) {
-      case 'synced': return 'bg-green-500';
-      case 'error': return 'bg-red-500';
-      default: return 'bg-yellow-500';
+  // Get combined status from Yjs sync and REST autosave
+  // Priority: Show Yjs status when healthy, show autosave status when Yjs is failing
+  const getCombinedStatus = (): { color: string; text: string; animate: boolean } => {
+    const yjsHealthy = syncStatus === 'synced' || syncStatus === 'connected';
+
+    if (yjsHealthy) {
+      // Yjs is working - show Yjs status
+      return {
+        color: syncStatus === 'synced' ? 'bg-green-500' : 'bg-yellow-500',
+        text: syncStatus === 'synced' ? 'Saved' : 'Syncing',
+        animate: syncStatus !== 'synced'
+      };
+    }
+
+    // Yjs is unhealthy - show REST autosave status as fallback
+    switch (autosaveState.saveState) {
+      case 'saved':
+        return { color: 'bg-green-500', text: 'Saved (REST)', animate: false };
+      case 'saving':
+        return { color: 'bg-blue-500', text: 'Saving...', animate: true };
+      case 'pending':
+        return { color: 'bg-yellow-500', text: 'Pending', animate: true };
+      case 'offline':
+        return { color: 'bg-orange-500', text: 'Offline (queued)', animate: true };
+      case 'error':
+        return { color: 'bg-red-500', text: 'Error', animate: false };
+      case 'conflict':
+        return { color: 'bg-red-500', text: 'Conflict', animate: true };
+      case 'rate_limited':
+        return { color: 'bg-orange-500', text: 'Rate limited', animate: true };
+      default:
+        // Yjs is failing but autosave hasn't kicked in yet
+        if (syncStatus === 'error') {
+          return { color: 'bg-red-500', text: 'Disconnected', animate: false };
+        }
+        return { color: 'bg-yellow-500', text: 'Connecting', animate: true };
     }
   };
+
+  const combinedStatus = getCombinedStatus();
 
   return (
     <>
@@ -904,11 +1002,14 @@ export default function TestTipTapPage() {
           {/* Autosave indicator - dot anchored, text extends rightward */}
           <div
             className="absolute flex items-center gap-1 pl-2 border-l border-gray-200"
-            style={{ left: 'calc(100% - 80px)' }}
+            style={{ left: 'calc(100% - 100px)' }}
           >
-            <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getStatusColor(syncStatus)} ${syncStatus === 'synced' ? '' : 'animate-pulse'}`} title={`Status: ${syncStatus}`}></div>
+            <div
+              className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${combinedStatus.color} ${combinedStatus.animate ? 'animate-pulse' : ''}`}
+              title={`Yjs: ${syncStatus}, Autosave: ${autosaveState.saveState}`}
+            ></div>
             <span className="text-[10px] text-gray-400 whitespace-nowrap" style={{ fontFamily: "inherit" }}>
-              {syncStatus === 'synced' ? 'Saved' : syncStatus === 'connecting' ? 'Syncing' : syncStatus === 'connected' ? 'Synced' : syncStatus.charAt(0).toUpperCase() + syncStatus.slice(1)}
+              {combinedStatus.text}
             </span>
           </div>
         </div>

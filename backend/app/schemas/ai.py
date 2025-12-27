@@ -71,6 +71,17 @@ class IntentType(str, Enum):
     BRAINSTORM = "brainstorm"
 
 
+class TopicMode(str, Enum):
+    """
+    Topic continuity mode for history gating.
+
+    Determines whether the current message is a follow-up to the
+    previous conversation or a new topic requiring fresh context.
+    """
+    FOLLOW_UP = "follow_up"  # Continue previous topic - include last response
+    NEW_TOPIC = "new_topic"   # New topic - skip recent history, use full context
+
+
 class BudgetTier(str, Enum):
     """Token budget tiers."""
     QUICK = "quick"          # 1200 tokens
@@ -218,6 +229,8 @@ class ToolCallMetadata(BaseModel):
     tool_calls_made: int = Field(..., description="Number of tool calling iterations")
     tools_used: List[str] = Field(..., description="Names of tools called (e.g., ['get_scene', 'analyze_pacing'])")
     stop_reason: str = Field(..., description="'end_turn' (natural) or 'max_iterations' (limit reached)")
+    # P0.3: Track recovery attempts for max_tokens truncation handling
+    recovery_attempts: int = Field(0, description="Number of recovery attempts made after max_tokens truncation")
 
 
 class ChatMessageResponse(BaseModel):

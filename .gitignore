@@ -33,9 +33,11 @@ writersRoom/
 .idea/
 *.swp
 *.swo
+.claude/
 
 # Logs
 *.log
+backend/logs/
 
 # Local development
 .DS_Store

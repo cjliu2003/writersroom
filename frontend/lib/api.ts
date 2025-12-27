@@ -535,6 +535,59 @@ export async function* sendChatMessageWithStatusStream(
   }
 }
 
+// Delete conversation from database (clears messages and conversation record)
+export async function deleteConversation(conversationId: string): Promise<{ success: boolean; message: string }> {
+  const response = await authenticatedFetch(`/ai/chat/conversations/${conversationId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    // 404 is acceptable - conversation may already be deleted
+    if (response.status === 404) {
+      return { success: true, message: 'Conversation already deleted' };
+    }
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to delete conversation');
+  }
+
+  return response.json();
+}
+
+// Response type for conversation history
+export interface ConversationHistoryResponse {
+  conversation: {
+    conversation_id: string;
+    user_id: string;
+    script_id: string;
+    current_scene_id: string | null;
+    title: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+    message_count: number;
+  } | null;
+  messages: Array<{
+    message_id: string;
+    conversation_id: string;
+    sender: string;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    created_at: string;
+  }>;
+}
+
+// Get conversation history for a script from the database
+// This is the source of truth - replaces localStorage-based history
+export async function getConversationForScript(scriptId: string): Promise<ConversationHistoryResponse> {
+  const response = await authenticatedFetch(`/ai/chat/script/${scriptId}/conversation`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to fetch conversation history');
+  }
+
+  return response.json();
+}
+
 // Collaborator API functions
 export interface Collaborator {
   user_id: string;

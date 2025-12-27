@@ -1,6 +1,35 @@
-10:42:50 ai_ingestion: app.tasks.ai_ingestion_worker.analyze_script_full('b9265801-3835-45f2-89d2-69743f754526') (d37bcb1d-e866-4291-b32e-9d485e8abda1)
-Character sheet generation failed: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
-Embedding generation failed: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
-PHASE 2 completed with errors: sheets: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce); embeddings: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
-10:44:13 ai_ingestion: Job OK (d37bcb1d-e866-4291-b32e-9d485e8abda1)
-10:44:13 Result is kept for 500 seconds
+○ Compiling /script-editor ...
+ ⨯ ./app/script-editor/page.tsx:26:1
+Module not found: Can't resolve '@/hooks/use-script-autosave'
+  24 | // @ts-ignore - pagination extension may not have types
+  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
+> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
+     | ^
+  27 | import { useAuth } from '@/contexts/AuthContext';
+  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
+  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
+
+https://nextjs.org/docs/messages/module-not-found
+ ⨯ ./app/script-editor/page.tsx:26:1
+Module not found: Can't resolve '@/hooks/use-script-autosave'
+  24 | // @ts-ignore - pagination extension may not have types
+  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
+> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
+     | ^
+  27 | import { useAuth } from '@/contexts/AuthContext';
+  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
+  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
+
+https://nextjs.org/docs/messages/module-not-found
+ ⨯ ./app/script-editor/page.tsx:26:1
+Module not found: Can't resolve '@/hooks/use-script-autosave'
+  24 | // @ts-ignore - pagination extension may not have types
+  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
+> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
+     | ^
+  27 | import { useAuth } from '@/contexts/AuthContext';
+  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
+  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
+
+https://nextjs.org/docs/messages/module-not-found
+ GET /script-editor?scriptId=7e399408-010e-4910-9d3e-ade06c9e619e 500 in 5ms

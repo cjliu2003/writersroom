@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { MarkdownContent } from "@/components/ui/markdown-content"
 import { Send, Loader2, ChevronDown, ChevronLeft, ChevronRight, Sparkles, PanelLeft, PanelRight, PanelBottom, Trash2 } from "lucide-react"
-import { sendChatMessageWithStatusStream, type ChatMessage, type ToolCallMetadata, type ChatStreamEvent } from "@/lib/api"
+import { sendChatMessageWithStatusStream, deleteConversation, getConversationForScript, type ChatMessage, type ToolCallMetadata, type ChatStreamEvent } from "@/lib/api"
 import { type ChatPosition } from "@/utils/layoutPrefs"
 
 interface AIChatbotProps {
@@ -57,27 +58,38 @@ export function AIChatbot({
     })
   }
 
-  // Load conversation history from localStorage
+  // Load conversation history from database (source of truth)
   useEffect(() => {
-    if (projectId) {
-      const saved = localStorage.getItem(`chat-${projectId}`)
-      if (saved) {
-        try {
-          const savedMessages = JSON.parse(saved)
-          setMessages(savedMessages)
-        } catch (error) {
-          console.error('Failed to load chat history:', error)
+    if (!projectId) return
+
+    const loadConversation = async () => {
+      try {
+        const response = await getConversationForScript(projectId)
+
+        if (response.conversation && response.messages.length > 0) {
+          // Set conversation ID for future messages
+          setConversationId(response.conversation.conversation_id)
+
+          // Transform DB messages to our format (filter out system messages for display)
+          const loadedMessages: ExtendedChatMessage[] = response.messages
+            .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+            .map(msg => ({
+              role: msg.role as 'user' | 'assistant',
+              content: msg.content,
+              timestamp: msg.created_at
+            }))
+
+          setMessages(loadedMessages)
+          console.log('[AIChatbot] Loaded conversation from database:', response.conversation.conversation_id)
         }
+      } catch (error) {
+        console.error('[AIChatbot] Failed to load conversation from database:', error)
+        // Silently fail - user can start a new conversation
       }
     }
-  }, [projectId])
 
-  // Save conversation history to localStorage
-  useEffect(() => {
-    if (projectId && messages.length > 0) {
-      localStorage.setItem(`chat-${projectId}`, JSON.stringify(messages))
-    }
-  }, [projectId, messages])
+    loadConversation()
+  }, [projectId])
 
   // Auto-scroll to bottom when new messages arrive (e.g., AI response)
   useEffect(() => {
@@ -190,11 +202,20 @@ export function AIChatbot({
     }
   }
 
-  // Clear chat history (both localStorage and state)
-  const clearChat = () => {
-    if (projectId) {
-      localStorage.removeItem(`chat-${projectId}`)
+  // Clear chat history (database and UI state)
+  const clearChat = async () => {
+    // Delete from database if we have a conversation ID
+    if (conversationId) {
+      try {
+        await deleteConversation(conversationId)
+        console.log('[AIChatbot] Conversation deleted from database:', conversationId)
+      } catch (error) {
+        // Log but don't block UI - conversation will be orphaned but user experience is preserved
+        console.error('[AIChatbot] Failed to delete conversation from database:', error)
+      }
     }
+
+    // Clear UI state
     setMessages([])
     setConversationId(undefined)
     setShowClearConfirm(false)
@@ -383,7 +404,11 @@ export function AIChatbot({
                         : 'bg-white text-gray-700 border border-gray-200/80 rounded-2xl rounded-bl-md shadow-sm'
                     }`}
                   >
-                    <p className="whitespace-pre-wrap m-0">{message.content}</p>
+                    {message.role === 'user' ? (
+                      <p className="whitespace-pre-wrap m-0">{message.content}</p>
+                    ) : (
+                      <MarkdownContent content={message.content} />
+                    )}
                   </div>
                 </div>
               ))

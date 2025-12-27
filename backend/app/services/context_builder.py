@@ -15,9 +15,10 @@ import tiktoken
 from app.models.script_outline import ScriptOutline
 from app.models.character_sheet import CharacterSheet
 from app.models.scene import Scene
-from app.schemas.ai import IntentType, BudgetTier
+from app.schemas.ai import IntentType, BudgetTier, TopicMode
 from app.services.retrieval_service import RetrievalService
 from app.services.conversation_service import ConversationService
+from app.services.topic_detector import TopicDetector
 from app.core.config import settings
 
 
@@ -42,6 +43,7 @@ class ContextBuilder:
         self.db = db
         self.retrieval_service = RetrievalService(db)
         self.conversation_service = ConversationService(db)
+        self.topic_detector = TopicDetector()
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
 
     async def build_prompt(
@@ -51,7 +53,9 @@ class ContextBuilder:
         intent: IntentType,
         conversation_id: Optional[UUID] = None,
         current_scene_id: Optional[UUID] = None,
-        budget_tier: BudgetTier = BudgetTier.STANDARD
+        budget_tier: BudgetTier = BudgetTier.STANDARD,
+        skip_scene_retrieval: bool = False,
+        tools_enabled: bool = False
     ) -> Dict:
         """
         Build optimized prompt with caching structure.
@@ -70,6 +74,7 @@ class ContextBuilder:
         [CACHEABLE - Updates on retrieval change]
         3. Scene cards (~300 tokens)
            - Retrieved scene summaries
+           - SKIPPED when tools_enabled=True (Claude can fetch via tools)
 
         [NOT CACHED - Every request]
         4. Conversation context (~200 tokens)
@@ -83,6 +88,8 @@ class ContextBuilder:
             conversation_id: Optional conversation ID
             current_scene_id: Optional current scene
             budget_tier: Token budget tier
+            skip_scene_retrieval: If True, skip scene card retrieval (use when tools enabled)
+            tools_enabled: If True, adjust system prompt for tool-assisted mode
 
         Returns:
             Dict with model, max_tokens, system, messages, and metadata
@@ -93,9 +100,9 @@ class ContextBuilder:
 
         total_budget = self.BUDGET_TIERS[budget_tier]
 
-        # 1. System prompt (cacheable)
+        # 1. System prompt (cacheable) - adjust for tools mode
         step_start = time.perf_counter()
-        system_prompt = self._get_system_prompt(intent)
+        system_prompt = self._get_system_prompt(intent, tools_enabled=tools_enabled)
         system_tokens = self._count_tokens(system_prompt)
         logger.info(f"[CONTEXT] System prompt generation took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
@@ -105,36 +112,81 @@ class ContextBuilder:
         global_tokens = self._count_tokens(global_context)
         logger.info(f"[CONTEXT] Global context fetch took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
-        # 3. Retrieved scene cards (cacheable)
-        step_start = time.perf_counter()
-        retrieval_result = await self.retrieval_service.retrieve_for_intent(
-            script_id=script_id,
-            message=message,
-            intent=intent,
-            current_scene_id=current_scene_id
-        )
-        logger.info(f"[CONTEXT] Retrieval service took {(time.perf_counter() - step_start) * 1000:.2f}ms")
+        # 3. Retrieved scene cards (cacheable) - SKIP if tools enabled
+        # When tools are enabled, Claude can fetch scenes dynamically via tools,
+        # so including pre-fetched scene cards creates redundancy and confusion
+        scene_cards = ""
+        scene_tokens = 0
+        if not skip_scene_retrieval:
+            step_start = time.perf_counter()
+            retrieval_result = await self.retrieval_service.retrieve_for_intent(
+                script_id=script_id,
+                message=message,
+                intent=intent,
+                current_scene_id=current_scene_id
+            )
+            logger.info(f"[CONTEXT] Retrieval service took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
-        step_start = time.perf_counter()
-        scene_cards = self._format_scene_cards(retrieval_result["scenes"])
-        scene_tokens = self._count_tokens(scene_cards)
-        logger.info(f"[CONTEXT] Scene card formatting took {(time.perf_counter() - step_start) * 1000:.2f}ms")
+            step_start = time.perf_counter()
+            scene_cards = self._format_scene_cards(retrieval_result["scenes"])
+            scene_tokens = self._count_tokens(scene_cards)
+            logger.info(f"[CONTEXT] Scene card formatting took {(time.perf_counter() - step_start) * 1000:.2f}ms")
+        else:
+            logger.info(f"[CONTEXT] Skipping scene retrieval (tools_enabled={tools_enabled})")
 
-        # 4. Conversation context (not cached)
-        # conv_data is used later for building proper alternating messages
+        # 4. Conversation context (not cached) with topic-aware history gating
+        # P2 Implementation: Detect if this is a follow-up or new topic to optimize context
         conv_context = ""
         conv_tokens = 0
         conv_data = None
+        topic_mode = TopicMode.NEW_TOPIC  # Default for new conversations
+        topic_confidence = 1.0
+
         if conversation_id:
             conv_data = await self.conversation_service.get_conversation_context(
                 conversation_id,
                 token_budget=min(300, total_budget // 6)
             )
-            # We no longer format conversation into a single text block
-            # Instead, conv_data is used directly to build proper alternating messages
-            # conv_context = self._format_conversation(conv_data)
-            # conv_tokens = self._count_tokens(conv_context)
-            # Estimate tokens for the raw conversation messages
+
+            # Detect topic mode for history gating
+            if conv_data and conv_data.get("recent_messages"):
+                recent_msgs = conv_data["recent_messages"]
+
+                # Get last user and assistant messages for topic detection
+                last_user_msg = None
+                last_assistant_msg = None
+                for msg in reversed(recent_msgs):
+                    role = msg['role'].value if hasattr(msg['role'], 'value') else str(msg['role'])
+                    if role.lower() == "user" and last_user_msg is None:
+                        last_user_msg = msg.get("content", "")
+                    elif role.lower() == "assistant" and last_assistant_msg is None:
+                        last_assistant_msg = msg.get("content", "")
+                    if last_user_msg and last_assistant_msg:
+                        break
+
+                topic_mode, topic_confidence = await self.topic_detector.detect_mode(
+                    current_message=message,
+                    last_assistant_message=last_assistant_msg,
+                    last_user_message=last_user_msg
+                )
+
+                logger.info(
+                    f"[CONTEXT] Topic mode: {topic_mode.value} "
+                    f"(confidence: {topic_confidence:.2f})"
+                )
+
+            # Gate conversation history based on topic mode
+            if topic_mode == TopicMode.NEW_TOPIC:
+                # Fresh start - clear conversation history to avoid confusion
+                # Keep summary if available, but skip recent messages
+                if conv_data:
+                    conv_data["recent_messages"] = []
+                    logger.info("[CONTEXT] NEW_TOPIC: Skipping recent conversation history")
+            else:
+                # Follow-up - include recent history as normal
+                logger.info("[CONTEXT] FOLLOW_UP: Including conversation history")
+
+            # Estimate tokens for the conversation messages (after gating)
             for msg in conv_data.get("recent_messages", []):
                 conv_tokens += self._count_tokens(msg.get("content", ""))
 
@@ -212,6 +264,11 @@ class ContextBuilder:
         messages = []
 
         # If we have context, start with a context-setting user message
+        # NOTE: We do NOT add a fake assistant acknowledgment here. Adding a fake
+        # "I understand..." response causes Claude to think it already responded
+        # and it will try to continue from that fake response, causing responses
+        # to feel like they "start out of nowhere" or are continuations.
+        # Instead, we let the context flow naturally into the user's actual question.
         if context_blocks:
             context_blocks.append({
                 "type": "text",
@@ -220,11 +277,6 @@ class ContextBuilder:
             messages.append({
                 "role": "user",
                 "content": context_blocks
-            })
-            # Add a brief assistant acknowledgment to maintain alternation
-            messages.append({
-                "role": "assistant",
-                "content": "I understand. I've reviewed the screenplay context provided. How can I help you with your screenplay?"
             })
 
         # Add conversation history as properly alternating messages
@@ -282,6 +334,8 @@ class ContextBuilder:
             "metadata": {
                 "intent": intent,
                 "budget_tier": budget_tier,
+                "topic_mode": topic_mode,
+                "topic_confidence": topic_confidence,
                 "tokens_used": {
                     "system": system_tokens,
                     "global": global_tokens,
@@ -294,12 +348,13 @@ class ContextBuilder:
             }
         }
 
-    def _get_system_prompt(self, intent: IntentType) -> str:
+    def _get_system_prompt(self, intent: IntentType, tools_enabled: bool = False) -> str:
         """
-        Get system prompt tailored to intent.
+        Get system prompt tailored to intent and tool mode.
 
         Args:
             intent: User intent type
+            tools_enabled: If True, adjust prompt for tool-assisted mode
 
         Returns:
             System prompt string
@@ -315,6 +370,38 @@ Key guidelines:
 - Provide specific, actionable feedback
 
 IMPORTANT: When conversation history is provided, it is for CONTEXT ONLY. Always start your response fresh and complete - never continue or complete a previous response. Each of your responses should stand alone as a complete answer."""
+
+        # When tools are enabled, add tool-specific guidance
+        # This replaces the inline tool instructions that were appended in ai_router.py
+        if tools_enabled:
+            base += """
+
+TOOL USAGE INSTRUCTIONS:
+You have access to tools that allow you to retrieve and analyze screenplay content dynamically.
+
+SCENE INDEXING (CRITICAL): Tools use 0-based indexing. When a user mentions "Scene 5",
+use scene_index=4 (subtract 1 from the scene number).
+Examples: Scene 1 = index 0, Scene 5 = index 4, Scene 10 = index 9.
+
+EFFICIENCY: If the user asks about a specific scene by number, ONE get_scene call
+is sufficient. Only fetch multiple scenes if comparison or broader context is needed.
+
+MULTIPLE RESULTS: When you receive multiple tool results, synthesize ALL of them equally.
+Do NOT focus only on the most recent result - earlier results often contain key information.
+
+When answering questions:
+- Use tools to get accurate, up-to-date information from the screenplay
+- Provide specific scene numbers, character names, and quotes from tool results
+- The global context above (outline, characters) gives you overview; tools give you precision
+- After gathering information, synthesize ALL results into a clear, well-organized answer
+
+Available tools:
+- get_scene: Get full scene text (scene_index is 0-based: Scene 5 = index 4)
+- get_scene_context: Get scene plus surrounding scenes for context
+- get_character_scenes: Track all appearances of a character
+- search_script: Semantic/keyword search across the script
+- analyze_pacing: Get quantitative pacing metrics (scene lengths, dialogue ratio)
+- get_plot_threads: Retrieve plot thread and thematic information"""
 
         intent_additions = {
             IntentType.LOCAL_EDIT: "\n\nFocus on improving dialogue and action lines. Be concise and specific.",
@@ -473,3 +560,146 @@ IMPORTANT: When conversation history is provided, it is for CONTEXT ONLY. Always
             current_tokens += line_tokens
 
         return '\n'.join(current_text)
+
+    # =========================================================================
+    # P1.3: Tool-Only Mode and Synthesis Prompts
+    # =========================================================================
+
+    def get_tool_loop_system_prompt(self) -> str:
+        """
+        Get system prompt optimized for tool-only mode during tool loop iterations.
+
+        P1.3 Implementation: This prompt enforces that the model outputs ONLY tool
+        calls, no prose. This prevents wasted tokens and truncation mid-thought.
+
+        Returns:
+            System prompt string for tool loop iterations
+        """
+        return """You are an expert screenplay analyst with access to tools.
+
+CRITICAL INSTRUCTION: In this phase, output ONLY tool calls.
+- Do NOT write any user-facing text
+- Do NOT explain what you're doing
+- Do NOT provide partial answers
+- ONLY call tools to gather information
+
+When you have gathered enough information to answer, call no tools.
+The next phase will ask you to synthesize a response.
+
+SCENE INDEXING: Tools use 0-based indexing.
+- Scene 1 = index 0
+- Scene 5 = index 4
+- Scene 10 = index 9
+When the user says "Scene N", use scene_index = N - 1.
+
+BATCH TOOLS: For efficiency, prefer batch tools when fetching multiple scenes:
+- get_scenes: Fetch multiple scenes at once (max 10)
+- get_scenes_context: Fetch multiple scenes with their neighbors
+
+Available tools:
+- get_scene / get_scenes: Get scene text (use batch when fetching multiple)
+- get_scene_context / get_scenes_context: Get scene with neighbors
+- get_character_scenes: Track character appearances
+- search_script: Semantic search across scenes
+- analyze_pacing: Quantitative pacing metrics (no LLM tokens)
+- get_plot_threads: Plot thread information
+- get_scene_relationships: Scene connections and foreshadowing"""
+
+    def get_synthesis_format_instructions(self, intent: IntentType = None) -> str:
+        """
+        Get format constraints for the synthesis phase.
+
+        P1.3 Implementation: Replace token-based limits with structural constraints
+        that models follow better - word budgets and bullet limits.
+
+        Args:
+            intent: Optional intent type for intent-specific formatting
+
+        Returns:
+            Format instruction string
+        """
+        # Intent-specific format constraints
+        intent_formats = {
+            IntentType.LOCAL_EDIT: """
+FORMAT REQUIREMENTS:
+- Provide exactly one revised version
+- Maximum 3 sentences of explanation before the revision
+- The revision should be clearly marked with "REVISED:" prefix
+- Maximum 150 words total""",
+
+            IntentType.SCENE_FEEDBACK: """
+FORMAT REQUIREMENTS:
+Structure your response as:
+1. Main Strength (1-2 sentences)
+2. Area for Improvement (1-2 sentences)
+3. Specific Suggestion (1-2 sentences)
+Maximum 150 words total.""",
+
+            IntentType.GLOBAL_QUESTION: """
+FORMAT REQUIREMENTS:
+- Maximum 5 bullet points
+- Each bullet: scene reference + specific observation
+- Lead with the most significant finding
+- Be specific: cite scene numbers and quote key lines
+- Maximum 200 words total""",
+
+            IntentType.BRAINSTORM: """
+FORMAT REQUIREMENTS:
+- Provide 3-5 distinct options
+- Each option: 1-2 sentences
+- Briefly note trade-offs for each
+- Maximum 200 words total"""
+        }
+
+        # Default format for unknown intents
+        default_format = """
+RESPONSE FORMAT REQUIREMENTS (CRITICAL):
+1. Maximum 200 words
+2. Maximum 5 bullet points if listing
+3. Lead with the most important finding
+4. Be specific: cite scene numbers, quote key lines
+5. Do not mention tools, evidence, or analysis process
+
+If you cannot fit everything, prioritize the MOST IMPORTANT information first.
+Truncation from the end is acceptable; truncation of the key insight is not."""
+
+        return intent_formats.get(intent, default_format)
+
+    def build_synthesis_prompt(
+        self,
+        evidence_text: str,
+        user_question: str,
+        intent: IntentType = None
+    ) -> str:
+        """
+        Build the synthesis prompt with evidence and format constraints.
+
+        P1.3 Implementation: Provides clean evidence to Claude for synthesis,
+        replacing the raw tool dump approach.
+
+        Args:
+            evidence_text: Formatted evidence from EvidenceBuilder
+            user_question: Original user question
+            intent: Optional intent for format customization
+
+        Returns:
+            Complete synthesis prompt string
+        """
+        format_instructions = self.get_synthesis_format_instructions(intent)
+
+        return f"""Answer this question: {user_question}
+
+Using this evidence:
+{evidence_text}
+
+{format_instructions}
+
+CRITICAL INSTRUCTIONS FOR YOUR RESPONSE:
+1. Start DIRECTLY with the answer - no preamble, no "Now I can...", no "Based on..."
+2. Write as if you inherently know this information - never reference tools, evidence, or analysis
+3. Never say phrases like "Now I can give you feedback" or "Having reviewed" or "Let me analyze"
+4. Jump straight into the substance: if giving feedback, start with the feedback itself
+5. Your response should read as natural expert knowledge, not as a report of findings
+
+BAD starts (never use): "Now I can...", "Based on the evidence...", "Having gathered...", "Let me provide..."
+GOOD starts: Direct statement of the answer, insight, or feedback itself."""

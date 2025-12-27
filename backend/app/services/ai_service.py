@@ -14,6 +14,9 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Default max tokens for RAG-only mode (P0.2 fix: increased from 600)
+RAG_ONLY_DEFAULT_MAX_TOKENS = 1200
+
 
 class AIService:
     """
@@ -34,10 +37,30 @@ class AIService:
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
         self.db = db
 
+    def _extract_all_text(self, content_blocks) -> str:
+        """
+        Extract and concatenate all text blocks from Claude response.
+
+        P0.1 fix: Anthropic responses can contain multiple content blocks.
+        Previously we only returned content[0].text, which dropped any
+        additional text blocks. This method extracts ALL text content.
+
+        Args:
+            content_blocks: List of content blocks from response.content
+
+        Returns:
+            Concatenated text from all text-type blocks, joined by newlines
+        """
+        text_parts = []
+        for block in content_blocks:
+            if hasattr(block, 'type') and block.type == "text":
+                text_parts.append(block.text)
+        return "\n".join(text_parts) if text_parts else ""
+
     async def generate_response(
         self,
         prompt: dict,
-        max_tokens: int = 600,
+        max_tokens: int = RAG_ONLY_DEFAULT_MAX_TOKENS,
         stream: bool = False
     ) -> Dict:
         """
@@ -65,8 +88,9 @@ class AIService:
                 messages=prompt["messages"]
             )
 
+            # P0.1 fix: Extract ALL text blocks, not just content[0].text
             return {
-                "content": response.content[0].text,
+                "content": self._extract_all_text(response.content),
                 "usage": {
                     "input_tokens": response.usage.input_tokens,
                     "cache_creation_input_tokens": getattr(
@@ -197,8 +221,9 @@ class AIService:
             if response.stop_reason != "tool_use":
                 # LLM provided final answer without needing tools
                 logger.info(f"Chat completed after {iteration} tool call iterations")
+                # P0.1 fix: Extract ALL text blocks, not just content[0].text
                 return {
-                    "content": response.content[0].text if response.content else "",
+                    "content": self._extract_all_text(response.content) if response.content else "",
                     "usage": {
                         "input_tokens": response.usage.input_tokens,
                         "cache_creation_input_tokens": getattr(

@@ -332,6 +332,7 @@ export default function HomePage() {
       });
     } catch (e: any) {
       // On error, revert to stored original values
+      // Use nullish coalescing to ensure description is string | null (not undefined)
       setScripts(prev => prev.map(s =>
         s.script_id === scriptId
           ? { ...s, title: originalTitle || trimmedTitle, description: originalDescription ?? null }

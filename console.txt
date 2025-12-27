@@ -1,105 +1,313 @@
-[fetchWithTimeout] Fetch completed in 7466ms for: http://localhost:8000/api/users/me/scripts
-api.ts:22 [fetchWithTimeout] Fetch completed in 16958ms for: http://localhost:8000/api/users/me/collaborations
-page.tsx:102 [HomePage] Owned scripts count: 1
-page.tsx:103 [HomePage] Shared scripts count: 2
-page.tsx:104 [HomePage] Shared scripts data: Array(2)
-page.tsx:109 [HomePage] State updated - sharedScripts now set to: Array(2)
-hot-reloader-client.js:187 [Fast Refresh] rebuilding
-hot-reloader-client.js:44 [Fast Refresh] done in 637ms
-index.js:986 Tiptap Error: SSR has been detected, please set `immediatelyRender` explicitly to `false` to avoid hydration mismatches.
-getInitialEditor @ index.js:986Understand this warning
-tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: Object
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-page.tsx:123 [TipTapEditor] Fetching script content for: 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-use-script-yjs-collaboration.ts:174 [ScriptYjsCollaboration] Connecting to: ws://localhost:8000/api/ws/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f?token=***
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: Object
-smart-enter-plugin.ts:118 [SmartEnter] Skipped - pos <= 1
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: Object
-smart-enter-plugin.ts:118 [SmartEnter] Skipped - pos <= 1
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: Object
-tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: Object
-api.ts:43 [api] requesting http://localhost:8000/api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content token? true retry: 0
-api.ts:19 [fetchWithTimeout] Starting fetch to: http://localhost:8000/api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content with timeout 30000ms
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
-api.ts:22 [fetchWithTimeout] Fetch completed in 6868ms for: http://localhost:8000/api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content
-page.tsx:128 [TipTapEditor] Script content received: Object
-page.tsx:157 [TipTapEditor] Converted to TipTap document: Object
-page.tsx:163 [TipTapEditor] Storing content for application to editor
-page.tsx:173 [TipTapEditor] Yjs updates exist, keeping loading screen until sync completes
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connected
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: offline
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connecting
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connected
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: offline
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connecting
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connected
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-hot-reloader-client.js:187 [Fast Refresh] rebuilding
-hot-reloader-client.js:44 [Fast Refresh] done in 21ms
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: true, code: 1005, reason: '', type: 'close', …}
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: offline
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connecting
-use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
-page.tsx:320 [TestTipTap] Waiting for sync before seeding, current status: connected
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: true
-smart-enter-plugin.ts:58 [SmartEnter] Current node: {type: 'sceneHeading', pos: 0, contentSize: 55, nodeContent: 'INT. HALLWAY - SASKATOON POLICE DEPARTMENT – NIGHT TEST'}
-smart-enter-plugin.ts:118 [SmartEnter] Skipped - pos <= 1
-smart-enter-plugin.ts:121 [SmartEnter] Modified: false
-tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: {sceneCount: 148, totalBlocks: 3317, scenes: Array(148)}
-use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update {bytes: 251968, origin: 'WebsocketProvider'}
-use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
-page.tsx:328 [TestTipTap] Skipping setContent - Yjs updates exist in database (Yjs is source of truth)
-page.tsx:362 [TipTapEditor] Yjs sync complete, hiding loading screen
-smart-enter-plugin.ts:38 [SmartEnter] appendTransaction called
-smart-enter-plugin.ts:48 [SmartEnter] hasSplit: false
+script-editor?scriptId=7e399408-010e-4910-9d3e-ade06c9e619e:1 Access to fetch at 'http://localhost:8000/api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversation' from origin 'http://localhost:3102' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+api.ts:20  GET http://localhost:8000/api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversation net::ERR_FAILED 500 (Internal Server Error)
+fetchWithTimeout @ api.ts:20
+authenticatedFetch @ api.ts:56
+await in authenticatedFetch
+getConversationForScript @ api.ts:556
+loadConversation @ ai-chatbot.tsx:67
+eval @ ai-chatbot.tsx:91
+commitHookEffectListMount @ react-dom.development.js:21102
+commitHookPassiveMountEffects @ react-dom.development.js:23154
+commitPassiveMountOnFiber @ react-dom.development.js:23259
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23334
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23334
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23267
+commitPassiveMountEffects @ react-dom.development.js:23225
+flushPassiveEffectsImpl @ react-dom.development.js:26497
+flushPassiveEffects @ react-dom.development.js:26438
+performSyncWorkOnRoot @ react-dom.development.js:24870
+flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
+flushSyncWorkOnAllRoots @ react-dom.development.js:7718
+commitRootImpl @ react-dom.development.js:26369
+commitRoot @ react-dom.development.js:26077
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+api.ts:26 [fetchWithTimeout] Fetch failed after 16048ms: TypeError Failed to fetch for: http://localhost:8000/api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversation
+window.console.error @ app-index.js:33
+console.error @ hydration-error-info.js:63
+fetchWithTimeout @ api.ts:26
+await in fetchWithTimeout
+authenticatedFetch @ api.ts:56
+await in authenticatedFetch
+getConversationForScript @ api.ts:556
+loadConversation @ ai-chatbot.tsx:67
+eval @ ai-chatbot.tsx:91
+commitHookEffectListMount @ react-dom.development.js:21102
+commitHookPassiveMountEffects @ react-dom.development.js:23154
+commitPassiveMountOnFiber @ react-dom.development.js:23259
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23334
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23334
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23256
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23370
+recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
+commitPassiveMountOnFiber @ react-dom.development.js:23267
+commitPassiveMountEffects @ react-dom.development.js:23225
+flushPassiveEffectsImpl @ react-dom.development.js:26497
+flushPassiveEffects @ react-dom.development.js:26438
+performSyncWorkOnRoot @ react-dom.development.js:24870
+flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
+flushSyncWorkOnAllRoots @ react-dom.development.js:7718
+commitRootImpl @ react-dom.development.js:26369
+commitRoot @ react-dom.development.js:26077
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+ai-chatbot.tsx:86 [AIChatbot] Failed to load conversation from database: TypeError: Failed to fetch
+    at fetchWithTimeout (api.ts:20:23)
+    at authenticatedFetch (api.ts:56:26)
+    at async getConversationForScript (api.ts:556:20)
+    at async loadConversation (ai-chatbot.tsx:67:26)

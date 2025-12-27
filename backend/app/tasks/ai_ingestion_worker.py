@@ -35,6 +35,7 @@ from app.services.script_state_service import ScriptStateService
 from app.services.ingestion_service import IngestionService
 from app.services.embedding_service import EmbeddingService
 from app.services.ai_scene_service import AISceneService
+from app.services.narrative_analysis_service import NarrativeAnalysisService
 
 # Import all models explicitly to ensure they're registered with SQLAlchemy's mapper registry
 # This prevents "failed to locate a name" errors when resolving model relationships in background workers
@@ -283,6 +284,46 @@ async def _refresh_character_sheet_async(script_id: UUID, character_name: str) -
 
         except Exception as e:
             logger.error(f"Error refreshing character sheet for {character_name}: {str(e)}")
+            return {"success": False, "error": str(e)}
+
+
+def refresh_narrative_analysis(script_id: str) -> dict:
+    """
+    Regenerate plot threads and scene relationships.
+
+    Args:
+        script_id: Script ID (string UUID)
+
+    Returns:
+        Dict with success status and counts
+    """
+    return asyncio.run(_refresh_narrative_analysis_async(UUID(script_id)))
+
+
+async def _refresh_narrative_analysis_async(script_id: UUID) -> dict:
+    """
+    Async implementation of narrative analysis refresh.
+    """
+    async with AsyncSessionLocal() as db:
+        try:
+            logger.info(f"Refreshing narrative analysis for script {script_id}")
+
+            narrative_service = NarrativeAnalysisService(db)
+            result = await narrative_service.batch_analyze_narrative(
+                script_id,
+                force_regenerate=True
+            )
+
+            logger.info(f"Narrative analysis refresh complete for script {script_id}")
+
+            return {
+                "success": True,
+                "script_id": str(script_id),
+                **result
+            }
+
+        except Exception as e:
+            logger.error(f"Error refreshing narrative analysis for script {script_id}: {str(e)}")
             return {"success": False, "error": str(e)}
 
 
