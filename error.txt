@@ -1,1 +1,35 @@
-Response: I have gathered sufficient information from the single scene retrieval to provide complete feedback on Scene 4's dialogue. No additional tool calls are needed at this time.
+○ Compiling /script-editor ...
+ ⨯ ./app/script-editor/page.tsx:26:1
+Module not found: Can't resolve '@/hooks/use-script-autosave'
+  24 | // @ts-ignore - pagination extension may not have types
+  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
+> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
+     | ^
+  27 | import { useAuth } from '@/contexts/AuthContext';
+  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
+  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
+
+https://nextjs.org/docs/messages/module-not-found
+ ⨯ ./app/script-editor/page.tsx:26:1
+Module not found: Can't resolve '@/hooks/use-script-autosave'
+  24 | // @ts-ignore - pagination extension may not have types
+  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
+> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
+     | ^
+  27 | import { useAuth } from '@/contexts/AuthContext';
+  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
+  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
+
+https://nextjs.org/docs/messages/module-not-found
+ ⨯ ./app/script-editor/page.tsx:26:1
+Module not found: Can't resolve '@/hooks/use-script-autosave'
+  24 | // @ts-ignore - pagination extension may not have types
+  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
+> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
+     | ^
+  27 | import { useAuth } from '@/contexts/AuthContext';
+  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
+  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
+
+https://nextjs.org/docs/messages/module-not-found
+ GET /script-editor?scriptId=7e399408-010e-4910-9d3e-ade06c9e619e 500 in 5ms

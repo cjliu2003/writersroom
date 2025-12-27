@@ -404,7 +404,11 @@ export function AIChatbot({
                         : 'bg-white text-gray-700 border border-gray-200/80 rounded-2xl rounded-bl-md shadow-sm'
                     }`}
                   >
-                    <p className="whitespace-pre-wrap m-0">{message.content}</p>
+                    {message.role === 'user' ? (
+                      <p className="whitespace-pre-wrap m-0">{message.content}</p>
+                    ) : (
+                      <MarkdownContent content={message.content} />
+                    )}
                   </div>
                 </div>
               ))

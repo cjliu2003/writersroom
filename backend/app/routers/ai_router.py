@@ -457,37 +457,29 @@ async def _handle_tool_loop(
             else:
                 logger.info(f"Tool loop ended with stop_reason='{response.stop_reason}' after {iteration + 1} iteration(s)")
 
-            # P0.3 FIX: Determine if synthesis is needed based on two conditions:
+            # P0.3 FIX: ALWAYS synthesize when tool results exist.
             #
-            # 1. POST-RECOVERY (deterministic): If we recovered from max_tokens truncation,
-            #    ALWAYS synthesize because RECOVERY_PROMPT explicitly told Claude to
-            #    "output ONLY tool calls - no explanations", so any text is NOT the answer.
+            # Rationale: The tool loop phase doesn't have anti-preamble instructions,
+            # so the model often produces responses like "Now I can give you feedback..."
+            # By ALWAYS synthesizing, we force the response through the synthesis prompt
+            # which has explicit instructions to avoid preamble text.
             #
-            # 2. SHORT RESPONSE (fallback): Even without recovery, if Claude returned very
-            #    minimal text after collecting tool results, likely needs synthesis.
-            #    Threshold of 150 chars catches acknowledgment phrases.
+            # This also ensures consistent response quality - synthesis uses the
+            # evidence-based prompt with proper formatting instructions.
             #
-            needs_synthesis = (
-                all_tool_results and (
-                    recovery_attempts > 0 or  # Post-recovery ALWAYS needs synthesis
-                    len(final_text.strip()) < 150  # Fallback for non-recovery short responses
-                )
-            )
+            needs_synthesis = bool(all_tool_results)  # Always synthesize when we have tool results
 
             # Log the decision for debugging
             logger.info(
                 f"Synthesis check: tool_results={len(all_tool_results)}, "
-                f"recovery_attempts={recovery_attempts}, "
-                f"final_text_len={len(final_text.strip())}, "
                 f"needs_synthesis={needs_synthesis}"
             )
             if final_text.strip():
-                logger.info(f"Final text preview: {final_text.strip()[:100]}...")
+                logger.info(f"Pre-synthesis text preview (will be replaced): {final_text.strip()[:100]}...")
 
             if needs_synthesis:
                 logger.info(
-                    f"Tool results collected ({len(all_tool_results)}) but synthesis needed "
-                    f"(recovery_attempts={recovery_attempts}, text_len={len(final_text)} chars)"
+                    f"Triggering synthesis for {len(all_tool_results)} tool results (always synthesize when tools used)"
                 )
 
                 # Extract user's original question for synthesis
@@ -816,37 +808,29 @@ async def _handle_tool_loop_with_status(
             else:
                 logger.info(f"Tool loop ended with stop_reason='{response.stop_reason}' after {iteration + 1} iteration(s)")
 
-            # P0.3 FIX: Determine if synthesis is needed based on two conditions:
+            # P0.3 FIX: ALWAYS synthesize when tool results exist.
             #
-            # 1. POST-RECOVERY (deterministic): If we recovered from max_tokens truncation,
-            #    ALWAYS synthesize because RECOVERY_PROMPT explicitly told Claude to
-            #    "output ONLY tool calls - no explanations", so any text is NOT the answer.
+            # Rationale: The tool loop phase doesn't have anti-preamble instructions,
+            # so the model often produces responses like "Now I can give you feedback..."
+            # By ALWAYS synthesizing, we force the response through the synthesis prompt
+            # which has explicit instructions to avoid preamble text.
             #
-            # 2. SHORT RESPONSE (fallback): Even without recovery, if Claude returned very
-            #    minimal text after collecting tool results, likely needs synthesis.
-            #    Threshold of 150 chars catches acknowledgment phrases.
+            # This also ensures consistent response quality - synthesis uses the
+            # evidence-based prompt with proper formatting instructions.
             #
-            needs_synthesis = (
-                all_tool_results and (
-                    recovery_attempts > 0 or  # Post-recovery ALWAYS needs synthesis
-                    len(final_text.strip()) < 150  # Fallback for non-recovery short responses
-                )
-            )
+            needs_synthesis = bool(all_tool_results)  # Always synthesize when we have tool results
 
             # Log the decision for debugging
             logger.info(
                 f"Synthesis check: tool_results={len(all_tool_results)}, "
-                f"recovery_attempts={recovery_attempts}, "
-                f"final_text_len={len(final_text.strip())}, "
                 f"needs_synthesis={needs_synthesis}"
             )
             if final_text.strip():
-                logger.info(f"Final text preview: {final_text.strip()[:100]}...")
+                logger.info(f"Pre-synthesis text preview (will be replaced): {final_text.strip()[:100]}...")
 
             if needs_synthesis:
                 logger.info(
-                    f"Tool results collected ({len(all_tool_results)}) but synthesis needed "
-                    f"(recovery_attempts={recovery_attempts}, text_len={len(final_text)} chars)"
+                    f"Triggering synthesis for {len(all_tool_results)} tool results (always synthesize when tools used)"
                 )
                 yield {"type": "thinking", "message": "Synthesizing findings..."}
 

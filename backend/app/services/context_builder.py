@@ -694,6 +694,12 @@ Using this evidence:
 
 {format_instructions}
 
-IMPORTANT: Synthesize the evidence into a clear, direct answer. Do not mention
-that you used tools or gathered evidence - just provide the answer as if you
-already knew the information."""
+CRITICAL INSTRUCTIONS FOR YOUR RESPONSE:
+1. Start DIRECTLY with the answer - no preamble, no "Now I can...", no "Based on..."
+2. Write as if you inherently know this information - never reference tools, evidence, or analysis
+3. Never say phrases like "Now I can give you feedback" or "Having reviewed" or "Let me analyze"
+4. Jump straight into the substance: if giving feedback, start with the feedback itself
+5. Your response should read as natural expert knowledge, not as a report of findings
+
+BAD starts (never use): "Now I can...", "Based on the evidence...", "Having gathered...", "Let me provide..."
+GOOD starts: Direct statement of the answer, insight, or feedback itself."""
