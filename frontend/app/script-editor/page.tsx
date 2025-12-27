@@ -12,20 +12,24 @@
 
 "use client"
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { JSONContent } from '@tiptap/core';
 import * as Y from 'yjs';
+import { yUndoPluginKey } from 'y-prosemirror';
 // @ts-ignore - pagination extension may not have types
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useAuth } from '@/contexts/AuthContext';
-import { ScreenplayKit } from '@/extensions/screenplay/screenplay-kit';
+import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
+import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
+import { FindReplaceExtension, FindReplacePopup } from '@/extensions/find-replace';
 import {PaginationPlus, PAGE_SIZES} from '@jack/tiptap-pagination-plus';
 import { contentBlocksToTipTap } from '@/utils/content-blocks-converter';
-import { getScriptContent, exportFDXFile, updateScript, type ScriptWithContent } from '@/lib/api';
+import { getScriptContent, exportFDXFile, exportPDFFile, updateScript, type ScriptWithContent } from '@/lib/api';
 import { loadLayoutPrefs, saveLayoutPrefs, type EditorLayoutPrefs, type ChatPosition } from '@/utils/layoutPrefs';
 import {
   extractSceneBoundariesFromTipTap,
@@ -39,8 +43,10 @@ import ProcessingScreen from '@/components/ProcessingScreen';
 import { ShareDialog } from '@/components/share-dialog';
 import { EditMenuDropdown } from '@/components/edit-menu-dropdown';
 import { FileMenuDropdown } from '@/components/file-menu-dropdown';
+import { TipTapBlockTypeDropdown } from '@/components/tiptap-block-type-dropdown';
+import { FormattingToolbar } from '@/components/formatting-toolbar';
 import { Button } from '@/components/ui/button';
-import { Home, Share2, Download, ChevronUp, ChevronDown } from 'lucide-react';
+import { Home, Share2, ChevronUp, ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '@/styles/screenplay.css';
 
@@ -68,6 +74,7 @@ export default function TestTipTapPage() {
   const [chatHeight, setChatHeight] = useState(220);
   const [chatPosition, setChatPosition] = useState<ChatPosition>('bottom');
   const [chatWidth, setChatWidth] = useState(360);
+  const [chatBottomWidth, setChatBottomWidth] = useState(1200);
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -142,9 +149,12 @@ export default function TestTipTapPage() {
           console.warn('[TipTapEditor] No content_blocks found in script');
 
           // If Yjs has updates, keep loading screen visible until Yjs sync completes
-          // Otherwise, hide loading screen and show empty editor
+          // Otherwise, set initial content with scene heading and show editor
           if (!scriptData.has_yjs_updates) {
-            console.log('[TipTapEditor] No Yjs updates, showing empty editor');
+            console.log('[TipTapEditor] No Yjs updates, setting initial scene heading document');
+            // Use contentBlocksToTipTap to get default document (starts with scene heading)
+            const initialDoc = contentBlocksToTipTap([]);
+            setPendingContent(initialDoc);
             setIsLoadingScript(false);
           } else {
             console.log('[TipTapEditor] Yjs updates exist, waiting for sync before hiding loading screen');
@@ -234,12 +244,22 @@ export default function TestTipTapPage() {
   // Initialize TipTap editor with screenplay extensions + collaboration + pagination
   const editor = useEditor({
     extensions: [
-      // Configure StarterKit to disable conflicting extensions
-      StarterKit.configure({
-        history: false, // Yjs provides undo/redo
-        heading: false, // ScreenplayKit provides scene headings
-        // Note: paragraph is kept enabled as a fallback and for compatibility with pagination
+      // Custom Document FIRST - enforces sceneHeading as first block for new scripts
+      // This ensures ProseMirror's createAndFill() creates sceneHeading, not paragraph
+      ScreenplayDocument,
+      // Screenplay formatting - ensures screenplay keyboard handlers take precedence
+      ScreenplayKit.configure({
+        enableSmartPageBreaks: false,
       }),
+      // StarterKit AFTER screenplay - disable conflicting extensions
+      StarterKit.configure({
+        document: false,   // Using ScreenplayDocument instead (enforces sceneHeading first)
+        history: false,    // Yjs provides undo/redo
+        heading: false,    // ScreenplayKit provides scene headings
+        // Note: paragraph kept enabled for schema compatibility; Action handlers check for it
+      }),
+      // Text formatting marks (Underline not in StarterKit)
+      Underline,
       // Collaboration
       ...(doc ? [
         Collaboration.configure({
@@ -257,35 +277,35 @@ export default function TestTipTapPage() {
       ] : []),
       // Pagination
       PaginationPlus.configure({
-        // geometry
-        ...PAGE_SIZES.LETTER,
-        // chrome between pages
+        // US Letter at 96 DPI
+        pageHeight: 1056,            // 11" × 96 DPI
+        pageWidth: 816,              // 8.5" × 96 DPI
+
+        // Gap between pages in editor view
         pageGap: 24,
         pageGapBorderSize: 1,
-        pageBreakBackground: '#f1f3f5',
+        pageBreakBackground: '#e0e2e6',
 
-        // header/footer (set to 0 if you don't want page numbers)
-        pageHeaderHeight: 48,    // ~0.5in @ 96 DPI
+        // Header: page number sits 0.5" from top edge
+        pageHeaderHeight: 48,        // 0.5" × 96 DPI
         pageFooterHeight: 0,
         headerLeft: '',
         headerRight: '<span class="rm-page-number"></span>.',
         footerLeft: '',
         footerRight: '',
-      
-        // screenplay margins (in px)
-        marginTop: 48,           // 1.0in Total (stacks with header height)
-        marginBottom: 96,        // 1.0in
-        marginLeft: 144,         // 1.5in
-        marginRight: 96,         // 1.0in
 
-        // extra padding inside content area (keep 0)
+        // Margins: headerHeight + marginTop = 1" from page top to content
+        marginTop: 48,               // 48 + 48 (header) = 96px = 1"
+        marginBottom: 96,            // 1" × 96 DPI
+        marginLeft: 144,             // 1.5" × 96 DPI
+        marginRight: 96,             // 1" × 96 DPI
+
+        // No extra content padding
         contentMarginTop: 0,
         contentMarginBottom: 0,
       }),
-      // Screenplay formatting extensions
-      ScreenplayKit.configure({
-        enableSmartPageBreaks: false,  // Enable smart page breaks
-      }),
+      // Find/Replace
+      FindReplaceExtension,
     ],
     editorProps: {
       attributes: { class: 'screenplay-editor focus:outline-none min-h-screen' },
@@ -301,7 +321,7 @@ export default function TestTipTapPage() {
       .rm-with-pagination { counter-reset: page-number 1 !important; }
 
       /* Hide first page header content (number and dot) but keep spacing */
-      .rm-with-pagination .rm-first-page-header {
+      .rm-with-pagination.screenplay-editor .rm-first-page-header {
         visibility: hidden !important;
       }
     `;
@@ -330,19 +350,30 @@ export default function TestTipTapPage() {
         return;
       }
 
-      // After sync completes, check if Yjs document already has content
+      // After sync completes, check if Yjs document already has MEANINGFUL content
+      // IMPORTANT: y-prosemirror creates a default empty paragraph when syncing with an
+      // empty server document. This means yjsFragment.length > 0 is TRUE even for "empty"
+      // documents. We must check actual text content, not just structural element count.
+      // See: https://discuss.yjs.dev/t/whats-the-correct-way-to-set-default-content-for-y-prosemirror/1129
       const yjsFragment = doc.get('default', Y.XmlFragment);
-      const yjsHasContent = yjsFragment && yjsFragment.length > 0;
 
-      // Check if editor already has content
-      const editorHasContent = editor.state.doc.content.size > 2; // >2 accounts for empty doc structure
+      // Extract text content from Yjs fragment (strip XML tags, check for actual characters)
+      const yjsXmlString = yjsFragment ? yjsFragment.toString() : '';
+      const yjsTextContent = yjsXmlString.replace(/<[^>]*>/g, '').trim();
+      const yjsHasContent = yjsTextContent.length > 0;
+
+      // Check if editor already has MEANINGFUL content (actual text, not just empty structure)
+      // Previously used `content.size > 2` but that's true even for an empty paragraph
+      // which causes the scene heading seed to be skipped for new scripts
+      const editorHasContent = editor.state.doc.textContent.trim().length > 0;
 
       if (yjsHasContent || editorHasContent) {
         console.log('[TestTipTap] Skipping setContent - content already exists:', {
-          yjsLength: yjsFragment?.length || 0,
-          editorSize: editor.state.doc.content.size,
+          yjsFragmentLength: yjsFragment?.length || 0,
+          yjsTextLength: yjsTextContent.length,
+          editorTextLength: editor.state.doc.textContent.trim().length,
           syncStatus: syncStatus,
-          reason: yjsHasContent ? 'Yjs has content (from sync)' : 'Editor has content'
+          reason: yjsHasContent ? 'Yjs has text content (from sync)' : 'Editor has text content'
         });
         setPendingContent(null); // Clear pending content to prevent retry
         return;
@@ -352,6 +383,21 @@ export default function TestTipTapPage() {
       console.log('[TestTipTap] Seeding editor - no content found after sync');
       editor.commands.setContent(pendingContent);
       console.log('[TestTipTap] Content applied successfully');
+
+      // Clear undo stack after seeding to prevent "undo removes entire script" edge case
+      // The initial content seeding should not be undoable - only user edits should be
+      setTimeout(() => {
+        try {
+          const undoManager = yUndoPluginKey.getState(editor.state)?.undoManager;
+          if (undoManager) {
+            undoManager.clear();
+            console.log('[TestTipTap] Cleared undo stack after content seeding');
+          }
+        } catch (e) {
+          console.warn('[TestTipTap] Failed to clear undo stack:', e);
+        }
+      }, 0);
+
       setPendingContent(null); // Clear after applying
     }
   }, [editor, pendingContent, doc, syncStatus, script]);
@@ -364,6 +410,33 @@ export default function TestTipTapPage() {
     }
   }, [script, syncStatus, isLoadingScript]);
 
+  // Verify that ScreenplayDocument schema fix is working
+  // The custom Document with content: 'sceneHeading block*' should ensure
+  // new empty documents start with sceneHeading, not paragraph
+  useEffect(() => {
+    if (!editor || syncStatus !== 'synced') return;
+
+    // Log first node type after sync to verify the schema fix is working
+    const timer = setTimeout(() => {
+      const firstNode = editor.state.doc.firstChild;
+      const docText = editor.state.doc.textContent.trim();
+
+      console.log('[TipTapEditor] Document initialized:', {
+        firstNodeType: firstNode?.type.name,
+        isEmpty: docText.length === 0,
+        nodeCount: editor.state.doc.childCount,
+      });
+
+      // If first node is NOT sceneHeading on an empty doc, log a warning
+      // This shouldn't happen with the ScreenplayDocument schema fix
+      if (docText.length === 0 && firstNode?.type.name !== 'sceneHeading') {
+        console.warn('[TipTapEditor] Unexpected first block type for empty document:', firstNode?.type.name);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [editor, syncStatus]);
+
   // Load layout preferences on mount
   useEffect(() => {
     const prefs = loadLayoutPrefs();
@@ -371,6 +444,7 @@ export default function TestTipTapPage() {
     setChatHeight(prefs.chatHeight ?? 220);
     setChatPosition(prefs.chatPosition ?? 'bottom');
     setChatWidth(prefs.chatWidth ?? 360);
+    setChatBottomWidth(prefs.chatBottomWidth ?? 1200);
   }, []);
 
   // Save layout preferences when chat state changes
@@ -379,9 +453,10 @@ export default function TestTipTapPage() {
       chatCollapsed: isChatCollapsed,
       chatHeight,
       chatPosition,
-      chatWidth
+      chatWidth,
+      chatBottomWidth
     });
-  }, [isChatCollapsed, chatHeight, chatPosition, chatWidth]);
+  }, [isChatCollapsed, chatHeight, chatPosition, chatWidth, chatBottomWidth]);
 
   // Handle vertical resize drag (for bottom position)
   const handleVerticalResizeMouseDown = useCallback((e: React.MouseEvent) => {
@@ -460,8 +535,43 @@ export default function TestTipTapPage() {
     document.addEventListener('mouseup', handleMouseUp);
   }, [chatWidth, chatPosition]);
 
+  // Handle horizontal resize drag for bottom position (symmetric, stays centered)
+  const handleBottomHorizontalResizeMouseDown = useCallback((e: React.MouseEvent, side: 'left' | 'right') => {
+    e.preventDefault();
+
+    const startX = e.clientX;
+    const startWidth = chatBottomWidth;
+    const minWidth = 816; // Match script page width (letter size at 96 DPI)
+    const maxWidth = Math.min(window.innerWidth * 0.95, 1600);
+
+    const cleanup = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      // Multiply by 2 because we're resizing symmetrically from center
+      // Left side: dragging left increases width, dragging right decreases
+      // Right side: dragging right increases width, dragging left decreases
+      const widthDelta = side === 'left' ? -deltaX * 2 : deltaX * 2;
+      const newWidth = Math.min(Math.max(startWidth + widthDelta, minWidth), maxWidth);
+      setChatBottomWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      cleanup();
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [chatBottomWidth]);
+
   // Track current scene and extract boundaries on any editor change
   // Combined into single effect to ensure boundaries are always fresh
+  const sceneUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousSceneIndexRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!editor) return;
 
@@ -472,21 +582,51 @@ export default function TestTipTapPage() {
 
       // Use fresh boundaries for scene detection
       const sceneIndex = getCurrentSceneIndex(editor, boundaries);
+
+      // Guard: Detect spurious selection jumps to position 1 (Scene 1)
+      // This happens when clicking in pagination gaps or outside content areas.
+      // The editor resets selection to doc start, falsely highlighting Scene 1.
+      const currentPos = editor.state.selection.anchor;
+      const prevIndex = previousSceneIndexRef.current;
+
+      if (
+        sceneIndex === 0 &&           // New scene would be Scene 1
+        currentPos <= 2 &&            // Selection is at very start of document
+        prevIndex !== null &&         // We had a previous scene
+        prevIndex !== 0               // We were NOT already in Scene 1
+      ) {
+        // Suspicious jump to position 1 from a different scene - ignore this update
+        console.log('[TipTapEditor] Ignoring spurious selection jump to position 1');
+        return;
+      }
+
+      previousSceneIndexRef.current = sceneIndex;
       setCurrentSceneIndex(sceneIndex);
     };
 
-    // Update on selection change (clicking/navigating in editor)
+    // Debounced version for document changes (typing) - reduces CPU usage
+    const debouncedUpdateSceneState = () => {
+      if (sceneUpdateTimeoutRef.current) {
+        clearTimeout(sceneUpdateTimeoutRef.current);
+      }
+      sceneUpdateTimeoutRef.current = setTimeout(updateSceneState, 200);
+    };
+
+    // Update on selection change (clicking/navigating in editor) - immediate for responsive highlighting
     editor.on('selectionUpdate', updateSceneState);
 
-    // Update on document changes (typing, editing)
-    editor.on('update', updateSceneState);
+    // Update on document changes (typing, editing) - debounced for performance
+    editor.on('update', debouncedUpdateSceneState);
 
     // Initial update
     updateSceneState();
 
     return () => {
       editor.off('selectionUpdate', updateSceneState);
-      editor.off('update', updateSceneState);
+      editor.off('update', debouncedUpdateSceneState);
+      if (sceneUpdateTimeoutRef.current) {
+        clearTimeout(sceneUpdateTimeoutRef.current);
+      }
     };
   }, [editor]);
 
@@ -518,10 +658,38 @@ export default function TestTipTapPage() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      console.log('[TipTapEditor] Export successful');
+      console.log('[TipTapEditor] FDX export successful');
     } catch (e: any) {
       setExportError(e?.message || 'Export failed. Please try again.');
       console.error('[TipTapEditor] FDX export failed:', e);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Export PDF handler
+  const handleExportPDF = async () => {
+    if (!scriptId) {
+      setExportError('No script loaded.');
+      return;
+    }
+    setIsExporting(true);
+    setExportError(null);
+
+    try {
+      const blob = await exportPDFFile(scriptId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${script?.title || 'script'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      console.log('[TipTapEditor] PDF export successful');
+    } catch (e: any) {
+      setExportError(e?.message || 'PDF export failed. Please try again.');
+      console.error('[TipTapEditor] PDF export failed:', e);
     } finally {
       setIsExporting(false);
     }
@@ -624,11 +792,11 @@ export default function TestTipTapPage() {
         mode="open"
       />
 
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-[#e0e2e6]">
         {/* Fixed Top Header - Compact Screenplay Style (collapsible) */}
       {!isTopBarCollapsed && (
         <div className="fixed top-0 left-0 right-0 z-50 border-b border-gray-300 bg-white shadow-sm transition-all duration-200" style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}>
-          <div className="relative px-4 flex items-center justify-between h-12">
+          <div className="relative px-4 flex items-center justify-between h-11">
             {/* Left - Collapse button + Home, File, Edit */}
             <div className="flex items-center">
               <Button
@@ -640,22 +808,17 @@ export default function TestTipTapPage() {
               >
                 <ChevronUp className="w-3.5 h-3.5" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push("/")}
-                className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
-                style={{ fontFamily: "inherit" }}
-              >
-                <Home className="w-3.5 h-3.5 mr-1.5" />
-                Home
-              </Button>
               <FileMenuDropdown
-                onExport={handleExportFDX}
+                onExportFDX={handleExportFDX}
+                onExportPDF={handleExportPDF}
                 isExporting={isExporting}
                 scriptTitle={script?.title}
               />
               <EditMenuDropdown editor={editor} />
+              {/* Separator */}
+              <div className="w-px h-5 bg-gray-200 mx-1" />
+              {/* Block Type Selector */}
+              <TipTapBlockTypeDropdown editor={editor} />
             </div>
 
           {/* Center - Script Title (absolutely centered on page, click to edit) */}
@@ -670,14 +833,14 @@ export default function TestTipTapPage() {
                 maxLength={30}
                 autoFocus
                 disabled={isSavingTitle}
-                className="text-gray-800 text-base tracking-wide text-center bg-transparent underline focus:outline-none px-2 py-0.5 uppercase"
-                style={{ fontFamily: "inherit", width: '34ch' }}
+                className="text-slate-700 text-xl tracking-wider text-center bg-transparent focus:outline-none px-3 py-0.5 uppercase"
+                style={{ fontFamily: "inherit", width: '40ch' }}
               />
             ) : (
               <h1
                 onClick={handleTitleClick}
-                className="text-gray-800 text-base tracking-wide truncate text-center cursor-pointer hover:opacity-60 transition-opacity px-2 py-0.5 uppercase underline"
-                style={{ fontFamily: "inherit", maxWidth: '34ch' }}
+                className="text-slate-700 text-xl tracking-wider truncate text-center cursor-pointer hover:opacity-70 transition-opacity px-3 py-0.5 uppercase"
+                style={{ fontFamily: "inherit", maxWidth: '40ch' }}
                 title="Click to edit title"
               >
                 {script?.title || 'Untitled Script'}
@@ -685,8 +848,12 @@ export default function TestTipTapPage() {
             )}
           </div>
 
-          {/* Right - Collaborators, Share, Export */}
+          {/* Right - Formatting, Collaborators, Share, Export */}
           <div className="flex items-center gap-0.5 mr-16">
+            {/* Formatting Toolbar */}
+            <FormattingToolbar editor={editor} />
+            {/* Separator */}
+            <div className="w-px h-5 bg-gray-200 mx-1" />
             {/* Collaborator presence avatars - minimal, only shows when others are editing */}
             {collaborators.length > 0 && (
               <div className="flex items-center -space-x-1.5 mr-2 pr-2 border-r border-gray-200">
@@ -724,13 +891,13 @@ export default function TestTipTapPage() {
             <Button
               variant="ghost"
               size="sm"
-              disabled={isExporting}
-              onClick={handleExportFDX}
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => router.push("/")}
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded px-2.5 py-1 text-sm font-normal"
               style={{ fontFamily: "inherit" }}
+              title="Go to home"
             >
-              <Download className="w-3.5 h-3.5 mr-1.5" />
-              {isExporting ? 'Exporting...' : 'Export'}
+              <Home className="w-3.5 h-3.5 mr-1.5" />
+              Home
             </Button>
           </div>
 
@@ -778,7 +945,7 @@ export default function TestTipTapPage() {
       {/* Scene Navigation Bar */}
       {!isSceneNavCollapsed && (
         <div
-          className={`fixed left-0 right-0 z-40 transition-all duration-200 ${isTopBarCollapsed ? 'top-0' : 'top-12'}`}
+          className={`fixed left-0 right-0 z-40 transition-all duration-200 ${isTopBarCollapsed ? 'top-0' : 'top-11'}`}
         >
           <SceneNavBar
             scenes={sceneBoundaries}
@@ -851,12 +1018,13 @@ export default function TestTipTapPage() {
 
       {/* Main Content Area - scroll container with dynamic bounds */}
       <div
-        className="flex overflow-auto"
+        id="editor-scroll-container"
+        className="flex overflow-auto h-full"
         style={{
           position: 'fixed',
           top: isTopBarCollapsed
             ? (isSceneNavCollapsed ? '0' : '44px')
-            : (isSceneNavCollapsed ? '48px' : '92px'),
+            : (isSceneNavCollapsed ? '44px' : '88px'),
           left: chatPosition === 'left' && !isChatCollapsed ? `${chatWidth}px` : 0,
           right: chatPosition === 'right' && !isChatCollapsed ? `${chatWidth}px` : 0,
           bottom: chatPosition === 'bottom' && !isChatCollapsed ? `${chatHeight}px` : 0,
@@ -874,7 +1042,16 @@ export default function TestTipTapPage() {
           >
             <div className="screenplay-editor-wrapper min-h-screen pt-6">
               <div className="flex justify-center">
-                <EditorContent editor={editor} className="screenplay-editor" />
+                {/* Relative container for editor + popups */}
+                <div className="relative">
+                  <EditorContent editor={editor} className="screenplay-editor" />
+                  <SmartTypePopup editor={editor} />
+                  <FindReplacePopup
+                    editor={editor}
+                    isTopBarCollapsed={isTopBarCollapsed}
+                    isSceneNavCollapsed={isSceneNavCollapsed}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -886,42 +1063,75 @@ export default function TestTipTapPage() {
       <div
         className="fixed z-30"
         style={
-          chatPosition === 'bottom'
+          isChatCollapsed
+            ? chatPosition === 'left'
+              ? {
+                  // Collapsed left: floating circle on left side
+                  bottom: '24px',
+                  left: '16px',
+                  width: 'auto',
+                  height: 'auto',
+                }
+              : {
+                  // Collapsed bottom/right: floating circle on right side
+                  bottom: '24px',
+                  right: '16px',
+                  width: 'auto',
+                  height: 'auto',
+                }
+            : chatPosition === 'bottom'
             ? {
+                // Expanded bottom: centered
                 bottom: 0,
                 left: '50%',
                 transform: 'translateX(-50%)',
-                width: '88%',
-                maxWidth: '1400px',
-                height: isChatCollapsed ? 'auto' : `${chatHeight}px`,
+                width: `${chatBottomWidth}px`,
+                maxWidth: '95vw',
+                height: `${chatHeight}px`,
               }
             : chatPosition === 'left'
             ? {
                 left: 0,
                 top: isTopBarCollapsed
                   ? (isSceneNavCollapsed ? '0' : '44px')
-                  : (isSceneNavCollapsed ? '48px' : '92px'),
+                  : (isSceneNavCollapsed ? '44px' : '88px'),
                 bottom: 0,
-                width: isChatCollapsed ? 'auto' : `${chatWidth}px`,
+                width: `${chatWidth}px`,
               }
             : {
                 // right position
                 right: 0,
                 top: isTopBarCollapsed
                   ? (isSceneNavCollapsed ? '0' : '44px')
-                  : (isSceneNavCollapsed ? '48px' : '92px'),
+                  : (isSceneNavCollapsed ? '44px' : '88px'),
                 bottom: 0,
-                width: isChatCollapsed ? 'auto' : `${chatWidth}px`,
+                width: `${chatWidth}px`,
               }
         }
       >
-        {/* Resize Handle - position-aware */}
+        {/* Resize Handles - position-aware */}
+        {/* Bottom position: vertical handle (top) + horizontal handles (left & right) */}
         {!isChatCollapsed && chatPosition === 'bottom' && (
-          <div
-            onMouseDown={handleVerticalResizeMouseDown}
-            className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-10"
-            style={{ marginTop: '-6px' }}
-          />
+          <>
+            {/* Top edge - vertical resize */}
+            <div
+              onMouseDown={handleVerticalResizeMouseDown}
+              className="absolute top-0 left-4 right-4 h-3 cursor-ns-resize z-10"
+              style={{ marginTop: '-6px' }}
+            />
+            {/* Left edge - horizontal resize */}
+            <div
+              onMouseDown={(e) => handleBottomHorizontalResizeMouseDown(e, 'left')}
+              className="absolute top-0 bottom-0 left-0 w-3 cursor-ew-resize z-10"
+              style={{ marginLeft: '-6px' }}
+            />
+            {/* Right edge - horizontal resize */}
+            <div
+              onMouseDown={(e) => handleBottomHorizontalResizeMouseDown(e, 'right')}
+              className="absolute top-0 bottom-0 right-0 w-3 cursor-ew-resize z-10"
+              style={{ marginRight: '-6px' }}
+            />
+          </>
         )}
         {!isChatCollapsed && chatPosition === 'left' && (
           <div
@@ -953,7 +1163,7 @@ export default function TestTipTapPage() {
       {/* Custom Styles for Screenplay Editor */}
       <style jsx global>{`
         :root {
-          --app-chrome-bg: #f1f3f5;
+          --app-chrome-bg: #e0e2e6;
         }
 
         .screenplay-editor-wrapper {
@@ -966,14 +1176,18 @@ export default function TestTipTapPage() {
 
         .rm-with-pagination .page {
           background: #fff;
-          box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+          box-shadow:
+            0 2px 4px rgba(0,0,0,.1),
+            0 8px 16px rgba(0,0,0,.12),
+            0 16px 32px rgba(0,0,0,.14),
+            0 24px 48px rgba(0,0,0,.08);
         }
 
         .screenplay-editor .ProseMirror {
           padding: 0rem;
-          font-family: 'Courier', 'Courier New', monospace;
+          font-family: var(--font-courier-prime), 'Courier Prime', 'Courier New', monospace;
           font-size: 12pt;
-          line-height: 12pt;
+          /* line-height inherited from screenplay.css */
           color: #000;
         }
 

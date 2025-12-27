@@ -74,12 +74,12 @@ const TIPTAP_TO_BACKEND_TYPE_MAP: Record<string, string> = {
  */
 export function contentBlocksToTipTap(blocks: ContentBlock[]): JSONContent {
   if (!blocks || blocks.length === 0) {
-    // Return empty document with a single paragraph
+    // Return empty document with a scene heading (screenplay convention)
     return {
       type: 'doc',
       content: [
         {
-          type: 'paragraph',
+          type: 'sceneHeading',
           content: []
         }
       ]

@@ -3,13 +3,15 @@ Script management endpoints for the WritersRoom API
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, desc, func, and_
+from sqlalchemy import select, update, delete, desc, func, and_
 from typing import List, Dict, Any
 import logging
 
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
+
+from fastapi.responses import Response
 
 from app.models.user import User
 from app.models.script import Script
@@ -20,6 +22,7 @@ from app.schemas.script import ScriptCreate, ScriptUpdate, ScriptResponse, Scrip
 from app.firebase.config import get_firebase_user_by_email
 from app.auth.dependencies import get_current_user
 from app.db.base import get_db
+from app.services.pdf_exporter import generate_pdf
 
 router = APIRouter(prefix="/scripts", tags=["Scripts"])
 
@@ -424,8 +427,9 @@ async def delete_script(
             detail="Only the script owner can delete it"
         )
 
-    # Delete script (cascades to related records via DB constraints)
-    await db.delete(script)
+    # Delete script using direct SQL (script is a ScriptData object, not ORM instance)
+    # Cascades to related records via DB constraints
+    await db.execute(delete(Script).where(Script.script_id == script_id))
     await db.commit()
 
     return None
@@ -632,5 +636,77 @@ async def remove_collaborator(
     logger.info(f"Removed collaborator {user_id} from script {script_id}")
 
     return None
+
+
+# ============================================================================
+# Export Endpoints
+# ============================================================================
+
+@router.get("/{script_id}/export/pdf")
+async def export_script_pdf(
+    script_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Export a script as a PDF file.
+
+    Generates a properly formatted screenplay PDF using industry-standard
+    formatting (Courier 12pt, proper margins, page numbers).
+
+    Requires authentication and access to the script (owner or collaborator).
+
+    Returns:
+        PDF file as binary response with appropriate headers for download.
+    """
+    # Get script with access check
+    script = await get_script_if_user_has_access(script_id, current_user, db)
+
+    # Get content blocks - prefer script-level, fallback to scenes
+    content_blocks = script.content_blocks
+
+    if content_blocks is None:
+        # Rebuild from scenes if script-level content not available
+        scenes_result = await db.execute(
+            select(Scene.content_blocks)
+            .where(Scene.script_id == script_id)
+            .order_by(Scene.position)
+        )
+        scene_rows = scenes_result.all()
+
+        content_blocks = []
+        for row in scene_rows:
+            if row.content_blocks:
+                content_blocks.extend(row.content_blocks)
+
+    if not content_blocks:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Script has no content to export"
+        )
+
+    logger.info(f"Exporting PDF for script {script_id}: {len(content_blocks)} blocks")
+
+    # Generate PDF
+    try:
+        pdf_bytes = await generate_pdf(script.title, content_blocks)
+    except Exception as e:
+        logger.error(f"PDF generation failed for script {script_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to generate PDF"
+        )
+
+    # Create filename from title (sanitize for header)
+    safe_title = "".join(c for c in script.title if c.isalnum() or c in (' ', '-', '_')).strip()
+    filename = f"{safe_title or 'screenplay'}.pdf"
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"'
+        }
+    )
 
 

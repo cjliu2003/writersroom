@@ -1,42 +1,90 @@
 /**
  * Keyboard Navigation Utilities for Screenplay Extensions
+ *
+ * Implements Final Draft-style context-sensitive Tab navigation.
+ * NOT a linear cycle - uses logical element pairs for natural writing flow.
  */
 
-import { ELEMENT_CYCLE, type ScreenplayElementType } from '../types';
+import { type ScreenplayElementType } from '../types';
 
 /**
- * Get the next element type in the TAB cycle sequence
+ * Get the next element type for Tab key (Final Draft style)
+ *
+ * Context-sensitive pairs:
+ * - Action → Character (ready to write who speaks)
+ * - Character (empty) → Transition (Final Draft behavior)
+ * - Character (with text) → Parenthetical (add direction)
+ * - Dialogue → Parenthetical (add wryly, beat, etc.)
+ * - Parenthetical → Dialogue (back to speech)
+ * - Transition → Scene Heading (start new scene)
+ * - Scene Heading → Action (fallback after complete heading)
  *
  * @param currentType - Current screenplay element type
- * @returns Next element type in cycle
+ * @param isEmpty - Whether the current block is empty (affects Character behavior)
+ * @returns Next element type based on context
  */
-export function getNextElementType(currentType: string): ScreenplayElementType {
-  const currentIndex = ELEMENT_CYCLE.indexOf(currentType as ScreenplayElementType);
+export function getNextElementType(currentType: string, isEmpty: boolean = false): ScreenplayElementType {
+  switch (currentType) {
+    case 'action':
+      return 'character';
 
-  // If current type not found, default to 'action'
-  if (currentIndex === -1) {
-    return 'action';
+    case 'character':
+      // Empty character → Transition (Final Draft behavior)
+      // Character with text → Parenthetical (add direction)
+      return isEmpty ? 'transition' : 'parenthetical';
+
+    case 'dialogue':
+      return 'parenthetical';
+
+    case 'parenthetical':
+      return 'dialogue';
+
+    case 'transition':
+      return 'sceneHeading';
+
+    case 'sceneHeading':
+      return 'action';
+
+    default:
+      return 'action';
   }
-
-  // Return next element in cycle (wraps around)
-  return ELEMENT_CYCLE[(currentIndex + 1) % ELEMENT_CYCLE.length];
 }
 
 /**
- * Get the previous element type in the TAB cycle sequence (for Shift+Tab)
+ * Get the previous element type for Shift+Tab key (Final Draft style)
+ *
+ * Reverse navigation:
+ * - Character → Action
+ * - Parenthetical → Character
+ * - Dialogue → Character
+ * - Scene Heading → Transition
+ * - Action → Dialogue
+ * - Transition → Action
  *
  * @param currentType - Current screenplay element type
- * @returns Previous element type in cycle
+ * @returns Previous element type based on context
  */
 export function getPreviousElementType(currentType: string): ScreenplayElementType {
-  const currentIndex = ELEMENT_CYCLE.indexOf(currentType as ScreenplayElementType);
+  switch (currentType) {
+    case 'character':
+      return 'action';
 
-  // If current type not found, default to 'action'
-  if (currentIndex === -1) {
-    return 'action';
+    case 'parenthetical':
+      return 'character';
+
+    case 'dialogue':
+      return 'character';
+
+    case 'sceneHeading':
+      return 'transition';
+
+    case 'action':
+      return 'dialogue';
+
+    case 'transition':
+      return 'action';
+
+    default:
+      return 'action';
   }
-
-  // Return previous element in cycle (wraps around)
-  const previousIndex = (currentIndex - 1 + ELEMENT_CYCLE.length) % ELEMENT_CYCLE.length;
-  return ELEMENT_CYCLE[previousIndex];
 }

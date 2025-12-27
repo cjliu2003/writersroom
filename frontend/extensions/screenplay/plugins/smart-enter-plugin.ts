@@ -2,10 +2,19 @@
  * Smart Enter Plugin
  *
  * ProseMirror plugin that handles smart Enter key transitions for screenplay elements.
- * Instead of hijacking Enter in keyboard shortcuts, this uses appendTransaction
- * to detect Enter presses and transform the newly created node based on context.
  *
- * Only triggers when cursor is at the end of specific node types.
+ * NOTE: Most Enter key behavior is now handled directly in each node's keyboard shortcuts.
+ * This plugin serves as a fallback for edge cases:
+ * - Converting 'paragraph' nodes (StarterKit default) to appropriate screenplay types
+ * - Handling any splits that bypass the keyboard shortcuts
+ *
+ * The keyboard shortcuts in each node handle:
+ * - Scene Heading: Enter at end → Action (middle = blocked)
+ * - Character: Enter at end → Dialogue (middle = blocked)
+ * - Transition: Enter at end → Scene Heading (middle = blocked)
+ * - Dialogue: Enter at end → Action (middle = allows split for multi-paragraph dialogue)
+ * - Parenthetical: Enter before ")" → Dialogue (middle = blocked)
+ * - Action: No restriction, splits naturally stay as action
  */
 
 import { Plugin, PluginKey } from '@tiptap/pm/state';
@@ -32,94 +41,79 @@ export function SmartEnterPlugin(options: SmartEnterOptions = {}) {
     key: SmartEnterPluginKey,
 
     appendTransaction(transactions, oldState, newState) {
-      const tr = newState.tr;
-      let modified = false;
+      // Filter out Yjs sync/undo transactions - only process user-initiated transactions
+      const hasUserTransaction = transactions.some(tr =>
+        !tr.getMeta('y-sync$') && !tr.getMeta('y-undo$') && tr.getMeta('addToHistory') !== false
+      );
+      if (!hasUserTransaction) {
+        return null;
+      }
 
-      console.log('[SmartEnter] appendTransaction called');
+      // Check if this is a true Enter (split) by verifying the document GAINED nodes
+      const oldNodeCount = oldState.doc.childCount;
+      const newNodeCount = newState.doc.childCount;
+      const gainedNodes = newNodeCount > oldNodeCount;
+
+      // Only proceed if we gained nodes (true Enter/split)
+      if (!gainedNodes) {
+        return null;
+      }
 
       // Check if this looks like an Enter press (node split)
       const hasSplit = transactions.some(transaction => {
         return transaction.docChanged && transaction.steps.some(step => {
           const stepJSON = step.toJSON();
-          return stepJSON.stepType === 'replace' && stepJSON.slice;
+          return (stepJSON.stepType === 'replace' || stepJSON.stepType === 'replaceAround') && stepJSON.slice;
         });
       });
 
-      console.log('[SmartEnter] hasSplit:', hasSplit);
       if (!hasSplit) return null;
 
       const { $from } = newState.selection;
       const currentNode = $from.parent;
       const currentType = currentNode.type.name;
 
+      // Only handle 'paragraph' nodes (fallback for StarterKit default)
+      // All screenplay node types now handle Enter via keyboard shortcuts
+      if (currentType !== 'paragraph') {
+        return null;
+      }
+
       // Get the position of the current node
       const pos = $from.before();
 
-      console.log('[SmartEnter] Current node:', {
-        type: currentType,
-        pos: pos,
-        contentSize: currentNode.content.size,
-        nodeContent: currentNode.textContent
-      });
-
       // Check if there's a previous node
-      if (pos > 1) {
+      if (pos > 0) {
         try {
-          // Resolve position before the current node to get the previous node
-          const $prevPos = newState.doc.resolve(pos - 1);
-          const prevNode = $prevPos.parent;
+          const $beforePos = newState.doc.resolve(pos);
+          const prevNode = $beforePos.nodeBefore;
+
+          if (!prevNode) {
+            return null;
+          }
+
           const prevType = prevNode.type.name;
-
-          console.log('[SmartEnter] Previous node:', {
-            type: prevType,
-            contentSize: prevNode.content.size,
-            nodeContent: prevNode.textContent
-          });
-
-          // Check if previous node type has a transition defined
           const transitionType = types[prevType];
 
-          console.log('[SmartEnter] Transition lookup:', {
-            prevType,
-            transitionType,
-            availableTransitions: Object.keys(types)
-          });
+          // Only transform empty paragraphs that follow a screenplay element
+          const isEmpty = currentNode.content.size === 0;
 
-          // Only transform if:
-          // 1. Previous node has a transition defined
-          // 2. Current node is 'paragraph' (default node created by Enter in StarterKit)
-          // 3. Current node is empty (newly created by Enter press)
-          const shouldTransform = transitionType && currentType === 'paragraph' && currentNode.content.size === 0;
-
-          console.log('[SmartEnter] Should transform?', {
-            hasTransition: !!transitionType,
-            isParagraph: currentType === 'paragraph',
-            isEmpty: currentNode.content.size === 0,
-            shouldTransform
-          });
-
-          if (shouldTransform) {
+          if (transitionType && isEmpty) {
             const nextNodeType = newState.schema.nodes[transitionType];
 
             if (nextNodeType) {
-              console.log('[SmartEnter] Applying transformation:', prevType, '→', transitionType);
-              // Transform the current (newly created empty) node to the transition type
+              const tr = newState.tr;
               tr.setNodeMarkup(pos, nextNodeType);
-              modified = true;
-            } else {
-              console.warn('[SmartEnter] Node type not found in schema:', transitionType);
+              return tr;
             }
           }
         } catch (err) {
           // Invalid position, skip transformation
           console.warn('[SmartEnter] Failed to resolve previous node:', err);
         }
-      } else {
-        console.log('[SmartEnter] Skipped - pos <= 1');
       }
 
-      console.log('[SmartEnter] Modified:', modified);
-      return modified ? tr : null;
+      return null;
     },
   });
 }

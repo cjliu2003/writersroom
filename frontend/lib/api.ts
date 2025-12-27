@@ -279,6 +279,31 @@ export async function exportFDXFile(scriptId: string): Promise<Blob> {
   return response.blob();
 }
 
+// API function for PDF export
+export async function exportPDFFile(scriptId: string): Promise<Blob> {
+  const token = await getCurrentUserToken();
+
+  if (!token) {
+    throw new Error('No authentication token available');
+  }
+
+  // Longer timeout for PDF generation (Playwright rendering takes time)
+  const response = await fetchWithTimeout(`${API_BASE_URL}/scripts/${scriptId}/export/pdf`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+    timeoutMs: 60000, // 60 seconds for PDF generation
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to export PDF file');
+  }
+
+  return response.blob();
+}
+
 // AI-related API functions
 export interface ChatMessage {
   role: 'user' | 'assistant';
