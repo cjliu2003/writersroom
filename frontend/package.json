@@ -33,6 +33,8 @@
     "next": "^14.2.33",
     "react": "^18",
     "react-dom": "^18",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "slate": "^0.118.1",
     "slate-dom": "^0.118.1",
     "slate-history": "^0.115.0",

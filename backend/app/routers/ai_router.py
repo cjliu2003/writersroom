@@ -39,6 +39,8 @@ from app.services.ai_service import AIService
 from app.services.intent_classifier import IntentClassifier
 from app.services.context_builder import ContextBuilder
 from app.services.conversation_service import ConversationService
+from app.services.ai_logger import AIConversationLogger, ai_log
+from app.services.evidence_builder import EvidenceBuilder
 from app.auth.dependencies import get_current_user
 from app.db.base import get_db
 from app.routers.script_router import get_script_if_user_has_access, validate_script_access
@@ -56,6 +58,36 @@ FINAL_SYNTHESIS_MAX_TOKENS = 1200  # Double the normal limit (was 600)
 
 # Standard max tokens for intermediate tool loop iterations
 TOOL_LOOP_MAX_TOKENS = 600
+
+# P0.2 fix: RAG-only mode default (increased from 600)
+RAG_ONLY_DEFAULT_MAX_TOKENS = 1200
+
+# P0.3: Recovery loop configuration for max_tokens truncation
+MAX_RECOVERY_ATTEMPTS = 2
+RECOVERY_PROMPT = """Continue your tool planning.
+Output ONLY tool calls - no explanations or user-facing text.
+If you have gathered enough information, output no tools and I will ask for synthesis."""
+
+
+def _extract_all_text(content_blocks) -> str:
+    """
+    Extract and concatenate all text blocks from Claude response.
+
+    P0.1 fix: Anthropic responses can contain multiple content blocks.
+    Previously we only returned the first text block, which dropped any
+    additional text. This function extracts ALL text content.
+
+    Args:
+        content_blocks: List of content blocks from response.content
+
+    Returns:
+        Concatenated text from all text-type blocks, joined by newlines
+    """
+    text_parts = []
+    for block in content_blocks:
+        if hasattr(block, 'type') and block.type == "text":
+            text_parts.append(block.text)
+    return "\n".join(text_parts) if text_parts else ""
 
 
 @router.post("/scene-summary", response_model=SceneSummaryResponse)
@@ -327,10 +359,16 @@ async def _handle_tool_loop(
     tools: List[dict],
     max_iterations: int,
     script_id: UUID,
-    db: AsyncSession
+    db: AsyncSession,
+    ai_conv_logger: AIConversationLogger = None,
+    user_question: str = None,
+    intent: IntentType = None
 ) -> tuple[str, dict, ToolCallMetadata]:
     """
-    Handle multi-turn tool calling loop.
+    Handle multi-turn tool calling loop with evidence-based synthesis.
+
+    P1.3: Now uses EvidenceBuilder to rank and compress tool results,
+    replacing the raw tool dump approach with structured evidence synthesis.
 
     Args:
         client: Anthropic client
@@ -340,11 +378,15 @@ async def _handle_tool_loop(
         max_iterations: Maximum tool calling iterations
         script_id: Script ID for tool execution context
         db: Database session
+        ai_conv_logger: Optional conversation logger for detailed logging
+        user_question: Original user question for evidence ranking (P1.3)
+        intent: Intent type for format customization (P1.3)
 
     Returns:
         Tuple of (final_message, aggregated_usage, tool_metadata)
     """
     from app.services.mcp_tools import MCPToolExecutor
+    import time
 
     messages = initial_messages.copy()
     total_usage = {
@@ -355,6 +397,12 @@ async def _handle_tool_loop(
     }
     tools_used = []
     tool_executor = MCPToolExecutor(db=db, script_id=script_id)
+    recovery_attempts = 0  # P0.3: Track recovery attempts for max_tokens truncation
+
+    # P1.3: Collect structured tool results for evidence building
+    all_tool_results = []
+    evidence_builder = EvidenceBuilder()
+    context_builder = ContextBuilder(db=db)
 
     for iteration in range(max_iterations):
         logger.info(f"Tool loop iteration {iteration + 1}/{max_iterations}")
@@ -374,21 +422,141 @@ async def _handle_tool_loop(
         total_usage["cache_read_input_tokens"] += response.usage.cache_read_input_tokens
         total_usage["output_tokens"] += response.usage.output_tokens
 
-        # Check stop reason
-        if response.stop_reason == "end_turn":
-            # Natural end - extract final text
-            final_text = next(
-                (block.text for block in response.content if block.type == "text"),
-                ""
+        # Check stop reason - use != "tool_use" to catch ALL non-tool cases
+        # This handles: "end_turn" (natural), "max_tokens" (truncated), "stop_sequence"
+        # CRITICAL: If we only check "end_turn", truncated responses with partial
+        # tool_use blocks fall through to tool execution, causing corruption.
+        if response.stop_reason != "tool_use":
+            # P0.3: Handle max_tokens with recovery loop
+            if response.stop_reason == "max_tokens" and recovery_attempts < MAX_RECOVERY_ATTEMPTS:
+                recovery_attempts += 1
+                logger.warning(
+                    f"Tool loop truncated (max_tokens) at iteration {iteration + 1}, "
+                    f"attempting recovery {recovery_attempts}/{MAX_RECOVERY_ATTEMPTS}"
+                )
+                # Append the partial response and ask to continue
+                messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "user", "content": RECOVERY_PROMPT})
+
+                if ai_conv_logger:
+                    ai_conv_logger.log_error(
+                        f"max_tokens truncation, recovery attempt {recovery_attempts}",
+                        "tool_loop_recovery"
+                    )
+                continue  # Retry the loop
+
+            # P0.1 fix: Extract ALL text blocks, not just the first one
+            final_text = _extract_all_text(response.content)
+
+            # Log appropriately based on actual stop reason
+            if response.stop_reason == "max_tokens":
+                logger.warning(
+                    f"Tool loop response truncated (max_tokens) at iteration {iteration + 1} "
+                    f"after {recovery_attempts} recovery attempts - returning available text"
+                )
+            else:
+                logger.info(f"Tool loop ended with stop_reason='{response.stop_reason}' after {iteration + 1} iteration(s)")
+
+            # P0.3 FIX: Determine if synthesis is needed based on two conditions:
+            #
+            # 1. POST-RECOVERY (deterministic): If we recovered from max_tokens truncation,
+            #    ALWAYS synthesize because RECOVERY_PROMPT explicitly told Claude to
+            #    "output ONLY tool calls - no explanations", so any text is NOT the answer.
+            #
+            # 2. SHORT RESPONSE (fallback): Even without recovery, if Claude returned very
+            #    minimal text after collecting tool results, likely needs synthesis.
+            #    Threshold of 150 chars catches acknowledgment phrases.
+            #
+            needs_synthesis = (
+                all_tool_results and (
+                    recovery_attempts > 0 or  # Post-recovery ALWAYS needs synthesis
+                    len(final_text.strip()) < 150  # Fallback for non-recovery short responses
+                )
             )
-            logger.info(f"Tool loop ended naturally after {iteration + 1} iteration(s)")
+
+            # Log the decision for debugging
+            logger.info(
+                f"Synthesis check: tool_results={len(all_tool_results)}, "
+                f"recovery_attempts={recovery_attempts}, "
+                f"final_text_len={len(final_text.strip())}, "
+                f"needs_synthesis={needs_synthesis}"
+            )
+            if final_text.strip():
+                logger.info(f"Final text preview: {final_text.strip()[:100]}...")
+
+            if needs_synthesis:
+                logger.info(
+                    f"Tool results collected ({len(all_tool_results)}) but synthesis needed "
+                    f"(recovery_attempts={recovery_attempts}, text_len={len(final_text)} chars)"
+                )
+
+                # Extract user's original question for synthesis
+                question_for_synthesis = user_question
+                if not question_for_synthesis:
+                    for msg in reversed(initial_messages):
+                        if msg.get("role") == "user":
+                            content = msg.get("content", "")
+                            if isinstance(content, str):
+                                question_for_synthesis = content
+                            elif isinstance(content, list):
+                                for block in content:
+                                    if isinstance(block, dict) and block.get("type") == "text":
+                                        question_for_synthesis = block.get("text", "")
+                                        break
+                            break
+                    question_for_synthesis = question_for_synthesis or "the user's question"
+
+                # Build structured evidence from all tool results
+                evidence = await evidence_builder.build_evidence(
+                    tool_results=all_tool_results,
+                    user_question=question_for_synthesis
+                )
+
+                logger.info(
+                    f"Evidence built for synthesis: {len(evidence.items)} items, "
+                    f"{evidence.total_chars} chars, truncated={evidence.was_truncated}"
+                )
+
+                # Create synthesis prompt using context_builder
+                synthesis_content = context_builder.build_synthesis_prompt(
+                    evidence_text=evidence.to_prompt_text(),
+                    user_question=question_for_synthesis,
+                    intent=intent
+                )
+
+                # Add current response and synthesis instruction to messages
+                messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "user", "content": synthesis_content})
+
+                # Make final synthesis call
+                synthesis_response = await client.messages.create(
+                    model="claude-haiku-4-5",
+                    max_tokens=FINAL_SYNTHESIS_MAX_TOKENS,
+                    system=system,
+                    messages=messages
+                )
+
+                # Aggregate synthesis tokens
+                total_usage["input_tokens"] += synthesis_response.usage.input_tokens
+                total_usage["cache_creation_input_tokens"] += synthesis_response.usage.cache_creation_input_tokens
+                total_usage["cache_read_input_tokens"] += synthesis_response.usage.cache_read_input_tokens
+                total_usage["output_tokens"] += synthesis_response.usage.output_tokens
+
+                final_text = _extract_all_text(synthesis_response.content)
+
+                if ai_conv_logger:
+                    ai_conv_logger.log_assistant_response(final_text, "post_recovery_synthesis")
+                    ai_conv_logger.log_token_usage(total_usage)
+                    ai_conv_logger.log_session_summary()
+
             return final_text, total_usage, ToolCallMetadata(
                 tool_calls_made=iteration + 1,
                 tools_used=list(set(tools_used)),
-                stop_reason="end_turn"
+                stop_reason=response.stop_reason,
+                recovery_attempts=recovery_attempts  # P0.3: Include recovery attempts in metadata
             )
 
-        # Extract and execute tool uses
+        # Extract and execute tool uses (stop_reason == "tool_use")
         tool_results = []
         for block in response.content:
             if block.type == "tool_use":
@@ -396,17 +564,38 @@ async def _handle_tool_loop(
                 logger.info(f"Executing tool: {block.name} with input: {block.input}")
 
                 try:
-                    # Execute tool
+                    # Execute tool with timing
+                    tool_start = time.perf_counter()
                     result = await tool_executor.execute_tool(
                         tool_name=block.name,
                         tool_input=block.input
                     )
+                    tool_duration_ms = (time.perf_counter() - tool_start) * 1000
+
                     tool_results.append({
                         "type": "tool_result",
                         "tool_use_id": block.id,
                         "content": result
                     })
-                    logger.info(f"Tool {block.name} executed successfully")
+                    logger.info(f"Tool {block.name} executed successfully in {tool_duration_ms:.1f}ms")
+
+                    # P1.3: Collect structured result for evidence building
+                    all_tool_results.append({
+                        "tool_name": block.name,
+                        "tool_input": block.input,
+                        "result": result
+                    })
+
+                    # Log to AI conversation logger if available
+                    if ai_conv_logger:
+                        ai_conv_logger.log_tool_call(
+                            tool_name=block.name,
+                            tool_input=block.input,
+                            tool_result=result,
+                            iteration=iteration + 1,
+                            duration_ms=tool_duration_ms
+                        )
+
                 except Exception as e:
                     # Return error to Claude (graceful degradation)
                     logger.error(f"Tool execution failed: {e}", exc_info=True)
@@ -416,9 +605,21 @@ async def _handle_tool_loop(
                         "content": f"Error executing tool: {str(e)}",
                         "is_error": True
                     })
+                    if ai_conv_logger:
+                        ai_conv_logger.log_error(str(e), f"Tool {block.name} execution")
 
         # Append assistant message and tool results to conversation
         messages.append({"role": "assistant", "content": response.content})
+
+        # TIER 2 FIX: Reverse tool results order to exploit LLM recency bias
+        # By putting the FIRST tool result LAST, we counteract the model's tendency
+        # to focus on whatever appears most recently in context.
+        # This ensures the first (often most relevant) result gets the most attention.
+        if tool_results and len(tool_results) > 1:
+            tool_results = list(reversed(tool_results))
+            logger.info(f"Reversed {len(tool_results)} tool results to counteract recency bias")
+            if ai_conv_logger:
+                ai_conv_logger.log_tool_results_reordered(len(tool_results))
 
         # Only append tool results if there are any (avoid empty content error)
         if tool_results:
@@ -427,17 +628,44 @@ async def _handle_tool_loop(
     # Max iterations reached - add synthesis instruction and make final call
     logger.warning(f"Tool loop reached max_iterations ({max_iterations})")
 
-    # Add explicit synthesis instruction to guide final response
-    # This ensures Claude produces a complete, well-organized answer instead of
-    # intermediate thinking or incomplete synthesis
+    # P1.3: Use evidence-based synthesis instead of raw tool dumps
+    # Extract user's original question if not provided as parameter
+    question_for_synthesis = user_question
+    if not question_for_synthesis:
+        for msg in reversed(initial_messages):
+            if msg.get("role") == "user":
+                content = msg.get("content", "")
+                if isinstance(content, str):
+                    question_for_synthesis = content
+                elif isinstance(content, list):
+                    for block in content:
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            question_for_synthesis = block.get("text", "")
+                            break
+                break
+        question_for_synthesis = question_for_synthesis or "the user's question"
+
+    # P1.3: Build structured evidence from all tool results
+    evidence = await evidence_builder.build_evidence(
+        tool_results=all_tool_results,
+        user_question=question_for_synthesis
+    )
+
+    logger.info(
+        f"Evidence built: {len(evidence.items)} items, "
+        f"{evidence.total_chars} chars, truncated={evidence.was_truncated}"
+    )
+
+    # P1.3: Create synthesis prompt using context_builder
+    synthesis_content = context_builder.build_synthesis_prompt(
+        evidence_text=evidence.to_prompt_text(),
+        user_question=question_for_synthesis,
+        intent=intent
+    )
+
     synthesis_instruction = {
         "role": "user",
-        "content": (
-            "Based on all the information you've gathered from the tools above, "
-            "please provide a complete, well-organized answer to the original question. "
-            "Synthesize the key findings and be specific with scene numbers and details. "
-            "Do not mention the tools you used - just provide the final answer."
-        )
+        "content": synthesis_content
     }
     messages.append(synthesis_instruction)
 
@@ -455,15 +683,19 @@ async def _handle_tool_loop(
     total_usage["cache_read_input_tokens"] += final_response.usage.cache_read_input_tokens
     total_usage["output_tokens"] += final_response.usage.output_tokens
 
-    final_text = next(
-        (block.text for block in final_response.content if block.type == "text"),
-        ""
-    )
+    # P0.1 fix: Extract ALL text blocks, not just the first one
+    final_text = _extract_all_text(final_response.content)
+
+    # Log the final response and token usage
+    if ai_conv_logger:
+        ai_conv_logger.log_assistant_response(final_text, "max_iterations")
+        ai_conv_logger.log_token_usage(total_usage)
 
     return final_text, total_usage, ToolCallMetadata(
         tool_calls_made=max_iterations,
         tools_used=list(set(tools_used)),
-        stop_reason="max_iterations"
+        stop_reason="max_iterations",
+        recovery_attempts=recovery_attempts  # P0.3: Include recovery attempts in metadata
     )
 
 
@@ -474,10 +706,16 @@ async def _handle_tool_loop_with_status(
     tools: List[dict],
     max_iterations: int,
     script_id: UUID,
-    db: AsyncSession
+    db: AsyncSession,
+    ai_conv_logger: AIConversationLogger = None,
+    user_question: str = None,
+    intent: IntentType = None
 ):
     """
-    Handle multi-turn tool calling loop with status event yielding.
+    Handle multi-turn tool calling loop with status event yielding and evidence-based synthesis.
+
+    P1.3: Now uses EvidenceBuilder to rank and compress tool results,
+    replacing the raw tool dump approach with structured evidence synthesis.
 
     This is an async generator that yields status events for each tool execution,
     allowing the frontend to show progress to users.
@@ -497,8 +735,12 @@ async def _handle_tool_loop_with_status(
         max_iterations: Maximum tool calling iterations
         script_id: Script ID for tool execution context
         db: Database session
+        ai_conv_logger: Optional conversation logger for detailed logging
+        user_question: Original user question for evidence ranking (P1.3)
+        intent: Intent type for format customization (P1.3)
     """
     from app.services.mcp_tools import MCPToolExecutor, get_tool_status_message
+    import time
 
     messages = initial_messages.copy()
     total_usage = {
@@ -509,6 +751,12 @@ async def _handle_tool_loop_with_status(
     }
     tools_used = []
     tool_executor = MCPToolExecutor(db=db, script_id=script_id)
+    recovery_attempts = 0  # P0.3: Track recovery attempts for max_tokens truncation
+
+    # P1.3: Collect structured tool results for evidence building
+    all_tool_results = []
+    evidence_builder = EvidenceBuilder()
+    context_builder = ContextBuilder(db=db)
 
     # Initial thinking status
     yield {"type": "thinking", "message": "Thinking..."}
@@ -531,14 +779,135 @@ async def _handle_tool_loop_with_status(
         total_usage["cache_read_input_tokens"] += response.usage.cache_read_input_tokens
         total_usage["output_tokens"] += response.usage.output_tokens
 
-        # Check stop reason
-        if response.stop_reason == "end_turn":
-            # Natural end - extract final text
-            final_text = next(
-                (block.text for block in response.content if block.type == "text"),
-                ""
+        # Check stop reason - use != "tool_use" to catch ALL non-tool cases
+        # This handles: "end_turn" (natural), "max_tokens" (truncated), "stop_sequence"
+        # CRITICAL: If we only check "end_turn", truncated responses with partial
+        # tool_use blocks fall through to tool execution, causing corruption.
+        if response.stop_reason != "tool_use":
+            # P0.3: Handle max_tokens with recovery loop
+            if response.stop_reason == "max_tokens" and recovery_attempts < MAX_RECOVERY_ATTEMPTS:
+                recovery_attempts += 1
+                logger.warning(
+                    f"Tool loop truncated (max_tokens) at iteration {iteration + 1}, "
+                    f"attempting recovery {recovery_attempts}/{MAX_RECOVERY_ATTEMPTS}"
+                )
+                yield {"type": "thinking", "message": "Recovering from truncation..."}
+
+                # Append the partial response and ask to continue
+                messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "user", "content": RECOVERY_PROMPT})
+
+                if ai_conv_logger:
+                    ai_conv_logger.log_error(
+                        f"max_tokens truncation, recovery attempt {recovery_attempts}",
+                        "tool_loop_recovery"
+                    )
+                continue  # Retry the loop
+
+            # P0.1 fix: Extract ALL text blocks, not just the first one
+            final_text = _extract_all_text(response.content)
+
+            # Log appropriately based on actual stop reason
+            if response.stop_reason == "max_tokens":
+                logger.warning(
+                    f"Tool loop response truncated (max_tokens) at iteration {iteration + 1} "
+                    f"after {recovery_attempts} recovery attempts - returning available text"
+                )
+            else:
+                logger.info(f"Tool loop ended with stop_reason='{response.stop_reason}' after {iteration + 1} iteration(s)")
+
+            # P0.3 FIX: Determine if synthesis is needed based on two conditions:
+            #
+            # 1. POST-RECOVERY (deterministic): If we recovered from max_tokens truncation,
+            #    ALWAYS synthesize because RECOVERY_PROMPT explicitly told Claude to
+            #    "output ONLY tool calls - no explanations", so any text is NOT the answer.
+            #
+            # 2. SHORT RESPONSE (fallback): Even without recovery, if Claude returned very
+            #    minimal text after collecting tool results, likely needs synthesis.
+            #    Threshold of 150 chars catches acknowledgment phrases.
+            #
+            needs_synthesis = (
+                all_tool_results and (
+                    recovery_attempts > 0 or  # Post-recovery ALWAYS needs synthesis
+                    len(final_text.strip()) < 150  # Fallback for non-recovery short responses
+                )
             )
-            logger.info(f"Tool loop ended naturally after {iteration + 1} iteration(s)")
+
+            # Log the decision for debugging
+            logger.info(
+                f"Synthesis check: tool_results={len(all_tool_results)}, "
+                f"recovery_attempts={recovery_attempts}, "
+                f"final_text_len={len(final_text.strip())}, "
+                f"needs_synthesis={needs_synthesis}"
+            )
+            if final_text.strip():
+                logger.info(f"Final text preview: {final_text.strip()[:100]}...")
+
+            if needs_synthesis:
+                logger.info(
+                    f"Tool results collected ({len(all_tool_results)}) but synthesis needed "
+                    f"(recovery_attempts={recovery_attempts}, text_len={len(final_text)} chars)"
+                )
+                yield {"type": "thinking", "message": "Synthesizing findings..."}
+
+                # Extract user's original question for synthesis
+                question_for_synthesis = user_question
+                if not question_for_synthesis:
+                    for msg in reversed(initial_messages):
+                        if msg.get("role") == "user":
+                            content = msg.get("content", "")
+                            if isinstance(content, str):
+                                question_for_synthesis = content
+                            elif isinstance(content, list):
+                                for block in content:
+                                    if isinstance(block, dict) and block.get("type") == "text":
+                                        question_for_synthesis = block.get("text", "")
+                                        break
+                            break
+                    question_for_synthesis = question_for_synthesis or "the user's question"
+
+                # Build structured evidence from all tool results
+                evidence = await evidence_builder.build_evidence(
+                    tool_results=all_tool_results,
+                    user_question=question_for_synthesis
+                )
+
+                logger.info(
+                    f"Evidence built for synthesis: {len(evidence.items)} items, "
+                    f"{evidence.total_chars} chars, truncated={evidence.was_truncated}"
+                )
+
+                # Create synthesis prompt using context_builder
+                synthesis_content = context_builder.build_synthesis_prompt(
+                    evidence_text=evidence.to_prompt_text(),
+                    user_question=question_for_synthesis,
+                    intent=intent
+                )
+
+                # Add current response and synthesis instruction to messages
+                messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "user", "content": synthesis_content})
+
+                # Make final synthesis call
+                synthesis_response = await client.messages.create(
+                    model="claude-haiku-4-5",
+                    max_tokens=FINAL_SYNTHESIS_MAX_TOKENS,
+                    system=system,
+                    messages=messages
+                )
+
+                # Aggregate synthesis tokens
+                total_usage["input_tokens"] += synthesis_response.usage.input_tokens
+                total_usage["cache_creation_input_tokens"] += synthesis_response.usage.cache_creation_input_tokens
+                total_usage["cache_read_input_tokens"] += synthesis_response.usage.cache_read_input_tokens
+                total_usage["output_tokens"] += synthesis_response.usage.output_tokens
+
+                final_text = _extract_all_text(synthesis_response.content)
+
+                if ai_conv_logger:
+                    ai_conv_logger.log_assistant_response(final_text, "post_recovery_synthesis")
+                    ai_conv_logger.log_token_usage(total_usage)
+                    ai_conv_logger.log_session_summary()
 
             yield {
                 "type": "complete",
@@ -547,12 +916,13 @@ async def _handle_tool_loop_with_status(
                 "tool_metadata": {
                     "tool_calls_made": iteration + 1,
                     "tools_used": list(set(tools_used)),
-                    "stop_reason": "end_turn"
+                    "stop_reason": response.stop_reason,
+                    "recovery_attempts": recovery_attempts  # P0.3: Include recovery attempts
                 }
             }
             return
 
-        # Extract and execute tool uses
+        # Extract and execute tool uses (stop_reason == "tool_use")
         tool_results = []
         for block in response.content:
             if block.type == "tool_use":
@@ -565,17 +935,38 @@ async def _handle_tool_loop_with_status(
                 logger.info(f"Executing tool: {block.name} with input: {block.input}")
 
                 try:
-                    # Execute tool
+                    # Execute tool with timing
+                    tool_start = time.perf_counter()
                     result = await tool_executor.execute_tool(
                         tool_name=block.name,
                         tool_input=block.input
                     )
+                    tool_duration_ms = (time.perf_counter() - tool_start) * 1000
+
                     tool_results.append({
                         "type": "tool_result",
                         "tool_use_id": block.id,
                         "content": result
                     })
-                    logger.info(f"Tool {block.name} executed successfully")
+                    logger.info(f"Tool {block.name} executed successfully in {tool_duration_ms:.1f}ms")
+
+                    # P1.3: Collect structured result for evidence building
+                    all_tool_results.append({
+                        "tool_name": block.name,
+                        "tool_input": block.input,
+                        "result": result
+                    })
+
+                    # Log to AI conversation logger if available
+                    if ai_conv_logger:
+                        ai_conv_logger.log_tool_call(
+                            tool_name=block.name,
+                            tool_input=block.input,
+                            tool_result=result,
+                            iteration=iteration + 1,
+                            duration_ms=tool_duration_ms
+                        )
+
                 except Exception as e:
                     # Return error to Claude (graceful degradation)
                     logger.error(f"Tool execution failed: {e}", exc_info=True)
@@ -585,9 +976,21 @@ async def _handle_tool_loop_with_status(
                         "content": f"Error executing tool: {str(e)}",
                         "is_error": True
                     })
+                    if ai_conv_logger:
+                        ai_conv_logger.log_error(str(e), f"Tool {block.name} execution")
 
         # Append assistant message and tool results to conversation
         messages.append({"role": "assistant", "content": response.content})
+
+        # TIER 2 FIX: Reverse tool results order to exploit LLM recency bias
+        # By putting the FIRST tool result LAST, we counteract the model's tendency
+        # to focus on whatever appears most recently in context.
+        # This ensures the first (often most relevant) result gets the most attention.
+        if tool_results and len(tool_results) > 1:
+            tool_results = list(reversed(tool_results))
+            logger.info(f"Reversed {len(tool_results)} tool results to counteract recency bias")
+            if ai_conv_logger:
+                ai_conv_logger.log_tool_results_reordered(len(tool_results))
 
         # Only append tool results if there are any (avoid empty content error)
         if tool_results:
@@ -600,17 +1003,44 @@ async def _handle_tool_loop_with_status(
     logger.warning(f"Tool loop reached max_iterations ({max_iterations})")
     yield {"type": "thinking", "message": "Synthesizing findings..."}
 
-    # Add explicit synthesis instruction to guide final response
-    # This ensures Claude produces a complete, well-organized answer instead of
-    # intermediate thinking or incomplete synthesis
+    # P1.3: Use evidence-based synthesis instead of raw tool dumps
+    # Extract user's original question if not provided as parameter
+    question_for_synthesis = user_question
+    if not question_for_synthesis:
+        for msg in reversed(initial_messages):
+            if msg.get("role") == "user":
+                content = msg.get("content", "")
+                if isinstance(content, str):
+                    question_for_synthesis = content
+                elif isinstance(content, list):
+                    for block in content:
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            question_for_synthesis = block.get("text", "")
+                            break
+                break
+        question_for_synthesis = question_for_synthesis or "the user's question"
+
+    # P1.3: Build structured evidence from all tool results
+    evidence = await evidence_builder.build_evidence(
+        tool_results=all_tool_results,
+        user_question=question_for_synthesis
+    )
+
+    logger.info(
+        f"Evidence built: {len(evidence.items)} items, "
+        f"{evidence.total_chars} chars, truncated={evidence.was_truncated}"
+    )
+
+    # P1.3: Create synthesis prompt using context_builder
+    synthesis_content = context_builder.build_synthesis_prompt(
+        evidence_text=evidence.to_prompt_text(),
+        user_question=question_for_synthesis,
+        intent=intent
+    )
+
     synthesis_instruction = {
         "role": "user",
-        "content": (
-            "Based on all the information you've gathered from the tools above, "
-            "please provide a complete, well-organized answer to the original question. "
-            "Synthesize the key findings and be specific with scene numbers and details. "
-            "Do not mention the tools you used - just provide the final answer."
-        )
+        "content": synthesis_content
     }
     messages.append(synthesis_instruction)
 
@@ -628,10 +1058,14 @@ async def _handle_tool_loop_with_status(
     total_usage["cache_read_input_tokens"] += final_response.usage.cache_read_input_tokens
     total_usage["output_tokens"] += final_response.usage.output_tokens
 
-    final_text = next(
-        (block.text for block in final_response.content if block.type == "text"),
-        ""
-    )
+    # P0.1 fix: Extract ALL text blocks, not just the first one
+    final_text = _extract_all_text(final_response.content)
+
+    # Log the final response and token usage
+    if ai_conv_logger:
+        ai_conv_logger.log_assistant_response(final_text, "max_iterations")
+        ai_conv_logger.log_token_usage(total_usage)
+        ai_conv_logger.log_session_summary()
 
     yield {
         "type": "complete",
@@ -640,7 +1074,8 @@ async def _handle_tool_loop_with_status(
         "tool_metadata": {
             "tool_calls_made": max_iterations,
             "tools_used": list(set(tools_used)),
-            "stop_reason": "max_iterations"
+            "stop_reason": "max_iterations",
+            "recovery_attempts": recovery_attempts  # P0.3: Include recovery attempts
         }
     }
 
@@ -758,6 +1193,19 @@ async def chat_message(
         tool_metadata = None
         logger.info(f"[CHAT] 🔧 Tools enabled: {tools_enabled}")
 
+        # Initialize AI conversation logger for detailed logging
+        ai_conv_logger = AIConversationLogger(
+            conversation_id=conversation.conversation_id,
+            user_id=current_user.user_id,
+            script_id=request.script_id
+        )
+        ai_conv_logger.log_session_start(
+            intent=str(intent),
+            tools_enabled=tools_enabled,
+            budget_tier=request.budget_tier or "standard"
+        )
+        ai_conv_logger.log_user_message(request.message)
+
         # 4. Build context-aware prompt (optimized based on tools_enabled)
         step_start = time.perf_counter()
         prompt = await context_builder.build_prompt(
@@ -796,7 +1244,8 @@ async def chat_message(
             # context_builder.build_prompt(tools_enabled=True)
             # No need to append inline instructions here
 
-            # Call tool loop
+            # Call tool loop with AI conversation logger
+            # P1.3: Pass user_question and intent for evidence-based synthesis
             step_start = time.perf_counter()
             logger.info("[CHAT] 🤖 Starting tool loop (this includes AI generation)...")
             final_message, usage, tool_metadata = await _handle_tool_loop(
@@ -806,7 +1255,10 @@ async def chat_message(
                 tools=SCREENPLAY_TOOLS,
                 max_iterations=request.max_iterations,
                 script_id=request.script_id,
-                db=db
+                db=db,
+                ai_conv_logger=ai_conv_logger,
+                user_question=request.message,
+                intent=intent
             )
             step_duration = (time.perf_counter() - step_start) * 1000
             logger.info(f"[CHAT] ✅ Tool loop completed in {step_duration:.2f}ms")
@@ -828,9 +1280,10 @@ async def chat_message(
 
             step_start = time.perf_counter()
             logger.info("[CHAT] 🤖 Generating AI response...")
+            # P0.2 fix: Use higher default for RAG-only mode (was 600)
             response = await ai_service.generate_response(
                 prompt=prompt,
-                max_tokens=request.max_tokens or 600
+                max_tokens=request.max_tokens or RAG_ONLY_DEFAULT_MAX_TOKENS
             )
             step_duration = (time.perf_counter() - step_start) * 1000
             logger.info(f"[CHAT] ✅ AI generation completed in {step_duration:.2f}ms")
@@ -839,6 +1292,10 @@ async def chat_message(
                 f"RAG response: {response['usage']['output_tokens']} output tokens, "
                 f"cache_read={response['usage']['cache_read_input_tokens']} (cache hit={response['usage']['cache_read_input_tokens'] > 0})"
             )
+
+            # Log to AI conversation logger
+            ai_conv_logger.log_assistant_response(response["content"], "end_turn")
+            ai_conv_logger.log_token_usage(response["usage"])
 
         # 5. Save conversation messages
         step_start = time.perf_counter()
@@ -894,6 +1351,9 @@ async def chat_message(
 
         endpoint_duration = (time.perf_counter() - endpoint_start) * 1000
         logger.info(f"[CHAT] 🏁 ENDPOINT COMPLETE - Total: {endpoint_duration:.2f}ms")
+
+        # Log session summary to file
+        ai_conv_logger.log_session_summary()
 
         return ChatMessageResponse(
             message=response["content"],
@@ -1002,9 +1462,10 @@ async def chat_message_stream(
             full_content = ""
             final_usage = None
 
+            # P0.2 fix: Use higher default for RAG-only mode (was 600)
             async for chunk in ai_service.generate_response(
                 prompt=prompt,
-                max_tokens=request.max_tokens or 600,
+                max_tokens=request.max_tokens or RAG_ONLY_DEFAULT_MAX_TOKENS,
                 stream=True
             ):
                 if chunk["type"] == "content_delta":
@@ -1136,6 +1597,19 @@ async def chat_message_stream_with_status(
         tools_enabled = should_enable_tools(request, intent)
         logger.info(f"[STREAM] Tools enabled: {tools_enabled}")
 
+        # Initialize AI conversation logger for detailed logging
+        ai_conv_logger = AIConversationLogger(
+            conversation_id=conversation.conversation_id,
+            user_id=current_user.user_id,
+            script_id=request.script_id
+        )
+        ai_conv_logger.log_session_start(
+            intent=str(intent),
+            tools_enabled=tools_enabled,
+            budget_tier=request.budget_tier or "standard"
+        )
+        ai_conv_logger.log_user_message(request.message)
+
         # 4. Build context-aware prompt (optimized based on tools_enabled)
         prompt = await context_builder.build_prompt(
             script_id=request.script_id,
@@ -1177,6 +1651,7 @@ async def chat_message_stream_with_status(
                 # No need to append inline instructions here
 
                 # Use the status-yielding tool loop
+                # P1.3: Pass user_question and intent for evidence-based synthesis
                 async for event in _handle_tool_loop_with_status(
                     client=client,
                     system=prompt["system"],
@@ -1184,7 +1659,10 @@ async def chat_message_stream_with_status(
                     tools=SCREENPLAY_TOOLS,
                     max_iterations=max_iterations,
                     script_id=script_id,
-                    db=db
+                    db=db,
+                    ai_conv_logger=ai_conv_logger,
+                    user_question=user_message_content,
+                    intent=intent
                 ):
                     if event["type"] == "complete":
                         final_message = event["message"]
@@ -1203,13 +1681,19 @@ async def chat_message_stream_with_status(
                 # Send initial thinking status
                 yield f"data: {json.dumps({'type': 'thinking', 'message': 'Thinking...'})}\n\n"
 
+                # P0.2 fix: Use higher default for RAG-only mode (was 600)
                 response = await ai_service.generate_response(
                     prompt=prompt,
-                    max_tokens=request.max_tokens or 600
+                    max_tokens=request.max_tokens or RAG_ONLY_DEFAULT_MAX_TOKENS
                 )
 
                 final_message = response["content"]
                 final_usage = response["usage"]
+
+                # Log to AI conversation logger
+                ai_conv_logger.log_assistant_response(final_message, "end_turn")
+                ai_conv_logger.log_token_usage(final_usage)
+                ai_conv_logger.log_session_summary()
 
                 # Send complete event
                 yield f"data: {json.dumps({'type': 'complete', 'message': final_message, 'usage': final_usage})}\n\n"
@@ -1334,6 +1818,154 @@ async def get_conversation(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get conversation: {str(e)}"
+        )
+
+
+@router.get("/chat/script/{script_id}/conversation")
+async def get_conversation_for_script(
+    script_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get the user's conversation history for a specific script.
+
+    This endpoint allows the frontend to load chat history from the database
+    instead of relying on localStorage. Returns the most recent conversation
+    for this user+script combination, or null if no conversation exists.
+
+    Returns:
+    - conversation: Conversation metadata (id, title, script_id, timestamps) or null
+    - messages: List of all messages in chronological order, or empty array
+    """
+    try:
+        # Find the user's conversation for this script
+        # Users have one conversation per script (most recent if multiple exist)
+        conversation_result = await db.execute(
+            select(ChatConversation)
+            .options(noload('*'))
+            .where(
+                ChatConversation.script_id == script_id,
+                ChatConversation.user_id == current_user.user_id
+            )
+            .order_by(ChatConversation.updated_at.desc())
+            .limit(1)
+        )
+        conversation = conversation_result.scalar_one_or_none()
+
+        if not conversation:
+            # No conversation exists yet - return empty state
+            return {
+                "conversation": None,
+                "messages": []
+            }
+
+        # Get all messages for this conversation
+        # Use noload('*') to prevent eager loading of relationships (avoids recursion)
+        messages_result = await db.execute(
+            select(ChatMessageModel)
+            .options(noload('*'))
+            .where(ChatMessageModel.conversation_id == conversation.conversation_id)
+            .order_by(ChatMessageModel.created_at)
+        )
+        messages = messages_result.scalars().all()
+
+        # Build response - manually serialize to avoid ORM relationship traversal
+        conv_dict = {
+            'conversation_id': str(conversation.conversation_id),
+            'user_id': str(conversation.user_id),
+            'script_id': str(conversation.script_id),
+            'current_scene_id': str(conversation.current_scene_id) if conversation.current_scene_id else None,
+            'title': conversation.title,
+            'created_at': conversation.created_at.isoformat() if conversation.created_at else None,
+            'updated_at': conversation.updated_at.isoformat() if conversation.updated_at else None,
+            'message_count': len(messages)
+        }
+
+        # Manually serialize messages to avoid relationship traversal issues
+        messages_list = []
+        for msg in messages:
+            messages_list.append({
+                'message_id': str(msg.message_id),
+                'conversation_id': str(msg.conversation_id),
+                'role': msg.role.value if msg.role else (msg.sender.value if msg.sender else 'user'),
+                'content': msg.content,
+                'created_at': msg.created_at.isoformat() if msg.created_at else None
+            })
+
+        return {
+            "conversation": conv_dict,
+            "messages": messages_list
+        }
+
+    except Exception as e:
+        logger.error(f"Error in get_conversation_for_script endpoint: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get conversation: {str(e)}"
+        )
+
+
+@router.delete("/chat/conversations/{conversation_id}")
+async def delete_conversation(
+    conversation_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Delete a conversation and all associated messages.
+
+    The cascade delete will automatically remove:
+    - All ChatMessages in this conversation
+    - All ConversationSummaries for this conversation
+
+    Returns:
+    - success: Boolean indicating successful deletion
+    - message: Confirmation message
+    """
+    try:
+        # Get conversation
+        conversation_result = await db.execute(
+            select(ChatConversation)
+            .options(noload('*'))
+            .where(ChatConversation.conversation_id == conversation_id)
+        )
+        conversation = conversation_result.scalar_one_or_none()
+
+        if not conversation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conversation not found"
+            )
+
+        # Verify ownership - user must own the conversation to delete it
+        if conversation.user_id != current_user.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this conversation"
+            )
+
+        # Delete the conversation (cascade will handle messages and summaries)
+        await db.delete(conversation)
+        await db.commit()
+
+        logger.info(
+            f"User {current_user.user_id} deleted conversation {conversation_id}"
+        )
+
+        return {
+            "success": True,
+            "message": f"Conversation {conversation_id} deleted successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error deleting conversation: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete conversation: {str(e)}"
         )
 
 

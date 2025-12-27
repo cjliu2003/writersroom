@@ -22,6 +22,7 @@ from app.models.script_state import ScriptState
 from app.services.ai_scene_service import AISceneService
 from app.services.ingestion_service import IngestionService
 from app.services.embedding_service import EmbeddingService
+from app.services.narrative_analysis_service import NarrativeAnalysisService
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -147,9 +148,10 @@ class ScriptStateService:
         1. Generate scene summaries (MUST complete first)
 
         PHASE 2 (Parallel - no conflicts):
-        2. Generate script outline     |
-        3. Generate character sheets   | Run concurrently
-        4. Generate embeddings         |
+        2. Generate script outline        |
+        3. Generate character sheets      | Run concurrently
+        4. Generate embeddings            |
+        5. Generate narrative analysis    |
 
         CONCURRENCY FIX: Each Phase 2 task creates its own database session.
         SQLAlchemy AsyncSession is NOT safe for concurrent use - sharing a session
@@ -178,14 +180,14 @@ class ScriptStateService:
 
         # ==========================================
         # PHASE 2: Parallel Execution
-        # Outline, character sheets, and embeddings:
+        # Outline, character sheets, embeddings, and narrative analysis:
         # - All READ from scene_summaries (no conflicts)
         # - All WRITE to different tables (no conflicts)
         #
         # CRITICAL: Each task creates its own session to avoid
         # SQLAlchemy "concurrent operations not permitted" error
         # ==========================================
-        logger.info("PHASE 2: Starting parallel analysis (outline, sheets, embeddings)...")
+        logger.info("PHASE 2: Starting parallel analysis (outline, sheets, embeddings, narrative)...")
 
         # Define async tasks for parallel execution - each with its own session
         async def generate_outline_task():
@@ -230,11 +232,25 @@ class ScriptStateService:
                 logger.error(f"Embedding generation failed: {str(e)}")
                 return ("embeddings", None, e)
 
+        async def generate_narrative_analysis_task():
+            """Generate plot threads and scene relationships with error handling and dedicated session."""
+            try:
+                async with async_session_maker() as task_db:
+                    service = NarrativeAnalysisService(task_db)
+                    result = await service.batch_analyze_narrative(script_id)
+                    await task_db.commit()
+                    logger.info(f"Narrative analysis complete: {result['threads_count']} threads, {result['relationships_count']} relationships")
+                    return ("narrative", result, None)
+            except Exception as e:
+                logger.error(f"Narrative analysis failed: {str(e)}")
+                return ("narrative", None, e)
+
         # Execute all Phase 2 tasks concurrently
         results = await asyncio.gather(
             generate_outline_task(),
             generate_character_sheets_task(),
             generate_embeddings_task(),
+            generate_narrative_analysis_task(),
             return_exceptions=False  # We handle exceptions within each task
         )
 

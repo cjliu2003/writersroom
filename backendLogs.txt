@@ -1,313 +1,88 @@
->>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-2025-12-13 10:23:35,830 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-[SCRIPT WS] Step 1: Accepting WebSocket connection...
-INFO:     127.0.0.1:63311 - "WebSocket /api/ws/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f?token=eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk1MTg5MTkxMTA3NjA1NDM0NGUxNWUyNTY0MjViYjQyNWVlYjNhNWMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NTU3ODYzNywidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY1NjE3Nzk0LCJleHAiOjE3NjU2MjEzOTQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.iUzBfrDPVWdRjOCDO06GrS2jg-Bbqem-PZ_4t9flxXvzZEf2eiQkJ1e9nKizheEkzLm2logzfuOgEcNlLIzX5I4gN94inlExIXos54tP0zw_-58RbRjpFx26sLgO8f-X4-SBGUuc8268c3hac2_dPSvyl5gdtrc7jd--D5BRy2Hp_UevJdHartTnyHHOdul7m9nxB-80c_9bcIaxfra5bY2DTVK0g0fPiqk6ZjlX2gEAM25W-NJ8x9cDRee0NpwS-gDYkUHlmPw2g9F4IzbQvD2wDPwtr9xMjhV2YUVbvT0Or6VH0d0mzI0LHT9VzsRMuCckxn0hjtflz6UZlKQBQA" [accepted]
-[SCRIPT WS] Step 2: WebSocket accepted successfully
-2025-12-13 10:23:35,831 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 3: Starting token verification for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:23:35,832 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 4: Calling verify_token_websocket()...
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
-DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 5: Token verification succeeded!
-2025-12-13 10:23:35,833 - app.routers.script_websocket - INFO - Token verified successfully for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
-[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 8: Looking up user in database...
-INFO:     connection open
-🔵 Incoming request: OPTIONS /api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content
-✅ Completed: OPTIONS /api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content - 200 - 0.000s
-INFO:     127.0.0.1:63276 - "OPTIONS /api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content HTTP/1.1" 200 OK
-🔵 Incoming request: GET /api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content
-DEBUG: Authentication process started
-DEBUG: Token received: eyJhbGciOiJSUzI...
-DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 9: Database lookup complete, user found = True
-[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
-2025-12-13 10:23:37,026 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 11: Verifying script access...
-[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[get_script_and_verify_access] Querying database for script...
-DEBUG: User lookup result: Found
-[get_script_and_verify_access] Script found: True
-[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-[get_script_and_verify_access] User is the owner
-[get_script_and_verify_access] Access verified successfully
-[SCRIPT WS] Step 12: Script access verified! Script title: silk_road_090825
-[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
-2025-12-13 10:23:41,098 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:23:41,098 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f. Room now has 1 participant(s)
-[SCRIPT WS] Step 14: WebSocket registered successfully
-2025-12-13 10:23:41,098 - app.routers.script_websocket - INFO - WebSocket connection established for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:23:42,080 - app.routers.script_router - INFO - [GET /content] Script 01ddb380-6cf4-4c5c-821a-924f04bdf85f: content_blocks=3317 blocks
-2025-12-13 10:23:42,467 - app.routers.script_router - INFO - [GET /content] Script 01ddb380-6cf4-4c5c-821a-924f04bdf85f: has_yjs_updates=True
-✅ Completed: GET /api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content - 200 - 6.836s
-INFO:     127.0.0.1:63276 - "GET /api/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f/content HTTP/1.1" 200 OK
-2025-12-13 10:23:48,232 - app.services.script_yjs_persistence - INFO - Applied 158 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:23:48,232 - app.routers.script_websocket - INFO - Loaded 158 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:23:48,232 - app.routers.script_websocket - INFO - After loading 158 updates, Yjs content length: 0
-2025-12-13 10:23:48,232 - app.routers.script_websocket - INFO - Yjs document empty for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f, rebuilding from scenes
-INFO:     connection closed
-
->>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-2025-12-13 10:24:08,921 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-[SCRIPT WS] Step 1: Accepting WebSocket connection...
-INFO:     127.0.0.1:63350 - "WebSocket /api/ws/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f?token=eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk1MTg5MTkxMTA3NjA1NDM0NGUxNWUyNTY0MjViYjQyNWVlYjNhNWMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NTU3ODYzNywidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY1NjE3Nzk0LCJleHAiOjE3NjU2MjEzOTQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.iUzBfrDPVWdRjOCDO06GrS2jg-Bbqem-PZ_4t9flxXvzZEf2eiQkJ1e9nKizheEkzLm2logzfuOgEcNlLIzX5I4gN94inlExIXos54tP0zw_-58RbRjpFx26sLgO8f-X4-SBGUuc8268c3hac2_dPSvyl5gdtrc7jd--D5BRy2Hp_UevJdHartTnyHHOdul7m9nxB-80c_9bcIaxfra5bY2DTVK0g0fPiqk6ZjlX2gEAM25W-NJ8x9cDRee0NpwS-gDYkUHlmPw2g9F4IzbQvD2wDPwtr9xMjhV2YUVbvT0Or6VH0d0mzI0LHT9VzsRMuCckxn0hjtflz6UZlKQBQA" [accepted]
-[SCRIPT WS] Step 2: WebSocket accepted successfully
-2025-12-13 10:24:08,921 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 3: Starting token verification for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:08,921 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 4: Calling verify_token_websocket()...
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
-DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 5: Token verification succeeded!
-2025-12-13 10:24:08,925 - app.routers.script_websocket - INFO - Token verified successfully for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
-[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 8: Looking up user in database...
-INFO:     connection open
-[SCRIPT WS] Step 9: Database lookup complete, user found = True
-[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
-2025-12-13 10:24:10,198 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 11: Verifying script access...
-[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[get_script_and_verify_access] Querying database for script...
-[get_script_and_verify_access] Script found: True
-[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-[get_script_and_verify_access] User is the owner
-[get_script_and_verify_access] Access verified successfully
-[SCRIPT WS] Step 12: Script access verified! Script title: silk_road_090825
-[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
-2025-12-13 10:24:13,204 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:13,204 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f. Room now has 2 participant(s)
-[SCRIPT WS] Step 14: WebSocket registered successfully
-2025-12-13 10:24:13,204 - app.routers.script_websocket - INFO - WebSocket connection established for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:17,267 - app.services.script_yjs_persistence - INFO - Applied 158 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:17,268 - app.routers.script_websocket - INFO - Loaded 158 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:17,268 - app.routers.script_websocket - INFO - After loading 158 updates, Yjs content length: 0
-2025-12-13 10:24:17,268 - app.routers.script_websocket - INFO - Yjs document empty for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f, rebuilding from scenes
-INFO:     connection closed
-
->>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-2025-12-13 10:24:41,904 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-[SCRIPT WS] Step 1: Accepting WebSocket connection...
-INFO:     127.0.0.1:63391 - "WebSocket /api/ws/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f?token=eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk1MTg5MTkxMTA3NjA1NDM0NGUxNWUyNTY0MjViYjQyNWVlYjNhNWMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NTU3ODYzNywidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY1NjE3Nzk0LCJleHAiOjE3NjU2MjEzOTQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.iUzBfrDPVWdRjOCDO06GrS2jg-Bbqem-PZ_4t9flxXvzZEf2eiQkJ1e9nKizheEkzLm2logzfuOgEcNlLIzX5I4gN94inlExIXos54tP0zw_-58RbRjpFx26sLgO8f-X4-SBGUuc8268c3hac2_dPSvyl5gdtrc7jd--D5BRy2Hp_UevJdHartTnyHHOdul7m9nxB-80c_9bcIaxfra5bY2DTVK0g0fPiqk6ZjlX2gEAM25W-NJ8x9cDRee0NpwS-gDYkUHlmPw2g9F4IzbQvD2wDPwtr9xMjhV2YUVbvT0Or6VH0d0mzI0LHT9VzsRMuCckxn0hjtflz6UZlKQBQA" [accepted]
-[SCRIPT WS] Step 2: WebSocket accepted successfully
-2025-12-13 10:24:41,904 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 3: Starting token verification for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:41,904 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 4: Calling verify_token_websocket()...
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
-DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 5: Token verification succeeded!
-2025-12-13 10:24:41,906 - app.routers.script_websocket - INFO - Token verified successfully for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
-[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 8: Looking up user in database...
-INFO:     connection open
-[SCRIPT WS] Step 9: Database lookup complete, user found = True
-[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
-2025-12-13 10:24:45,043 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 11: Verifying script access...
-[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[get_script_and_verify_access] Querying database for script...
-[get_script_and_verify_access] Script found: True
-[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-[get_script_and_verify_access] User is the owner
-[get_script_and_verify_access] Access verified successfully
-[SCRIPT WS] Step 12: Script access verified! Script title: silk_road_090825
-[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
-2025-12-13 10:24:47,204 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:47,204 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f. Room now has 3 participant(s)
-[SCRIPT WS] Step 14: WebSocket registered successfully
-2025-12-13 10:24:47,204 - app.routers.script_websocket - INFO - WebSocket connection established for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:48,139 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
-2025-12-13 10:24:48,139 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
-2025-12-13 10:24:48,143 - app.services.redis_pubsub - INFO - Subscribed to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f channels
-2025-12-13 10:24:48,143 - app.routers.script_websocket - INFO - Subscribed to Redis for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:48,144 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:48,146 - app.routers.script_websocket - ERROR - Error processing binary message: 
-2025-12-13 10:24:48,146 - app.services.websocket_manager - ERROR - Error broadcasting to user 2157d1b1-b88f-4b4f-a25b-13dc50dea852: 
-2025-12-13 10:24:48,146 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:48,146 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
-2025-12-13 10:24:48,150 - app.routers.script_websocket - INFO - Client disconnected from script 01ddb380-6cf4-4c5c-821a-924f04bdf85f: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-2025-12-13 10:24:48,150 - app.services.websocket_manager - ERROR - Error broadcasting to user 2157d1b1-b88f-4b4f-a25b-13dc50dea852: Cannot call "send" once a close message has been sent.
-2025-12-13 10:24:48,150 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:48,150 - app.services.redis_pubsub - INFO - Unsubscribed from script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:48,150 - app.routers.script_websocket - INFO - WebSocket connection closed for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:49,541 - app.services.script_yjs_persistence - INFO - Applied 158 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:49,541 - app.routers.script_websocket - INFO - Loaded 158 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:49,541 - app.routers.script_websocket - INFO - After loading 158 updates, Yjs content length: 0
-2025-12-13 10:24:49,541 - app.routers.script_websocket - INFO - Yjs document empty for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f, rebuilding from scenes
-2025-12-13 10:24:53,400 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
-2025-12-13 10:24:53,400 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
-2025-12-13 10:24:53,401 - app.services.redis_pubsub - INFO - Subscribed to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f channels
-2025-12-13 10:24:53,401 - app.routers.script_websocket - INFO - Subscribed to Redis for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:53,401 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:53,404 - app.routers.script_websocket - ERROR - Error processing binary message: Cannot call "send" once a close message has been sent.
-2025-12-13 10:24:53,405 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
-2025-12-13 10:24:53,407 - app.routers.script_websocket - INFO - Client disconnected from script 01ddb380-6cf4-4c5c-821a-924f04bdf85f: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-2025-12-13 10:24:53,408 - app.services.redis_pubsub - INFO - Unsubscribed from script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:24:53,408 - app.routers.script_websocket - INFO - WebSocket connection closed for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-INFO:     connection closed
-
->>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-2025-12-13 10:25:23,906 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-[SCRIPT WS] Step 1: Accepting WebSocket connection...
-INFO:     127.0.0.1:63554 - "WebSocket /api/ws/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f?token=eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk1MTg5MTkxMTA3NjA1NDM0NGUxNWUyNTY0MjViYjQyNWVlYjNhNWMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NTU3ODYzNywidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY1NjE3Nzk0LCJleHAiOjE3NjU2MjEzOTQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.iUzBfrDPVWdRjOCDO06GrS2jg-Bbqem-PZ_4t9flxXvzZEf2eiQkJ1e9nKizheEkzLm2logzfuOgEcNlLIzX5I4gN94inlExIXos54tP0zw_-58RbRjpFx26sLgO8f-X4-SBGUuc8268c3hac2_dPSvyl5gdtrc7jd--D5BRy2Hp_UevJdHartTnyHHOdul7m9nxB-80c_9bcIaxfra5bY2DTVK0g0fPiqk6ZjlX2gEAM25W-NJ8x9cDRee0NpwS-gDYkUHlmPw2g9F4IzbQvD2wDPwtr9xMjhV2YUVbvT0Or6VH0d0mzI0LHT9VzsRMuCckxn0hjtflz6UZlKQBQA" [accepted]
-[SCRIPT WS] Step 2: WebSocket accepted successfully
-2025-12-13 10:25:23,907 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 3: Starting token verification for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:23,907 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 4: Calling verify_token_websocket()...
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
-DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 5: Token verification succeeded!
-2025-12-13 10:25:23,911 - app.routers.script_websocket - INFO - Token verified successfully for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
-[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 8: Looking up user in database...
-INFO:     connection open
-[SCRIPT WS] Step 9: Database lookup complete, user found = True
-[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
-2025-12-13 10:25:25,074 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 11: Verifying script access...
-[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[get_script_and_verify_access] Querying database for script...
-[get_script_and_verify_access] Script found: True
-[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-[get_script_and_verify_access] User is the owner
-[get_script_and_verify_access] Access verified successfully
-[SCRIPT WS] Step 12: Script access verified! Script title: silk_road_090825
-[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
-2025-12-13 10:25:26,480 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:26,480 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f. Room now has 2 participant(s)
-[SCRIPT WS] Step 14: WebSocket registered successfully
-2025-12-13 10:25:26,480 - app.routers.script_websocket - INFO - WebSocket connection established for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:28,761 - app.services.script_yjs_persistence - INFO - Applied 158 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:28,761 - app.routers.script_websocket - INFO - Loaded 158 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:28,761 - app.routers.script_websocket - INFO - After loading 158 updates, Yjs content length: 0
-2025-12-13 10:25:28,762 - app.routers.script_websocket - INFO - Yjs document empty for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f, rebuilding from scenes
-2025-12-13 10:25:31,372 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
-2025-12-13 10:25:31,373 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
-2025-12-13 10:25:31,373 - app.services.redis_pubsub - INFO - Subscribed to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f channels
-2025-12-13 10:25:31,373 - app.routers.script_websocket - INFO - Subscribed to Redis for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:31,373 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:31,377 - app.routers.script_websocket - ERROR - Error processing binary message: 
-2025-12-13 10:25:31,378 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
-2025-12-13 10:25:31,383 - app.routers.script_websocket - INFO - Client disconnected from script 01ddb380-6cf4-4c5c-821a-924f04bdf85f: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-2025-12-13 10:25:31,383 - app.services.websocket_manager - ERROR - Error broadcasting to user 2157d1b1-b88f-4b4f-a25b-13dc50dea852: Cannot call "send" once a close message has been sent.
-2025-12-13 10:25:31,383 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:31,383 - app.services.redis_pubsub - INFO - Unsubscribed from script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:31,383 - app.routers.script_websocket - INFO - WebSocket connection closed for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:45,849 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
-2025-12-13 10:25:45,849 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
-2025-12-13 10:25:45,849 - app.services.redis_pubsub - INFO - Subscribed to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f channels
-2025-12-13 10:25:45,849 - app.routers.script_websocket - INFO - Subscribed to Redis for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:45,849 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:25:45,870 - app.routers.script_websocket - INFO - Replied with SyncStep2 (251968 bytes)
-2025-12-13 10:25:45,870 - app.routers.script_websocket - INFO - Sent SyncStep1 to client (15 bytes state vector)
-2025-12-13 10:25:45,871 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
-2025-12-13 10:25:46,666 - app.routers.script_websocket - INFO - Broadcasted SYNC_STEP2 as SYNC_UPDATE to peers
-2025-12-13 10:26:17,798 - app.routers.script_websocket - INFO - Client disconnected from script 01ddb380-6cf4-4c5c-821a-924f04bdf85f: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-2025-12-13 10:26:17,799 - app.services.websocket_manager - ERROR - Error broadcasting to user 2157d1b1-b88f-4b4f-a25b-13dc50dea852: Unexpected ASGI message 'websocket.send', after sending 'websocket.close' or response already completed.
-2025-12-13 10:26:17,799 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-INFO:     connection closed
-2025-12-13 10:26:17,800 - app.services.redis_pubsub - INFO - Unsubscribed from script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:17,800 - app.routers.script_websocket - INFO - WebSocket connection closed for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-
->>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-2025-12-13 10:26:17,905 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-[SCRIPT WS] Step 1: Accepting WebSocket connection...
-INFO:     127.0.0.1:63854 - "WebSocket /api/ws/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f?token=eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk1MTg5MTkxMTA3NjA1NDM0NGUxNWUyNTY0MjViYjQyNWVlYjNhNWMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NTU3ODYzNywidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY1NjE3Nzk0LCJleHAiOjE3NjU2MjEzOTQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.iUzBfrDPVWdRjOCDO06GrS2jg-Bbqem-PZ_4t9flxXvzZEf2eiQkJ1e9nKizheEkzLm2logzfuOgEcNlLIzX5I4gN94inlExIXos54tP0zw_-58RbRjpFx26sLgO8f-X4-SBGUuc8268c3hac2_dPSvyl5gdtrc7jd--D5BRy2Hp_UevJdHartTnyHHOdul7m9nxB-80c_9bcIaxfra5bY2DTVK0g0fPiqk6ZjlX2gEAM25W-NJ8x9cDRee0NpwS-gDYkUHlmPw2g9F4IzbQvD2wDPwtr9xMjhV2YUVbvT0Or6VH0d0mzI0LHT9VzsRMuCckxn0hjtflz6UZlKQBQA" [accepted]
-[SCRIPT WS] Step 2: WebSocket accepted successfully
-2025-12-13 10:26:17,905 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 3: Starting token verification for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:17,905 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 4: Calling verify_token_websocket()...
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
-DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 5: Token verification succeeded!
-2025-12-13 10:26:17,908 - app.routers.script_websocket - INFO - Token verified successfully for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
-[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 8: Looking up user in database...
-INFO:     connection open
-[SCRIPT WS] Step 9: Database lookup complete, user found = True
-[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
-2025-12-13 10:26:19,178 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 11: Verifying script access...
-[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[get_script_and_verify_access] Querying database for script...
-[get_script_and_verify_access] Script found: True
-[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-[get_script_and_verify_access] User is the owner
-[get_script_and_verify_access] Access verified successfully
-[SCRIPT WS] Step 12: Script access verified! Script title: silk_road_090825
-[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
-2025-12-13 10:26:20,622 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:20,622 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f. Room now has 1 participant(s)
-[SCRIPT WS] Step 14: WebSocket registered successfully
-2025-12-13 10:26:20,622 - app.routers.script_websocket - INFO - WebSocket connection established for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:23,123 - app.services.script_yjs_persistence - INFO - Applied 159 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:23,123 - app.routers.script_websocket - INFO - Loaded 159 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:23,123 - app.routers.script_websocket - INFO - After loading 159 updates, Yjs content length: 0
-2025-12-13 10:26:23,123 - app.routers.script_websocket - INFO - Yjs document empty for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f, rebuilding from scenes
-INFO:     connection closed
-
->>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-2025-12-13 10:26:50,903 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f <<<
-[SCRIPT WS] Step 1: Accepting WebSocket connection...
-INFO:     127.0.0.1:64033 - "WebSocket /api/ws/scripts/01ddb380-6cf4-4c5c-821a-924f04bdf85f?token=eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk1MTg5MTkxMTA3NjA1NDM0NGUxNWUyNTY0MjViYjQyNWVlYjNhNWMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NTU3ODYzNywidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY1NjE3Nzk0LCJleHAiOjE3NjU2MjEzOTQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.iUzBfrDPVWdRjOCDO06GrS2jg-Bbqem-PZ_4t9flxXvzZEf2eiQkJ1e9nKizheEkzLm2logzfuOgEcNlLIzX5I4gN94inlExIXos54tP0zw_-58RbRjpFx26sLgO8f-X4-SBGUuc8268c3hac2_dPSvyl5gdtrc7jd--D5BRy2Hp_UevJdHartTnyHHOdul7m9nxB-80c_9bcIaxfra5bY2DTVK0g0fPiqk6ZjlX2gEAM25W-NJ8x9cDRee0NpwS-gDYkUHlmPw2g9F4IzbQvD2wDPwtr9xMjhV2YUVbvT0Or6VH0d0mzI0LHT9VzsRMuCckxn0hjtflz6UZlKQBQA" [accepted]
-[SCRIPT WS] Step 2: WebSocket accepted successfully
-2025-12-13 10:26:50,903 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 3: Starting token verification for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:50,903 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 4: Calling verify_token_websocket()...
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
-DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 5: Token verification succeeded!
-2025-12-13 10:26:50,906 - app.routers.script_websocket - INFO - Token verified successfully for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
-[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 8: Looking up user in database...
-INFO:     connection open
-[SCRIPT WS] Step 9: Database lookup complete, user found = True
-[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
-2025-12-13 10:26:52,202 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[SCRIPT WS] Step 11: Verifying script access...
-[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-[get_script_and_verify_access] Querying database for script...
-[get_script_and_verify_access] Script found: True
-[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-[get_script_and_verify_access] User is the owner
-[get_script_and_verify_access] Access verified successfully
-[SCRIPT WS] Step 12: Script access verified! Script title: silk_road_090825
-[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
-2025-12-13 10:26:53,257 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:53,257 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 01ddb380-6cf4-4c5c-821a-924f04bdf85f. Room now has 2 participant(s)
-[SCRIPT WS] Step 14: WebSocket registered successfully
-2025-12-13 10:26:53,257 - app.routers.script_websocket - INFO - WebSocket connection established for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:53,904 - app.services.script_yjs_persistence - INFO - Applied 159 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:53,904 - app.routers.script_websocket - INFO - Loaded 159 persisted update(s) for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f
-2025-12-13 10:26:53,904 - app.routers.script_websocket - INFO - After loading 159 updates, Yjs content length: 0
-2025-12-13 10:26:53,904 - app.routers.script_websocket - INFO - Yjs document empty for script 01ddb380-6cf4-4c5c-821a-924f04bdf85f, rebuilding from scenes
+File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 279, in jsonable_encoder
+    encoded_key = jsonable_encoder(
+                  ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 216, in jsonable_encoder
+    if isinstance(obj, BaseModel):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+RecursionError: maximum recursion depth exceeded
