@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import SignInPage from "@/components/SignInPage";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,7 @@ import { MoviePosterBanner } from "@/components/MoviePosterBanner";
 export default function HomePage() {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // UI state
   const [isDragging, setIsDragging] = useState(false);
@@ -72,6 +73,15 @@ export default function HomePage() {
       };
     }
   }, [currentError]);
+
+  // Auto-open new script modal if ?action=new is in URL
+  useEffect(() => {
+    if (searchParams.get('action') === 'new' && user && !authLoading) {
+      setShowTitleModal(true);
+      // Clear the query param from URL without navigation
+      router.replace('/', { scroll: false });
+    }
+  }, [searchParams, user, authLoading, router]);
 
   // Load user's scripts and shared scripts when a user is present
   useEffect(() => {

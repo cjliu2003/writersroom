@@ -11,7 +11,7 @@ SQLAlchemy==2.0.28
 psycopg2-binary==2.9.9      # Alembic migrations (sync)
 asyncpg==0.29.0             # Async driver for app runtime
 SQLAlchemy-Utils==0.41.1
-greenlet==3.0.1
+greenlet==3.1.1
 alembic==1.13.1
 
 # Vector support
@@ -60,3 +60,6 @@ y-py==0.6.2         # Python Yjs CRDT bindings
 anthropic==0.75.0   # Claude API client (for AI assistant) - upgraded for tool calling support
 tiktoken==0.5.2     # Token counting for budget management
 rq==1.15.1          # Redis Queue for background jobs
+
+# PDF Export
+playwright==1.49.1  # Browser automation for PDF generation

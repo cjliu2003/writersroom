@@ -63,14 +63,15 @@ describe('Content Blocks Converter', () => {
       expect(result.content![3].type).toBe('dialogue');
     });
 
-    test('handles empty blocks array', () => {
+    test('handles empty blocks array - returns sceneHeading (screenplay convention)', () => {
       const result = contentBlocksToTipTap([]);
 
+      // Screenplay convention: new empty document starts with scene heading, not paragraph
       expect(result).toEqual({
         type: 'doc',
         content: [
           {
-            type: 'paragraph',
+            type: 'sceneHeading',
             content: []
           }
         ]

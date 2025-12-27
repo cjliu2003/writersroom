@@ -1,8 +1,9 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard } from 'lucide-react'
+import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard, Search, Bold, Italic, Underline } from 'lucide-react'
 import { Editor } from '@tiptap/react'
+import { yUndoPluginKey } from 'y-prosemirror'
 
 interface EditMenuDropdownProps {
   editor: Editor | null
@@ -11,11 +12,11 @@ interface EditMenuDropdownProps {
 export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Check undo/redo availability from editor's history state
-  // Note: history$ is not standard ProseMirror - use `as any` for type safety
-  const historyState = (editor?.state as any)?.history$
-  const canUndo = editor ? (editor.state as any).history$?.done?.eventCount > 0 : false
-  const canRedo = editor ? (editor.state as any).history$?.undone?.eventCount > 0 : false
+  // Check undo/redo availability from Yjs UndoManager (not ProseMirror history plugin)
+  // When using TipTap Collaboration extension, undo/redo is managed by y-prosemirror's UndoManager
+  const undoManager = editor ? yUndoPluginKey.getState(editor.state)?.undoManager : null
+  const canUndo = undoManager ? undoManager.undoStack.length > 0 : false
+  const canRedo = undoManager ? undoManager.redoStack.length > 0 : false
 
   // Check if there's a text selection for cut/copy
   const hasSelection = editor ? !editor.state.selection.empty : false
@@ -79,6 +80,38 @@ export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
       },
       disabled: !editor,
     },
+    { type: 'separator' as const },
+    {
+      label: 'Bold',
+      icon: Bold,
+      shortcut: '⌘B',
+      action: () => editor?.chain().focus().toggleBold().run(),
+      disabled: !editor || !hasSelection,
+    },
+    {
+      label: 'Italic',
+      icon: Italic,
+      shortcut: '⌘I',
+      action: () => editor?.chain().focus().toggleItalic().run(),
+      disabled: !editor || !hasSelection,
+    },
+    {
+      label: 'Underline',
+      icon: Underline,
+      shortcut: '⌘U',
+      action: () => editor?.chain().focus().toggleUnderline().run(),
+      disabled: !editor || !hasSelection,
+    },
+    { type: 'separator' as const },
+    {
+      label: 'Find & Replace',
+      icon: Search,
+      shortcut: '⌘F',
+      action: () => {
+        editor?.commands.openFind()
+      },
+      disabled: !editor,
+    },
   ]
 
   const handleItemClick = (action: () => void) => {
@@ -116,7 +149,7 @@ export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
           >
             {menuItems.map((item, index) => {
               if ('type' in item && item.type === 'separator') {
-                return <div key={index} className="border-t border-gray-100 my-1" />
+                return <div key={index} className="my-1 border-t border-gray-200" />
               }
 
               const Icon = item.icon

@@ -225,59 +225,35 @@ export function AIChatbot({
   // Generate personalized placeholder
   const getPlaceholder = () => {
     if (!projectId) return "Select a project to start..."
-    if (scriptTitle) return `Let's talk about ${scriptTitle.toUpperCase()}...`
-    return "Let's talk about your screenplay..."
+    if (scriptTitle) return `Ask about ${scriptTitle}...`
+    return "Ask about your screenplay..."
   }
 
   if (!isVisible) return null
 
-  // Collapsed state - subtle tab that matches the expanded header
+  // Collapsed state - minimal circle button
   if (isCollapsed) {
-    // Position-specific styling for collapsed tab
-    const collapsedStyles = {
-      bottom: {
-        container: "flex justify-start",
-        button: "flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-b-0 rounded-t-lg px-5 py-2 transition-all duration-200 shadow-sm hover:shadow-md",
-      },
-      left: {
-        container: "flex flex-col justify-end h-full pb-4",
-        button: "flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-l-0 rounded-r-md px-1.5 py-3 transition-all duration-200 shadow-sm hover:shadow-md",
-      },
-      right: {
-        container: "flex flex-col justify-end h-full pb-4",
-        button: "flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 border-r-0 rounded-l-md px-1.5 py-3 transition-all duration-200 shadow-sm hover:shadow-md",
-      }
-    }
-
-    const styles = collapsedStyles[position]
-
-    // Text faces outward toward screen edge:
-    // LEFT: vertical-lr → characters face LEFT (outward), reads bottom-to-top
-    // RIGHT: vertical-rl → characters face RIGHT (outward), reads top-to-bottom
-    const getWritingMode = () => {
-      if (position === 'left') return 'vertical-lr'
-      if (position === 'right') return 'vertical-rl'
-      return undefined
-    }
-
-    const isVertical = position === 'left' || position === 'right'
-
     return (
-      <div className={styles.container}>
-        <button
-          onClick={onCollapseToggle}
-          className={styles.button}
-          style={{
-            fontFamily: "var(--font-courier-prime), 'Courier New', monospace",
-            writingMode: getWritingMode(),
-            textOrientation: isVertical ? 'mixed' : undefined
-          }}
-          title="Open AI Assistant"
-        >
-          <Sparkles className="w-3 h-3 text-purple-400" />
-          <span className="text-[10px] uppercase tracking-wide">AI</span>
-        </button>
-      </div>
+      <button
+        onClick={onCollapseToggle}
+        className="
+          group
+          w-11 h-11
+          flex items-center justify-center
+          bg-white/90 backdrop-blur-sm
+          border border-gray-200/80
+          rounded-full
+          shadow-md
+          transition-all duration-200 ease-out
+          hover:shadow-lg hover:shadow-purple-500/20
+          hover:border-purple-300
+          hover:scale-105
+          active:scale-95
+        "
+        title="Open The Room"
+      >
+        <Sparkles className="w-5 h-5 text-purple-500 group-hover:text-purple-600 transition-colors" />
+      </button>
     )
   }
 
@@ -302,10 +278,12 @@ export function AIChatbot({
   // Get the appropriate collapse icon based on position
   const CollapseIcon = position === 'left' ? ChevronLeft : position === 'right' ? ChevronRight : ChevronDown
 
-  // Focus input when clicking anywhere in chat panel (except buttons)
+  // Focus input when clicking anywhere in chat panel (except buttons or when selecting text)
   const handlePanelClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
-    if (!target.closest('button') && !target.closest('input')) {
+    // Don't steal focus if user has selected text
+    const hasSelection = window.getSelection()?.toString()
+    if (!target.closest('button') && !target.closest('input') && !hasSelection) {
       inputRef.current?.focus()
     }
   }
@@ -313,15 +291,15 @@ export function AIChatbot({
   // Expanded state - popup chat interface
   return (
     <div
-      className={`h-full flex flex-col bg-white border border-gray-200 shadow-xl overflow-hidden ${panelStyles.container}`}
+      className={`h-full flex flex-col bg-neutral-50/95 border border-gray-200/80 shadow-2xl shadow-black/15 backdrop-blur-sm overflow-hidden ${panelStyles.container}`}
       style={{ fontFamily: "var(--font-courier-prime), 'Courier New', monospace" }}
       onClick={handlePanelClick}
     >
       {/* Header - Compact */}
-      <div className={`h-7 min-h-[28px] border-b border-gray-100 bg-gray-50/80 px-3 flex items-center justify-between ${panelStyles.header}`}>
+      <div className={`h-8 min-h-[32px] border-b border-gray-200/60 bg-gradient-to-r from-gray-100/90 to-purple-50/40 px-3 flex items-center justify-between ${panelStyles.header}`}>
         <div className="flex items-center gap-1.5">
           <Sparkles className="w-3 h-3 text-purple-500" />
-          <span className="text-[10px] text-gray-500 uppercase tracking-wide">AI</span>
+          <span className="text-[10px] text-gray-600 uppercase tracking-widest font-medium">The Room</span>
         </div>
 
         <div className="flex items-center gap-0.5">
@@ -331,7 +309,7 @@ export function AIChatbot({
               variant="ghost"
               size="sm"
               onClick={() => setShowClearConfirm(true)}
-              className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded p-0.5"
+              className="text-gray-400 hover:text-red-500 hover:bg-red-50/80 rounded p-0.5"
               title="Clear chat"
               disabled={isLoading}
             >
@@ -367,7 +345,7 @@ export function AIChatbot({
                 const nextIndex = (currentIndex + 1) % positions.length;
                 onPositionChange(positions[nextIndex]);
               }}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-200/60 rounded p-0.5"
               title={`Move to ${position === 'bottom' ? 'right' : position === 'right' ? 'left' : 'bottom'}`}
             >
               {position === 'bottom' ? (
@@ -385,7 +363,7 @@ export function AIChatbot({
               variant="ghost"
               size="sm"
               onClick={onCollapseToggle}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded p-0.5 -mr-1"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-200/60 rounded p-0.5 -mr-1"
               title="Minimize"
             >
               <CollapseIcon className="w-3.5 h-3.5" />
@@ -397,18 +375,18 @@ export function AIChatbot({
       {/* Messages */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="p-3 space-y-3">
+          <div className="p-4 space-y-4">
             {messages.length === 0 ? (
-              <div className="py-6 text-center">
-                <Sparkles className="w-6 h-6 text-purple-200 mx-auto mb-2" />
-                <p className="text-[12pt] text-gray-500 leading-relaxed">
+              <div className="py-8 text-center">
+                <Sparkles className="w-5 h-5 text-purple-300 mx-auto mb-3" />
+                <p className="text-[11pt] text-gray-500 leading-relaxed">
                   {scriptTitle ? (
-                    <>Let&apos;s talk about {scriptTitle.toUpperCase()}...</>
+                    <>Let&apos;s talk about <span className="text-gray-600 font-medium">{scriptTitle.toUpperCase()}</span>...</>
                   ) : (
                     <>Let&apos;s talk about your screenplay...</>
                   )}
                 </p>
-                <p className="text-[10pt] text-gray-400 mt-1">
+                <p className="text-[9pt] text-gray-400 mt-2">
                   Ask about characters, plot, structure, or anything else!
                 </p>
               </div>
@@ -416,29 +394,33 @@ export function AIChatbot({
               messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`text-[12pt] leading-[16pt] rounded px-2 py-1.5 ${
-                    message.role === 'user'
-                      ? 'text-black'
-                      : 'text-black bg-purple-50/70 border-l-2 border-purple-300'
-                  }`}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in-0 slide-in-from-bottom-2 duration-200`}
+                  style={{ animationDelay: `${index * 30}ms` }}
                 >
-                  {message.role === 'user' ? (
-                    <>
-                      <span className="text-purple-500 font-medium mr-1.5">&gt;</span>
-                      <span className="whitespace-pre-wrap">{message.content}</span>
-                    </>
-                  ) : (
-                    <MarkdownContent content={message.content} />
-                  )}
+                  <div
+                    className={`max-w-[85%] text-[11pt] leading-[16pt] px-3.5 py-2 ${
+                      message.role === 'user'
+                        ? 'bg-purple-600 text-white rounded-2xl rounded-br-md shadow-sm'
+                        : 'bg-white text-gray-700 border border-gray-200/80 rounded-2xl rounded-bl-md shadow-sm'
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap m-0">{message.content}</p>
+                  </div>
                 </div>
               ))
             )}
 
             {isLoading && (
-              <div className="text-[12pt] leading-[16pt] text-gray-600 bg-purple-50/70 border-l-2 border-purple-300 rounded px-2 py-1.5">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-500" />
-                  <span>{statusMessage || 'Thinking...'}</span>
+              <div className="flex justify-start animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
+                <div className="bg-white text-gray-500 border border-gray-200/80 rounded-2xl rounded-bl-md shadow-sm px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    </div>
+                    <span className="text-[10pt] text-gray-400">{statusMessage || 'Thinking...'}</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -447,9 +429,8 @@ export function AIChatbot({
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-200 bg-gray-100 p-2 px-3">
-        <div className="flex items-start gap-2">
-          <span className="text-purple-500 text-[12pt] font-medium leading-[20px]">&gt;</span>
+      <div className="border-t border-gray-200/60 bg-gray-100/80 p-3">
+        <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-200/80 px-3 py-2.5 shadow-sm">
           <textarea
             ref={inputRef}
             value={inputValue}
@@ -458,15 +439,18 @@ export function AIChatbot({
             placeholder={getPlaceholder()}
             disabled={!projectId}
             rows={1}
-            className="flex-1 bg-transparent text-[12pt] text-black placeholder-gray-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none leading-[20px]"
+            className="flex-1 bg-transparent text-[11pt] text-gray-700 placeholder-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none leading-[20px] min-h-[20px] py-0"
             style={{ fontFamily: "inherit", fieldSizing: "content" } as React.CSSProperties}
           />
           <Button
             onClick={sendMessage}
             disabled={!inputValue.trim() || !projectId || isLoading}
             size="sm"
-            variant="ghost"
-            className="text-gray-500 hover:text-purple-600 hover:bg-purple-50 p-1.5"
+            className={`p-1.5 rounded-lg transition-all duration-150 flex-shrink-0 ${
+              inputValue.trim() && projectId && !isLoading
+                ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
+                : 'bg-gray-100 text-gray-400'
+            }`}
           >
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

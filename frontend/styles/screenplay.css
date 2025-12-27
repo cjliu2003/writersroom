@@ -10,9 +10,10 @@
 
 /* Global Screenplay Editor Styles */
 .screenplay-editor {
-  font-family: 'Courier', 'Courier New', monospace;
+  font-family: var(--font-courier-prime), 'Courier Prime', 'Courier New', monospace;
   font-size: 12pt;
-  line-height: 12pt;
+  line-height: 12pt;  /* Match Final Draft's 6 lines per inch (12pt baseline-to-baseline) */
+  letter-spacing: -0.02em;  /* Tighten characters to match Final Draft's rendering */
   color: #000;
   background: #fff;
 }
@@ -28,9 +29,20 @@
   margin-left: 0 !important; /* Flush with left margin */
   max-width: none !important;
   text-transform: uppercase;
-  font-weight: bold;
+  /* Note: Scene headings are NOT bold in standard screenplay format */
   margin-top: 24pt !important; /* Double-space before */
   margin-bottom: 12pt !important; /* Single-space after */
+}
+
+/* First element on each page should not have top margin.
+ * [data-rm-pagination] is inserted by PaginationPlus at position 0 with side: -1,
+ * AFTER .rm-first-page-header (side: -2). So this rule targets:
+ * - Page 1: The first content element (scene heading, action, etc.)
+ * - Pages 2+: The first content element after each page break
+ * Without this, scene headings would add 24pt (32px) margin pushing content down.
+ */
+.screenplay-editor [data-rm-pagination] + * {
+  margin-top: 0 !important;
 }
 
 /* Action (Scene Description) */
@@ -38,19 +50,20 @@
 .screenplay-editor [data-type="action"] {
   margin-left: 0 !important; /* Flush with left margin */
   max-width: none !important;
+  margin-top: 12pt !important; /* Single-space before (matches Character for seamless Tab switching) */
   margin-bottom: 12pt !important; /* Single-space after */
-  line-height: 12pt;
+  /* line-height inherited from .screenplay-editor */
 }
 
 /* Character Name (Character Cue) */
 .screenplay-editor .screenplay-character,
 .screenplay-editor [data-type="character"] {
-  /* Standard: 4.0" from page left edge = 2.5" from 1.5" left margin */
-  /* 2.5" = 63.5mm additional indent */
+  /* Standard: 3.7" from page left edge = 2.2" from 1.5" left margin */
+  /* 2.2" = 55.88mm additional indent */
   /* !important needed to override Tailwind prose styles */
   width: fit-content !important;
   max-width: none !important;
-  margin-left: 63.5mm !important; /* 4.0" from page left edge */
+  margin-left: 50.5mm !important; /* ~3.5" from page left edge */
   margin-right: auto !important;
   text-transform: uppercase;
   margin-top: 12pt !important; /* Single-space before */
@@ -61,41 +74,49 @@
 .screenplay-editor .screenplay-dialogue,
 .screenplay-editor [data-type="dialogue"] {
   /* Standard: 2.5" from page left edge = 1.0" from 1.5" left margin */
-  /* Right margin at 2.5" from page right = width of 3.5" */
-  /* 1.0" = 25.4mm additional indent, 3.5" = 88.9mm width */
+  /* Width adjusted from 88.9mm (3.5") to 86mm to compensate for letter-spacing: -0.02em */
+  /* This ensures exactly 35 characters per line, matching Final Draft */
   /* !important needed to override Tailwind prose styles */
-  width: 88.9mm !important; /* 3.5 inches wide */
-  max-width: 88.9mm !important;
+  width: 88.332mm !important; /* ~335px for 35 chars with letter-spacing */
+  max-width: 88.332mm !important;
   margin-left: 25.4mm !important; /* 2.5" from page left edge */
-  margin-right: 63.5mm !important; /* 2.5" from page right edge */
+  margin-right: 64.068mm !important; /* adjusted for 88.332mm width */
   margin-bottom: 12pt !important; /* Single-space after */
+}
+
+/* Dialogue followed by more dialogue (multi-paragraph speech) should have no bottom margin */
+.screenplay-editor .screenplay-dialogue:has(+ .screenplay-dialogue),
+.screenplay-editor .screenplay-dialogue:has(+ [data-type="dialogue"]),
+.screenplay-editor [data-type="dialogue"]:has(+ .screenplay-dialogue),
+.screenplay-editor [data-type="dialogue"]:has(+ [data-type="dialogue"]) {
+  margin-bottom: 0 !important;
+}
+
+/* Dialogue followed by parenthetical should have no bottom margin */
+.screenplay-editor .screenplay-dialogue:has(+ .screenplay-parenthetical),
+.screenplay-editor .screenplay-dialogue:has(+ [data-type="parenthetical"]),
+.screenplay-editor [data-type="dialogue"]:has(+ .screenplay-parenthetical),
+.screenplay-editor [data-type="dialogue"]:has(+ [data-type="parenthetical"]) {
+  margin-bottom: 0 !important;
 }
 
 /* Parenthetical */
 .screenplay-editor .screenplay-parenthetical,
 .screenplay-editor [data-type="parenthetical"] {
-  /* Standard: 3.5" from page left edge = 2.0" from 1.5" left margin */
-  /* Right margin at 2.5" from page right = width of 3.0" */
-  /* 2.0" = 50.8mm additional indent, 3.0" = 76.2mm width */
+  /* 26 characters per line including parentheses */
+  /* 26 chars ÷ 10 chars/inch = 2.6 inches = 66.04mm width */
   /* !important needed to override Tailwind prose styles */
-  width: 76.2mm !important; /* 3.0 inches wide */
-  max-width: 76.2mm !important;
-  margin-left: 50.8mm !important; /* 3.5" from page left edge */
-  margin-right: 63.5mm !important; /* 2.5" from page right edge */
-  font-style: italic;
+  width: 62.5mm !important; /* ~236px for 26 chars with letter-spacing */
+  max-width: 62.5mm !important;
+  margin-left: 35.75mm !important; /* ~2.9" from page left edge */
+  margin-right: 92.33mm !important; /* adjusted for 62.5mm width */
+  font-style: normal; /* NOT italic - standard screenplay format */
+  margin-top: 0 !important; /* No space before (follows character/dialogue immediately) */
   margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */
 }
 
-/* Auto-wrap parenthetical content in parentheses */
-.screenplay-editor .screenplay-parenthetical::before,
-.screenplay-editor [data-type="parenthetical"]::before {
-  content: '(';
-}
-
-.screenplay-editor .screenplay-parenthetical::after,
-.screenplay-editor [data-type="parenthetical"]::after {
-  content: ')';
-}
+/* Parentheses are now real text characters in the document, not CSS pseudo-elements.
+   This allows users to edit/delete parentheses like normal text. */
 
 /* Transition */
 .screenplay-editor .screenplay-transition,
@@ -105,12 +126,17 @@
   max-width: none !important;
   margin-top: 12pt !important; /* Single-space before */
   margin-bottom: 12pt !important; /* Single-space after */
+  position: relative;
+  padding-right: 0.6em; /* Space for the colon */
 }
 
-/* Auto-add colon to transitions */
+/* Auto-add colon to transitions - absolutely positioned to stay after text */
 .screenplay-editor .screenplay-transition::after,
 .screenplay-editor [data-type="transition"]::after {
   content: ':';
+  position: absolute;
+  right: 0;
+  top: 0; /* Pin to first line even when empty */
 }
 
 /* Collaboration Cursor Styling (preserve from POC) */
@@ -159,4 +185,61 @@
   margin: 2rem 0;
   padding-top: 2rem;
   page-break-after: always;
+}
+
+/* Find/Replace Match Highlighting */
+.screenplay-editor .find-match {
+  background-color: #fef08a; /* Yellow-200 */
+  border-radius: 2px;
+}
+
+.screenplay-editor .find-current-match {
+  background-color: #fb923c; /* Orange-400 */
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.5);
+}
+
+/* ============================================
+   Text Formatting Marks (Bold, Italic, Underline)
+
+   Using synthetic styles to maintain monospace character width.
+   This prevents pagination/line-break shifts when formatting text.
+
+   Shortcuts:
+   - Bold: Cmd+B / Ctrl+B
+   - Italic: Cmd+I / Ctrl+I
+   - Underline: Cmd+U / Ctrl+U
+   ============================================ */
+
+/* Bold - uses Courier Prime Bold (700) font variant
+   Courier Prime Bold has identical character widths to Regular */
+.screenplay-editor strong,
+.screenplay-editor b {
+  font-weight: 700;  /* Use loaded Courier Prime Bold */
+  font-synthesis: none;  /* Prevent browser from synthesizing */
+}
+
+/* Italic - uses Courier Prime Italic font variant
+   Courier Prime Italic has identical character widths to Regular */
+.screenplay-editor em,
+.screenplay-editor i {
+  font-style: italic;  /* Use loaded Courier Prime Italic */
+  font-synthesis: none;  /* Prevent browser from synthesizing */
+}
+
+/* Underline - already width-stable, just style it nicely */
+.screenplay-editor u {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/* SmartType ghost text - inline autocomplete preview */
+.smart-type-ghost {
+  color: #9ca3af;
+  pointer-events: none;
+  user-select: none;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
 }

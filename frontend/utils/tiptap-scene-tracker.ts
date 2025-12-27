@@ -190,8 +190,8 @@ export function scrollToScene(editor: Editor | null, scene: SceneBoundary): void
       }
 
       if (targetElement) {
-        // Find the scroll container (the fixed-position overflow-auto div)
-        const scrollContainer = document.querySelector('.overflow-auto') as HTMLElement;
+        // Find the scroll container using specific id (added to page.tsx scroll container)
+        const scrollContainer = document.getElementById('editor-scroll-container') as HTMLElement;
 
         if (scrollContainer) {
           // Calculate the element's position relative to the scroll container
