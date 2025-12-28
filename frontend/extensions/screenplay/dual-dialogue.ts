@@ -71,6 +71,142 @@ export function isInsideDualDialogue($pos: ResolvedPos): boolean {
 }
 
 /**
+ * Result of checking if dual dialogue can be toggled
+ */
+export interface DualDialogueState {
+  /** Whether the toggle action can be performed */
+  canToggle: boolean;
+  /** Whether cursor is currently inside a dual dialogue block */
+  isInsideBlock: boolean;
+  /** Human-readable reason if canToggle is false */
+  reason?: string;
+}
+
+/**
+ * Check if dual dialogue can be toggled from current cursor/selection.
+ * Used by toolbar to determine button state (enabled/disabled/active).
+ *
+ * Supports two modes:
+ * 1. Cursor in second dialogue group → pairs with previous group
+ * 2. Selection spanning two adjacent groups → wraps those groups
+ *
+ * @param editor - TipTap Editor instance
+ * @returns State object with canToggle, isInsideBlock, and optional reason
+ */
+export function getDualDialogueState(editor: Editor): DualDialogueState {
+  const { state } = editor;
+  const { $from, $to } = state.selection;
+
+  // Check if already inside a dual dialogue block
+  for (let depth = $from.depth; depth > 0; depth--) {
+    const node = $from.node(depth);
+    if (node.type.name === 'dualDialogueBlock') {
+      return {
+        canToggle: true,
+        isInsideBlock: true,
+      };
+    }
+  }
+
+  // Find dialogue groups
+  const groups = findDialogueGroups(state.doc);
+
+  if (groups.length < 2) {
+    return {
+      canToggle: false,
+      isInsideBlock: false,
+      reason: 'Need two dialogue groups',
+    };
+  }
+
+  // Check if selection spans two groups
+  const startGroupIndex = findGroupContainingCursor(groups, $from.pos);
+  const endGroupIndex = findGroupContainingCursor(groups, $to.pos);
+
+  // Selection spans two different groups
+  if (startGroupIndex !== -1 && endGroupIndex !== -1 && startGroupIndex !== endGroupIndex) {
+    // Normalize order (in case of backwards selection)
+    const firstIndex = Math.min(startGroupIndex, endGroupIndex);
+    const secondIndex = Math.max(startGroupIndex, endGroupIndex);
+
+    // Must be exactly two adjacent groups
+    if (secondIndex - firstIndex !== 1) {
+      return {
+        canToggle: false,
+        isInsideBlock: false,
+        reason: 'Select exactly two adjacent dialogue groups',
+      };
+    }
+
+    // Check groups are adjacent (no content between)
+    const leftGroup = groups[firstIndex];
+    const rightGroup = groups[secondIndex];
+
+    if (leftGroup.endPos !== rightGroup.startPos) {
+      return {
+        canToggle: false,
+        isInsideBlock: false,
+        reason: 'Dialogue groups must be adjacent',
+      };
+    }
+
+    return {
+      canToggle: true,
+      isInsideBlock: false,
+    };
+  }
+
+  // Single cursor/selection within one group - use original logic
+  const currentNode = $from.parent;
+  const currentType = currentNode.type.name;
+
+  // Must be in a dialogue-related element
+  if (!['character', 'dialogue', 'parenthetical'].includes(currentType)) {
+    return {
+      canToggle: false,
+      isInsideBlock: false,
+      reason: 'Place cursor in character or dialogue',
+    };
+  }
+
+  const cursorGroupIndex = startGroupIndex;
+
+  if (cursorGroupIndex === -1) {
+    return {
+      canToggle: false,
+      isInsideBlock: false,
+      reason: 'Cursor not in a dialogue group',
+    };
+  }
+
+  // First group cannot initiate (need previous group to pair with)
+  if (cursorGroupIndex === 0) {
+    return {
+      canToggle: false,
+      isInsideBlock: false,
+      reason: 'Place cursor in second character\'s dialogue',
+    };
+  }
+
+  // Check groups are adjacent
+  const leftGroup = groups[cursorGroupIndex - 1];
+  const rightGroup = groups[cursorGroupIndex];
+
+  if (leftGroup.endPos !== rightGroup.startPos) {
+    return {
+      canToggle: false,
+      isInsideBlock: false,
+      reason: 'Dialogue groups must be adjacent',
+    };
+  }
+
+  return {
+    canToggle: true,
+    isInsideBlock: false,
+  };
+}
+
+/**
  * Get the valid element types for cycling inside a dual dialogue column.
  * Columns can only contain: character, dialogue, parenthetical
  */
@@ -332,14 +468,17 @@ function wrapDualDialogue(
 }
 
 /**
- * Toggle dual dialogue on the current dialogue group.
+ * Toggle dual dialogue on the current dialogue group or selection.
  *
- * Behavior depends on cursor location:
+ * Behavior depends on cursor/selection:
  *
  * 1. If cursor is inside a dualDialogueBlock:
  *    → Unwrap: Extract all nodes back to flat document structure
  *
- * 2. If cursor is in a dialogue group (character/dialogue/parenthetical):
+ * 2. If selection spans two adjacent dialogue groups:
+ *    → Wrap: Use selected groups as left and right columns
+ *
+ * 3. If cursor is in a dialogue group (character/dialogue/parenthetical):
  *    → Wrap: Pair with preceding dialogue group into dual dialogue
  *    → Fails if cursor is in the FIRST dialogue group (no preceding group)
  *    → Fails if groups are not adjacent (content between them)
@@ -349,7 +488,7 @@ function wrapDualDialogue(
  */
 export function toggleDualDialogue(editor: Editor): boolean {
   const { state } = editor;
-  const { $from } = state.selection;
+  const { $from, $to } = state.selection;
 
   // ============================================================
   // CASE 1: Already inside a dualDialogueBlock → UNWRAP
@@ -365,16 +504,6 @@ export function toggleDualDialogue(editor: Editor): boolean {
   // CASE 2: Not inside a block → try to WRAP
   // ============================================================
 
-  // Check cursor is in a dialogue-related element
-  const currentNode = $from.parent;
-  const currentType = currentNode.type.name;
-
-  if (!DIALOGUE_GROUP_TYPES.includes(currentType)) {
-    console.log(`[DualDialogue] Cannot toggle - cursor in '${currentType}'`);
-    console.log('  Dual dialogue only works with character, dialogue, or parenthetical');
-    return false;
-  }
-
   // Find all dialogue groups in the document
   const groups = findDialogueGroups(state.doc);
 
@@ -389,12 +518,50 @@ export function toggleDualDialogue(editor: Editor): boolean {
     return false;
   }
 
-  // Find which group contains the cursor
-  const cursorPos = $from.pos;
-  const cursorGroupIndex = findGroupContainingCursor(groups, cursorPos);
+  // Check if selection spans two groups
+  const startGroupIndex = findGroupContainingCursor(groups, $from.pos);
+  const endGroupIndex = findGroupContainingCursor(groups, $to.pos);
+
+  // ============================================================
+  // CASE 2a: Selection spans two different groups
+  // ============================================================
+  if (startGroupIndex !== -1 && endGroupIndex !== -1 && startGroupIndex !== endGroupIndex) {
+    // Normalize order (in case of backwards selection)
+    const firstIndex = Math.min(startGroupIndex, endGroupIndex);
+    const secondIndex = Math.max(startGroupIndex, endGroupIndex);
+
+    // Must be exactly two adjacent groups
+    if (secondIndex - firstIndex !== 1) {
+      console.log('[DualDialogue] Selection spans more than 2 groups - cannot wrap');
+      return false;
+    }
+
+    const leftGroup = groups[firstIndex];
+    const rightGroup = groups[secondIndex];
+
+    console.log(`[DualDialogue] Selection spans groups ${firstIndex} and ${secondIndex} → wrapping`);
+
+    return wrapDualDialogue(editor, leftGroup, rightGroup);
+  }
+
+  // ============================================================
+  // CASE 2b: Cursor in single group → pair with previous
+  // ============================================================
+
+  // Check cursor is in a dialogue-related element
+  const currentNode = $from.parent;
+  const currentType = currentNode.type.name;
+
+  if (!DIALOGUE_GROUP_TYPES.includes(currentType)) {
+    console.log(`[DualDialogue] Cannot toggle - cursor in '${currentType}'`);
+    console.log('  Dual dialogue only works with character, dialogue, or parenthetical');
+    return false;
+  }
+
+  const cursorGroupIndex = startGroupIndex;
 
   if (cursorGroupIndex === -1) {
-    console.log(`[DualDialogue] Cursor position ${cursorPos} not in any dialogue group`);
+    console.log(`[DualDialogue] Cursor position ${$from.pos} not in any dialogue group`);
     console.log('  Groups:', groups.map(g => `${g.startPos}-${g.endPos}`).join(', '));
     return false;
   }

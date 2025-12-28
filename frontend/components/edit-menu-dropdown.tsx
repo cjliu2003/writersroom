@@ -1,9 +1,30 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard, Search, Bold, Italic, Underline } from 'lucide-react'
+import { Pencil, Undo2, Redo2, MousePointer2, Scissors, Copy, Clipboard, Search, Bold, Italic, Underline, LucideIcon } from 'lucide-react'
 import { Editor } from '@tiptap/react'
 import { yUndoPluginKey } from 'y-prosemirror'
+import { getDualDialogueState, toggleDualDialogue } from '@/extensions/screenplay/dual-dialogue'
+
+/**
+ * Dual Dialogue icon - two speech bubbles side by side
+ */
+function DualDialogueIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 4h6a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6l-2 2v-2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+      <path d="M14 10h6a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1v2l-2-2h-3a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" />
+    </svg>
+  )
+}
 
 interface EditMenuDropdownProps {
   editor: Editor | null
@@ -20,6 +41,9 @@ export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
 
   // Check if there's a text selection for cut/copy
   const hasSelection = editor ? !editor.state.selection.empty : false
+
+  // Check dual dialogue state
+  const dualDialogueState = editor ? getDualDialogueState(editor) : { canToggle: false, isInsideBlock: false }
 
   const menuItems = [
     {
@@ -101,6 +125,14 @@ export function EditMenuDropdown({ editor }: EditMenuDropdownProps) {
       shortcut: '⌘U',
       action: () => editor?.chain().focus().toggleUnderline().run(),
       disabled: !editor || !hasSelection,
+    },
+    { type: 'separator' as const },
+    {
+      label: dualDialogueState.isInsideBlock ? 'Exit Dual Dialogue' : 'Dual Dialogue',
+      icon: DualDialogueIcon,
+      shortcut: '⌘D',
+      action: () => editor && toggleDualDialogue(editor),
+      disabled: !editor || !dualDialogueState.canToggle,
     },
     { type: 'separator' as const },
     {
