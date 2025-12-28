@@ -11,7 +11,7 @@ export interface EditorLayoutPrefs {
   assistantVisible: boolean;
   chatCollapsed?: boolean;     // Whether chat panel is collapsed to minimal state
   chatHeight?: number;         // Height of chat panel in pixels when docked at bottom (default: 220)
-  chatPosition?: ChatPosition; // Which edge the chat is docked to (default: 'bottom')
+  chatPosition?: ChatPosition; // Which edge the chat is docked to (default: 'right')
   chatWidth?: number;          // Width of chat panel in pixels when docked left/right (default: 360)
   chatBottomWidth?: number;    // Width of chat panel in pixels when docked at bottom (default: 1200)
 }
@@ -38,7 +38,7 @@ export function loadLayoutPrefs(): EditorLayoutPrefs {
     assistantVisible: true,
     chatCollapsed: false,
     chatHeight: 220,
-    chatPosition: 'bottom',
+    chatPosition: 'right',
     chatWidth: 360,
     chatBottomWidth: 1200
   };

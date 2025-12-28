@@ -34,7 +34,7 @@ export function AIChatbot({
   currentSceneId,
   isCollapsed = false,
   onCollapseToggle,
-  position = 'bottom',
+  position = 'right',
   onPositionChange,
   isTopBarCollapsed = false,
   isSceneNavCollapsed = false

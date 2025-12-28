@@ -73,7 +73,7 @@ export default function TestTipTapPage() {
   // UI state
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [chatHeight, setChatHeight] = useState(220);
-  const [chatPosition, setChatPosition] = useState<ChatPosition>('bottom');
+  const [chatPosition, setChatPosition] = useState<ChatPosition>('right');
   const [chatWidth, setChatWidth] = useState(360);
   const [chatBottomWidth, setChatBottomWidth] = useState(1200);
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
@@ -507,7 +507,7 @@ export default function TestTipTapPage() {
     const prefs = loadLayoutPrefs();
     setIsChatCollapsed(prefs.chatCollapsed ?? false);
     setChatHeight(prefs.chatHeight ?? 220);
-    setChatPosition(prefs.chatPosition ?? 'bottom');
+    setChatPosition(prefs.chatPosition ?? 'right');
     setChatWidth(prefs.chatWidth ?? 360);
     setChatBottomWidth(prefs.chatBottomWidth ?? 1200);
   }, []);
