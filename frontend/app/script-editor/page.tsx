@@ -523,6 +523,20 @@ export default function TestTipTapPage() {
     });
   }, [isChatCollapsed, chatHeight, chatPosition, chatWidth, chatBottomWidth]);
 
+  // Global keyboard shortcut: ⌘J to toggle AI chat panel
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Cmd+J (Mac) or Ctrl+J (Windows)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
+        e.preventDefault();
+        setIsChatCollapsed(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Handle vertical resize drag (for bottom position)
   const handleVerticalResizeMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();

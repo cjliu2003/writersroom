@@ -64,7 +64,12 @@
       "Skill(sc:load)",
       "Skill(sc:analyze)",
       "WebFetch(domain:github.com)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "WebFetch(domain:www.studiobinder.com)",
+      "WebFetch(domain:nofilmschool.com)",
+      "WebFetch(domain:johnaugust.com)",
+      "WebFetch(domain:kb.finaldraft.com)",
+      "WebFetch(domain:screenwriting.io)"
     ],
     "deny": [],
     "ask": []

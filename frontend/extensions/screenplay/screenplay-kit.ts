@@ -36,6 +36,7 @@ import { SmartEnterPlugin } from './plugins/smart-enter-plugin';
 import { SmartBreaksPlugin } from './plugins/smart-breaks-plugin';
 import { DualDialogueMigrationPlugin } from './plugins/dual-dialogue-migration';
 import { DualDialogueGuardPlugin } from './plugins/dual-dialogue-guard';
+import { CharacterContdPlugin } from './plugins/character-contd-plugin';
 
 // SmartType autocomplete
 import { SmartTypeExtension } from './smart-type';
@@ -168,6 +169,10 @@ export const ScreenplayKit = Extension.create<ScreenplayKitOptions>({
     // Dual dialogue guard plugin - safety net for invalid column states
     // Auto-unwraps if structure becomes invalid (e.g., character deleted)
     plugins.push(DualDialogueGuardPlugin());
+
+    // Character CONT'D plugin - displays (CONT'D) decoration when same character
+    // speaks again after an action line interruption
+    plugins.push(CharacterContdPlugin());
 
     return plugins;
   },

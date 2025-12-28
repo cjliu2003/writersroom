@@ -70,6 +70,18 @@
   margin-bottom: 0 !important; /* No space after (dialogue follows immediately) */
 }
 
+/* Character CONT'D decoration
+ * Displayed automatically when the same character speaks after an action line.
+ * This is computed at render time via ProseMirror decorations, not stored in the document.
+ */
+.screenplay-editor .character-contd {
+  color: inherit; /* Match the character name color */
+  font-style: normal;
+  text-transform: uppercase;
+  user-select: none; /* Not selectable */
+  pointer-events: none; /* Not interactive */
+}
+
 /* Dialogue */
 .screenplay-editor .screenplay-dialogue,
 .screenplay-editor [data-type="dialogue"] {
