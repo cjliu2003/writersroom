@@ -231,28 +231,40 @@ export function AIChatbot({
 
   if (!isVisible) return null
 
-  // Collapsed state - minimal circle button
+  // Collapsed state - expandable pill button
   if (isCollapsed) {
     return (
       <button
         onClick={onCollapseToggle}
         className="
           group
-          w-11 h-11
-          flex items-center justify-center
+          w-11 h-11 hover:w-[140px]
+          flex items-center justify-center hover:justify-start hover:gap-2 hover:px-3
           bg-white/90 backdrop-blur-sm
           border border-gray-200/80
           rounded-full
           shadow-md
-          transition-all duration-200 ease-out
-          hover:shadow-lg hover:shadow-purple-500/20
+          transition-all duration-300 ease-out
+          hover:shadow-lg hover:shadow-purple-500/25
           hover:border-purple-300
-          hover:scale-105
+          hover:bg-gradient-to-r hover:from-white hover:to-purple-50
+          hover:scale-100
           active:scale-95
+          overflow-hidden
         "
-        title="Open The Room"
+        title="Open The Room (⌘J)"
       >
-        <Sparkles className="w-5 h-5 text-purple-500 group-hover:text-purple-600 transition-colors" />
+        <Sparkles className="w-5 h-5 min-w-[20px] text-purple-500 group-hover:text-purple-600 transition-colors" />
+        <span className="
+          text-sm font-medium text-gray-600 group-hover:text-purple-700
+          whitespace-nowrap
+          w-0 group-hover:w-auto
+          opacity-0 group-hover:opacity-100
+          transition-all duration-300 ease-out
+          overflow-hidden
+        ">
+          The Room
+        </span>
       </button>
     )
   }
