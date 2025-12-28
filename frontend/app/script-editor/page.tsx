@@ -1269,6 +1269,7 @@ export default function TestTipTapPage() {
 
         .screenplay-editor-wrapper {
           background: var(--app-chrome-bg);
+          padding-bottom: 120px;  /* Buffer to see end of last page */
         }
 
         .screenplay-editor {

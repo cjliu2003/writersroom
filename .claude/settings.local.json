@@ -60,7 +60,9 @@
       "Bash(curl:*)",
       "Bash(npx tsc:*)",
       "Bash(pip freeze:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Skill(sc:load)",
+      "Skill(sc:analyze)"
     ],
     "deny": [],
     "ask": []
