@@ -186,17 +186,22 @@ export const Character = Node.create({
           return false; // Not in dual dialogue, let default handle it
         }
 
-        // Only unwrap from LEFT column's character (first element)
-        // This preserves structure if user is in right column
-        if (columnInfo.side === 'left') {
-          // Check if this is the first element in the column
-          // The character should be the first child of the column
-          const isFirstInColumn = $from.index(columnInfo.depth) === 0;
+        // Check if this is the first element in the column (the required character)
+        const isFirstInColumn = $from.index(columnInfo.depth) === 0;
+        const isEmpty = node.textContent.trim().length === 0;
 
-          if (isFirstInColumn) {
-            console.log('[DualDialogue] Backspace at start of left column character → unwrapping');
-            return toggleDualDialogue(this.editor);
-          }
+        // LEFT column's character: Backspace at start unwraps dual dialogue
+        if (columnInfo.side === 'left' && isFirstInColumn) {
+          console.log('[DualDialogue] Backspace at start of left column character → unwrapping');
+          return toggleDualDialogue(this.editor);
+        }
+
+        // RIGHT column's empty character: Block backspace to prevent schema violation
+        // The column schema requires a character first: 'character (dialogue | parenthetical)*'
+        // User must use Cmd+D to unwrap the dual dialogue instead
+        if (columnInfo.side === 'right' && isFirstInColumn && isEmpty) {
+          console.log('[DualDialogue] Blocking backspace on empty right column character');
+          return true; // Block - consume event but do nothing
         }
 
         return false; // Let default Backspace behavior handle other cases

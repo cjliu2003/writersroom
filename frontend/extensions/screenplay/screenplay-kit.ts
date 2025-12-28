@@ -35,6 +35,7 @@ import { DualDialogueBlock } from './nodes/dual-dialogue-block';
 import { SmartEnterPlugin } from './plugins/smart-enter-plugin';
 import { SmartBreaksPlugin } from './plugins/smart-breaks-plugin';
 import { DualDialogueMigrationPlugin } from './plugins/dual-dialogue-migration';
+import { DualDialogueGuardPlugin } from './plugins/dual-dialogue-guard';
 
 // SmartType autocomplete
 import { SmartTypeExtension } from './smart-type';
@@ -163,6 +164,10 @@ export const ScreenplayKit = Extension.create<ScreenplayKitOptions>({
     // Dual dialogue migration plugin - runs once on document load
     // Converts legacy flat isDualDialogue=true structure to wrapper nodes
     plugins.push(DualDialogueMigrationPlugin());
+
+    // Dual dialogue guard plugin - safety net for invalid column states
+    // Auto-unwraps if structure becomes invalid (e.g., character deleted)
+    plugins.push(DualDialogueGuardPlugin());
 
     return plugins;
   },
