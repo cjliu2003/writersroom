@@ -59,6 +59,57 @@ const TIPTAP_TO_BACKEND_TYPE_MAP: Record<string, string> = {
 };
 
 /**
+ * Check if a node is a dual dialogue block
+ */
+function isDualDialogueBlock(node: JSONContent): boolean {
+  return node.type === 'dualDialogueBlock';
+}
+
+/**
+ * Check if a node is a dual dialogue column
+ */
+function isDualDialogueColumn(node: JSONContent): boolean {
+  return node.type === 'dualDialogueColumn';
+}
+
+/**
+ * Flatten a dual dialogue block into individual content blocks
+ * Elements from the block are marked with isDualDialogue: true in metadata
+ */
+function flattenDualDialogueBlock(block: JSONContent): ContentBlock[] {
+  const blocks: ContentBlock[] = [];
+
+  if (!block.content) return blocks;
+
+  // Process each column
+  block.content.forEach((column) => {
+    if (!isDualDialogueColumn(column) || !column.content) return;
+
+    // Process each element in the column
+    column.content.forEach((node) => {
+      const backendType = TIPTAP_TO_BACKEND_TYPE_MAP[node.type || 'paragraph'] || 'general';
+
+      // Extract text content
+      let text = '';
+      if (node.content && node.content.length > 0) {
+        text = node.content
+          .filter(child => child.type === 'text')
+          .map(child => child.text || '')
+          .join('');
+      }
+
+      blocks.push({
+        type: backendType,
+        text: text,
+        metadata: { isDualDialogue: true }
+      });
+    });
+  });
+
+  return blocks;
+}
+
+/**
  * Convert backend content_blocks array to TipTap/ProseMirror JSON document
  *
  * @param blocks - Array of content blocks from backend
@@ -129,9 +180,18 @@ export function tipTapToContentBlocks(doc: JSONContent): ContentBlock[] {
     return [];
   }
 
-  return doc.content
-    .filter(node => node.type && node.type !== 'doc') // Filter out doc nodes
-    .map(node => {
+  const blocks: ContentBlock[] = [];
+
+  doc.content
+    .filter(node => node.type && node.type !== 'doc')
+    .forEach(node => {
+      // Handle dual dialogue blocks specially - flatten them
+      if (isDualDialogueBlock(node)) {
+        const dualBlocks = flattenDualDialogueBlock(node);
+        blocks.push(...dualBlocks);
+        return;
+      }
+
       // Map TipTap type to backend type
       const backendType = TIPTAP_TO_BACKEND_TYPE_MAP[node.type || 'paragraph'] || 'general';
 
@@ -144,12 +204,14 @@ export function tipTapToContentBlocks(doc: JSONContent): ContentBlock[] {
           .join('');
       }
 
-      return {
+      blocks.push({
         type: backendType,
         text: text,
         metadata: {}
-      };
+      });
     });
+
+  return blocks;
 }
 
 /**

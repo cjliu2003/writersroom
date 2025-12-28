@@ -13,6 +13,11 @@ import { Node, mergeAttributes, CommandProps } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
 import { createAutoCapitalizeRules } from '../utils/auto-capitalize';
+import {
+  isInsideDualDialogue,
+  getNextColumnElementType,
+  getPreviousColumnElementType,
+} from '../dual-dialogue';
 
 /**
  * Helper to strip outer parentheses from text content
@@ -49,6 +54,17 @@ export const Parenthetical = Node.create({
     return [
       { tag: 'p[data-type="parenthetical"]' },
     ];
+  },
+
+  addAttributes() {
+    return {
+      // Legacy attribute for migration - parsed from old docs but not rendered to new docs
+      isDualDialogue: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-dual-dialogue') === 'true',
+        renderHTML: () => ({}), // Don't output - migration handles structure
+      },
+    };
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -97,6 +113,7 @@ export const Parenthetical = Node.create({
       },
 
       // Tab: Parenthetical → Dialogue (back to speech after direction) - only if empty
+      // Inside dual dialogue: cycles within valid column types
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -116,7 +133,11 @@ export const Parenthetical = Node.create({
           return false;
         }
 
-        const nextType = getNextElementType(this.name);
+        // Determine next type based on context
+        const nextType = isInsideDualDialogue($from)
+          ? getNextColumnElementType(this.name)
+          : getNextElementType(this.name);
+
         // Clear the content (remove parentheses) and change node type
         return this.editor.chain()
           .command(({ tr, state, dispatch }: CommandProps) => {
@@ -132,6 +153,7 @@ export const Parenthetical = Node.create({
       },
 
       // Shift-Tab: Parenthetical → Character (go back to character name) - only if empty
+      // Inside dual dialogue: cycles within valid column types
       'Shift-Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -151,7 +173,11 @@ export const Parenthetical = Node.create({
           return false;
         }
 
-        const prevType = getPreviousElementType(this.name);
+        // Determine previous type based on context
+        const prevType = isInsideDualDialogue($from)
+          ? getPreviousColumnElementType(this.name)
+          : getPreviousElementType(this.name);
+
         // Clear the content (remove parentheses) and change node type
         return this.editor.chain()
           .command(({ tr, state, dispatch }: CommandProps) => {

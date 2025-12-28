@@ -243,3 +243,102 @@
   font-weight: normal;
   text-decoration: none;
 }
+
+/* ==========================================================================
+   Dual Dialogue Layout - CSS Grid
+   ========================================================================== */
+
+/*
+ * Dual dialogue displays two character+dialogue pairs side-by-side.
+ * Uses CSS Grid for layout with wrapper nodes:
+ * - dualDialogueBlock: Grid container with two equal columns
+ * - dualDialogueColumn: Flex container for vertical stacking
+ *
+ * Structure:
+ * <div class="dual-dialogue-block">
+ *   <div class="dual-dialogue-column dual-dialogue-column--left">
+ *     <p class="screenplay-character">CHARACTER 1</p>
+ *     <p class="screenplay-dialogue">Dialogue...</p>
+ *   </div>
+ *   <div class="dual-dialogue-column dual-dialogue-column--right">
+ *     <p class="screenplay-character">CHARACTER 2</p>
+ *     <p class="screenplay-dialogue">Dialogue...</p>
+ *   </div>
+ * </div>
+ */
+
+/* --- Dual Dialogue Block (Grid Container) --- */
+
+.screenplay-editor .dual-dialogue-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* Two equal columns */
+  gap: 6mm;                        /* ~24px gap between columns */
+  margin-top: 12pt !important;     /* Single-space before (like other blocks) */
+  margin-bottom: 12pt !important;  /* Single-space after */
+  margin-left: 0 !important;       /* Align with page margins */
+  margin-right: 0 !important;
+  align-items: start;              /* Both columns start from same top position */
+}
+
+/* --- Dual Dialogue Column (Flex Container) --- */
+
+.screenplay-editor .dual-dialogue-column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;            /* Children span full column width by default */
+  gap: 0;                          /* No gap - elements control their own spacing */
+}
+
+/* --- Character inside Dual Dialogue Column --- */
+
+.screenplay-editor .dual-dialogue-column .screenplay-character {
+  /* Override page-relative margins - use column-relative positioning */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: 0 !important;        /* No top margin - block handles spacing */
+  margin-bottom: 0 !important;     /* No bottom margin - dialogue follows immediately */
+  width: auto !important;
+  max-width: 100% !important;
+  text-align: center;              /* Center character name in column */
+}
+
+/* --- Dialogue inside Dual Dialogue Column --- */
+
+.screenplay-editor .dual-dialogue-column .screenplay-dialogue {
+  /* Override page-relative margins - span full column width */
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Multiple dialogue blocks in same column: add small spacing between them */
+.screenplay-editor .dual-dialogue-column .screenplay-dialogue + .screenplay-dialogue {
+  margin-top: 12pt !important;     /* Single-space between dialogue paragraphs */
+}
+
+/* --- Parenthetical inside Dual Dialogue Column --- */
+
+.screenplay-editor .dual-dialogue-column .screenplay-parenthetical {
+  /* Narrower and centered within column */
+  /* Keep mm-based width for consistency with standard parenthetical */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  width: 80% !important;           /* Narrower than dialogue */
+  max-width: 50mm !important;      /* Cap width for very wide columns */
+  text-align: left;                /* Text left-aligned within the element */
+}
+
+/* --- Legacy class cleanup --- */
+/* These --dual modifier classes are deprecated but kept for backwards compatibility
+   during migration. They no longer affect layout - the wrapper structure handles it. */
+
+.screenplay-editor .screenplay-character--dual,
+.screenplay-editor .screenplay-dialogue--dual,
+.screenplay-editor .screenplay-parenthetical--dual {
+  /* No special styling needed - wrapper structure handles positioning */
+}

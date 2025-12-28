@@ -62,7 +62,9 @@
       "Bash(pip freeze:*)",
       "Bash(git log:*)",
       "Skill(sc:load)",
-      "Skill(sc:analyze)"
+      "Skill(sc:analyze)",
+      "WebFetch(domain:github.com)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

@@ -8,6 +8,12 @@
 
 import { Node, mergeAttributes } from '@tiptap/core';
 import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
+import {
+  isInsideDualDialogue,
+  findColumnAncestor,
+  getNextColumnElementType,
+  toggleDualDialogue,
+} from '../dual-dialogue';
 
 export const Character = Node.create({
   name: 'character',
@@ -22,6 +28,17 @@ export const Character = Node.create({
     return [
       { tag: 'p[data-type="character"]' },
     ];
+  },
+
+  addAttributes() {
+    return {
+      // Legacy attribute for migration - parsed from old docs but not rendered to new docs
+      isDualDialogue: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-dual-dialogue') === 'true',
+        renderHTML: () => ({}), // Don't output - migration handles structure
+      },
+    };
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -61,8 +78,8 @@ export const Character = Node.create({
           .run();
       },
 
-      // Tab: Only works when empty - converts to Transition
-      // (If block has text, Tab does nothing to preserve content)
+      // Tab: Only works when empty - converts to next element type
+      // Inside dual dialogue: cycles within valid column types (character→dialogue)
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -80,11 +97,19 @@ export const Character = Node.create({
           return false;
         }
 
+        // Check if inside dual dialogue - use column-specific cycling
+        if (isInsideDualDialogue($from)) {
+          const nextType = getNextColumnElementType(this.name);
+          return this.editor.commands.setNode(nextType);
+        }
+
+        // Normal behavior
         const nextType = getNextElementType(this.name, isEmpty);
         return this.editor.commands.setNode(nextType);
       },
 
       // Shift-Tab: Character → Action (go back to scene description) - only if empty
+      // Inside dual dialogue: BLOCKED because character is required first in column
       'Shift-Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -101,8 +126,61 @@ export const Character = Node.create({
           return false;
         }
 
+        // Inside dual dialogue: block Shift-Tab on character
+        // Character is required first in column schema: 'character (dialogue | parenthetical)*'
+        // Use Backspace at start to unwrap instead
+        if (isInsideDualDialogue($from)) {
+          // Return true to consume the event but do nothing
+          // This preserves schema validity
+          return true;
+        }
+
+        // Normal behavior (outside dual dialogue)
         const prevType = getPreviousElementType(this.name);
         return this.editor.commands.setNode(prevType);
+      },
+
+      // Backspace at start of character in left column: unwrap dual dialogue
+      'Backspace': () => {
+        const { state } = this.editor;
+        const { $from, empty } = state.selection;
+        const node = $from.parent;
+
+        // Only handle if we're in a character block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        // Only handle if cursor is at the very start
+        if ($from.parentOffset !== 0) {
+          return false;
+        }
+
+        // Only handle if selection is collapsed (no selection)
+        if (!empty) {
+          return false;
+        }
+
+        // Check if inside dual dialogue column
+        const columnInfo = findColumnAncestor($from);
+        if (!columnInfo) {
+          return false; // Not in dual dialogue, let default handle it
+        }
+
+        // Only unwrap from LEFT column's character (first element)
+        // This preserves structure if user is in right column
+        if (columnInfo.side === 'left') {
+          // Check if this is the first element in the column
+          // The character should be the first child of the column
+          const isFirstInColumn = $from.index(columnInfo.depth) === 0;
+
+          if (isFirstInColumn) {
+            console.log('[DualDialogue] Backspace at start of left column character → unwrapping');
+            return toggleDualDialogue(this.editor);
+          }
+        }
+
+        return false; // Let default Backspace behavior handle other cases
       },
 
       // Cmd/Ctrl+Alt+3: Direct shortcut to Character

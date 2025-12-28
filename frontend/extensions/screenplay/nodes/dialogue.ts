@@ -8,6 +8,12 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
 import { createAutoCapitalizeRules } from '../utils/auto-capitalize';
+import {
+  isInsideDualDialogue,
+  findColumnAncestor,
+  getNextColumnElementType,
+  getPreviousColumnElementType
+} from '../dual-dialogue';
 
 export const Dialogue = Node.create({
   name: 'dialogue',
@@ -24,6 +30,17 @@ export const Dialogue = Node.create({
     ];
   },
 
+  addAttributes() {
+    return {
+      // Legacy attribute for migration - parsed from old docs but not rendered to new docs
+      isDualDialogue: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-dual-dialogue') === 'true',
+        renderHTML: () => ({}), // Don't output - migration handles structure
+      },
+    };
+  },
+
   renderHTML({ HTMLAttributes }) {
     return ['p', mergeAttributes(HTMLAttributes, {
       'data-type': 'dialogue',
@@ -35,6 +52,7 @@ export const Dialogue = Node.create({
     return {
       // Enter: At END creates new Action block, in MIDDLE allows split (new dialogue paragraph)
       // This matches Final Draft behavior for continuing long speeches
+      // EXCEPTION: Inside dual dialogue column, Enter at end creates new dialogue in same column
       'Enter': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -53,7 +71,17 @@ export const Dialogue = Node.create({
           return false;
         }
 
-        // At end: insert new Action block after this node
+        // Check if inside dual dialogue column
+        if (isInsideDualDialogue($from)) {
+          // Inside dual dialogue: add another dialogue line in same column
+          const endOfNode = $from.after();
+          return this.editor.chain()
+            .insertContentAt(endOfNode, { type: 'dialogue' })
+            .focus(endOfNode + 1)
+            .run();
+        }
+
+        // Normal behavior: At end, insert new Action block after this node
         const endOfNode = $from.after();
         return this.editor.chain()
           .insertContentAt(endOfNode, { type: 'action' })
@@ -62,6 +90,7 @@ export const Dialogue = Node.create({
       },
 
       // Tab: Dialogue → Parenthetical (add wryly, beat, etc.) - only if empty
+      // Inside dual dialogue: cycles within valid column types
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -78,11 +107,21 @@ export const Dialogue = Node.create({
           return false;
         }
 
-        // Use setParenthetical to get automatic () insertion
+        // Check if inside dual dialogue - use column-specific cycling
+        if (isInsideDualDialogue($from)) {
+          const nextType = getNextColumnElementType(this.name);
+          if (nextType === 'parenthetical') {
+            return this.editor.commands.setParenthetical();
+          }
+          return this.editor.commands.setNode(nextType);
+        }
+
+        // Normal behavior: use setParenthetical to get automatic () insertion
         return this.editor.commands.setParenthetical();
       },
 
       // Shift-Tab: Dialogue → Character (go back to who's speaking) - only if empty
+      // Inside dual dialogue: cycles within valid column types
       'Shift-Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -99,6 +138,13 @@ export const Dialogue = Node.create({
           return false;
         }
 
+        // Check if inside dual dialogue - use column-specific cycling
+        if (isInsideDualDialogue($from)) {
+          const prevType = getPreviousColumnElementType(this.name);
+          return this.editor.commands.setNode(prevType);
+        }
+
+        // Normal behavior
         const prevType = getPreviousElementType(this.name);
         return this.editor.commands.setNode(prevType);
       },

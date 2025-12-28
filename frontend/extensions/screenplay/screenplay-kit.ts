@@ -27,12 +27,20 @@ import { Dialogue } from './nodes/dialogue';
 import { Parenthetical } from './nodes/parenthetical';
 import { Transition } from './nodes/transition';
 
+// Dual dialogue wrapper nodes
+import { DualDialogueColumn } from './nodes/dual-dialogue-column';
+import { DualDialogueBlock } from './nodes/dual-dialogue-block';
+
 // Plugins
 import { SmartEnterPlugin } from './plugins/smart-enter-plugin';
 import { SmartBreaksPlugin } from './plugins/smart-breaks-plugin';
+import { DualDialogueMigrationPlugin } from './plugins/dual-dialogue-migration';
 
 // SmartType autocomplete
 import { SmartTypeExtension } from './smart-type';
+
+// Dual dialogue toggle
+import { toggleDualDialogue } from './dual-dialogue';
 
 export interface ScreenplayKitOptions {
   /**
@@ -70,6 +78,9 @@ export const ScreenplayKit = Extension.create<ScreenplayKitOptions>({
       Dialogue,
       Parenthetical,
       Transition,
+      // Dual dialogue wrapper nodes (column must come before block for schema resolution)
+      DualDialogueColumn,
+      DualDialogueBlock,
     ];
 
     // Add SmartType if enabled (default: true)
@@ -82,6 +93,9 @@ export const ScreenplayKit = Extension.create<ScreenplayKitOptions>({
 
   addKeyboardShortcuts() {
     return {
+      // Dual dialogue toggle - Cmd+D (Mac) or Ctrl+D (Windows/Linux)
+      'Mod-d': () => toggleDualDialogue(this.editor),
+
       // Fallback Tab handler - catches Tab presses not handled by specific node extensions
       // This ensures Tab always does something sensible even in edge cases
       'Tab': () => {
@@ -145,6 +159,10 @@ export const ScreenplayKit = Extension.create<ScreenplayKitOptions>({
         safetyPx: 4,
       }));
     }
+
+    // Dual dialogue migration plugin - runs once on document load
+    // Converts legacy flat isDualDialogue=true structure to wrapper nodes
+    plugins.push(DualDialogueMigrationPlugin());
 
     return plugins;
   },
