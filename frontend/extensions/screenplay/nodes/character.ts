@@ -7,6 +7,7 @@
  */
 
 import { Node, mergeAttributes } from '@tiptap/core';
+import { TextSelection } from '@tiptap/pm/state';
 import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
 import {
   isInsideDualDialogue,
@@ -78,8 +79,10 @@ export const Character = Node.create({
           .run();
       },
 
-      // Tab: Only works when empty - converts to next element type
-      // Inside dual dialogue: cycles within valid column types (character→dialogue)
+      // Tab: Character → Parenthetical
+      // - Empty character: converts to transition (Final Draft behavior)
+      // - Non-empty character: inserts parenthetical after (for V.O., O.S., CONT'D, etc.)
+      // Inside dual dialogue: cycles within valid column types
       'Tab': () => {
         const { state } = this.editor;
         const { $from } = state.selection;
@@ -92,20 +95,36 @@ export const Character = Node.create({
 
         const isEmpty = node.textContent.trim().length === 0;
 
-        // Only change block type if empty - otherwise do nothing
-        if (!isEmpty) {
-          return false;
-        }
-
-        // Check if inside dual dialogue - use column-specific cycling
-        if (isInsideDualDialogue($from)) {
-          const nextType = getNextColumnElementType(this.name);
+        // Empty character: convert to next element type
+        if (isEmpty) {
+          // Check if inside dual dialogue - use column-specific cycling
+          if (isInsideDualDialogue($from)) {
+            const nextType = getNextColumnElementType(this.name);
+            return this.editor.commands.setNode(nextType);
+          }
+          // Normal behavior: empty character → transition
+          const nextType = getNextElementType(this.name, isEmpty);
           return this.editor.commands.setNode(nextType);
         }
 
-        // Normal behavior
-        const nextType = getNextElementType(this.name, isEmpty);
-        return this.editor.commands.setNode(nextType);
+        // Non-empty character: insert parenthetical after
+        // Useful for adding (V.O.), (O.S.), (CONT'D), etc.
+        const endOfNode = $from.after();
+        return this.editor.chain()
+          .insertContentAt(endOfNode, {
+            type: 'parenthetical',
+            content: [{ type: 'text', text: '()' }]
+          })
+          .command(({ tr, dispatch }) => {
+            if (dispatch) {
+              // Position cursor between the parentheses
+              // endOfNode + 1 (into parenthetical) + 1 (after opening paren)
+              const cursorPos = endOfNode + 2;
+              tr.setSelection(TextSelection.create(tr.doc, cursorPos));
+            }
+            return true;
+          })
+          .run();
       },
 
       // Shift-Tab: Character → Action (go back to scene description) - only if empty

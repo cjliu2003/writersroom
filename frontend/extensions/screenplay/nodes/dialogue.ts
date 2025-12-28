@@ -6,6 +6,7 @@
  */
 
 import { Node, mergeAttributes } from '@tiptap/core';
+import { TextSelection } from '@tiptap/pm/state';
 import { getNextElementType, getPreviousElementType } from '../utils/keyboard-navigation';
 import { createAutoCapitalizeRules } from '../utils/auto-capitalize';
 import {
@@ -89,7 +90,10 @@ export const Dialogue = Node.create({
           .run();
       },
 
-      // Tab: Dialogue → Parenthetical (add wryly, beat, etc.) - only if empty
+      // Tab: Dialogue → Parenthetical
+      // - Empty dialogue: converts block to parenthetical
+      // - Non-empty dialogue: splits and inserts parenthetical mid-dialogue
+      //   (useful for beats, pauses, hesitations breaking up speech)
       // Inside dual dialogue: cycles within valid column types
       'Tab': () => {
         const { state } = this.editor;
@@ -102,22 +106,74 @@ export const Dialogue = Node.create({
           return false; // Let other handlers process this
         }
 
-        // Only change block type if empty - otherwise do nothing
-        if (!isEmpty) {
-          return false;
-        }
-
-        // Check if inside dual dialogue - use column-specific cycling
-        if (isInsideDualDialogue($from)) {
-          const nextType = getNextColumnElementType(this.name);
-          if (nextType === 'parenthetical') {
-            return this.editor.commands.setParenthetical();
+        // Empty dialogue: convert to parenthetical
+        if (isEmpty) {
+          // Check if inside dual dialogue - use column-specific cycling
+          if (isInsideDualDialogue($from)) {
+            const nextType = getNextColumnElementType(this.name);
+            if (nextType === 'parenthetical') {
+              return this.editor.commands.setParenthetical();
+            }
+            return this.editor.commands.setNode(nextType);
           }
-          return this.editor.commands.setNode(nextType);
+          // Normal behavior: use setParenthetical to get automatic () insertion
+          return this.editor.commands.setParenthetical();
         }
 
-        // Normal behavior: use setParenthetical to get automatic () insertion
-        return this.editor.commands.setParenthetical();
+        // Non-empty dialogue: split and insert parenthetical mid-dialogue
+        // This creates: [dialogue before cursor] [parenthetical] [dialogue after cursor]
+        const cursorOffset = $from.parentOffset;
+        const textContent = node.textContent;
+        const textBefore = textContent.slice(0, cursorOffset).trimEnd();
+        const textAfter = textContent.slice(cursorOffset).trimStart();
+
+        // Get position before the dialogue node for replacement
+        const beforeNode = $from.before();
+
+        return this.editor.chain()
+          .command(({ tr, dispatch }) => {
+            if (!dispatch) return true;
+
+            const schema = tr.doc.type.schema;
+            const nodes = [];
+
+            // First dialogue (text before cursor) - only if there's content
+            if (textBefore.length > 0) {
+              nodes.push(schema.nodes.dialogue.create(null,
+                textBefore ? schema.text(textBefore) : null
+              ));
+            }
+
+            // Parenthetical with empty () - cursor will go between them
+            nodes.push(schema.nodes.parenthetical.create(null,
+              schema.text('()')
+            ));
+
+            // Second dialogue (text after cursor) - only if there's content
+            if (textAfter.length > 0) {
+              nodes.push(schema.nodes.dialogue.create(null,
+                schema.text(textAfter)
+              ));
+            }
+
+            // Replace the original dialogue node with our new nodes
+            tr.replaceWith(beforeNode, $from.after(), nodes);
+
+            // Calculate position to place cursor between () in parenthetical
+            // Position after first dialogue (if exists) + into parenthetical + after "("
+            let parenPos = beforeNode;
+            if (textBefore.length > 0) {
+              // Account for first dialogue node: 1 (open) + text + 1 (close)
+              parenPos += 1 + textBefore.length + 1;
+            }
+            // Now at start of parenthetical, go inside: 1 (open tag) + 1 (after "(")
+            parenPos += 2;
+
+            tr.setSelection(TextSelection.create(tr.doc, parenPos));
+
+            return true;
+          })
+          .run();
       },
 
       // Shift-Tab: Dialogue → Character (go back to who's speaking) - only if empty
@@ -141,7 +197,10 @@ export const Dialogue = Node.create({
         // Check if inside dual dialogue - use column-specific cycling
         if (isInsideDualDialogue($from)) {
           const prevType = getPreviousColumnElementType(this.name);
-          return this.editor.commands.setNode(prevType);
+          if (prevType) {
+            return this.editor.commands.setNode(prevType);
+          }
+          return true; // Consume event but do nothing if no previous type
         }
 
         // Normal behavior

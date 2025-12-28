@@ -178,6 +178,11 @@ export const Parenthetical = Node.create({
           ? getPreviousColumnElementType(this.name)
           : getPreviousElementType(this.name);
 
+        // Safety check for null (shouldn't happen for parenthetical, but TypeScript requires it)
+        if (!prevType) {
+          return true; // Consume event but do nothing
+        }
+
         // Clear the content (remove parentheses) and change node type
         return this.editor.chain()
           .command(({ tr, state, dispatch }: CommandProps) => {
@@ -189,6 +194,52 @@ export const Parenthetical = Node.create({
             return true;
           })
           .setNode(prevType)
+          .run();
+      },
+
+      // Backspace: In empty parenthetical, delete entire node and return to previous block
+      // This makes it easy to undo an accidental Tab that created a parenthetical
+      'Backspace': () => {
+        const { state } = this.editor;
+        const { $from, empty } = state.selection;
+        const node = $from.parent;
+
+        // Only handle if we're in a parenthetical block
+        if (node.type.name !== this.name) {
+          return false;
+        }
+
+        // Only handle if selection is collapsed (no text selected)
+        if (!empty) {
+          return false;
+        }
+
+        const textContent = node.textContent;
+        const strippedContent = stripOuterParentheses(textContent).trim();
+        const isEmpty = strippedContent.length === 0;
+
+        // Only handle if parenthetical is empty (just "()" or truly empty)
+        if (!isEmpty) {
+          return false; // Let default backspace behavior handle non-empty
+        }
+
+        // Delete entire parenthetical node and position cursor at end of previous node
+        const beforeNode = $from.before();
+
+        return this.editor.chain()
+          .command(({ tr, dispatch }) => {
+            if (dispatch) {
+              // Delete the entire parenthetical node
+              tr.delete(beforeNode, $from.after());
+
+              // Position cursor at end of previous node's content
+              if (beforeNode > 0) {
+                const prevNodeEnd = beforeNode - 1;
+                tr.setSelection(TextSelection.create(tr.doc, prevNodeEnd));
+              }
+            }
+            return true;
+          })
           .run();
       },
 
