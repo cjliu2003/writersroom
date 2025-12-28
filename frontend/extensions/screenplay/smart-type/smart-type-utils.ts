@@ -71,9 +71,11 @@ export const SCENE_HEADING_PREFIXES = [
  * - "JOHN (V.O.)" → "JOHN"
  * - "MARY (CONT'D)" → "MARY"
  * - "DR. SMITH (O.S.)" → "DR. SMITH"
+ * - "JOHN (" → "JOHN" (incomplete parenthetical stripped)
+ * - "JOHN (V." → "JOHN" (incomplete parenthetical stripped)
  *
  * @param text - Raw text content from Character node
- * @returns Extracted character name (uppercase) or null if invalid
+ * @returns Extracted character name (uppercase, trimmed, no parentheticals) or null if invalid
  */
 export function extractCharacterName(text: string): string | null {
   if (!text || text.trim().length === 0) {
@@ -82,13 +84,20 @@ export function extractCharacterName(text: string): string | null {
 
   let name = text.trim().toUpperCase();
 
-  // Remove any parenthetical extensions
+  // First: Remove any trailing INCOMPLETE parenthetical (opening paren without closing)
+  // e.g., "JOHN (" → "JOHN", "JOHN (V.O." → "JOHN"
+  name = name.replace(/\s*\([^)]*$/, '').trim();
+
+  // Second: Remove any COMPLETE parenthetical extensions
   // Match pattern: NAME (EXTENSION) or NAME(EXTENSION)
   const parenMatch = name.match(/^([A-Z][A-Z0-9\s.\-']+?)(?:\s*\([^)]*\))*\s*$/);
 
   if (parenMatch) {
     name = parenMatch[1].trim();
   }
+
+  // Final cleanup: remove any stray parentheses that might have slipped through
+  name = name.replace(/[()]/g, '').trim();
 
   // Validate: must start with letter, be at least 1 char
   if (!/^[A-Z]/.test(name) || name.length === 0) {
