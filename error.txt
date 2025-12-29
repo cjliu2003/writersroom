@@ -1,35 +1,20 @@
-○ Compiling /script-editor ...
- ⨯ ./app/script-editor/page.tsx:26:1
-Module not found: Can't resolve '@/hooks/use-script-autosave'
-  24 | // @ts-ignore - pagination extension may not have types
-  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
-> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
-     | ^
-  27 | import { useAuth } from '@/contexts/AuthContext';
-  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
-  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
+http://localhost:8000/api/ai/chat/conversations/4ff6d4f8-9506-43c2-957a-e6c1797cf389
+Request Method
+GET
 
-https://nextjs.org/docs/messages/module-not-found
- ⨯ ./app/script-editor/page.tsx:26:1
-Module not found: Can't resolve '@/hooks/use-script-autosave'
-  24 | // @ts-ignore - pagination extension may not have types
-  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
-> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
-     | ^
-  27 | import { useAuth } from '@/contexts/AuthContext';
-  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
-  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
-
-https://nextjs.org/docs/messages/module-not-found
- ⨯ ./app/script-editor/page.tsx:26:1
-Module not found: Can't resolve '@/hooks/use-script-autosave'
-  24 | // @ts-ignore - pagination extension may not have types
-  25 | import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
-> 26 | import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
-     | ^
-  27 | import { useAuth } from '@/contexts/AuthContext';
-  28 | import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
-  29 | import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
-
-https://nextjs.org/docs/messages/module-not-found
- GET /script-editor?scriptId=7e399408-010e-4910-9d3e-ade06c9e619e 500 in 5ms
+File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+                    ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
+    return jsonable_encoder(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 279, in jsonable_encoder
+    encoded_key = jsonable_encoder(
+                  ^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 216, in jsonable_encoder
+    if isinstance(obj, BaseModel):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+RecursionError: maximum recursion depth exceeded

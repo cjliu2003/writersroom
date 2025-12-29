@@ -19,6 +19,11 @@ from uuid import UUID
 # User-friendly status messages for each tool
 # These are shown to non-technical users while the AI works
 TOOL_STATUS_MESSAGES = {
+    "signal_ready_for_response": {
+        "active": "Preparing response...",
+        "active_default": "Preparing response...",
+        "complete": "Ready to respond"
+    },
     "get_scene": {
         "active": "Reading scene {scene_index}...",
         "active_default": "Reading the scene...",
@@ -116,7 +121,35 @@ from app.services.retrieval_service import RetrievalService
 
 
 # MCP Tool Definitions for Claude API
+#
+# SIGNAL TOOL ARCHITECTURE:
+# The signal_ready_for_response tool is used with tool_choice="any" to force
+# Claude to either call another information-gathering tool OR signal that it's
+# ready for synthesis. This prevents Claude from generating text responses
+# directly in the tool loop, which caused truncation issues.
+#
+# Flow:
+# 1. First iteration: tool_choice="auto" - Claude can respond directly if no tools needed
+# 2. After first tool call: tool_choice="any" - Claude MUST call a tool
+# 3. When Claude has enough info: calls signal_ready_for_response
+# 4. We detect the signal and trigger synthesis with high token limit
+#
 SCREENPLAY_TOOLS = [
+    # Signal tool - MUST be first, used to cleanly exit tool loop
+    {
+        "name": "signal_ready_for_response",
+        "description": "Call this ONLY when you have gathered all the information needed to respond to the user's request. This signals that the information gathering phase is complete and synthesis should begin. Do NOT generate your response directly - calling this tool will trigger the response generation phase with proper formatting.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "gathered_info_summary": {
+                    "type": "string",
+                    "description": "Brief 1-2 sentence summary of what information was gathered and what you plan to address in your response"
+                }
+            },
+            "required": ["gathered_info_summary"]
+        }
+    },
     {
         "name": "get_scene",
         "description": "Get full text of a specific scene. Use this when you need the complete dialogue and action lines.",
@@ -317,6 +350,11 @@ class MCPToolExecutor:
         Returns:
             str: Formatted result for Claude to process
         """
+        # Signal tool - just acknowledge, actual synthesis happens in ai_router
+        if tool_name == "signal_ready_for_response":
+            summary = tool_input.get("gathered_info_summary", "Ready to respond")
+            return f"SIGNAL_READY: {summary}"
+
         if tool_name == "get_scene":
             return await self._get_scene(
                 script_id=self.script_id,

@@ -60,7 +60,8 @@
       "Bash(curl:*)",
       "Bash(npx tsc:*)",
       "Bash(pip freeze:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": [],
     "ask": []

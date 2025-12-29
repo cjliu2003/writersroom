@@ -173,18 +173,30 @@ class TestTopicDetectorEdgeCases:
 
     @pytest.mark.asyncio
     async def test_short_message_defaults_to_follow_up(self, detector):
-        """Test that short ambiguous messages default to follow-up."""
+        """Test that short ambiguous messages default to follow-up with strong confidence.
+
+        Short messages (<8 words) are likely follow-ups since users typing brief
+        responses are typically responding to the ongoing conversation.
+        """
         mode, confidence = await detector.detect_mode(
             current_message="OK",  # Very short, no patterns
             last_assistant_message="Scene 5 is well-structured.",
             last_user_message="Analyze scene 5"
         )
         assert mode == TopicMode.FOLLOW_UP
-        assert confidence == 0.5  # Low confidence default
+        assert confidence == 0.7  # Strong follow-up signal for short messages
 
     @pytest.mark.asyncio
-    async def test_long_message_without_patterns_is_new_topic(self, detector):
-        """Test that long messages without patterns lean toward new topic."""
+    async def test_long_message_without_patterns_defaults_to_follow_up(self, detector):
+        """Test that long messages without patterns default to follow-up.
+
+        This is an intentional behavior change: in an active conversation,
+        we default to FOLLOW_UP to preserve context. Users who want to start
+        a new topic can use explicit signals like "new question" or "by the way".
+
+        False positive (including extra context) is less harmful than
+        false negative (losing context).
+        """
         long_message = (
             "I'm working on a new screenplay about a detective who discovers "
             "a conspiracy in a small town. The detective has a troubled past "
@@ -196,8 +208,8 @@ class TestTopicDetectorEdgeCases:
             last_assistant_message="Scene 5 is about the cafe scene.",
             last_user_message="What happens in scene 5?"
         )
-        assert mode == TopicMode.NEW_TOPIC
-        assert confidence == 0.5
+        assert mode == TopicMode.FOLLOW_UP
+        assert confidence == 0.5  # Low confidence but defaults to preserving context
 
     @pytest.mark.asyncio
     async def test_mixed_patterns_follow_up_wins(self, detector):

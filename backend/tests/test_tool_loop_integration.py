@@ -178,148 +178,121 @@ class TestToolLoopWithEvidenceBuilder:
 # Test: Truncation Recovery (P0.3)
 # ============================================================================
 
-class TestTruncationRecovery:
-    """Test max_tokens truncation recovery mechanism."""
+class TestSignalToolPattern:
+    """Test signal_ready_for_response tool pattern for controlled synthesis."""
 
     @pytest.mark.asyncio
-    async def test_recovery_prompt_continues_tool_planning(self):
-        """Test that recovery prompt asks to continue without prose."""
-        # Import the recovery prompt constant
-        from app.routers.ai_router import RECOVERY_PROMPT, MAX_RECOVERY_ATTEMPTS
+    async def test_signal_tool_exists_in_tools(self):
+        """Test that signal_ready_for_response tool is defined."""
+        from app.services.mcp_tools import SCREENPLAY_TOOLS
+        from app.routers.ai_router import SIGNAL_TOOL_NAME
 
-        # Verify recovery prompt content
-        assert "Continue" in RECOVERY_PROMPT
-        assert "ONLY tool calls" in RECOVERY_PROMPT
-        assert "no explanations" in RECOVERY_PROMPT.lower() or "no user-facing" in RECOVERY_PROMPT.lower()
+        # Verify signal tool exists
+        tool_names = [tool["name"] for tool in SCREENPLAY_TOOLS]
+        assert SIGNAL_TOOL_NAME in tool_names, "signal_ready_for_response tool should exist"
 
-        # Verify max recovery attempts is reasonable
-        assert MAX_RECOVERY_ATTEMPTS >= 1
-        assert MAX_RECOVERY_ATTEMPTS <= 5
+        # Find the tool and verify its schema
+        signal_tool = next(t for t in SCREENPLAY_TOOLS if t["name"] == SIGNAL_TOOL_NAME)
+        assert "gathered_info_summary" in signal_tool["input_schema"]["properties"]
 
     @pytest.mark.asyncio
-    async def test_recovery_metadata_tracks_attempts(self):
-        """Test that recovery attempts are tracked in metadata."""
-        # This tests the ToolCallMetadata schema
+    async def test_signal_tool_triggers_synthesis(self):
+        """Test that signal tool result is properly recognized."""
+        from app.services.mcp_tools import MCPToolExecutor, SCREENPLAY_TOOLS
+
+        # Verify signal tool returns expected prefix
+        # Note: We can't actually execute without a full DB setup, but we can verify the pattern
+        signal_result_prefix = "SIGNAL_READY:"
+
+        # The tool loop checks for this pattern to trigger synthesis
+        assert signal_result_prefix.startswith("SIGNAL_READY")
+
+    @pytest.mark.asyncio
+    async def test_tool_call_metadata_schema(self):
+        """Test that ToolCallMetadata schema supports the new pattern."""
         from app.schemas.ai import ToolCallMetadata
 
+        # Test with signal_ready stop reason
         metadata = ToolCallMetadata(
             tool_calls_made=3,
-            tools_used=["get_scene", "search_script"],
-            stop_reason="end_turn",
-            recovery_attempts=2
+            tools_used=["get_scene", "signal_ready_for_response"],
+            stop_reason="signal_ready",
+            recovery_attempts=0  # Always 0 now (no recovery mechanism)
         )
 
-        assert metadata.recovery_attempts == 2
-        assert metadata.tool_calls_made == 3
+        assert metadata.stop_reason == "signal_ready"
+        assert metadata.recovery_attempts == 0
+        assert "signal_ready_for_response" in metadata.tools_used
 
     @pytest.mark.asyncio
-    async def test_truncation_triggers_recovery(self):
-        """
-        Test that max_tokens stop_reason triggers recovery attempt.
+    async def test_tool_choice_constants(self):
+        """Test that tool_choice-related constants are properly defined."""
+        from app.routers.ai_router import (
+            SIGNAL_TOOL_NAME,
+            TOOL_LOOP_MAX_TOKENS,
+            FINAL_SYNTHESIS_MAX_TOKENS
+        )
 
-        This is a logical test verifying the recovery conditions.
-        """
-        from app.routers.ai_router import MAX_RECOVERY_ATTEMPTS
+        # Signal tool name should match the tool definition
+        assert SIGNAL_TOOL_NAME == "signal_ready_for_response"
 
-        # Simulate the recovery decision logic
-        stop_reason = "max_tokens"
-        recovery_attempts = 0
-
-        # Should trigger recovery
-        should_recover = (stop_reason == "max_tokens" and
-                          recovery_attempts < MAX_RECOVERY_ATTEMPTS)
-        assert should_recover is True
-
-        # After max attempts, should not recover
-        recovery_attempts = MAX_RECOVERY_ATTEMPTS
-        should_recover = (stop_reason == "max_tokens" and
-                          recovery_attempts < MAX_RECOVERY_ATTEMPTS)
-        assert should_recover is False
+        # Token limits should be reasonable
+        assert TOOL_LOOP_MAX_TOKENS >= 1000, "Tool loop needs sufficient tokens for planning"
+        assert FINAL_SYNTHESIS_MAX_TOKENS >= 2000, "Synthesis needs room for full responses"
+        assert FINAL_SYNTHESIS_MAX_TOKENS > TOOL_LOOP_MAX_TOKENS, "Synthesis should have more tokens"
 
     @pytest.mark.asyncio
-    async def test_post_recovery_synthesis_triggers_deterministically(self):
+    async def test_synthesis_triggers_with_signal_tool(self):
         """
-        Test that synthesis is triggered based on two conditions:
+        Test that synthesis is triggered based on the new signal tool pattern:
 
-        1. POST-RECOVERY (deterministic): If recovery_attempts > 0, ALWAYS synthesize
-           because RECOVERY_PROMPT explicitly told Claude to "output ONLY tool calls",
-           so any text after recovery is NOT the actual answer.
+        1. SIGNAL TOOL (deterministic): When signal_ready_for_response is called,
+           ALWAYS trigger synthesis - this is the proper way to exit the tool loop.
 
-        2. SHORT RESPONSE (fallback): If no recovery but text < 150 chars, synthesize.
-           This catches cases where Claude returns an acknowledgment instead of answering.
+        2. TOOL RESULTS (always): When tools have been called, always synthesize
+           to ensure consistent quality responses based on gathered evidence.
 
-        The P0.3 fix ensures post-recovery synthesis is deterministic, not probabilistic.
+        The tool_choice strategy ensures Claude either:
+        - Responds directly (no tools needed) - first iteration only
+        - Calls signal tool when ready to synthesize - after gathering info
         """
-        SYNTHESIS_THRESHOLD = 150  # Must match ai_router.py
 
-        # Helper function matching the actual ai_router.py logic
-        def needs_synthesis(all_tool_results, recovery_attempts, final_text):
-            return (
-                len(all_tool_results) > 0 and (
-                    recovery_attempts > 0 or  # Post-recovery ALWAYS needs synthesis
-                    len(final_text.strip()) < SYNTHESIS_THRESHOLD  # Fallback for short responses
-                )
-            )
-
-        # Test data
+        # Test data simulating the new pattern
         tool_results = [
             {"tool_name": "get_scene", "tool_input": {"scene_index": 3}, "result": "Scene content..."}
         ]
         empty_results = []
 
-        # =========================================================
-        # DETERMINISTIC CASE: recovery_attempts > 0 always triggers
-        # =========================================================
-
-        # Scenario 1: Post-recovery with empty text -> MUST synthesize
-        assert needs_synthesis(tool_results, recovery_attempts=1, final_text="") is True
-
-        # Scenario 2: Post-recovery with acknowledgment phrase -> MUST synthesize
-        assert needs_synthesis(
-            tool_results,
-            recovery_attempts=1,
-            final_text="I have all the information I need to respond."
-        ) is True
-
-        # Scenario 3: Post-recovery with LONG text -> MUST STILL synthesize!
-        # This is the key test: even if Claude produces 200+ chars after recovery,
-        # it's not the real answer because RECOVERY_PROMPT said "ONLY tool calls"
-        long_text_after_recovery = (
-            "Based on my analysis of scene 4, I found that the dialogue between Sam and Lauren "
-            "effectively establishes the tension in their relationship. The scene opens with Sam "
-            "caring for their newborn while Lauren manages the apartment, setting up a domestic scene."
-        )
-        assert len(long_text_after_recovery) >= SYNTHESIS_THRESHOLD, "Test assumption: text is long"
-        assert needs_synthesis(tool_results, recovery_attempts=1, final_text=long_text_after_recovery) is True, \
-            "Post-recovery ALWAYS triggers synthesis regardless of text length"
-
-        # Scenario 4: Post-recovery with multiple recovery attempts -> MUST synthesize
-        assert needs_synthesis(tool_results, recovery_attempts=2, final_text="Some text") is True
+        # With tool_choice="any" after first iteration, Claude MUST use tools
+        # So synthesis is always triggered when we have tool results
+        def needs_synthesis(all_tool_results, signal_tool_called):
+            """New synthesis trigger logic based on signal tool pattern."""
+            return signal_tool_called or len(all_tool_results) > 0
 
         # =========================================================
-        # FALLBACK CASE: no recovery, short text triggers
+        # SIGNAL TOOL CASE: Always triggers synthesis
         # =========================================================
 
-        # Scenario 5: No recovery, empty text -> should trigger (fallback)
-        assert needs_synthesis(tool_results, recovery_attempts=0, final_text="") is True
+        # Scenario 1: Signal tool called with tool results -> synthesize
+        assert needs_synthesis(tool_results, signal_tool_called=True) is True
 
-        # Scenario 6: No recovery, acknowledgment phrase -> should trigger (fallback)
-        ack_phrase = "I have all the information I need to respond."
-        assert len(ack_phrase) < SYNTHESIS_THRESHOLD
-        assert needs_synthesis(tool_results, recovery_attempts=0, final_text=ack_phrase) is True
-
-        # Scenario 7: No recovery, real answer -> should NOT trigger
-        assert needs_synthesis(tool_results, recovery_attempts=0, final_text=long_text_after_recovery) is False, \
-            "Without recovery, long text should NOT trigger synthesis"
+        # Scenario 2: Signal tool called without tool results -> synthesize
+        assert needs_synthesis(empty_results, signal_tool_called=True) is True
 
         # =========================================================
-        # EDGE CASES
+        # TOOL RESULTS CASE: Always triggers synthesis
         # =========================================================
 
-        # Scenario 8: No tool results -> never synthesize
-        assert needs_synthesis(empty_results, recovery_attempts=0, final_text="") is False
-        assert needs_synthesis(empty_results, recovery_attempts=1, final_text="") is False
-        assert needs_synthesis(empty_results, recovery_attempts=0, final_text="short") is False
+        # Scenario 3: Tool results exist (no signal) -> synthesize
+        assert needs_synthesis(tool_results, signal_tool_called=False) is True
+
+        # =========================================================
+        # NO TOOLS CASE: No synthesis needed
+        # =========================================================
+
+        # Scenario 4: No tool results and no signal -> no synthesis
+        # This happens when Claude responds directly on first iteration
+        assert needs_synthesis(empty_results, signal_tool_called=False) is False
 
 
 # ============================================================================

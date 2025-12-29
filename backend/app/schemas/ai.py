@@ -82,11 +82,74 @@ class TopicMode(str, Enum):
     NEW_TOPIC = "new_topic"   # New topic - skip recent history, use full context
 
 
+class TopicModeOverride(str, Enum):
+    """
+    User override for topic continuity.
+
+    When set, bypasses automatic detection. This allows users to explicitly
+    control whether the AI should continue the current conversation thread
+    or start fresh with new context.
+    """
+    CONTINUE = "continue"     # Include conversation history (force FOLLOW_UP)
+    NEW_TOPIC = "new_topic"   # Skip conversation history, fresh context (force NEW_TOPIC)
+
+
 class BudgetTier(str, Enum):
     """Token budget tiers."""
     QUICK = "quick"          # 1200 tokens
     STANDARD = "standard"    # 5000 tokens
     DEEP = "deep"            # 20000 tokens
+
+
+class DomainType(str, Enum):
+    """
+    Domain classification for context assembly.
+
+    Determines whether the question is about the script, general
+    screenwriting knowledge, or a combination.
+    """
+    GENERAL = "general"     # Non-script question (no tools, expert knowledge only)
+    SCRIPT = "script"       # Script-grounded answer (tools enabled)
+    HYBRID = "hybrid"       # Both (answer general first, then apply to script)
+
+
+class RequestType(str, Enum):
+    """
+    Request type classification for response formatting.
+
+    Controls whether the AI provides suggestions or full rewrites.
+    """
+    SUGGEST = "suggest"       # Default - diagnosis + suggestions, no rewrites
+    REWRITE = "rewrite"       # Explicit request for full revision
+    DIAGNOSE = "diagnose"     # Analysis only, no suggestions
+    BRAINSTORM = "brainstorm" # Creative alternatives
+    FACTUAL = "factual"       # General knowledge question
+
+
+class ReferenceType(str, Enum):
+    """
+    Reference type for continuity resolution.
+
+    Identifies what the user is referring to when continuing a conversation.
+    """
+    SCENE = "scene"           # "that scene", "this part"
+    CHARACTER = "character"   # "he", "she", "they" referring to character
+    THREAD = "thread"         # "that storyline", "the subplot"
+    PRIOR_ADVICE = "prior_advice"  # "what you suggested", "your recommendation"
+    NONE = "none"             # No specific reference
+
+
+class RouterResult(BaseModel):
+    """
+    Unified router output containing all classification decisions.
+    """
+    domain: DomainType
+    request_type: RequestType
+    intent: IntentType
+    continuity: TopicMode
+    refers_to: ReferenceType
+    confidence: float = Field(ge=0.0, le=1.0)
+    needs_probe: bool = False  # True if domain is uncertain and needs script probe
 
 
 # Scene Summary Schemas
@@ -206,6 +269,12 @@ class ChatMessageRequest(BaseModel):
     enable_tools: bool = Field(True, description="Enable MCP tool calling (default: True)")
     max_iterations: int = Field(5, ge=1, le=10, description="Maximum tool calling iterations")
 
+    # Topic continuity override - allows frontend to control context inclusion
+    topic_mode: Optional[TopicModeOverride] = Field(
+        None,
+        description="Override automatic topic detection: 'continue' includes conversation history, 'new_topic' starts fresh"
+    )
+
 
 class TokenUsage(BaseModel):
     """Token usage statistics."""
@@ -301,3 +370,48 @@ class ToolCallMessageResponse(BaseModel):
     usage: TokenUsage = Field(..., description="Token usage statistics")
     tool_calls: int = Field(..., description="Number of tool calling iterations used")
     stop_reason: str = Field(..., description="Why the conversation ended")
+
+
+# ============================================================================
+# Multi-Chat Support Schemas
+# ============================================================================
+
+class ConversationListItem(BaseModel):
+    """Schema for a conversation in a list (without messages)."""
+    conversation_id: str = Field(..., description="Conversation UUID")
+    title: str = Field(..., description="Conversation title")
+    created_at: str = Field(..., description="ISO timestamp of creation")
+    updated_at: str = Field(..., description="ISO timestamp of last update")
+    message_count: int = Field(..., description="Number of messages in conversation")
+    last_message_preview: Optional[str] = Field(None, description="Preview of the last message (truncated)")
+
+
+class ConversationListResponse(BaseModel):
+    """Response schema for listing conversations."""
+    conversations: List[ConversationListItem] = Field(..., description="List of conversations")
+
+
+class CreateConversationRequest(BaseModel):
+    """Request schema for creating a new conversation."""
+    title: Optional[str] = Field("New Chat", max_length=255, description="Title for the conversation")
+
+
+class CreateConversationResponse(BaseModel):
+    """Response schema for creating a new conversation."""
+    conversation_id: str = Field(..., description="Created conversation UUID")
+    title: str = Field(..., description="Conversation title")
+    created_at: str = Field(..., description="ISO timestamp of creation")
+    updated_at: str = Field(..., description="ISO timestamp of last update")
+    message_count: int = Field(0, description="Number of messages (always 0 for new)")
+
+
+class UpdateConversationRequest(BaseModel):
+    """Request schema for updating a conversation (rename)."""
+    title: str = Field(..., min_length=1, max_length=255, description="New title for the conversation")
+
+
+class UpdateConversationResponse(BaseModel):
+    """Response schema for updating a conversation."""
+    conversation_id: str = Field(..., description="Conversation UUID")
+    title: str = Field(..., description="Updated conversation title")
+    updated_at: str = Field(..., description="ISO timestamp of update")

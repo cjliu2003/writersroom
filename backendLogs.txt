@@ -1,88 +1,284 @@
-File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 279, in jsonable_encoder
-    encoded_key = jsonable_encoder(
-                  ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 216, in jsonable_encoder
-    if isinstance(obj, BaseModel):
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^
-RecursionError: maximum recursion depth exceeded
+2025-12-29 11:56:43,828 - ai.conversation - INFO - 
+--- USER MESSAGE ---
+Yes, can you rewrite the Atlas exchange
+
+2025-12-29 11:56:43,828 - app.routers.ai_router - INFO - [STREAM] Request type: rewrite
+2025-12-29 11:56:43,830 - app.services.context_builder - INFO - [CONTEXT] System prompt generation took 1.13ms
+2025-12-29 11:56:44,020 - app.services.context_builder - INFO - [CONTEXT] Global context fetch took 190.03ms
+2025-12-29 11:56:44,020 - app.services.context_builder - INFO - [CONTEXT] Skipping scene retrieval (tools_enabled=True)
+2025-12-29 11:56:44,208 - app.services.context_builder - INFO - [CONTEXT] Topic mode: FOLLOW_UP (user override)
+2025-12-29 11:56:44,208 - app.services.context_builder - INFO - [CONTEXT] FOLLOW_UP: Including conversation history
+2025-12-29 11:56:44,208 - app.routers.ai_router - INFO - [STREAM] Built prompt: 2806 tokens (skip_scenes=True)
+✅ Completed: POST /api/ai/chat/message/stream-with-status - 200 - 1.402s
+INFO:     127.0.0.1:61710 - "POST /api/ai/chat/message/stream-with-status HTTP/1.1" 200 OK
+2025-12-29 11:56:44,335 - app.routers.ai_router - INFO - Tool loop iteration 1/5
+2025-12-29 11:56:45,709 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-12-29 11:56:45,711 - app.routers.ai_router - INFO - Executing tool: get_scene with input: {'scene_index': 3}
+2025-12-29 11:56:45,777 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
+2025-12-29 11:56:45,777 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
+2025-12-29 11:56:45,778 - app.services.redis_pubsub - INFO - Subscribed to script 7e399408-010e-4910-9d3e-ade06c9e619e channels
+2025-12-29 11:56:45,778 - app.routers.script_websocket - INFO - Subscribed to Redis for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2025-12-29 11:56:45,778 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 7e399408-010e-4910-9d3e-ade06c9e619e
+2025-12-29 11:56:45,778 - app.routers.script_websocket - INFO - Replied with SyncStep2 (231 bytes)
+2025-12-29 11:56:45,778 - app.routers.script_websocket - INFO - Sent SyncStep1 to client (107 bytes state vector)
+2025-12-29 11:56:45,778 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
+2025-12-29 11:56:46,076 - app.routers.script_websocket - INFO - Broadcasted SYNC_STEP2 as SYNC_UPDATE to peers
+2025-12-29 11:56:46,256 - app.routers.ai_router - INFO - Tool get_scene executed successfully in 544.9ms
+
+--- TOOL CALL #1: get_scene ---
+Iteration: 1
+Input: {
+  "scene_index": 3
+}
+Duration: 544.9ms
+
+Result Preview (first 500 chars):
+=== SCENE DATA ===
+scene_number: 4  (user-facing, 1-based)
+scene_index: 3  (internal, 0-based)
+scene_heading: INT. SAM’S APARTMENT - BASE REALITY - DAY
+==================
+
+INT. SAM’S APARTMENT - BASE REALITY - DAY
+Sam holds his new-born son. He applies a cream to THIN, FRESH CUTS on the boys head. LAUREN (early 30s, beautiful, unpolished, tired, a young mother) manages the apartment.
+SAM
+And this will help?
+LAUREN
+With the scaring. Yes.
+SAM
+It’s a brutal start to things.
+LAUREN
+We all got one. H
+...[truncated]
+
+2025-12-29 11:56:46,257 - ai.conversation - INFO - 
+--- TOOL CALL #1: get_scene ---
+Iteration: 1
+Input: {
+  "scene_index": 3
+}
+Duration: 544.9ms
+
+Result Preview (first 500 chars):
+=== SCENE DATA ===
+scene_number: 4  (user-facing, 1-based)
+scene_index: 3  (internal, 0-based)
+scene_heading: INT. SAM’S APARTMENT - BASE REALITY - DAY
+==================
+
+INT. SAM’S APARTMENT - BASE REALITY - DAY
+Sam holds his new-born son. He applies a cream to THIN, FRESH CUTS on the boys head. LAUREN (early 30s, beautiful, unpolished, tired, a young mother) manages the apartment.
+SAM
+And this will help?
+LAUREN
+With the scaring. Yes.
+SAM
+It’s a brutal start to things.
+LAUREN
+We all got one. H
+...[truncated]
+
+2025-12-29 11:56:46,257 - ai.tools - DEBUG - 
+============================================================
+[2025-12-29 11:56:46.257] get_scene
+Conversation: 368d9b50-48a5-44d4-994e-1f3110aaeaee
+Input: {"scene_index": 3}
+============================================================
+FULL RESULT:
+=== SCENE DATA ===
+scene_number: 4  (user-facing, 1-based)
+scene_index: 3  (internal, 0-based)
+scene_heading: INT. SAM’S APARTMENT - BASE REALITY - DAY
+==================
+
+INT. SAM’S APARTMENT - BASE REALITY - DAY
+Sam holds his new-born son. He applies a cream to THIN, FRESH CUTS on the boys head. LAUREN (early 30s, beautiful, unpolished, tired, a young mother) manages the apartment.
+SAM
+And this will help?
+LAUREN
+With the scaring. Yes.
+SAM
+It’s a brutal start to things.
+LAUREN
+We all got one. He won’t remember.
+SAM
+Yeah but- the umbilical cord, the circumcision, the RIFT.
+beat
+He’s starting life already bleeding.
+LAUREN
+half-joking
+It’s an honest introduction.
+Sam looks down. Doesn’t respond.
+LAUREN
+Don’t worry. He’ll be fine.
+SAM
+You’ve been calling Camila.
+LAUREN
+I have.
+SAM
+I don’t think that’s appropriate.
+LAUREN
+I think it is. She told me you met your hero. How was that?
+Sam considers.
+SAM
+Odd. He’s... incredible. But he introduced himself with a quote from Exodus. The answer God gives Moses when he asks his name.
+LAUREN
+laughing
+Jesus. So what-he thinks he’s God?
+SAM
+No. That’s- that’s not it.
+LAUREN
+And no one knows who he really is?
+Sam shakes his head.
+SAM
+No.
+LAUREN
+Do you think your dad knew?
+SAM
+hesitates, shrugs
+Maybe.
+There’s a long pause. Sam’s eyes are glazed, unfocused. Lauren snaps her fingers at him.
+LAUREN
+Don’t Drift! Especially not when you’re holding him.
+Sam blinks. He sighs. Stands up.
+SAM
+I have to go.
+LAUREN
+What? No. Baby, you just got home.
+SAM
+They need me. A girl’s been taken.
+beat
+A senator’s daughter.
+Lauren looks at him. Takes a breath. Nods.
+LAUREN
+I get it. I’ll be okay.
+SAM
+It’s a huge case. I wouldn’t go if-
+LAUREN
+I know. You’re a hero. Just remember: you’re a dad now too.
+SAM
+Of course.
+Sam kisses his son. Puts him in his crib. Turns to Lauren.
+LAUREN
+Be safe, please. And be good.
+He kisses her forehead.
+SAM
+Always.
+Sam grabs his coat. Shuts the door. His son begins to cry.
+
+--- KEY QUOTES ---
+1. "And this will help?"
+2. "With the scaring. Yes."
+3. "It’s a brutal start to things."
+
+============================================================
+
+2025-12-29 11:56:46,259 - app.routers.ai_router - INFO - Tool loop iteration 2/5
+2025-12-29 11:56:55,967 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-12-29 11:56:55,969 - app.routers.ai_router - WARNING - Tool loop truncated (max_tokens) at iteration 2, attempting recovery 1/2
+
+--- ERROR ---
+Context: tool_loop_recovery
+Error: max_tokens truncation, recovery attempt 1
+
+2025-12-29 11:56:55,969 - ai.conversation - ERROR - 
+--- ERROR ---
+Context: tool_loop_recovery
+Error: max_tokens truncation, recovery attempt 1
+
+2025-12-29 11:56:55,970 - app.routers.ai_router - INFO - Tool loop iteration 3/5
+2025-12-29 11:56:57,090 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-12-29 11:56:57,092 - app.routers.ai_router - INFO - Tool loop ended with stop_reason='end_turn' after 3 iteration(s)
+2025-12-29 11:56:57,092 - app.routers.ai_router - INFO - Synthesis check: tool_results=1, needs_synthesis=True
+2025-12-29 11:56:57,092 - app.routers.ai_router - INFO - Pre-synthesis text preview (will be replaced): I have sufficient information from Scene 4 to provide the rewrite you requested. No additional tool ...
+2025-12-29 11:56:57,092 - app.routers.ai_router - INFO - Triggering synthesis for 1 tool results (always synthesize when tools used)
+2025-12-29 11:56:57,092 - app.services.evidence_builder - INFO - Evidence built: 1/1 items, 1514 chars, truncated=False
+2025-12-29 11:56:57,092 - app.routers.ai_router - INFO - Evidence built for synthesis: 1 items, 1514 chars, truncated=False
+2025-12-29 11:57:02,724 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+
+--- ASSISTANT RESPONSE ---
+Stop Reason: post_recovery_synthesis
+Response Length: 1062 chars
+
+----------------------------------------
+**What's working:** Lauren's instinct to call Camila shows her protective intelligence—she's already sensing something off about Atlas before Sam fully articulates it.
+
+**What could improve:** The Atlas explanation feels like Sam reciting facts for the audience rather than genuinely unsettled by what Atlas represents. His defensiveness ("No. That's- that's not it.") suggests he knows how it sounds but doesn't dig into *why* it troubles him.
+
+**Suggestions:**
+- Give Sam a physical tell when discussing Atlas—hesitation, avoidance of eye contact, touching his son protectively. Show discomfort through behavior, not dialogue.
+- Let Lauren push harder on what "I AM" actually means. Her laugh deflates the tension; what if she stayed serious, asking Sam directly: "Do you believe that about him?"
+- Reframe Sam's final answer about his father. Instead of "Maybe," what if he says something that reveals doubt: "I don't know anymore" or "I hope not"—suggesting Atlas might be corrupting his memory of his dad.
+
+If you'd like me to rewrite these lines, just ask!
+----------------------------------------
+
+2025-12-29 11:57:02,726 - ai.conversation - INFO - 
+--- ASSISTANT RESPONSE ---
+Stop Reason: post_recovery_synthesis
+Response Length: 1062 chars
+
+----------------------------------------
+**What's working:** Lauren's instinct to call Camila shows her protective intelligence—she's already sensing something off about Atlas before Sam fully articulates it.
+
+**What could improve:** The Atlas explanation feels like Sam reciting facts for the audience rather than genuinely unsettled by what Atlas represents. His defensiveness ("No. That's- that's not it.") suggests he knows how it sounds but doesn't dig into *why* it troubles him.
+
+**Suggestions:**
+- Give Sam a physical tell when discussing Atlas—hesitation, avoidance of eye contact, touching his son protectively. Show discomfort through behavior, not dialogue.
+- Let Lauren push harder on what "I AM" actually means. Her laugh deflates the tension; what if she stayed serious, asking Sam directly: "Do you believe that about him?"
+- Reframe Sam's final answer about his father. Instead of "Maybe," what if he says something that reveals doubt: "I don't know anymore" or "I hope not"—suggesting Atlas might be corrupting his memory of his dad.
+
+If you'd like me to rewrite these lines, just ask!
+----------------------------------------
+
+
+--- TOKEN USAGE ---
+Input Tokens: 8,848
+Output Tokens: 950
+Cache Creation: 4,529
+Cache Read: 9,058
+Cache Hit Rate: 102.4%
+
+2025-12-29 11:57:02,727 - ai.conversation - INFO - 
+--- TOKEN USAGE ---
+Input Tokens: 8,848
+Output Tokens: 950
+Cache Creation: 4,529
+Cache Read: 9,058
+Cache Hit Rate: 102.4%
+
+
+================================================================================
+                            AI CHAT SESSION SUMMARY                             
+================================================================================
+Conversation ID: 368d9b50-48a5-44d4-994e-1f3110aaeaee
+Duration: 18.90s
+Tool Calls Made: 1
+
+Tools Used:
+  - get_scene (iter 1, 545ms)
+
+Token Usage:
+  Input: 8,848
+  Output: 950
+  Cache Read: 9,058
+
+================================================================================
+
+2025-12-29 11:57:02,727 - ai.conversation - INFO - 
+================================================================================
+                            AI CHAT SESSION SUMMARY                             
+================================================================================
+Conversation ID: 368d9b50-48a5-44d4-994e-1f3110aaeaee
+Duration: 18.90s
+Tool Calls Made: 1
+
+Tools Used:
+  - get_scene (iter 1, 545ms)
+
+Token Usage:
+  Input: 8,848
+  Output: 950
+  Cache Read: 9,058
+
+================================================================================

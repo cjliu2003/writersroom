@@ -1,159 +1,154 @@
-I read your report, and you’re right that the “increase max_tokens” ideas are mostly bandaids. The root problems are: **(1) the tool loop is allowed to “talk” while it’s supposed to “act,” (2) you’re appending raw tool outputs/history in ways that amplify recency bias, and (3) your RAG-only default output cap is accidentally tiny**. All of that compounds as the conversation goes on.
+Totally aligned with your framing: this is mainly a **routing + state** problem, not “the model is bad.”
 
-Below are fixes I’d prioritize for a system exactly like yours (MCP tools + screenplay retrieval + multi-turn agent). I’ll reference specifics from your flow where relevant. 
+What you want is a router that can reliably answer four questions *before* you build context / call tools:
 
----
+1. **Is this a follow-up to the current thread or a new topic?**
+2. **Is it about *this script* (even implicitly), general (not script-specific), or hybrid?**
+3. **Is the user asking for *suggestions* vs an actual *rewrite/revision*?**
+4. **If it’s script-related but underspecified, what’s the *best default anchor* (scene/character/thread) to fetch?**
 
-## P0: Fix the truncation + “partial return” failure modes (real bugs, not tuning)
-
-### 1) RAG-only mode is effectively capped at 600 unless client overrides
-
-Your report shows `max_tokens=request.max_tokens or 600` in RAG-only mode. That guarantees truncation for any meaningful answer unless the frontend always sends `max_tokens`. 
-
-**Fix**
-
-* Raise the default for RAG-only (e.g., 1200–2000), *and* have the client always pass an explicit value.
-
-### 2) You’re only returning `response.content[0].text` in `AIService.generate_response`
-
-That’s fragile: Anthropic responses can contain multiple content blocks, and even in non-tool calls you can end up dropping text if it’s not in the first block. Your report shows `response.content[0].text`. 
-
-**Fix**
-
-* Concatenate **all** `text` blocks in `response.content`, not just `[0]`.
-
-### 3) In the tool loop, `stop_reason != "tool_use"` immediately returns the first text block
-
-Per your snippet, if a loop iteration ends (including `max_tokens`) you return the first `text` block and exit. 
-That means:
-
-* if the model was *mid-plan* and got cut off → you prematurely return junk to the user
-* you never attempt a “continue” recovery
-
-**Fix**
-
-* Treat `stop_reason == "max_tokens"` during tool loop as “need to continue planning,” not “return to user.”
-* Add an automatic recovery step: re-call with a short “Continue tool planning; output tool calls only.” (No user-facing message yet.)
+Below is a concrete approach that fixes all four failure types without making the system brittle.
 
 ---
 
-## P1: Make the tool loop “tool-only” (this removes 80% of your drift + truncation)
+## 1) Conversation continuity: stop treating “history” as the mechanism
 
-Right now, each tool-loop step has `max_tokens=600`. Your report explicitly calls out the risk: the model sometimes tries to answer + call tools and gets cut off. 
+Instead of “include more history,” use **explicit conversation state** + **targeted retrieval**.
 
-**Best practice:** during the loop, force the assistant to output **only tool calls (and optionally a tiny plan)**. No prose answers until the final synthesis.
+### A. Maintain a small “Working Set” state object per conversation
 
-Concretely:
+Update it after every assistant turn.
 
-* Add a hard instruction:
-  “In tool loop iterations, do not write the user-facing answer. Either call tools or say you have enough info.”
-* Enforce it in code: if the assistant emits >N characters of text in a tool iteration, discard and retry with a stricter reminder.
+**Example state**
 
-This matters more than increasing `TOOL_LOOP_MAX_TOKENS`.
+* `active_scene_ids`: last 1–3 scenes referenced or retrieved
+* `active_characters`: last 1–5 character names referenced
+* `active_plot_threads`: last 1–3 threads referenced
+* `last_user_intent`: e.g., “pacing critique”, “dialogue improvement”
+* `last_assistant_commitment`: e.g., “I suggested cutting scene 12’s opener”
 
----
+Then continuity is not “did we include 40 turns,” it’s “do we have anchors for pronouns and callbacks.”
 
-## P1: Stop “reversing tool results” and replace with evidence assembly
+### B. Add a dedicated Continuity Classifier (cheap + strict)
 
-Your loop appends tool results “reversed for recency bias.” 
-That’s a clever hack, but it’s still a hack: the model will overweight *whatever is most salient / longest / most recent*, and raw tool dumps remain the problem.
+Have a small classification step that outputs **JSON only**:
 
-**Replace with:**
+* `continuity`: `FOLLOW_UP | NEW_TOPIC | UNCERTAIN`
+* `refers_to`: `SCENE | CHARACTER | THREAD | PRIOR_ADVICE | NONE`
+* `confidence`: 0–1
+* `needs_disambiguation`: boolean (rare)
 
-1. Execute tools
-2. Convert results into a **single structured “Evidence” object** (ranked + trimmed)
-3. Feed only that evidence into synthesis
+**Hard rule:**
+If `NEW_TOPIC`, you **drop prior turns** (except the state object) and do *not* pull old conversation snippets.
 
-Example evidence structure:
+### C. When follow-up is detected, retrieve only the relevant prior snippets
 
-* `evidence[ ]`: `{source_tool, scene_ids, snippet, why_relevant}`
-* cap snippets (e.g., 600–1200 chars each)
-* order by relevance score (embedding similarity to the user question)
+Don’t re-inject the whole chat. Store prior turns in a vector index and retrieve top-k *only when needed* (e.g., `refers_to=PRIOR_ADVICE`).
 
-Also: your system prompt says “give equal weight to every tool result.” 
-That instruction is *counterproductive* in practice—some tool outputs are noise. Better: **weight by relevance**, and allow discarding.
-
----
-
-## P1: Batch your tools (yes, do it)
-
-You’re seeing sequential `get_scene` calls. That’s exactly the case where batching is the “correct” primitive.
-
-Add:
-
-* `get_scenes(scene_indices: int[], fields: ["summary","text"], max_chars_per_scene)`
-* `get_scene_context_batch(scene_indices: int[], window_size, max_chars_per_scene)`
-* and consider merging `get_scene` + `get_scene_context` into one tool with parameters.
-
-This reduces:
-
-* latency (one round trip)
-* tokens (one tool schema + one tool_result)
-* recency problems (one unified result)
+This is what eliminates “it keeps talking about the first unrelated question.”
 
 ---
 
-## P2: Fix “independent question” contamination (history isn’t “context,” it’s training signal)
+## 2) Question understanding: introduce a 3-way domain router
 
-Your current prompt says history “may not be relevant,” but you still include it, so the model uses it. 
+Right now you basically have “script/tool” vs “not.” You need:
 
-**Best practice:** don’t send history unless you’ve decided it’s relevant.
+* `SCRIPT`: user wants script-grounded answer
+* `GENERAL`: user wants general knowledge/craft/brainstorming not tied to script
+* `HYBRID`: answer generally **and** optionally apply to the script
 
-Implement a tiny “mode gate” before context building:
+### The key: bias toward script *when ambiguous*, but verify cheaply
 
-* `mode = follow_up | new_topic`
-* If `new_topic`: include **0** prior turns (or just a 1–2 sentence stable user preference summary), then proceed with fresh retrieval.
+This solves your “if we don’t explicitly mention the script, it doesn’t reference it.”
 
-This will also improve cache hit stability because you won’t keep appending changing history to the prompt prefix.
+**Practical strategy**
 
----
+* If a script is loaded and the question is plausibly script-related (“is this character arc working?”, “how can I improve this dialogue?”), treat it as `SCRIPT` by default.
+* Do a **lightweight `search_script` probe** (top_k=3, low max_chars) using the user question + any `active_characters/scenes` from state.
+* If the probe returns nothing above a similarity threshold → fall back to `GENERAL`.
 
-## Model / cost recommendations (pragmatic ladder)
+So you get:
 
-You currently use `claude-haiku-4-5` for everything. 
-That’s fine, but agentic systems usually do better with a “ladder”:
-
-* **Haiku (cheap):** intent classification, tool selection, evidence compression
-* **Stronger model:** final synthesis only when needed (complex narrative analysis, multi-source reasoning)
-
-If you consider switching to OpenAI: prompt caching is automatic there (no cache_control blocks needed), which can simplify your pipeline. ([OpenAI Platform][1])
-OpenAI also publishes “cached input” pricing explicitly (useful if your prefix is stable). ([OpenAI Platform][2])
-
-Anthropic caching: `cache_control: {"type":"ephemeral"}` is currently the supported cache type and has a short lifetime (commonly documented as ~5 minutes), so the “~90% cost reduction” claim only holds when traffic patterns reuse the prefix within that window. ([Claude][3])
+* script grounding when it’s there
+* general answers when the script doesn’t match
 
 ---
 
-## Output length: stop relying on token caps
+## 3) “It likes offering revisions” → fix with response-mode gating
 
-Even with `FINAL_SYNTHESIS_MAX_TOKENS=1200`, the model will ramble and then get cut off. 
+Yes, mostly a system/developer prompt change, but do it with a **request-type classifier** so it’s consistent.
 
-**Instead:**
+### Add `request_type` classification
 
-* Force a response format: e.g. “5 bullets max, 1 sentence each.”
-* Add a word budget (“≤180 words”)—models follow this better than token numbers.
-* Put “most important first” instruction (truncation-safe).
+`SUGGEST | REWRITE | DIAGNOSE | BRAINSTORM | FACTUAL`
+
+**Rewrite is only allowed if explicitly asked** (words like “rewrite,” “revise,” “draft,” “give me alt lines,” “make this better by rewriting”).
+
+### Response contract (important)
+
+* Default for writers: **diagnosis + suggestions**, not full rewrites.
+* If user did not ask for a rewrite, do:
+
+  * “What’s working”
+  * “What’s not”
+  * “2–6 concrete edits you can make”
+  * “If you want, paste the lines and I can rewrite them” (optional, short)
+
+This will feel *much* more like a co-writer rather than a “rewrite bot.”
 
 ---
 
-## A recommended architecture for your exact flow
+## 4) Tooling / MCP best practices for your specific toolset
 
-**Tool loop**
+You’re already moving this direction, but here’s the “clean” ideal:
 
-1. Plan/tools (tool-only)
-2. Execute tools (batch)
-3. Evidence builder (compress + rank + discard)
-4. Synthesis (short, formatted)
+### A. Batch within tools for same-tool repeats
 
-**Key principle:** the synthesis step should see *clean evidence*, not raw history + raw tool dumps.
+* `get_scenes(scene_ids[])`
+* `get_scene_context_batch(scene_ids[])`
+
+### B. Allow multi-tool-per-turn, but cap it
+
+Yes: let the model emit multiple tool calls in one planning turn **when independent**, but add guardrails:
+
+* max 3 tool calls per planning step
+* max 1 “expensive” tool (`analyze_pacing`, `get_plot_threads`) unless user explicitly asked for it
+* require a one-line “why” per tool call (structured)
+
+### C. Evidence assembly step stays mandatory
+
+Even with better batching, keep:
+
+* tool results → ranked EvidenceItems → final synthesis
+  And **do not** show raw loop transcripts to the final synthesis step (that’s where contamination sneaks back in).
 
 ---
 
-If you want, paste one real failing trace (user message + tool calls + tool outputs sizes + final answer). With that, I can propose:
+## Putting it together: the router you want
 
-* the exact “Evidence JSON schema” I’d use,
-* the batching tool signatures,
-* and a concrete gating heuristic for new-topic vs follow-up tuned to screenplay chat.
+A single small “Router” call (or heuristics + tiny model) returns:
 
-[1]: https://platform.openai.com/docs/guides/prompt-caching?utm_source=chatgpt.com "Prompt caching | OpenAI API"
-[2]: https://platform.openai.com/docs/pricing?utm_source=chatgpt.com "Pricing | OpenAI API"
-[3]: https://platform.claude.com/docs/en/build-with-claude/prompt-caching?utm_source=chatgpt.com "Prompt caching - Claude Docs"
+* `continuity`: FOLLOW_UP / NEW_TOPIC
+* `domain`: SCRIPT / GENERAL / HYBRID
+* `request_type`: SUGGEST / REWRITE / DIAGNOSE / etc.
+* `anchors`: {scene_ids?, character_names?, thread_ids?}
+
+Then:
+
+### If GENERAL
+
+* no tools
+* no script context (maybe just “you’re a screenwriting assistant”)
+* concise answer
+
+### If SCRIPT
+
+* run script probe / tools
+* answer grounded in EvidenceItems
+* default to SUGGEST/DIAGNOSE unless REWRITE requested
+
+### If HYBRID
+
+* answer general first (short)
+* then “Applied to your script:” with tool-grounded points (short)
+

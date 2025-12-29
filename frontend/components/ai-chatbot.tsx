@@ -1,11 +1,13 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { MarkdownContent } from "@/components/ui/markdown-content"
+import { TopicModeToggle } from "@/components/ui/topic-mode-toggle"
 import { Send, Loader2, ChevronDown, ChevronLeft, ChevronRight, Sparkles, PanelLeft, PanelRight, PanelBottom, Trash2 } from "lucide-react"
-import { sendChatMessageWithStatusStream, deleteConversation, getConversationForScript, type ChatMessage, type ToolCallMetadata, type ChatStreamEvent } from "@/lib/api"
+import { sendChatMessageWithStatusStream, deleteConversation, listConversations, createConversation, renameConversation, getConversation, type ChatMessage, type ToolCallMetadata, type ChatStreamEvent, type TopicModeOverride, type ConversationListItem } from "@/lib/api"
+import { ChatSelector } from "@/components/ui/chat-selector"
 import { type ChatPosition } from "@/utils/layoutPrefs"
 
 interface AIChatbotProps {
@@ -43,8 +45,16 @@ export function AIChatbot({
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string>('')  // Real-time status from AI
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined)
   const [showClearConfirm, setShowClearConfirm] = useState(false)  // Confirmation state for clear
+  const [topicMode, setTopicMode] = useState<TopicModeOverride | undefined>(undefined)  // Topic continuity override
+
+  // Multi-chat state
+  const [conversations, setConversations] = useState<ConversationListItem[]>([])
+  const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined)
+
+  // Draft preservation per conversation
+  const draftsRef = useRef<Map<string, string>>(new Map())
+
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -58,38 +68,131 @@ export function AIChatbot({
     })
   }
 
-  // Load conversation history from database (source of truth)
+  // Switch to a specific conversation
+  const switchToConversation = useCallback(async (conversationId: string) => {
+    // Load conversation messages
+    try {
+      const response = await getConversation(conversationId)
+      const loadedMessages: ExtendedChatMessage[] = response.messages
+        .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+        .map(msg => ({
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+          timestamp: msg.created_at
+        }))
+
+      setMessages(loadedMessages)
+      setActiveConversationId(conversationId)
+
+      // Restore draft if exists
+      const savedDraft = draftsRef.current.get(conversationId) || ''
+      setInputValue(savedDraft)
+
+      console.log('[AIChatbot] Switched to conversation:', conversationId)
+    } catch (error) {
+      console.error('[AIChatbot] Failed to load conversation:', error)
+    }
+  }, [])
+
+  // Load conversations list from database on mount
   useEffect(() => {
     if (!projectId) return
 
-    const loadConversation = async () => {
+    const loadConversations = async () => {
       try {
-        const response = await getConversationForScript(projectId)
+        const response = await listConversations(projectId)
+        setConversations(response.conversations)
 
-        if (response.conversation && response.messages.length > 0) {
-          // Set conversation ID for future messages
-          setConversationId(response.conversation.conversation_id)
-
-          // Transform DB messages to our format (filter out system messages for display)
-          const loadedMessages: ExtendedChatMessage[] = response.messages
-            .filter(msg => msg.role === 'user' || msg.role === 'assistant')
-            .map(msg => ({
-              role: msg.role as 'user' | 'assistant',
-              content: msg.content,
-              timestamp: msg.created_at
-            }))
-
-          setMessages(loadedMessages)
-          console.log('[AIChatbot] Loaded conversation from database:', response.conversation.conversation_id)
+        // Auto-select most recent conversation if exists
+        if (response.conversations.length > 0) {
+          const mostRecent = response.conversations[0]
+          await switchToConversation(mostRecent.conversation_id)
         }
+        console.log('[AIChatbot] Loaded conversations:', response.conversations.length)
       } catch (error) {
-        console.error('[AIChatbot] Failed to load conversation from database:', error)
+        console.error('[AIChatbot] Failed to load conversations:', error)
         // Silently fail - user can start a new conversation
       }
     }
 
-    loadConversation()
-  }, [projectId])
+    loadConversations()
+  }, [projectId, switchToConversation])
+
+  // Create a new chat
+  const handleNewChat = async () => {
+    if (!projectId) return
+
+    // Save current draft
+    if (activeConversationId && inputValue.trim()) {
+      draftsRef.current.set(activeConversationId, inputValue)
+    }
+
+    try {
+      const newConv = await createConversation(projectId)
+      // Add to beginning of list (most recent)
+      setConversations(prev => [{
+        conversation_id: newConv.conversation_id,
+        title: newConv.title,
+        created_at: newConv.created_at,
+        updated_at: newConv.updated_at,
+        message_count: 0,
+        last_message_preview: null
+      }, ...prev])
+      setActiveConversationId(newConv.conversation_id)
+      setMessages([])
+      setInputValue('')
+      console.log('[AIChatbot] Created new conversation:', newConv.conversation_id)
+    } catch (error) {
+      console.error('[AIChatbot] Failed to create conversation:', error)
+    }
+  }
+
+  // Rename a conversation - optimistic update pattern
+  // Update UI immediately, then fire API call in background
+  const handleRename = (conversationId: string, newTitle: string) => {
+    // Optimistically update the UI immediately
+    setConversations(prev => prev.map(c =>
+      c.conversation_id === conversationId
+        ? { ...c, title: newTitle }
+        : c
+    ))
+    console.log('[AIChatbot] Optimistically renamed conversation:', conversationId, 'to', newTitle)
+
+    // Fire API call in background - no need to await
+    renameConversation(conversationId, newTitle)
+      .then(() => {
+        console.log('[AIChatbot] Rename confirmed by server:', conversationId)
+      })
+      .catch((error) => {
+        console.error('[AIChatbot] Failed to rename conversation:', error)
+        // Could optionally revert the optimistic update here, but for a rename
+        // it's low stakes - user can just rename again if needed
+      })
+  }
+
+  // Delete a conversation
+  const handleDeleteConversation = async (conversationId: string) => {
+    if (!confirm('Delete this chat?')) return
+
+    try {
+      await deleteConversation(conversationId)
+      const remaining = conversations.filter(c => c.conversation_id !== conversationId)
+      setConversations(remaining)
+
+      // If deleted active conversation, switch to another or clear
+      if (conversationId === activeConversationId) {
+        if (remaining.length > 0) {
+          await switchToConversation(remaining[0].conversation_id)
+        } else {
+          setActiveConversationId(undefined)
+          setMessages([])
+        }
+      }
+      console.log('[AIChatbot] Deleted conversation:', conversationId)
+    } catch (error) {
+      console.error('[AIChatbot] Failed to delete conversation:', error)
+    }
+  }
 
   // Auto-scroll to bottom when new messages arrive (e.g., AI response)
   useEffect(() => {
@@ -127,14 +230,16 @@ export function AIChatbot({
       // Use streaming endpoint with real-time status updates
       const stream = sendChatMessageWithStatusStream({
         script_id: projectId,
-        conversation_id: conversationId,
+        conversation_id: activeConversationId,
         current_scene_id: currentSceneId,
         message: userMessage.content,
-        budget_tier: 'standard' // Can be 'quick', 'standard', or 'deep'
+        budget_tier: 'standard', // Can be 'quick', 'standard', or 'deep'
+        topic_mode: topicMode  // Topic continuity override (undefined = auto-detect)
       })
 
       let finalMessage = ''
       let toolMetadata: ToolCallMetadata | undefined
+      let newConversationId: string | undefined
 
       // Process SSE events as they arrive
       for await (const event of stream) {
@@ -162,9 +267,19 @@ export function AIChatbot({
             break
 
           case 'stream_end':
-            // Update conversation ID for future messages
-            if (!conversationId && event.conversation_id) {
-              setConversationId(event.conversation_id)
+            // Track new conversation ID if created
+            if (!activeConversationId && event.conversation_id) {
+              newConversationId = event.conversation_id
+              setActiveConversationId(event.conversation_id)
+              // Add new conversation to list
+              setConversations(prev => [{
+                conversation_id: event.conversation_id,
+                title: 'New Chat',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                message_count: 2,
+                last_message_preview: null
+              }, ...prev])
             }
             break
         }
@@ -179,6 +294,21 @@ export function AIChatbot({
           tool_metadata: toolMetadata
         }
         setMessages(prev => [...prev, assistantMessage])
+
+        // Update conversation list to reflect new message
+        const currentConvId = newConversationId || activeConversationId
+        if (currentConvId) {
+          setConversations(prev => prev.map(c =>
+            c.conversation_id === currentConvId
+              ? {
+                  ...c,
+                  updated_at: new Date().toISOString(),
+                  message_count: c.message_count + 2, // user + assistant
+                  last_message_preview: finalMessage.slice(0, 50) + (finalMessage.length > 50 ? '...' : '')
+                }
+              : c
+          ))
+        }
       }
 
     } catch (error) {
@@ -202,22 +332,34 @@ export function AIChatbot({
     }
   }
 
-  // Clear chat history (database and UI state)
+  // Clear chat history (database and UI state) - clears the active conversation
   const clearChat = async () => {
-    // Delete from database if we have a conversation ID
-    if (conversationId) {
+    // Delete from database if we have an active conversation ID
+    if (activeConversationId) {
       try {
-        await deleteConversation(conversationId)
-        console.log('[AIChatbot] Conversation deleted from database:', conversationId)
+        await deleteConversation(activeConversationId)
+        console.log('[AIChatbot] Conversation deleted from database:', activeConversationId)
+
+        // Remove from conversations list
+        const remaining = conversations.filter(c => c.conversation_id !== activeConversationId)
+        setConversations(remaining)
+
+        // Switch to another conversation or clear
+        if (remaining.length > 0) {
+          await switchToConversation(remaining[0].conversation_id)
+        } else {
+          setActiveConversationId(undefined)
+          setMessages([])
+        }
       } catch (error) {
         // Log but don't block UI - conversation will be orphaned but user experience is preserved
         console.error('[AIChatbot] Failed to delete conversation from database:', error)
       }
+    } else {
+      // Just clear local state if no conversation exists yet
+      setMessages([])
     }
 
-    // Clear UI state
-    setMessages([])
-    setConversationId(undefined)
     setShowClearConfirm(false)
     inputRef.current?.focus()
   }
@@ -299,7 +441,15 @@ export function AIChatbot({
       <div className={`h-8 min-h-[32px] border-b border-gray-200/60 bg-gradient-to-r from-gray-100/90 to-purple-50/40 px-3 flex items-center justify-between ${panelStyles.header}`}>
         <div className="flex items-center gap-1.5">
           <Sparkles className="w-3 h-3 text-purple-500" />
-          <span className="text-[10px] text-gray-600 uppercase tracking-widest font-medium">The Room</span>
+          <ChatSelector
+            conversations={conversations}
+            activeConversationId={activeConversationId}
+            onSelect={switchToConversation}
+            onNewChat={handleNewChat}
+            onRename={handleRename}
+            onDelete={handleDeleteConversation}
+            disabled={isLoading}
+          />
         </div>
 
         <div className="flex items-center gap-0.5">
@@ -434,34 +584,45 @@ export function AIChatbot({
 
       {/* Input */}
       <div className="border-t border-gray-200/60 bg-gray-100/80 p-3">
-        <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-200/80 px-3 py-2.5 shadow-sm">
-          <textarea
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder={getPlaceholder()}
-            disabled={!projectId}
-            rows={1}
-            className="flex-1 bg-transparent text-[11pt] text-gray-700 placeholder-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none leading-[20px] min-h-[20px] py-0"
-            style={{ fontFamily: "inherit", fieldSizing: "content" } as React.CSSProperties}
-          />
-          <Button
-            onClick={sendMessage}
-            disabled={!inputValue.trim() || !projectId || isLoading}
-            size="sm"
-            className={`p-1.5 rounded-lg transition-all duration-150 flex-shrink-0 ${
-              inputValue.trim() && projectId && !isLoading
-                ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
-                : 'bg-gray-100 text-gray-400'
-            }`}
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
-          </Button>
+        <div className="flex flex-col gap-2">
+          {/* Topic mode toggle row */}
+          <div className="flex items-center justify-end px-1">
+            <TopicModeToggle
+              value={topicMode}
+              onChange={setTopicMode}
+              disabled={isLoading || !projectId}
+            />
+          </div>
+          {/* Input row */}
+          <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-200/80 px-3 py-2.5 shadow-sm">
+            <textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={getPlaceholder()}
+              disabled={!projectId}
+              rows={1}
+              className="flex-1 bg-transparent text-[11pt] text-gray-700 placeholder-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none leading-[20px] min-h-[20px] py-0"
+              style={{ fontFamily: "inherit", fieldSizing: "content" } as React.CSSProperties}
+            />
+            <Button
+              onClick={sendMessage}
+              disabled={!inputValue.trim() || !projectId || isLoading}
+              size="sm"
+              className={`p-1.5 rounded-lg transition-all duration-150 flex-shrink-0 ${
+                inputValue.trim() && projectId && !isLoading
+                  ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
+                  : 'bg-gray-100 text-gray-400'
+              }`}
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
