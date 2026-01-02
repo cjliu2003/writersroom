@@ -48,6 +48,10 @@ export function AIChatbot({
   const [showClearConfirm, setShowClearConfirm] = useState(false)  // Confirmation state for clear
   const [topicMode, setTopicMode] = useState<TopicModeOverride | undefined>(undefined)  // Topic continuity override
 
+  // NEW: State for streaming text display
+  const [streamingText, setStreamingText] = useState<string>('')
+  const [isStreaming, setIsStreaming] = useState(false)
+
   // Multi-chat state
   const [conversations, setConversations] = useState<ConversationListItem[]>([])
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined)
@@ -118,7 +122,7 @@ export function AIChatbot({
     loadConversations()
   }, [projectId, switchToConversation])
 
-  // Create a new chat
+  // Create a new chat - optimistic UI pattern for instant feel
   const handleNewChat = async () => {
     if (!projectId) return
 
@@ -127,23 +131,46 @@ export function AIChatbot({
       draftsRef.current.set(activeConversationId, inputValue)
     }
 
+    // Generate temporary ID for optimistic UI
+    const tempId = `temp-${Date.now()}`
+    const now = new Date().toISOString()
+
+    // OPTIMISTIC: Immediately update UI before API call
+    setConversations(prev => [{
+      conversation_id: tempId,
+      title: 'Untitled',
+      created_at: now,
+      updated_at: now,
+      message_count: 0,
+      last_message_preview: null
+    }, ...prev])
+    setActiveConversationId(tempId)
+    setMessages([])
+    setInputValue('')
+    console.log('[AIChatbot] Optimistically created new chat:', tempId)
+
+    // Background: Create real conversation and swap IDs
     try {
       const newConv = await createConversation(projectId)
-      // Add to beginning of list (most recent)
-      setConversations(prev => [{
-        conversation_id: newConv.conversation_id,
-        title: newConv.title,
-        created_at: newConv.created_at,
-        updated_at: newConv.updated_at,
-        message_count: 0,
-        last_message_preview: null
-      }, ...prev])
-      setActiveConversationId(newConv.conversation_id)
-      setMessages([])
-      setInputValue('')
-      console.log('[AIChatbot] Created new conversation:', newConv.conversation_id)
+      // Replace temp ID with real ID in conversations list
+      setConversations(prev => prev.map(c =>
+        c.conversation_id === tempId
+          ? {
+              ...c,
+              conversation_id: newConv.conversation_id,
+              created_at: newConv.created_at,
+              updated_at: newConv.updated_at
+            }
+          : c
+      ))
+      // Update active ID if still on the temp conversation
+      setActiveConversationId(prev => prev === tempId ? newConv.conversation_id : prev)
+      console.log('[AIChatbot] Swapped temp ID', tempId, '→', newConv.conversation_id)
     } catch (error) {
       console.error('[AIChatbot] Failed to create conversation:', error)
+      // Rollback: Remove the optimistic entry
+      setConversations(prev => prev.filter(c => c.conversation_id !== tempId))
+      setActiveConversationId(undefined)
     }
   }
 
@@ -170,10 +197,8 @@ export function AIChatbot({
       })
   }
 
-  // Delete a conversation
+  // Delete a conversation (confirmation is handled by ChatSelector dialog)
   const handleDeleteConversation = async (conversationId: string) => {
-    if (!confirm('Delete this chat?')) return
-
     try {
       await deleteConversation(conversationId)
       const remaining = conversations.filter(c => c.conversation_id !== conversationId)
@@ -211,6 +236,12 @@ export function AIChatbot({
   const sendMessage = async () => {
     if (!inputValue.trim() || !projectId || isLoading) return
 
+    // Guard: Don't send if conversation is still being created (temp ID)
+    if (activeConversationId?.startsWith('temp-')) {
+      console.log('[AIChatbot] Waiting for conversation to be created...')
+      return
+    }
+
     const userMessage: ChatMessage = {
       role: 'user',
       content: inputValue.trim(),
@@ -242,6 +273,8 @@ export function AIChatbot({
       let newConversationId: string | undefined
 
       // Process SSE events as they arrive
+      let accumulatedStreamingText = ''  // Track streaming text locally too
+
       for await (const event of stream) {
         switch (event.type) {
           case 'thinking':
@@ -253,8 +286,31 @@ export function AIChatbot({
             setStatusMessage(event.message)
             break
 
+          // NEW: Handle text streaming events
+          case 'text':
+            if (!isStreaming) {
+              setIsStreaming(true)
+              setStatusMessage('')  // Clear status when text starts streaming
+            }
+            accumulatedStreamingText += event.text
+            setStreamingText(accumulatedStreamingText)
+            scrollToBottom()  // Keep scrolled to bottom as text streams
+            break
+
           case 'complete':
-            finalMessage = event.message
+            // Use accumulated streaming text if streamed, otherwise use message
+            if (event.streamed) {
+              finalMessage = accumulatedStreamingText
+            } else {
+              finalMessage = event.message
+            }
+
+            // DON'T reset streaming state here - let the streaming bubble stay visible
+            // until the message is added to the conversation. The finally block will
+            // clean up streaming state after the message is displayed. This prevents
+            // a flash of "thinking" indicator between streaming and final message.
+            accumulatedStreamingText = ''
+
             toolMetadata = event.tool_metadata as ToolCallMetadata | undefined
             setStatusMessage('')
 
@@ -262,7 +318,8 @@ export function AIChatbot({
             console.log('AI Response Complete:', {
               output_tokens: event.usage.output_tokens,
               cache_read: event.usage.cache_read_input_tokens,
-              tool_metadata: toolMetadata || null
+              tool_metadata: toolMetadata || null,
+              streamed: event.streamed || false
             })
             break
 
@@ -274,7 +331,7 @@ export function AIChatbot({
               // Add new conversation to list
               setConversations(prev => [{
                 conversation_id: event.conversation_id,
-                title: 'New Chat',
+                title: 'Untitled',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 message_count: 2,
@@ -322,6 +379,9 @@ export function AIChatbot({
     } finally {
       setIsLoading(false)
       setStatusMessage('')
+      // Reset streaming state on completion or error
+      setStreamingText('')
+      setIsStreaming(false)
     }
   }
 
@@ -564,7 +624,18 @@ export function AIChatbot({
               ))
             )}
 
-            {isLoading && (
+            {/* Streaming text bubble - shows AI response as it streams in */}
+            {isStreaming && streamingText && (
+              <div className="flex justify-start animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
+                <div className="max-w-[85%] text-[11pt] leading-[16pt] px-3.5 py-2 bg-white text-gray-700 border border-gray-200/80 rounded-2xl rounded-bl-md shadow-sm">
+                  <MarkdownContent content={streamingText} />
+                  <span className="inline-block w-1.5 h-4 bg-purple-500 ml-0.5 animate-pulse rounded-sm" />
+                </div>
+              </div>
+            )}
+
+            {/* Status indicator - shows when loading but not yet streaming text */}
+            {isLoading && !isStreaming && (
               <div className="flex justify-start animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
                 <div className="bg-white text-gray-500 border border-gray-200/80 rounded-2xl rounded-bl-md shadow-sm px-4 py-3">
                   <div className="flex items-center gap-2">

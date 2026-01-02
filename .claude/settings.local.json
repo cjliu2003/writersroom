@@ -61,7 +61,8 @@
       "Bash(npx tsc:*)",
       "Bash(pip freeze:*)",
       "Bash(git log:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "mcp__context7__get-library-docs"
     ],
     "deny": [],
     "ask": []

@@ -7,8 +7,8 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import attributes, noload
-from typing import List
-from uuid import UUID
+from typing import List, AsyncGenerator
+from uuid import UUID, uuid4
 from datetime import datetime, timezone
 import json
 import logging
@@ -73,11 +73,9 @@ FINAL_SYNTHESIS_MAX_TOKENS = 4000  # Increased for deep analysis (~3000 words)
 # Now higher since we use tool_choice to control output (no text generation in loop)
 TOOL_LOOP_MAX_TOKENS = 1500  # Enough for tool calls + minimal planning text
 
-# P0.2 fix: RAG-only mode default (increased from 600)
-RAG_ONLY_DEFAULT_MAX_TOKENS = 1200
-
-# Signal tool name - used to detect when Claude is ready for synthesis
-SIGNAL_TOOL_NAME = "signal_ready_for_response"
+# NOTE: Tools are always enabled now. Signal tool has been removed.
+# We rely on stop_reason != "tool_use" to detect when Claude is done
+# gathering information and ready for synthesis.
 
 
 def _extract_all_text(content_blocks) -> str:
@@ -267,19 +265,19 @@ async def track_token_usage(
     """
     Track token usage for analytics and billing.
 
-    Calculates cost based on Claude 3.5 Sonnet pricing:
-    - Input: $0.003/1K tokens
-    - Cache creation (write): $0.00375/1K tokens (25% premium)
-    - Cache read: $0.0003/1K tokens (90% discount)
-    - Output: $0.015/1K tokens
+    Calculates cost based on Claude Haiku 4.5 pricing:
+    - Input: $0.001/1K tokens ($1/MTok)
+    - Cache creation (write): $0.00125/1K tokens ($1.25/MTok)
+    - Cache read: $0.0001/1K tokens ($0.10/MTok)
+    - Output: $0.005/1K tokens ($5/MTok)
     """
-    # Calculate cost
+    # Calculate cost - Claude Haiku 4.5 pricing
     input_cost = (
-        usage["input_tokens"] * 0.003 / 1000 +  # Full price input
-        usage["cache_creation_input_tokens"] * 0.00375 / 1000 +  # Cache write (25% more)
-        usage["cache_read_input_tokens"] * 0.0003 / 1000  # Cache read (90% discount)
+        usage["input_tokens"] * 0.001 / 1000 +  # $1/MTok
+        usage["cache_creation_input_tokens"] * 0.00125 / 1000 +  # $1.25/MTok cache write
+        usage["cache_read_input_tokens"] * 0.0001 / 1000  # $0.10/MTok cache read
     )
-    output_cost = usage["output_tokens"] * 0.015 / 1000
+    output_cost = usage["output_tokens"] * 0.005 / 1000  # $5/MTok
     total_cost = input_cost + output_cost
 
     # Store usage record
@@ -303,75 +301,16 @@ async def track_token_usage(
     logger.info(
         f"Token usage tracked: user={user_id}, script={script_id}, "
         f"in={usage['input_tokens']}, out={usage['output_tokens']}, "
-        f"cache_read={usage['cache_read_input_tokens']}, cost=${total_cost:.4f}"
+        f"cache_create={usage['cache_creation_input_tokens']}, cache_read={usage['cache_read_input_tokens']}, "
+        f"cost=${total_cost:.4f}"
     )
 
     return usage_record
 
 
 # ============================================================================
-# Phase 6: Unified Hybrid Chat Helper Functions
+# Phase 6: Tool Loop Helper Functions
 # ============================================================================
-
-def should_enable_tools(
-    request: ChatMessageRequest,
-    intent: IntentType,
-    domain: DomainType = DomainType.SCRIPT
-) -> bool:
-    """
-    Intelligently decide whether to enable tools based on request context and domain.
-
-    Strategy:
-    - GENERAL domain: Never use tools (expert knowledge only)
-    - SCRIPT domain: Use tools for analytical queries
-    - HYBRID domain: Use tools (need script grounding)
-
-    Args:
-        request: Chat message request
-        intent: Classified intent
-        domain: Classified domain (GENERAL/SCRIPT/HYBRID)
-
-    Returns:
-        True if tools should be enabled, False otherwise
-    """
-    # Phase 1: Domain-based decision takes priority
-    if domain == DomainType.GENERAL:
-        logger.info(f"Disabling tools: GENERAL domain detected")
-        return False
-
-    # Explicit user override takes precedence
-    if hasattr(request, 'enable_tools') and request.enable_tools is not None:
-        return request.enable_tools
-
-    # Analytical keywords suggest tool usage
-    analytical_keywords = [
-        "analyze", "pacing", "track", "find all", "search for",
-        "character appears", "plot threads", "quantitative",
-        "how many", "which scenes", "compare scenes", "show me all"
-    ]
-    message_lower = request.message.lower()
-    uses_analytical = any(kw in message_lower for kw in analytical_keywords)
-
-    if uses_analytical:
-        logger.info(f"Enabling tools: analytical keywords detected in '{request.message[:50]}...'")
-        return True
-
-    # Intent-based defaults
-    if intent in [IntentType.LOCAL_EDIT, IntentType.SCENE_FEEDBACK]:
-        # For local edits with scene_id provided, RAG context is sufficient
-        if request.current_scene_id:
-            logger.info(f"Disabling tools: LOCAL_EDIT/SCENE_FEEDBACK with scene_id provided")
-            return False
-
-    if intent == IntentType.GLOBAL_QUESTION:
-        # Global questions may benefit from precise retrieval
-        logger.info(f"Enabling tools: GLOBAL_QUESTION intent")
-        return True
-
-    # Conservative default: enable tools (let Claude decide)
-    logger.info(f"Enabling tools: default behavior for intent={intent}, domain={domain}")
-    return True
-
 
 async def _trigger_synthesis(
     client: AsyncAnthropic,
@@ -389,9 +328,8 @@ async def _trigger_synthesis(
     """
     Trigger final synthesis phase after tool gathering is complete.
 
-    This is called when:
-    1. Claude calls signal_ready_for_response
-    2. Tool loop exits with tool results that need synthesis
+    This is called when the tool loop exits with tool results that need synthesis
+    (stop_reason != "tool_use" and all_tool_results is not empty).
 
     Args:
         client: Anthropic client
@@ -487,15 +425,13 @@ async def _handle_tool_loop(
     Handle multi-turn tool calling loop with evidence-based synthesis.
 
     ARCHITECTURE (tool_choice strategy):
-    - First iteration: tool_choice="auto" - Claude can respond directly if no tools needed
-      (handles general questions that don't require script data)
-    - After first tool call: tool_choice="any" - Claude MUST call a tool
-      (prevents Claude from generating text responses that get truncated)
-    - When Claude calls signal_ready_for_response: exit loop and trigger synthesis
-      (ensures clean handoff to synthesis phase with full token budget)
+    - All iterations: tool_choice="auto" - Claude decides when to use tools vs respond
+    - When stop_reason != "tool_use": exit loop
+    - If tool results exist: trigger synthesis with full token budget
+    - If no tool results: return Claude's direct response
 
-    This approach eliminates the truncation issues where Claude would try to
-    generate a full response in the tool loop with limited tokens.
+    This approach relies on Claude's natural stop_reason to determine when
+    information gathering is complete, eliminating the need for a signal tool.
 
     Args:
         client: Anthropic client
@@ -525,9 +461,6 @@ async def _handle_tool_loop(
     tools_used = []
     tool_executor = MCPToolExecutor(db=db, script_id=script_id)
 
-    # Track whether any tools have been called (controls tool_choice strategy)
-    has_called_tools = False
-
     # Collect structured tool results for evidence building
     all_tool_results = []
     evidence_builder = EvidenceBuilder()
@@ -537,16 +470,11 @@ async def _handle_tool_loop(
         logger.info(f"Tool loop iteration {iteration + 1}/{max_iterations}")
 
         # TOOL_CHOICE STRATEGY:
-        # - First iteration OR no tools called yet: "auto" (Claude decides if tools needed)
-        # - After any tool call: "any" (Claude MUST call a tool, cannot output text)
-        # This prevents truncation by ensuring Claude uses signal_ready_for_response
-        # when done gathering info, rather than trying to generate a response directly.
-        if has_called_tools:
-            tool_choice = {"type": "any"}
-            logger.info("Using tool_choice='any' (forcing tool use after previous tool call)")
-        else:
-            tool_choice = {"type": "auto"}
-            logger.info("Using tool_choice='auto' (first iteration, Claude decides)")
+        # Always use "auto" - Claude naturally decides when to use tools vs respond.
+        # When Claude's stop_reason != "tool_use", we trigger synthesis if we have
+        # tool results, or return the direct response if not.
+        tool_choice = {"type": "auto"}
+        logger.info("Using tool_choice='auto' (Claude decides if tools needed)")
 
         # Call Claude
         response = await client.messages.create(
@@ -597,36 +525,11 @@ async def _handle_tool_loop(
 
         # Extract and execute tool uses (stop_reason == "tool_use")
         tool_results = []
-        signal_tool_called = False
-        signal_summary = ""
 
         for block in response.content:
             if block.type == "tool_use":
                 tools_used.append(block.name)
                 logger.info(f"Executing tool: {block.name} with input: {block.input}")
-
-                # Check for signal tool - triggers synthesis
-                if block.name == SIGNAL_TOOL_NAME:
-                    signal_tool_called = True
-                    signal_summary = block.input.get("gathered_info_summary", "")
-                    logger.info(f"Signal tool called: {signal_summary}")
-
-                    # Still execute to get acknowledgment for conversation history
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": f"SIGNAL_READY: {signal_summary}"
-                    })
-
-                    if ai_conv_logger:
-                        ai_conv_logger.log_tool_call(
-                            tool_name=block.name,
-                            tool_input=block.input,
-                            tool_result=f"SIGNAL_READY: {signal_summary}",
-                            iteration=iteration + 1,
-                            duration_ms=0
-                        )
-                    continue  # Don't add to all_tool_results
 
                 try:
                     # Execute tool with timing
@@ -650,9 +553,6 @@ async def _handle_tool_loop(
                         "tool_input": block.input,
                         "result": result
                     })
-
-                    # Mark that we've called tools (switch to tool_choice="any" next iteration)
-                    has_called_tools = True
 
                     # Log to AI conversation logger if available
                     if ai_conv_logger:
@@ -689,30 +589,6 @@ async def _handle_tool_loop(
         # Only append tool results if there are any
         if tool_results:
             messages.append({"role": "user", "content": tool_results})
-
-        # If signal tool was called, trigger synthesis now
-        if signal_tool_called:
-            logger.info(f"Signal tool triggered synthesis with {len(all_tool_results)} tool results")
-            final_text = await _trigger_synthesis(
-                client=client,
-                system=system,
-                messages=messages,
-                all_tool_results=all_tool_results,
-                evidence_builder=evidence_builder,
-                context_builder=context_builder,
-                user_question=user_question,
-                initial_messages=initial_messages,
-                intent=intent,
-                total_usage=total_usage,
-                ai_conv_logger=ai_conv_logger
-            )
-
-            return final_text, total_usage, ToolCallMetadata(
-                tool_calls_made=iteration + 1,
-                tools_used=list(set(tools_used)),
-                stop_reason="signal_ready",
-                recovery_attempts=0
-            )
 
     # Max iterations reached - trigger synthesis with whatever we have
     logger.warning(f"Tool loop reached max_iterations ({max_iterations})")
@@ -824,6 +700,118 @@ async def _trigger_synthesis_inline(
     return final_text
 
 
+async def _trigger_synthesis_streaming(
+    client: AsyncAnthropic,
+    system: List[dict],
+    messages: List[dict],
+    all_tool_results: List[dict],
+    evidence_builder,
+    context_builder,
+    user_question: str,
+    initial_messages: List[dict],
+    intent,
+    ai_conv_logger = None
+) -> AsyncGenerator[dict, None]:
+    """
+    Streaming version of synthesis - yields text events incrementally.
+
+    This function streams the final synthesis response to the user, providing
+    real-time text as Claude generates it instead of waiting for the full response.
+
+    Yields:
+        Dict events with types:
+        - {"type": "text", "text": "chunk"} - Text delta for frontend display
+        - {"type": "synthesis_done", "full_text": "...", "usage_delta": {...}} - Completion signal
+
+    Args:
+        client: Anthropic client
+        system: System prompt blocks
+        messages: Current message history
+        all_tool_results: Collected tool results for evidence building
+        evidence_builder: EvidenceBuilder instance
+        context_builder: ContextBuilder instance
+        user_question: Original user question
+        initial_messages: Initial messages for question extraction fallback
+        intent: Intent type for formatting
+        ai_conv_logger: Optional conversation logger
+    """
+    # Extract user's original question for synthesis
+    question_for_synthesis = user_question
+    if not question_for_synthesis:
+        for msg in reversed(initial_messages):
+            if msg.get("role") == "user":
+                content = msg.get("content", "")
+                if isinstance(content, str):
+                    question_for_synthesis = content
+                elif isinstance(content, list):
+                    for block in content:
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            question_for_synthesis = block.get("text", "")
+                            break
+                break
+        question_for_synthesis = question_for_synthesis or "the user's question"
+
+    # Build structured evidence from all tool results
+    evidence = await evidence_builder.build_evidence(
+        tool_results=all_tool_results,
+        user_question=question_for_synthesis
+    )
+
+    logger.info(
+        f"[STREAMING] Evidence built for synthesis: {len(evidence.items)} items, "
+        f"{evidence.total_chars} chars, truncated={evidence.was_truncated}"
+    )
+
+    # Create synthesis prompt using context_builder
+    synthesis_content = context_builder.build_synthesis_prompt(
+        evidence_text=evidence.to_prompt_text(),
+        user_question=question_for_synthesis,
+        intent=intent
+    )
+
+    # Build synthesis messages
+    synthesis_messages = messages.copy()
+    synthesis_messages.append({"role": "user", "content": synthesis_content})
+
+    # Stream the synthesis response
+    accumulated_text = ""
+
+    async with client.messages.stream(
+        model="claude-haiku-4-5",
+        max_tokens=FINAL_SYNTHESIS_MAX_TOKENS,
+        system=system,
+        messages=synthesis_messages
+    ) as stream:
+        async for text in stream.text_stream:
+            accumulated_text += text
+            yield {"type": "text", "text": text}
+
+        # Get final message for usage tracking (must be inside async with block)
+        final_message = await stream.get_final_message()
+
+    # Calculate usage delta for this synthesis call
+    usage_delta = {
+        "input_tokens": final_message.usage.input_tokens,
+        "cache_creation_input_tokens": getattr(final_message.usage, 'cache_creation_input_tokens', 0),
+        "cache_read_input_tokens": getattr(final_message.usage, 'cache_read_input_tokens', 0),
+        "output_tokens": final_message.usage.output_tokens
+    }
+
+    if ai_conv_logger:
+        ai_conv_logger.log_assistant_response(accumulated_text, "synthesis_streaming")
+        ai_conv_logger.log_token_usage(usage_delta)
+        ai_conv_logger.log_session_summary()
+
+    logger.info(f"[STREAMING] Synthesis complete: {len(accumulated_text)} chars, {usage_delta['output_tokens']} output tokens")
+
+    # Signal completion with full text (for DB storage) and usage
+    yield {
+        "type": "synthesis_done",
+        "full_text": accumulated_text,
+        "usage_delta": usage_delta
+    }
+
+
 async def _handle_tool_loop_with_status(
     client: AsyncAnthropic,
     system: List[dict],
@@ -834,18 +822,20 @@ async def _handle_tool_loop_with_status(
     db: AsyncSession,
     ai_conv_logger: AIConversationLogger = None,
     user_question: str = None,
-    intent: IntentType = None
+    intent: IntentType = None,
+    # Analytics context for per-iteration cost tracking
+    user_id: UUID = None,
+    conversation_id: UUID = None,
+    message_id: UUID = None
 ):
     """
     Handle multi-turn tool calling loop with status event yielding and evidence-based synthesis.
 
     ARCHITECTURE (tool_choice strategy):
-    - First iteration: tool_choice="auto" - Claude can respond directly if no tools needed
-      (handles general questions that don't require script data)
-    - After first tool call: tool_choice="any" - Claude MUST call a tool
-      (prevents Claude from generating text responses that get truncated)
-    - When Claude calls signal_ready_for_response: exit loop and trigger synthesis
-      (ensures clean handoff to synthesis phase with full token budget)
+    - All iterations: tool_choice="auto" - Claude decides when to use tools vs respond
+    - When stop_reason != "tool_use": exit loop
+    - If tool results exist: trigger synthesis with full token budget
+    - If no tool results: return Claude's direct response
 
     This is an async generator that yields status events for each tool execution,
     allowing the frontend to show progress to users.
@@ -870,6 +860,8 @@ async def _handle_tool_loop_with_status(
         intent: Intent type for format customization
     """
     from app.services.mcp_tools import MCPToolExecutor, get_tool_status_message
+    from app.services.metrics_service import MetricsService
+    from app.models.ai_operation_metrics import OperationType
     import time
 
     messages = initial_messages.copy()
@@ -882,8 +874,8 @@ async def _handle_tool_loop_with_status(
     tools_used = []
     tool_executor = MCPToolExecutor(db=db, script_id=script_id)
 
-    # Track whether any tools have been called (controls tool_choice strategy)
-    has_called_tools = False
+    # Analytics tracking
+    metrics_service = MetricsService(db) if user_id else None
 
     # Collect structured tool results for evidence building
     all_tool_results = []
@@ -897,16 +889,14 @@ async def _handle_tool_loop_with_status(
         logger.info(f"Tool loop iteration {iteration + 1}/{max_iterations}")
 
         # TOOL_CHOICE STRATEGY:
-        # - First iteration OR no tools called yet: "auto" (Claude decides if tools needed)
-        # - After any tool call: "any" (Claude MUST call a tool, cannot output text)
-        if has_called_tools:
-            tool_choice = {"type": "any"}
-            logger.info("Using tool_choice='any' (forcing tool use after previous tool call)")
-        else:
-            tool_choice = {"type": "auto"}
-            logger.info("Using tool_choice='auto' (first iteration, Claude decides)")
+        # Always use "auto" - Claude naturally decides when to use tools vs respond.
+        # When Claude's stop_reason != "tool_use", we trigger synthesis if we have
+        # tool results, or return the direct response if not.
+        tool_choice = {"type": "auto"}
+        logger.info("Using tool_choice='auto' (Claude decides if tools needed)")
 
-        # Call Claude
+        # Call Claude with timing for analytics
+        iter_start_time = time.time()
         response = await client.messages.create(
             model="claude-haiku-4-5",
             max_tokens=TOOL_LOOP_MAX_TOKENS,
@@ -915,12 +905,36 @@ async def _handle_tool_loop_with_status(
             tools=tools,
             tool_choice=tool_choice
         )
+        iter_latency_ms = int((time.time() - iter_start_time) * 1000)
 
         # Aggregate token usage
         total_usage["input_tokens"] += response.usage.input_tokens
         total_usage["cache_creation_input_tokens"] += response.usage.cache_creation_input_tokens
         total_usage["cache_read_input_tokens"] += response.usage.cache_read_input_tokens
         total_usage["output_tokens"] += response.usage.output_tokens
+
+        # Track this iteration's cost in analytics (tool call iteration)
+        if metrics_service and response.stop_reason == "tool_use":
+            # Extract tool names for this iteration
+            iter_tool_names = [
+                block.name for block in response.content
+                if hasattr(block, 'type') and block.type == "tool_use"
+            ]
+            await metrics_service.track_operation(
+                operation_type=OperationType.CHAT_TOOL_CALL,
+                user_id=user_id,
+                script_id=script_id,
+                conversation_id=conversation_id,
+                message_id=message_id,
+                iteration_number=iteration + 1,
+                tool_name=iter_tool_names[0] if iter_tool_names else None,
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                cache_creation_tokens=response.usage.cache_creation_input_tokens,
+                cache_read_tokens=response.usage.cache_read_input_tokens,
+                model="claude-haiku-4-5",
+                latency_ms=iter_latency_ms
+            )
 
         # Check stop reason
         if response.stop_reason != "tool_use":
@@ -931,9 +945,11 @@ async def _handle_tool_loop_with_status(
 
             # If we have tool results, always synthesize for consistent quality
             if all_tool_results:
-                logger.info(f"Triggering synthesis for {len(all_tool_results)} tool results")
+                logger.info(f"Triggering STREAMING synthesis for {len(all_tool_results)} tool results")
                 yield {"type": "thinking", "message": "Synthesizing findings..."}
-                final_text = await _trigger_synthesis_inline(
+
+                # Stream synthesis response to user
+                async for event in _trigger_synthesis_streaming(
                     client=client,
                     system=system,
                     messages=messages,
@@ -943,8 +959,59 @@ async def _handle_tool_loop_with_status(
                     user_question=user_question,
                     initial_messages=initial_messages,
                     intent=intent,
-                    total_usage=total_usage,
                     ai_conv_logger=ai_conv_logger
+                ):
+                    if event["type"] == "text":
+                        yield event  # Forward text deltas to client
+                    elif event["type"] == "synthesis_done":
+                        final_text = event["full_text"]
+                        # Add synthesis usage to total
+                        for key in event["usage_delta"]:
+                            total_usage[key] += event["usage_delta"][key]
+
+                        # Track synthesis in analytics
+                        if metrics_service:
+                            await metrics_service.track_operation(
+                                operation_type=OperationType.CHAT_SYNTHESIS,
+                                user_id=user_id,
+                                script_id=script_id,
+                                conversation_id=conversation_id,
+                                message_id=message_id,
+                                input_tokens=event["usage_delta"].get("input_tokens", 0),
+                                output_tokens=event["usage_delta"].get("output_tokens", 0),
+                                cache_creation_tokens=event["usage_delta"].get("cache_creation_input_tokens", 0),
+                                cache_read_tokens=event["usage_delta"].get("cache_read_input_tokens", 0),
+                                model="claude-haiku-4-5"
+                            )
+
+                yield {
+                    "type": "complete",
+                    "message": final_text,  # Include full text for DB storage (streamed flag tells frontend it was streamed)
+                    "usage": total_usage,
+                    "tool_metadata": {
+                        "tool_calls_made": iteration + 1,
+                        "tools_used": list(set(tools_used)),
+                        "stop_reason": response.stop_reason,
+                        "recovery_attempts": 0
+                    },
+                    "streamed": True
+                }
+                return
+
+            # No tool results - return direct response (RAG-only, track in analytics)
+            if metrics_service:
+                await metrics_service.track_operation(
+                    operation_type=OperationType.CHAT_RAG_ONLY,
+                    user_id=user_id,
+                    script_id=script_id,
+                    conversation_id=conversation_id,
+                    message_id=message_id,
+                    input_tokens=response.usage.input_tokens,
+                    output_tokens=response.usage.output_tokens,
+                    cache_creation_tokens=response.usage.cache_creation_input_tokens,
+                    cache_read_tokens=response.usage.cache_read_input_tokens,
+                    model="claude-haiku-4-5",
+                    latency_ms=iter_latency_ms
                 )
 
             yield {
@@ -962,38 +1029,10 @@ async def _handle_tool_loop_with_status(
 
         # Extract and execute tool uses (stop_reason == "tool_use")
         tool_results = []
-        signal_tool_called = False
-        signal_summary = ""
 
         for block in response.content:
             if block.type == "tool_use":
                 tools_used.append(block.name)
-
-                # Check for signal tool - triggers synthesis
-                if block.name == SIGNAL_TOOL_NAME:
-                    signal_tool_called = True
-                    signal_summary = block.input.get("gathered_info_summary", "")
-                    logger.info(f"Signal tool called: {signal_summary}")
-
-                    # Yield status for signal tool
-                    yield {"type": "status", "message": "Preparing response...", "tool": block.name}
-
-                    # Still add result to maintain conversation flow
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": f"SIGNAL_READY: {signal_summary}"
-                    })
-
-                    if ai_conv_logger:
-                        ai_conv_logger.log_tool_call(
-                            tool_name=block.name,
-                            tool_input=block.input,
-                            tool_result=f"SIGNAL_READY: {signal_summary}",
-                            iteration=iteration + 1,
-                            duration_ms=0
-                        )
-                    continue  # Don't add to all_tool_results
 
                 # Yield user-friendly status message
                 status_message = get_tool_status_message(block.name, block.input, "active")
@@ -1023,9 +1062,6 @@ async def _handle_tool_loop_with_status(
                         "tool_input": block.input,
                         "result": result
                     })
-
-                    # Mark that we've called tools (switch to tool_choice="any" next iteration)
-                    has_called_tools = True
 
                     # Log to AI conversation logger if available
                     if ai_conv_logger:
@@ -1063,78 +1099,85 @@ async def _handle_tool_loop_with_status(
         if tool_results:
             messages.append({"role": "user", "content": tool_results})
 
-        # If signal tool was called, trigger synthesis now
-        if signal_tool_called:
-            logger.info(f"Signal tool triggered synthesis with {len(all_tool_results)} tool results")
-            yield {"type": "thinking", "message": "Synthesizing findings..."}
-            final_text = await _trigger_synthesis_inline(
-                client=client,
-                system=system,
-                messages=messages,
-                all_tool_results=all_tool_results,
-                evidence_builder=evidence_builder,
-                context_builder=context_builder,
-                user_question=user_question,
-                initial_messages=initial_messages,
-                intent=intent,
-                total_usage=total_usage,
-                ai_conv_logger=ai_conv_logger
-            )
-
-            yield {
-                "type": "complete",
-                "message": final_text,
-                "usage": total_usage,
-                "tool_metadata": {
-                    "tool_calls_made": iteration + 1,
-                    "tools_used": list(set(tools_used)),
-                    "stop_reason": "signal_ready",
-                    "recovery_attempts": 0
-                }
-            }
-            return
-
         # After tools complete, show thinking again
         yield {"type": "thinking", "message": "Analyzing results..."}
 
-    # Max iterations reached - trigger synthesis with whatever we have
+    # Max iterations reached - trigger STREAMING synthesis with whatever we have
     logger.warning(f"Tool loop reached max_iterations ({max_iterations})")
     yield {"type": "thinking", "message": "Synthesizing findings..."}
 
     if all_tool_results:
-        # Use the helper function to trigger synthesis
-        final_text = await _trigger_synthesis_inline(
+        # Use STREAMING synthesis to stream the final response
+        logger.info(f"Max iterations: triggering STREAMING synthesis with {len(all_tool_results)} tool results")
+
+        final_text = ""
+        async for event in _trigger_synthesis_streaming(
             client=client,
             system=system,
             messages=messages,
-            initial_messages=initial_messages,
-            user_question=user_question,
-            intent=intent,
+            all_tool_results=all_tool_results,
             evidence_builder=evidence_builder,
             context_builder=context_builder,
-            all_tool_results=all_tool_results,
-            total_usage=total_usage,
+            user_question=user_question,
+            initial_messages=initial_messages,
+            intent=intent,
             ai_conv_logger=ai_conv_logger
-        )
+        ):
+            if event["type"] == "text":
+                # Forward text deltas directly to client
+                yield event
+            elif event["type"] == "synthesis_done":
+                # Capture final text and update usage
+                final_text = event["full_text"]
+                for key in event["usage_delta"]:
+                    total_usage[key] = total_usage.get(key, 0) + event["usage_delta"][key]
+
+                # Track synthesis in analytics (max iterations path)
+                if metrics_service:
+                    await metrics_service.track_operation(
+                        operation_type=OperationType.CHAT_SYNTHESIS,
+                        user_id=user_id,
+                        script_id=script_id,
+                        conversation_id=conversation_id,
+                        message_id=message_id,
+                        input_tokens=event["usage_delta"].get("input_tokens", 0),
+                        output_tokens=event["usage_delta"].get("output_tokens", 0),
+                        cache_creation_tokens=event["usage_delta"].get("cache_creation_input_tokens", 0),
+                        cache_read_tokens=event["usage_delta"].get("cache_read_input_tokens", 0),
+                        model="claude-haiku-4-5"
+                    )
+
+        yield {
+            "type": "complete",
+            "message": final_text,  # Include full text for DB storage (streamed flag tells frontend it was streamed)
+            "usage": total_usage,
+            "tool_metadata": {
+                "tool_calls_made": max_iterations,
+                "tools_used": list(set(tools_used)),
+                "stop_reason": "max_iterations",
+                "recovery_attempts": 0
+            },
+            "streamed": True
+        }
     else:
-        # No tools were successfully called
+        # No tools were successfully called - no streaming needed for this short message
         final_text = "I was unable to gather sufficient information to respond to your request. Please try rephrasing your question."
         if ai_conv_logger:
             ai_conv_logger.log_assistant_response(final_text, "max_iterations_no_results")
             ai_conv_logger.log_token_usage(total_usage)
             ai_conv_logger.log_session_summary()
 
-    yield {
-        "type": "complete",
-        "message": final_text,
-        "usage": total_usage,
-        "tool_metadata": {
-            "tool_calls_made": max_iterations,
-            "tools_used": list(set(tools_used)),
-            "stop_reason": "max_iterations",
-            "recovery_attempts": 0
+        yield {
+            "type": "complete",
+            "message": final_text,
+            "usage": total_usage,
+            "tool_metadata": {
+                "tool_calls_made": max_iterations,
+                "tools_used": list(set(tools_used)),
+                "stop_reason": "max_iterations",
+                "recovery_attempts": 0
+            }
         }
-    }
 
 
 @router.post("/chat/message", response_model=ChatMessageResponse)
@@ -1188,7 +1231,6 @@ async def chat_message(
         step_start = time.perf_counter()
         intent_classifier = IntentClassifier()
         context_builder = ContextBuilder(db=db)
-        ai_service = AIService()
         step_duration = (time.perf_counter() - step_start) * 1000
         logger.info(f"[CHAT] ✅ Service initialization took {step_duration:.2f}ms")
 
@@ -1244,9 +1286,9 @@ async def chat_message(
         step_duration = (time.perf_counter() - step_start) * 1000
         logger.info(f"[CHAT] ✅ Conversation handling took {step_duration:.2f}ms (conversation_id: {conversation.conversation_id})")
 
-        # 3. Determine if tools should be enabled BEFORE building context
-        # This allows us to optimize context (skip scene retrieval when tools enabled)
-        tools_enabled = should_enable_tools(request, intent)
+        # 3. Tools are always enabled - Claude can fetch what it needs dynamically
+        # This simplifies the architecture and ensures consistent, accurate responses
+        tools_enabled = True
         tool_metadata = None
         logger.info(f"[CHAT] 🔧 Tools enabled: {tools_enabled}")
 
@@ -1285,78 +1327,51 @@ async def chat_message(
             f"budget_tier={request.budget_tier or 'standard'}, intent={intent}, tools_enabled={tools_enabled}"
         )
 
-        # 5. Generate AI response (Phase 6: Hybrid RAG + Tools)
-        if tools_enabled:
-            # Hybrid mode: RAG context (thin) + MCP tools
-            logger.info("Hybrid mode: Enabling MCP tools with thin RAG context")
-            step_start = time.perf_counter()
+        # 5. Generate AI response using tool loop
+        # Tools are always enabled - Claude can fetch what it needs dynamically
+        logger.info("Tool mode: Enabling MCP tools for dynamic retrieval")
+        step_start = time.perf_counter()
 
-            # Import tools and create client
-            from app.services.mcp_tools import SCREENPLAY_TOOLS
-            from app.core.config import settings
+        # Import tools and create client
+        from app.services.mcp_tools import SCREENPLAY_TOOLS
+        from app.core.config import settings
 
-            client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-            setup_duration = (time.perf_counter() - step_start) * 1000
-            logger.info(f"[CHAT] ✅ Tool setup took {setup_duration:.2f}ms")
+        client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+        setup_duration = (time.perf_counter() - step_start) * 1000
+        logger.info(f"[CHAT] ✅ Tool setup took {setup_duration:.2f}ms")
 
-            # NOTE: Tool instructions are now included in system prompt via
-            # context_builder.build_prompt(tools_enabled=True)
-            # No need to append inline instructions here
+        # Call tool loop with AI conversation logger
+        # P1.3: Pass user_question and intent for evidence-based synthesis
+        step_start = time.perf_counter()
+        logger.info("[CHAT] 🤖 Starting tool loop (this includes AI generation)...")
+        final_message, usage, tool_metadata = await _handle_tool_loop(
+            client=client,
+            system=prompt["system"],
+            initial_messages=prompt["messages"],
+            tools=SCREENPLAY_TOOLS,
+            max_iterations=request.max_iterations,
+            script_id=request.script_id,
+            db=db,
+            ai_conv_logger=ai_conv_logger,
+            user_question=request.message,
+            intent=intent
+        )
+        step_duration = (time.perf_counter() - step_start) * 1000
+        logger.info(f"[CHAT] ✅ Tool loop completed in {step_duration:.2f}ms")
 
-            # Call tool loop with AI conversation logger
-            # P1.3: Pass user_question and intent for evidence-based synthesis
-            step_start = time.perf_counter()
-            logger.info("[CHAT] 🤖 Starting tool loop (this includes AI generation)...")
-            final_message, usage, tool_metadata = await _handle_tool_loop(
-                client=client,
-                system=prompt["system"],
-                initial_messages=prompt["messages"],
-                tools=SCREENPLAY_TOOLS,
-                max_iterations=request.max_iterations,
-                script_id=request.script_id,
-                db=db,
-                ai_conv_logger=ai_conv_logger,
-                user_question=request.message,
-                intent=intent
-            )
-            step_duration = (time.perf_counter() - step_start) * 1000
-            logger.info(f"[CHAT] ✅ Tool loop completed in {step_duration:.2f}ms")
+        response = {
+            "content": final_message,
+            "usage": usage
+        }
 
-            response = {
-                "content": final_message,
-                "usage": usage
-            }
+        logger.info(
+            f"Response: {usage['output_tokens']} output tokens, "
+            f"tools_used={tool_metadata.tools_used}, "
+            f"tool_calls={tool_metadata.tool_calls_made}, "
+            f"cache_read={usage['cache_read_input_tokens']}"
+        )
 
-            logger.info(
-                f"Hybrid response: {usage['output_tokens']} output tokens, "
-                f"tools_used={tool_metadata.tools_used}, "
-                f"tool_calls={tool_metadata.tool_calls_made}, "
-                f"cache_read={usage['cache_read_input_tokens']}"
-            )
-        else:
-            # RAG-only mode: Use existing AIService
-            logger.info("RAG-only mode: Using cached context without tools")
-
-            step_start = time.perf_counter()
-            logger.info("[CHAT] 🤖 Generating AI response...")
-            # P0.2 fix: Use higher default for RAG-only mode (was 600)
-            response = await ai_service.generate_response(
-                prompt=prompt,
-                max_tokens=request.max_tokens or RAG_ONLY_DEFAULT_MAX_TOKENS
-            )
-            step_duration = (time.perf_counter() - step_start) * 1000
-            logger.info(f"[CHAT] ✅ AI generation completed in {step_duration:.2f}ms")
-
-            logger.info(
-                f"RAG response: {response['usage']['output_tokens']} output tokens, "
-                f"cache_read={response['usage']['cache_read_input_tokens']} (cache hit={response['usage']['cache_read_input_tokens'] > 0})"
-            )
-
-            # Log to AI conversation logger
-            ai_conv_logger.log_assistant_response(response["content"], "end_turn")
-            ai_conv_logger.log_token_usage(response["usage"])
-
-        # 5. Save conversation messages
+        # 6. Save conversation messages
         step_start = time.perf_counter()
         user_message = ChatMessageModel(
             conversation_id=conversation.conversation_id,
@@ -1442,146 +1457,9 @@ async def chat_message(
             detail=f"Failed to generate chat response: {str(e)}"
         )
 
-
-@router.post("/chat/message/stream")
-async def chat_message_stream(
-    request: ChatMessageRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Streaming endpoint for real-time response generation.
-
-    Same functionality as POST /chat/message but streams the response
-    token-by-token for better UX in the frontend.
-
-    Returns Server-Sent Events (SSE) stream with:
-    - content_delta events: Text chunks as they're generated
-    - message_complete event: Final usage statistics
-    """
-    try:
-        # Validate script access
-        script = await get_script_if_user_has_access(
-            request.script_id,
-            current_user,
-            db,
-            allow_viewer=True
-        )
-
-        # Initialize services
-        intent_classifier = IntentClassifier()
-        context_builder = ContextBuilder(db=db)
-        ai_service = AIService()
-
-        # 1. Classify intent
-        intent = await intent_classifier.classify(
-            message=request.message,
-            hint=request.intent_hint
-        )
-
-        # 2. Get or create conversation
-        # OPTIMIZATION: Use noload('*') to prevent eager loading of relationships
-        if request.conversation_id:
-            conversation_result = await db.execute(
-                select(ChatConversation)
-                .options(noload('*'))
-                .where(ChatConversation.conversation_id == request.conversation_id)
-            )
-            conversation = conversation_result.scalar_one_or_none()
-
-            if not conversation or conversation.user_id != current_user.user_id:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Conversation not found"
-                )
-        else:
-            conversation = ChatConversation(
-                user_id=current_user.user_id,
-                script_id=request.script_id,
-                current_scene_id=request.current_scene_id,
-                title=request.message[:100]
-            )
-            db.add(conversation)
-            await db.commit()
-            await db.refresh(conversation)
-
-        # 3. Build context-aware prompt
-        # Phase B: Pass topic_mode override for user-controlled continuity
-        prompt = await context_builder.build_prompt(
-            script_id=request.script_id,
-            message=request.message,
-            intent=intent,
-            conversation_id=conversation.conversation_id,
-            current_scene_id=request.current_scene_id,
-            budget_tier=request.budget_tier or "standard",
-            topic_mode_override=request.topic_mode  # Phase B: User override for continuity
-        )
-
-        # 4. Generate streaming response
-        async def generate_stream():
-            """Generator for SSE stream."""
-            full_content = ""
-            final_usage = None
-
-            # P0.2 fix: Use higher default for RAG-only mode (was 600)
-            async for chunk in ai_service.generate_response(
-                prompt=prompt,
-                max_tokens=request.max_tokens or RAG_ONLY_DEFAULT_MAX_TOKENS,
-                stream=True
-            ):
-                if chunk["type"] == "content_delta":
-                    full_content += chunk["text"]
-                    yield f"data: {json.dumps(chunk)}\n\n"
-                elif chunk["type"] == "message_complete":
-                    final_usage = chunk["usage"]
-                    yield f"data: {json.dumps(chunk)}\n\n"
-
-            # 5. Save messages after streaming completes
-            user_message = ChatMessageModel(
-                conversation_id=conversation.conversation_id,
-                sender="user",
-                role=MessageRole.USER,
-                content=request.message
-            )
-            db.add(user_message)
-
-            assistant_message = ChatMessageModel(
-                conversation_id=conversation.conversation_id,
-                sender="assistant",
-                role=MessageRole.ASSISTANT,
-                content=full_content
-            )
-            db.add(assistant_message)
-
-            await db.commit()
-
-            # 6. Track token usage
-            if final_usage:
-                await track_token_usage(
-                    user_id=current_user.user_id,
-                    script_id=request.script_id,
-                    conversation_id=conversation.conversation_id,
-                    usage=final_usage,
-                    db=db
-                )
-
-            # Send final event
-            yield f"data: {json.dumps({'type': 'stream_end', 'conversation_id': str(conversation.conversation_id)})}\n\n"
-
-        return StreamingResponse(
-            generate_stream(),
-            media_type="text/event-stream"
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error in chat_message_stream endpoint: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate streaming response: {str(e)}"
-        )
-
+# NOTE: The old /chat/message/stream endpoint has been removed.
+# Use /chat/message/stream-with-status instead, which provides
+# real-time status updates during tool execution.
 
 @router.post("/chat/message/stream-with-status")
 async def chat_message_stream_with_status(
@@ -1706,10 +1584,10 @@ async def chat_message_stream_with_status(
 
             logger.info(f"[STREAM] Created new conversation: {conversation.conversation_id}")
 
-        # 3. Determine if tools should be enabled BEFORE building context
-        # Phase 1: Domain-based tool enablement
-        tools_enabled = should_enable_tools(request, intent, domain)
-        logger.info(f"[STREAM] Tools enabled: {tools_enabled} (domain={domain.value})")
+        # 3. Tools are always enabled - Claude can fetch what it needs dynamically
+        # This simplifies the architecture and ensures consistent, accurate responses
+        tools_enabled = True
+        logger.info(f"[STREAM] Tools enabled: {tools_enabled} (always on)")
 
         # Initialize AI conversation logger for detailed logging
         ai_conv_logger = AIConversationLogger(
@@ -1772,25 +1650,45 @@ async def chat_message_stream_with_status(
         user_message_content = request.message
         max_iterations = request.max_iterations
 
+        # Pre-generate assistant message ID for per-iteration analytics tracking
+        assistant_msg_id = uuid4()
+
+        # Create messages upfront so FK constraints are satisfied for metrics tracking
+        # Content will be updated after streaming completes
+        user_msg = ChatMessageModel(
+            conversation_id=conversation_id,
+            sender="user",
+            role=MessageRole.USER,
+            content=user_message_content
+        )
+        assistant_msg = ChatMessageModel(
+            message_id=assistant_msg_id,
+            conversation_id=conversation_id,
+            sender="assistant",
+            role=MessageRole.ASSISTANT,
+            content=""  # Placeholder - will be updated after streaming
+        )
+        db.add(user_msg)
+        db.add(assistant_msg)
+        await db.commit()
+
         async def generate_stream():
             """Generator for SSE stream with status events."""
             final_message = ""
             final_usage = None
             tool_metadata = None
 
-            if tools_enabled:
-                # Hybrid mode: RAG context (thin) + MCP tools with status events
+            try:
+                # Tool mode: MCP tools with status events
+                # Tools are always enabled - Claude can fetch what it needs dynamically
                 from app.services.mcp_tools import SCREENPLAY_TOOLS
                 from app.core.config import settings
 
                 client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
-                # NOTE: Tool instructions are now included in system prompt via
-                # context_builder.build_prompt(tools_enabled=True)
-                # No need to append inline instructions here
-
                 # Use the status-yielding tool loop
                 # P1.3: Pass user_question and intent for evidence-based synthesis
+                # Analytics: Pass user_id, conversation_id, message_id for per-iteration cost tracking
                 async for event in _handle_tool_loop_with_status(
                     client=client,
                     system=prompt["system"],
@@ -1801,7 +1699,10 @@ async def chat_message_stream_with_status(
                     db=db,
                     ai_conv_logger=ai_conv_logger,
                     user_question=user_message_content,
-                    intent=intent
+                    intent=intent,
+                    user_id=user_id,
+                    conversation_id=conversation_id,
+                    message_id=assistant_msg_id
                 ):
                     if event["type"] == "complete":
                         final_message = event["message"]
@@ -1813,71 +1714,76 @@ async def chat_message_stream_with_status(
                         # Send status/thinking events
                         yield f"data: {json.dumps(event)}\n\n"
 
-            else:
-                # RAG-only mode: Use AIService without tools
-                ai_service = AIService()
+                # Update assistant message content after streaming completes
+                # IMPORTANT: Create a NEW session here because FastAPI's dependency-injected
+                # session (db) gets committed and closed BEFORE StreamingResponse generators run.
+                # The `get_db()` dependency commits on yield return, which happens when the endpoint
+                # returns StreamingResponse - before the generator even starts executing.
+                from app.db.base import async_session_maker
+                async with async_session_maker() as stream_db:
+                    try:
+                        # Update the assistant message content
+                        from sqlalchemy import update
+                        from app.models.chat_message import ChatMessage as ChatMessageModel
+                        await stream_db.execute(
+                            update(ChatMessageModel)
+                            .where(ChatMessageModel.message_id == assistant_msg_id)
+                            .values(content=final_message)
+                        )
 
-                # Send initial thinking status
-                yield f"data: {json.dumps({'type': 'thinking', 'message': 'Thinking...'})}\n\n"
+                        # Update conversation state with assistant response
+                        try:
+                            from app.services.conversation_state_service import ConversationStateManager
+                            stream_state_manager = ConversationStateManager(stream_db)
+                            await stream_state_manager.update_state(
+                                conversation_id=conversation_id,
+                                assistant_response=final_message,
+                                user_intent=intent
+                            )
+                        except Exception as state_err:
+                            logger.warning(f"Failed to update conversation state: {state_err}")
 
-                # P0.2 fix: Use higher default for RAG-only mode (was 600)
-                response = await ai_service.generate_response(
-                    prompt=prompt,
-                    max_tokens=request.max_tokens or RAG_ONLY_DEFAULT_MAX_TOKENS
-                )
+                        # Track token usage (legacy)
+                        if final_usage:
+                            await track_token_usage(
+                                user_id=user_id,
+                                script_id=script_id,
+                                conversation_id=conversation_id,
+                                usage=final_usage,
+                                db=stream_db
+                            )
+                            # Note: Tool mode analytics are tracked per-iteration in _handle_tool_loop_with_status
 
-                final_message = response["content"]
-                final_usage = response["usage"]
+                        await stream_db.commit()
+                        logger.info(f"Successfully saved assistant message {assistant_msg_id} with {len(final_message)} chars")
+                    except Exception as save_err:
+                        logger.error(f"Failed to save assistant message: {save_err}")
+                        await stream_db.rollback()
+                        raise
 
-                # Log to AI conversation logger
-                ai_conv_logger.log_assistant_response(final_message, "end_turn")
-                ai_conv_logger.log_token_usage(final_usage)
-                ai_conv_logger.log_session_summary()
+                # Send final stream_end event with conversation_id
+                yield f"data: {json.dumps({'type': 'stream_end', 'conversation_id': str(conversation_id)})}\n\n"
 
-                # Send complete event
-                yield f"data: {json.dumps({'type': 'complete', 'message': final_message, 'usage': final_usage})}\n\n"
-
-            # Save conversation messages after streaming completes
-            user_msg = ChatMessageModel(
-                conversation_id=conversation_id,
-                sender="user",
-                role=MessageRole.USER,
-                content=user_message_content
-            )
-            db.add(user_msg)
-
-            assistant_msg = ChatMessageModel(
-                conversation_id=conversation_id,
-                sender="assistant",
-                role=MessageRole.ASSISTANT,
-                content=final_message
-            )
-            db.add(assistant_msg)
-
-            await db.commit()
-
-            # Phase 2: Update conversation state with assistant response
-            try:
-                await state_manager.update_state(
-                    conversation_id=conversation_id,
-                    assistant_response=final_message,
-                    user_intent=intent
-                )
-            except Exception as state_err:
-                logger.warning(f"Failed to update conversation state: {state_err}")
-
-            # Track token usage
-            if final_usage:
-                await track_token_usage(
-                    user_id=user_id,
-                    script_id=script_id,
-                    conversation_id=conversation_id,
-                    usage=final_usage,
-                    db=db
-                )
-
-            # Send final stream_end event with conversation_id
-            yield f"data: {json.dumps({'type': 'stream_end', 'conversation_id': str(conversation_id)})}\n\n"
+            except Exception as e:
+                # Streaming failed - clean up the empty placeholder assistant message
+                # to prevent "empty content" errors on follow-up messages
+                logger.error(f"Streaming failed, cleaning up empty assistant message: {e}")
+                try:
+                    # Use a new session since the dependency-injected one may be closed
+                    from app.db.base import async_session_maker
+                    from sqlalchemy import delete
+                    from app.models.chat_message import ChatMessage as ChatMessageModel
+                    async with async_session_maker() as cleanup_db:
+                        await cleanup_db.execute(
+                            delete(ChatMessageModel)
+                            .where(ChatMessageModel.message_id == assistant_msg_id)
+                        )
+                        await cleanup_db.commit()
+                        logger.info(f"Cleaned up empty assistant message {assistant_msg_id}")
+                except Exception as cleanup_err:
+                    logger.warning(f"Failed to clean up assistant message: {cleanup_err}")
+                # Re-raise to propagate the error
+                raise
 
         return StreamingResponse(
             generate_stream(),
@@ -2066,7 +1972,7 @@ async def list_conversations_for_script(
 
             conversation_list.append(ConversationListItem(
                 conversation_id=str(row.conversation_id),
-                title=row.title or "New Chat",
+                title=row.title or "Untitled",
                 created_at=row.created_at.isoformat() if row.created_at else "",
                 updated_at=row.updated_at.isoformat() if row.updated_at else "",
                 message_count=row.message_count,
@@ -2093,18 +1999,22 @@ async def create_conversation(
     """
     Create a new conversation for a script.
 
-    The title defaults to "New Chat" if not provided.
+    The title defaults to "Untitled" if not provided.
     """
     try:
         # Create new conversation
         conversation = ChatConversation(
             user_id=current_user.user_id,
             script_id=script_id,
-            title=request.title or "New Chat"
+            title=request.title or "Untitled"
         )
         db.add(conversation)
         await db.commit()
-        await db.refresh(conversation)
+        # OPTIMIZATION: Removed db.refresh() - it was triggering cascade loading of
+        # ChatConversation relationships (user → User, script → Script → ALL scenes,
+        # scene_embeddings, character_sheets, etc.). This caused 40+ second delays.
+        # We use the values we already have since they were just created.
+        now = datetime.now(timezone.utc)
 
         logger.info(
             f"User {current_user.user_id} created conversation {conversation.conversation_id} "
@@ -2114,8 +2024,8 @@ async def create_conversation(
         return CreateConversationResponse(
             conversation_id=str(conversation.conversation_id),
             title=conversation.title,
-            created_at=conversation.created_at.isoformat() if conversation.created_at else "",
-            updated_at=conversation.updated_at.isoformat() if conversation.updated_at else "",
+            created_at=now.isoformat(),
+            updated_at=now.isoformat(),
             message_count=0
         )
 
@@ -2401,12 +2311,21 @@ async def chat_message_with_tools(
         # Initialize AI service with database session
         ai_service = AIService(db=db)
 
-        # Generate response with tools
+        # Generate a message_id for tracking (will be used for the assistant message)
+        from uuid import uuid4
+        pending_message_id = uuid4()
+
+        # Generate response with tools (with analytics tracking)
         response = await ai_service.chat_with_tools(
             prompt=prompt,
             tools=SCREENPLAY_TOOLS,
             max_tokens=request.max_tokens or 1000,
-            max_iterations=request.max_iterations or 5
+            max_iterations=request.max_iterations or 5,
+            # Analytics context for detailed cost tracking
+            user_id=current_user.user_id,
+            script_id=request.script_id,
+            conversation_id=conversation.conversation_id,
+            message_id=pending_message_id
         )
 
         logger.info(
@@ -2425,6 +2344,7 @@ async def chat_message_with_tools(
         db.add(user_message)
 
         assistant_message = ChatMessageModel(
+            message_id=pending_message_id,  # Use pre-generated ID for analytics tracking
             conversation_id=conversation.conversation_id,
             sender="assistant",
             role=MessageRole.ASSISTANT,
@@ -2434,7 +2354,7 @@ async def chat_message_with_tools(
 
         await db.commit()
 
-        # Track token usage
+        # Track token usage (legacy - new analytics tracked in chat_with_tools)
         await track_token_usage(
             user_id=current_user.user_id,
             script_id=request.script_id,

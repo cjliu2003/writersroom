@@ -38,10 +38,11 @@ class ScriptStateService:
     - partial → analyzed: When script is substantially complete (30 scenes or 60 pages)
     """
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, user_id: Optional[UUID] = None):
         self.db = db
+        self.user_id = user_id  # For analytics cost tracking
         self.ai_scene_service = AISceneService(db)
-        self.ingestion_service = IngestionService(db)
+        self.ingestion_service = IngestionService(db, user_id=user_id)
         self.embedding_service = EmbeddingService(db)
 
     async def check_state_transition(self, script: Script) -> Optional[ScriptState]:
@@ -194,7 +195,7 @@ class ScriptStateService:
             """Generate script outline with error handling and dedicated session."""
             try:
                 async with async_session_maker() as task_db:
-                    service = IngestionService(task_db)
+                    service = IngestionService(task_db, user_id=self.user_id)
                     outline = await service.generate_script_outline(script_id)
                     await task_db.commit()
                     logger.info(f"Outline complete ({outline.tokens_estimate} tokens)")
@@ -207,7 +208,7 @@ class ScriptStateService:
             """Generate character sheets with error handling and dedicated session."""
             try:
                 async with async_session_maker() as task_db:
-                    service = IngestionService(task_db)
+                    service = IngestionService(task_db, user_id=self.user_id)
                     sheets = await service.batch_generate_character_sheets(
                         script_id,
                         progress_callback=self._log_progress("Character sheets")

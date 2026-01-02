@@ -452,15 +452,22 @@ export interface ThinkingEvent {
   message: string;
 }
 
+// NEW: Text streaming event - incremental text deltas from AI response
+export interface TextEvent {
+  type: 'text';
+  text: string;
+}
+
 export interface CompleteEvent {
   type: 'complete';
-  message: string;
+  message: string;  // Empty when streamed=true
   usage: TokenUsage;
   tool_metadata?: {
     tool_calls_made: number;
     tools_used: string[];
     stop_reason: string;
   };
+  streamed?: boolean;  // NEW: Indicates text was already streamed via text events
 }
 
 export interface StreamEndEvent {
@@ -468,7 +475,8 @@ export interface StreamEndEvent {
   conversation_id: string;
 }
 
-export type ChatStreamEvent = StatusEvent | ThinkingEvent | CompleteEvent | StreamEndEvent;
+// Union type for all SSE events including streaming text
+export type ChatStreamEvent = StatusEvent | ThinkingEvent | TextEvent | CompleteEvent | StreamEndEvent;
 
 // NEW: Streaming chat endpoint with real-time status updates
 // Returns an async generator that yields events as they arrive
@@ -641,7 +649,7 @@ export async function listConversations(scriptId: string): Promise<ConversationL
 /**
  * Create a new conversation for a script.
  * @param scriptId - The script ID
- * @param title - Optional title (defaults to "New Chat")
+ * @param title - Optional title (defaults to "Untitled")
  */
 export async function createConversation(
   scriptId: string,
@@ -649,7 +657,7 @@ export async function createConversation(
 ): Promise<CreateConversationResponse> {
   const response = await authenticatedFetch(`/ai/chat/script/${scriptId}/conversations`, {
     method: 'POST',
-    body: JSON.stringify({ title: title || 'New Chat' }),
+    body: JSON.stringify({ title: title || 'Untitled' }),
   });
 
   if (!response.ok) {

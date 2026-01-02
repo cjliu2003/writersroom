@@ -19,11 +19,6 @@ from uuid import UUID
 # User-friendly status messages for each tool
 # These are shown to non-technical users while the AI works
 TOOL_STATUS_MESSAGES = {
-    "signal_ready_for_response": {
-        "active": "Preparing response...",
-        "active_default": "Preparing response...",
-        "complete": "Ready to respond"
-    },
     "get_scene": {
         "active": "Reading scene {scene_index}...",
         "active_default": "Reading the scene...",
@@ -122,34 +117,19 @@ from app.services.retrieval_service import RetrievalService
 
 # MCP Tool Definitions for Claude API
 #
-# SIGNAL TOOL ARCHITECTURE:
-# The signal_ready_for_response tool is used with tool_choice="any" to force
-# Claude to either call another information-gathering tool OR signal that it's
-# ready for synthesis. This prevents Claude from generating text responses
-# directly in the tool loop, which caused truncation issues.
+# TOOL LOOP ARCHITECTURE:
+# Claude uses tool_choice="auto" throughout the tool loop, allowing it to
+# naturally decide when to stop gathering information. When Claude's response
+# has stop_reason != "tool_use" AND tool results were gathered, we trigger
+# a synthesis phase with higher token budget for the final response.
 #
 # Flow:
-# 1. First iteration: tool_choice="auto" - Claude can respond directly if no tools needed
-# 2. After first tool call: tool_choice="any" - Claude MUST call a tool
-# 3. When Claude has enough info: calls signal_ready_for_response
-# 4. We detect the signal and trigger synthesis with high token limit
+# 1. All iterations: tool_choice="auto" - Claude decides if more tools needed
+# 2. When Claude stops (stop_reason != "tool_use"): check for tool results
+# 3. If tool results exist: trigger synthesis with high token limit
+# 4. If no tool results: return Claude's direct response
 #
 SCREENPLAY_TOOLS = [
-    # Signal tool - MUST be first, used to cleanly exit tool loop
-    {
-        "name": "signal_ready_for_response",
-        "description": "Call this ONLY when you have gathered all the information needed to respond to the user's request. This signals that the information gathering phase is complete and synthesis should begin. Do NOT generate your response directly - calling this tool will trigger the response generation phase with proper formatting.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "gathered_info_summary": {
-                    "type": "string",
-                    "description": "Brief 1-2 sentence summary of what information was gathered and what you plan to address in your response"
-                }
-            },
-            "required": ["gathered_info_summary"]
-        }
-    },
     {
         "name": "get_scene",
         "description": "Get full text of a specific scene. Use this when you need the complete dialogue and action lines.",
@@ -350,11 +330,6 @@ class MCPToolExecutor:
         Returns:
             str: Formatted result for Claude to process
         """
-        # Signal tool - just acknowledge, actual synthesis happens in ai_router
-        if tool_name == "signal_ready_for_response":
-            summary = tool_input.get("gathered_info_summary", "Ready to respond")
-            return f"SIGNAL_READY: {summary}"
-
         if tool_name == "get_scene":
             return await self._get_scene(
                 script_id=self.script_id,

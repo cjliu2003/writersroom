@@ -7,6 +7,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { type ConversationListItem } from '@/lib/api'
 
 const MAX_TITLE_LENGTH = 60
@@ -38,8 +47,14 @@ export function ChatSelector({
   const [editValue, setEditValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Delete confirmation state
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const pendingDeleteConversation = pendingDeleteId
+    ? conversations.find(c => c.conversation_id === pendingDeleteId)
+    : null
+
   const activeConversation = conversations.find(c => c.conversation_id === activeConversationId)
-  const displayTitle = activeConversation?.title || 'The Room'
+  const displayTitle = activeConversation?.title || 'Untitled'
 
   // Format relative time (e.g., "2h ago", "Yesterday")
   const formatRelativeTime = (dateStr: string) => {
@@ -246,7 +261,7 @@ export function ChatSelector({
                             e.stopPropagation()
                             setMenuOpenFor(null)
                             setOpen(false)
-                            onDelete(conv.conversation_id)
+                            setPendingDeleteId(conv.conversation_id)
                           }}
                           className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded"
                         >
@@ -262,6 +277,42 @@ export function ChatSelector({
           )}
         </div>
       </PopoverContent>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={pendingDeleteId !== null} onOpenChange={(isOpen) => !isOpen && setPendingDeleteId(null)}>
+        <DialogContent className="sm:max-w-[400px]" showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Delete chat?</DialogTitle>
+            <DialogDescription>
+              {pendingDeleteConversation && (
+                <>
+                  Are you sure you want to delete &ldquo;{pendingDeleteConversation.title}&rdquo;?
+                  This action cannot be undone.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setPendingDeleteId(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (pendingDeleteId) {
+                  onDelete(pendingDeleteId)
+                  setPendingDeleteId(null)
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Popover>
   )
 }

@@ -393,7 +393,7 @@ class ConversationListResponse(BaseModel):
 
 class CreateConversationRequest(BaseModel):
     """Request schema for creating a new conversation."""
-    title: Optional[str] = Field("New Chat", max_length=255, description="Title for the conversation")
+    title: Optional[str] = Field("Untitled", max_length=255, description="Title for the conversation")
 
 
 class CreateConversationResponse(BaseModel):

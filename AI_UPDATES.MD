@@ -1,154 +1,73 @@
-Totally aligned with your framing: this is mainly a **routing + state** problem, not “the model is bad.”
+Yep — this log is *very* diagnostic, and it explains why you’re still seeing ~1–2¢ even for a “simple” question.
 
-What you want is a router that can reliably answer four questions *before* you build context / call tools:
+## 1) Do these numbers look weird?
 
-1. **Is this a follow-up to the current thread or a new topic?**
-2. **Is it about *this script* (even implicitly), general (not script-specific), or hybrid?**
-3. **Is the user asking for *suggestions* vs an actual *rewrite/revision*?**
-4. **If it’s script-related but underspecified, what’s the *best default anchor* (scene/character/thread) to fetch?**
+A couple things stand out:
 
-Below is a concrete approach that fixes all four failure types without making the system brittle.
+### A. Your “simple” turn is actually **big**
 
----
+* `input_tokens: 5519`
+* `output_tokens: 519`
 
-## 1) Conversation continuity: stop treating “history” as the mechanism
+That’s not insane for **dialogue analysis** if your `get_scene` tool returns the *full scene text* and you feed it back into the model (tool_result). But it does mean you’re routinely giving the model ~5k tokens of context for “simple” turns.
 
-Instead of “include more history,” use **explicit conversation state** + **targeted retrieval**.
+### B. **Prompt caching is being created but not used**
 
-### A. Maintain a small “Working Set” state object per conversation
+You have:
 
-Update it after every assistant turn.
+* `cache_creation_tokens: 9366`
+* `cache_read_tokens: 0`
 
-**Example state**
+Per Claude’s docs:
 
-* `active_scene_ids`: last 1–3 scenes referenced or retrieved
-* `active_characters`: last 1–5 character names referenced
-* `active_plot_threads`: last 1–3 threads referenced
-* `last_user_intent`: e.g., “pacing critique”, “dialogue improvement”
-* `last_assistant_commitment`: e.g., “I suggested cutting scene 12’s opener”
+* `cache_creation_input_tokens` = tokens written to cache
+* `cache_read_input_tokens` = tokens read from cache
+* `input_tokens` = tokens **after** the last cache breakpoint (not cached / not read / not used to create cache) ([Claude][1])
 
-Then continuity is not “did we include 40 turns,” it’s “do we have anchors for pronouns and callbacks.”
+So in your request, roughly **9366 tokens were written to cache**, but **0 were read back** — meaning you paid the extra “cache write” cost and got none of the savings you *should* get on subsequent calls. (Some platforms even charge cache writes at a premium vs normal input. ([Google Cloud Documentation][2]))
 
-### B. Add a dedicated Continuity Classifier (cheap + strict)
+**Why this is weird in a tool loop:** if a single user message causes multiple model calls (call → tool_use → tool_result → final), you’d normally expect later calls to show **cache_read_tokens > 0** (because the system prompt + tool schemas are identical).
 
-Have a small classification step that outputs **JSON only**:
+**What to check**
 
-* `continuity`: `FOLLOW_UP | NEW_TOPIC | UNCERTAIN`
-* `refers_to`: `SCENE | CHARACTER | THREAD | PRIOR_ADVICE | NONE`
-* `confidence`: 0–1
-* `needs_disambiguation`: boolean (rare)
+* Are you logging **one row per API call**, or **one row per user message aggregated**? If aggregated, you may be only recording the *first* call’s cache fields.
+* If it *is* per API call, then caching isn’t hitting because your cacheable prefix likely isn’t identical across calls (common causes: timestamps, request ids, tool order changing, “dynamic” text placed before the cache breakpoint).
 
-**Hard rule:**
-If `NEW_TOPIC`, you **drop prior turns** (except the state object) and do *not* pull old conversation snippets.
-
-### C. When follow-up is detected, retrieve only the relevant prior snippets
-
-Don’t re-inject the whole chat. Store prior turns in a vector index and retrieve top-k *only when needed* (e.g., `refers_to=PRIOR_ADVICE`).
-
-This is what eliminates “it keeps talking about the first unrelated question.”
+**Bottom line:** the cache fields don’t look “wrong,” but they look like **you’re not getting the benefit of caching** right now.
 
 ---
 
-## 2) Question understanding: introduce a 3-way domain router
+## 2) “Signal finish” tool call — is that correct?
 
-Right now you basically have “script/tool” vs “not.” You need:
+You don’t need it.
 
-* `SCRIPT`: user wants script-grounded answer
-* `GENERAL`: user wants general knowledge/craft/brainstorming not tied to script
-* `HYBRID`: answer generally **and** optionally apply to the script
+In Claude tool use, the model tells you it wants a tool by returning `stop_reason: "tool_use"` (and a `tool_use` content block). When it’s done, it returns a normal end-of-turn stop reason and **no tool_use blocks**. ([Claude][3])
 
-### The key: bias toward script *when ambiguous*, but verify cheaply
+So the standard agent loop is:
 
-This solves your “if we don’t explicitly mention the script, it doesn’t reference it.”
+1. Call model
+2. If `stop_reason == "tool_use"`:
 
-**Practical strategy**
+   * Execute tools
+   * Send `tool_result` blocks back (must match tool_use ids)
+   * Repeat
+3. Else:
 
-* If a script is loaded and the question is plausibly script-related (“is this character arc working?”, “how can I improve this dialogue?”), treat it as `SCRIPT` by default.
-* Do a **lightweight `search_script` probe** (top_k=3, low max_chars) using the user question + any `active_characters/scenes` from state.
-* If the probe returns nothing above a similarity threshold → fall back to `GENERAL`.
+   * You’re finished → return assistant text
 
-So you get:
+A dedicated `signal_finish` tool is usually redundant and adds:
 
-* script grounding when it’s there
-* general answers when the script doesn’t match
+* another model step (extra cost/latency)
+* another possible failure mode
 
----
-
-## 3) “It likes offering revisions” → fix with response-mode gating
-
-Yes, mostly a system/developer prompt change, but do it with a **request-type classifier** so it’s consistent.
-
-### Add `request_type` classification
-
-`SUGGEST | REWRITE | DIAGNOSE | BRAINSTORM | FACTUAL`
-
-**Rewrite is only allowed if explicitly asked** (words like “rewrite,” “revise,” “draft,” “give me alt lines,” “make this better by rewriting”).
-
-### Response contract (important)
-
-* Default for writers: **diagnosis + suggestions**, not full rewrites.
-* If user did not ask for a rewrite, do:
-
-  * “What’s working”
-  * “What’s not”
-  * “2–6 concrete edits you can make”
-  * “If you want, paste the lines and I can rewrite them” (optional, short)
-
-This will feel *much* more like a co-writer rather than a “rewrite bot.”
+If you need “done” for UI/telemetry, just treat “no tool_use / stop_reason != tool_use” as done.
 
 ---
 
-## 4) Tooling / MCP best practices for your specific toolset
+## The  biggest cost wins for your case
 
-You’re already moving this direction, but here’s the “clean” ideal:
+1. **Fix prompt caching so your later tool-loop calls read cache** (you want cache_read_tokens > 0 on the 2nd/3rd call). ([Claude][1])
 
-### A. Batch within tools for same-tool repeats
 
-* `get_scenes(scene_ids[])`
-* `get_scene_context_batch(scene_ids[])`
-
-### B. Allow multi-tool-per-turn, but cap it
-
-Yes: let the model emit multiple tool calls in one planning turn **when independent**, but add guardrails:
-
-* max 3 tool calls per planning step
-* max 1 “expensive” tool (`analyze_pacing`, `get_plot_threads`) unless user explicitly asked for it
-* require a one-line “why” per tool call (structured)
-
-### C. Evidence assembly step stays mandatory
-
-Even with better batching, keep:
-
-* tool results → ranked EvidenceItems → final synthesis
-  And **do not** show raw loop transcripts to the final synthesis step (that’s where contamination sneaks back in).
-
----
-
-## Putting it together: the router you want
-
-A single small “Router” call (or heuristics + tiny model) returns:
-
-* `continuity`: FOLLOW_UP / NEW_TOPIC
-* `domain`: SCRIPT / GENERAL / HYBRID
-* `request_type`: SUGGEST / REWRITE / DIAGNOSE / etc.
-* `anchors`: {scene_ids?, character_names?, thread_ids?}
-
-Then:
-
-### If GENERAL
-
-* no tools
-* no script context (maybe just “you’re a screenwriting assistant”)
-* concise answer
-
-### If SCRIPT
-
-* run script probe / tools
-* answer grounded in EvidenceItems
-* default to SUGGEST/DIAGNOSE unless REWRITE requested
-
-### If HYBRID
-
-* answer general first (short)
-* then “Applied to your script:” with tool-grounded points (short)
-
+[1]: https://platform.claude.com/docs/en/build-with-claude/prompt-caching?utm_source=chatgpt.com "Prompt caching - Claude Docs"
+[3]: https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons?utm_source=chatgpt.com "Handling stop reasons - Claude Docs"

@@ -5,10 +5,15 @@ Optimizations:
 - Parallel scene summary generation with semaphore (10x faster)
 - Pre-fetch existing summaries to eliminate N+1 queries
 - Batch commits to reduce transaction overhead
+
+Analytics:
+- Per-scene cost tracking via AIOperationMetrics
+- Supports cost analysis for script ingestion jobs
 """
 
 import asyncio
 import logging
+import time
 from typing import List, Optional, Callable, Dict, Tuple, Any
 from uuid import UUID, uuid4
 from datetime import datetime
@@ -23,8 +28,10 @@ from app.models.scene_summary import SceneSummary
 from app.models.script_outline import ScriptOutline
 from app.models.character_sheet import CharacterSheet
 from app.models.scene_character import SceneCharacter
+from app.models.ai_operation_metrics import OperationType
 from app.core.config import settings
 from app.services.scene_service import SceneService
+from app.services.metrics_service import MetricsService
 
 logger = logging.getLogger(__name__)
 
@@ -40,12 +47,18 @@ class IngestionService:
     - Scene summaries (scene cards)
     - Script outlines
     - Character sheets
+
+    Now includes per-operation cost tracking via MetricsService.
     """
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, user_id: Optional[UUID] = None):
         self.db = db
         self.client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
+        self.user_id = user_id  # For analytics tracking
+        self.metrics_service = MetricsService(db) if user_id else None
+        # Deferred metrics for batch operations to avoid session conflicts
+        self._deferred_metrics: List[Any] = []
 
     async def generate_scene_summary(
         self,
@@ -237,13 +250,19 @@ Keep total length to 5-7 lines (~150 tokens)."""
                 return_exceptions=False  # We handle exceptions in generate_one
             )
 
-        # Step 5: Collect successful summaries and batch commit
+        # Step 5: Collect successful summaries and batch add to session
+        # IMPORTANT: We add objects here AFTER gather() completes to avoid
+        # concurrent session operations that cause "Session is already flushing" errors
         summaries: List[SceneSummary] = []
+        new_summaries: List[SceneSummary] = []
         failed_count = 0
 
         for scene, summary, error in results:
             if summary:
                 summaries.append(summary)
+                # Check if this is a new summary (not in existing_map)
+                if scene.scene_id not in existing_map:
+                    new_summaries.append(summary)
             else:
                 failed_count += 1
 
@@ -252,6 +271,18 @@ Keep total length to 5-7 lines (~150 tokens)."""
             for scene in scenes:
                 if scene.scene_id in existing_map:
                     summaries.append(existing_map[scene.scene_id])
+
+        # Now add all new summaries to session (safe - sequential, after parallel work)
+        for summary in new_summaries:
+            self.db.add(summary)
+        logger.info(f"Added {len(new_summaries)} new summaries to session")
+
+        # Add all deferred metrics to session
+        if self._deferred_metrics:
+            for metric in self._deferred_metrics:
+                self.db.add(metric)
+            logger.info(f"Added {len(self._deferred_metrics)} deferred metrics to session")
+            self._deferred_metrics.clear()  # Reset for next batch
 
         # Single batch commit for all changes
         try:
@@ -315,21 +346,45 @@ Create a structured summary with these sections:
 
 Keep total length to 5-7 lines (~150 tokens)."""
 
-        # Call Claude API
+        # Call Claude API with timing
+        start_time = time.time()
         response = await self.client.messages.create(
             model="claude-haiku-4-5",
             max_tokens=300,
             messages=[{"role": "user", "content": prompt}]
         )
+        latency_ms = int((time.time() - start_time) * 1000)
 
         summary_text = response.content[0].text
         tokens_estimate = len(self.tokenizer.encode(summary_text))
 
+        # Track metrics if analytics enabled - use defer_add for batch operations
+        # to avoid "Session is already flushing" errors during parallel execution
+        if self.metrics_service and self.user_id:
+            metric = await self.metrics_service.track_operation(
+                operation_type=OperationType.INGESTION_SCENE_SUMMARY,
+                user_id=self.user_id,
+                script_id=scene.script_id,
+                scene_id=scene.scene_id,
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                cache_creation_tokens=getattr(response.usage, 'cache_creation_input_tokens', 0),
+                cache_read_tokens=getattr(response.usage, 'cache_read_input_tokens', 0),
+                model="claude-haiku-4-5",
+                latency_ms=latency_ms,
+                defer_add=True  # Don't add to session - collect for batch insert
+            )
+            self._deferred_metrics.append(metric)
+
         # Update scene hash to mark "this content was analyzed"
         scene.hash = SceneService.compute_scene_hash(scene_text)
 
-        # Create or update summary (no commit - caller handles batch commit)
+        # Create or update summary
+        # Note: For batch operations, we return the object but DON'T add new summaries
+        # to session here - the caller (batch_generate_scene_summaries) will collect
+        # and add them after all parallel coroutines complete
         if existing_summary:
+            # Updates to existing objects are tracked automatically by SQLAlchemy
             existing_summary.summary_text = summary_text
             existing_summary.tokens_estimate = tokens_estimate
             existing_summary.version += 1
@@ -344,7 +399,7 @@ Keep total length to 5-7 lines (~150 tokens)."""
                 version=1,
                 last_generated_at=datetime.utcnow()
             )
-            self.db.add(scene_summary)
+            # Don't add here - return for caller to batch-add after gather()
             return scene_summary
 
     async def generate_script_outline(
@@ -412,15 +467,31 @@ Create an outline with:
 Keep total length under 500 tokens."""
 
         try:
-            # Call Claude API
+            # Call Claude API with timing
+            start_time = time.time()
             response = await self.client.messages.create(
                 model="claude-haiku-4-5",
                 max_tokens=800,
                 messages=[{"role": "user", "content": prompt}]
             )
+            latency_ms = int((time.time() - start_time) * 1000)
 
             outline_text = response.content[0].text
             tokens_estimate = len(self.tokenizer.encode(outline_text))
+
+            # Track metrics if analytics enabled
+            if self.metrics_service and self.user_id:
+                await self.metrics_service.track_operation(
+                    operation_type=OperationType.INGESTION_SCRIPT_OUTLINE,
+                    user_id=self.user_id,
+                    script_id=script_id,
+                    input_tokens=response.usage.input_tokens,
+                    output_tokens=response.usage.output_tokens,
+                    cache_creation_tokens=getattr(response.usage, 'cache_creation_input_tokens', 0),
+                    cache_read_tokens=getattr(response.usage, 'cache_read_input_tokens', 0),
+                    model="claude-haiku-4-5",
+                    latency_ms=latency_ms
+                )
 
             # Create or update outline
             if existing_outline:
@@ -523,15 +594,31 @@ Create a character sheet with:
 Keep under 300 tokens."""
 
         try:
-            # Call Claude API
+            # Call Claude API with timing
+            start_time = time.time()
             response = await self.client.messages.create(
                 model="claude-haiku-4-5",
                 max_tokens=500,
                 messages=[{"role": "user", "content": prompt}]
             )
+            latency_ms = int((time.time() - start_time) * 1000)
 
             sheet_text = response.content[0].text
             tokens_estimate = len(self.tokenizer.encode(sheet_text))
+
+            # Track metrics if analytics enabled
+            if self.metrics_service and self.user_id:
+                await self.metrics_service.track_operation(
+                    operation_type=OperationType.INGESTION_CHARACTER_SHEET,
+                    user_id=self.user_id,
+                    script_id=script_id,
+                    input_tokens=response.usage.input_tokens,
+                    output_tokens=response.usage.output_tokens,
+                    cache_creation_tokens=getattr(response.usage, 'cache_creation_input_tokens', 0),
+                    cache_read_tokens=getattr(response.usage, 'cache_read_input_tokens', 0),
+                    model="claude-haiku-4-5",
+                    latency_ms=latency_ms
+                )
 
             # Create or update sheet
             if existing_sheet:
@@ -619,15 +706,33 @@ Create a character sheet with:
 
 Keep under 300 tokens."""
 
-        # Call Claude API
+        # Call Claude API with timing
+        start_time = time.time()
         response = await self.client.messages.create(
             model="claude-haiku-4-5",
             max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
+        latency_ms = int((time.time() - start_time) * 1000)
 
         sheet_text = response.content[0].text
         tokens_estimate = len(self.tokenizer.encode(sheet_text))
+
+        # Track metrics if analytics enabled - use defer_add for batch operations
+        if self.metrics_service and self.user_id:
+            metric = await self.metrics_service.track_operation(
+                operation_type=OperationType.INGESTION_CHARACTER_SHEET,
+                user_id=self.user_id,
+                script_id=script_id,
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                cache_creation_tokens=getattr(response.usage, 'cache_creation_input_tokens', 0),
+                cache_read_tokens=getattr(response.usage, 'cache_read_input_tokens', 0),
+                model="claude-haiku-4-5",
+                latency_ms=latency_ms,
+                defer_add=True  # Don't add to session - collect for batch insert
+            )
+            self._deferred_metrics.append(metric)
 
         # Create or update sheet (no commit - caller handles batch commit)
         if existing_sheet:
@@ -648,7 +753,7 @@ Keep under 300 tokens."""
                 dirty_scene_count=0,
                 last_generated_at=datetime.utcnow()
             )
-            self.db.add(sheet)
+            # Don't add here - return for caller to batch-add after gather()
             return sheet
 
     async def batch_generate_character_sheets(
@@ -769,13 +874,19 @@ Keep under 300 tokens."""
                 return_exceptions=False  # We handle exceptions in generate_one
             )
 
-        # Step 5: Collect successful sheets and batch commit
+        # Step 5: Collect successful sheets and batch add to session
+        # IMPORTANT: We add objects here AFTER gather() completes to avoid
+        # concurrent session operations that cause "Session is already flushing" errors
         sheets: List[CharacterSheet] = []
+        new_sheets: List[CharacterSheet] = []
         failed_count = 0
 
         for char_name, sheet, error in results:
             if sheet:
                 sheets.append(sheet)
+                # Check if this is a new sheet (not in existing_map)
+                if char_name not in existing_map:
+                    new_sheets.append(sheet)
             else:
                 failed_count += 1
 
@@ -785,6 +896,18 @@ Keep under 300 tokens."""
                 if char_name in existing_map and not existing_map[char_name].is_stale:
                     if existing_map[char_name] not in sheets:
                         sheets.append(existing_map[char_name])
+
+        # Now add all new sheets to session (safe - sequential, after parallel work)
+        for sheet in new_sheets:
+            self.db.add(sheet)
+        logger.info(f"Added {len(new_sheets)} new character sheets to session")
+
+        # Add all deferred metrics to session
+        if self._deferred_metrics:
+            for metric in self._deferred_metrics:
+                self.db.add(metric)
+            logger.info(f"Added {len(self._deferred_metrics)} deferred metrics to session")
+            self._deferred_metrics.clear()  # Reset for next batch
 
         # Single batch commit for all changes
         try:

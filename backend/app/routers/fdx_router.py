@@ -246,6 +246,7 @@ async def upload_fdx_file(
             job = queue.enqueue(
                 analyze_script_full,
                 str(new_script.script_id),
+                str(current_user.user_id),  # Pass user_id for analytics cost tracking
                 job_timeout='30m'
             )
 

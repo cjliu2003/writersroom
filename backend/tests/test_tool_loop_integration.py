@@ -159,8 +159,8 @@ class TestToolLoopWithEvidenceBuilder:
             intent=IntentType.GLOBAL_QUESTION
         )
 
-        assert "Maximum 5 bullet points" in synthesis_prompt
-        assert "scene reference" in synthesis_prompt.lower()
+        assert "Maximum 5 key points" in synthesis_prompt
+        assert "scene number" in synthesis_prompt.lower()
         assert "Maximum 200 words" in synthesis_prompt
 
         # Test LOCAL_EDIT format
@@ -170,7 +170,7 @@ class TestToolLoopWithEvidenceBuilder:
             intent=IntentType.LOCAL_EDIT
         )
 
-        assert "exactly one revised version" in synthesis_prompt_edit.lower()
+        assert "feedback" in synthesis_prompt_edit.lower()
         assert "Maximum 150 words" in synthesis_prompt_edit
 
 
@@ -178,63 +178,50 @@ class TestToolLoopWithEvidenceBuilder:
 # Test: Truncation Recovery (P0.3)
 # ============================================================================
 
-class TestSignalToolPattern:
-    """Test signal_ready_for_response tool pattern for controlled synthesis."""
+class TestToolChoicePattern:
+    """Test tool_choice='auto' pattern for natural synthesis triggering."""
 
     @pytest.mark.asyncio
-    async def test_signal_tool_exists_in_tools(self):
-        """Test that signal_ready_for_response tool is defined."""
+    async def test_core_tools_exist(self):
+        """Test that core screenplay tools are defined (signal tool removed)."""
         from app.services.mcp_tools import SCREENPLAY_TOOLS
-        from app.routers.ai_router import SIGNAL_TOOL_NAME
 
-        # Verify signal tool exists
+        # Verify core tools exist
         tool_names = [tool["name"] for tool in SCREENPLAY_TOOLS]
-        assert SIGNAL_TOOL_NAME in tool_names, "signal_ready_for_response tool should exist"
 
-        # Find the tool and verify its schema
-        signal_tool = next(t for t in SCREENPLAY_TOOLS if t["name"] == SIGNAL_TOOL_NAME)
-        assert "gathered_info_summary" in signal_tool["input_schema"]["properties"]
+        # These tools should exist
+        assert "get_scene" in tool_names
+        assert "get_scene_context" in tool_names
+        assert "get_character_scenes" in tool_names
+        assert "search_script" in tool_names
 
-    @pytest.mark.asyncio
-    async def test_signal_tool_triggers_synthesis(self):
-        """Test that signal tool result is properly recognized."""
-        from app.services.mcp_tools import MCPToolExecutor, SCREENPLAY_TOOLS
-
-        # Verify signal tool returns expected prefix
-        # Note: We can't actually execute without a full DB setup, but we can verify the pattern
-        signal_result_prefix = "SIGNAL_READY:"
-
-        # The tool loop checks for this pattern to trigger synthesis
-        assert signal_result_prefix.startswith("SIGNAL_READY")
+        # Signal tool should NOT exist (removed)
+        assert "signal_ready_for_response" not in tool_names
 
     @pytest.mark.asyncio
     async def test_tool_call_metadata_schema(self):
         """Test that ToolCallMetadata schema supports the new pattern."""
         from app.schemas.ai import ToolCallMetadata
 
-        # Test with signal_ready stop reason
+        # Test with end_turn stop reason (natural exit)
         metadata = ToolCallMetadata(
             tool_calls_made=3,
-            tools_used=["get_scene", "signal_ready_for_response"],
-            stop_reason="signal_ready",
-            recovery_attempts=0  # Always 0 now (no recovery mechanism)
+            tools_used=["get_scene", "get_character_scenes"],
+            stop_reason="end_turn",
+            recovery_attempts=0
         )
 
-        assert metadata.stop_reason == "signal_ready"
+        assert metadata.stop_reason == "end_turn"
         assert metadata.recovery_attempts == 0
-        assert "signal_ready_for_response" in metadata.tools_used
+        assert "get_scene" in metadata.tools_used
 
     @pytest.mark.asyncio
-    async def test_tool_choice_constants(self):
-        """Test that tool_choice-related constants are properly defined."""
+    async def test_tool_loop_constants(self):
+        """Test that token constants are properly defined."""
         from app.routers.ai_router import (
-            SIGNAL_TOOL_NAME,
             TOOL_LOOP_MAX_TOKENS,
             FINAL_SYNTHESIS_MAX_TOKENS
         )
-
-        # Signal tool name should match the tool definition
-        assert SIGNAL_TOOL_NAME == "signal_ready_for_response"
 
         # Token limits should be reasonable
         assert TOOL_LOOP_MAX_TOKENS >= 1000, "Tool loop needs sufficient tokens for planning"
@@ -242,19 +229,18 @@ class TestSignalToolPattern:
         assert FINAL_SYNTHESIS_MAX_TOKENS > TOOL_LOOP_MAX_TOKENS, "Synthesis should have more tokens"
 
     @pytest.mark.asyncio
-    async def test_synthesis_triggers_with_signal_tool(self):
+    async def test_synthesis_triggers_with_tool_results(self):
         """
-        Test that synthesis is triggered based on the new signal tool pattern:
+        Test that synthesis is triggered based on the new tool_choice='auto' pattern:
 
-        1. SIGNAL TOOL (deterministic): When signal_ready_for_response is called,
-           ALWAYS trigger synthesis - this is the proper way to exit the tool loop.
-
-        2. TOOL RESULTS (always): When tools have been called, always synthesize
+        1. TOOL RESULTS EXIST: When tools have been called, always synthesize
            to ensure consistent quality responses based on gathered evidence.
 
-        The tool_choice strategy ensures Claude either:
-        - Responds directly (no tools needed) - first iteration only
-        - Calls signal tool when ready to synthesize - after gathering info
+        2. NO TOOLS: When Claude responds directly without tools (stop_reason != "tool_use"),
+           return the direct response without synthesis.
+
+        The tool_choice='auto' strategy allows Claude to naturally decide when
+        to stop using tools, relying on stop_reason to detect completion.
         """
 
         # Test data simulating the new pattern
@@ -263,36 +249,25 @@ class TestSignalToolPattern:
         ]
         empty_results = []
 
-        # With tool_choice="any" after first iteration, Claude MUST use tools
-        # So synthesis is always triggered when we have tool results
-        def needs_synthesis(all_tool_results, signal_tool_called):
-            """New synthesis trigger logic based on signal tool pattern."""
-            return signal_tool_called or len(all_tool_results) > 0
-
-        # =========================================================
-        # SIGNAL TOOL CASE: Always triggers synthesis
-        # =========================================================
-
-        # Scenario 1: Signal tool called with tool results -> synthesize
-        assert needs_synthesis(tool_results, signal_tool_called=True) is True
-
-        # Scenario 2: Signal tool called without tool results -> synthesize
-        assert needs_synthesis(empty_results, signal_tool_called=True) is True
+        # New synthesis trigger logic: synthesize when tool results exist
+        def needs_synthesis(all_tool_results):
+            """Synthesis trigger logic based on tool results."""
+            return len(all_tool_results) > 0
 
         # =========================================================
         # TOOL RESULTS CASE: Always triggers synthesis
         # =========================================================
 
-        # Scenario 3: Tool results exist (no signal) -> synthesize
-        assert needs_synthesis(tool_results, signal_tool_called=False) is True
+        # Scenario 1: Tool results exist -> synthesize
+        assert needs_synthesis(tool_results) is True
 
         # =========================================================
         # NO TOOLS CASE: No synthesis needed
         # =========================================================
 
-        # Scenario 4: No tool results and no signal -> no synthesis
-        # This happens when Claude responds directly on first iteration
-        assert needs_synthesis(empty_results, signal_tool_called=False) is False
+        # Scenario 2: No tool results -> no synthesis (direct response)
+        # This happens when Claude responds directly on any iteration
+        assert needs_synthesis(empty_results) is False
 
 
 # ============================================================================
@@ -421,9 +396,9 @@ class TestToolOnlyMode:
         brainstorm_format = context_builder.get_synthesis_format_instructions(IntentType.BRAINSTORM)
 
         # Each should have different constraints
-        assert "revised" in local_edit_format.lower()
+        assert "feedback" in local_edit_format.lower()
         assert "bullet" in global_question_format.lower()
-        assert "options" in brainstorm_format.lower()
+        assert "alternatives" in brainstorm_format.lower()
 
         # All should have word limits
         assert "words" in local_edit_format.lower()
