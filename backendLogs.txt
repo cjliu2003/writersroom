@@ -1,88 +1,140 @@
-File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 287, in jsonable_encoder
-    encoded_value = jsonable_encoder(
-                    ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 331, in jsonable_encoder
-    return jsonable_encoder(
-           ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 279, in jsonable_encoder
-    encoded_key = jsonable_encoder(
-                  ^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/encoders.py", line 216, in jsonable_encoder
-    if isinstance(obj, BaseModel):
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^
-RecursionError: maximum recursion depth exceeded
+2026-01-01 16:16:19,498 - ai.conversation - INFO - 
+--- USER MESSAGE ---
+What are your thoughts on the opening scene?
+
+2026-01-01 16:16:19,498 - app.routers.ai_router - INFO - [STREAM] Request type: suggest
+2026-01-01 16:16:19,500 - app.services.context_builder - INFO - [CONTEXT] System prompt generation took 2.28ms
+2026-01-01 16:16:19,538 - app.services.context_builder - INFO - [CONTEXT] Global context fetch took 37.43ms
+2026-01-01 16:16:21,286 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-01-01 16:16:21,289 - app.services.retrieval_service - INFO - [RETRIEVAL] Embedding generation took 1750.87ms
+2026-01-01 16:16:21,312 - app.services.retrieval_service - INFO - [RETRIEVAL] Vector search query execution took 21.33ms (returned 5 results)
+2026-01-01 16:16:21,312 - app.services.context_builder - INFO - [CONTEXT] Retrieval service took 1774.78ms
+2026-01-01 16:16:21,314 - app.services.context_builder - INFO - [CONTEXT] Scene card formatting took 1.68ms
+2026-01-01 16:16:21,351 - app.services.context_builder - INFO - [CONTEXT] NEW_TOPIC: Skipping recent conversation history
+2026-01-01 16:16:21,351 - app.routers.ai_router - INFO - [STREAM] Built prompt: 3276 tokens (skip_scenes=False)
+✅ Completed: POST /api/ai/chat/message/stream-with-status - 200 - 3.304s
+INFO:     127.0.0.1:52215 - "POST /api/ai/chat/message/stream-with-status HTTP/1.1" 200 OK
+/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py:1961: RuntimeWarning: coroutine 'AIService.generate_response' was never awaited
+  async for event in ai_service.generate_response(
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+2026-01-01 16:16:21,414 - app.routers.ai_router - ERROR - Streaming failed, cleaning up empty assistant message: 'async for' requires an object with __aiter__ method, got coroutine
+2026-01-01 16:16:21,487 - app.routers.ai_router - INFO - Cleaned up empty assistant message 4ef04793-2332-432f-9d8c-492faef98ceb
+ERROR:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 781, in __aexit__
+  |     raise BaseExceptionGroup(
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 192, in __call__
+    |     await response(scope, wrapped_receive, send)
+    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 257, in __call__
+    |     async with anyio.create_task_group() as task_group:
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 781, in __aexit__
+    |     raise BaseExceptionGroup(
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
+      |     result = await app(  # type: ignore[func-returns-value]
+      |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+      |     return await self.app(scope, receive, send)
+      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
+      |     await super().__call__(scope, receive, send)
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/applications.py", line 123, in __call__
+      |     await self.middleware_stack(scope, receive, send)
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+      |     raise exc
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+      |     await self.app(scope, receive, _send)
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
+      |     with collapse_excgroups():
+      |          ^^^^^^^^^^^^^^^^^^^^
+      |   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
+      |     self.gen.throw(value)
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+      |     raise exc
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
+      |     await func()
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 217, in stream_response
+      |     return await super().stream_response(send)
+      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
+      |     async for chunk in self.body_iterator:
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 181, in body_stream
+      |     raise app_exc
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 151, in coro
+      |     await self.app(scope, receive_or_disconnect, send_no_error)
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
+      |     with collapse_excgroups():
+      |          ^^^^^^^^^^^^^^^^^^^^
+      |   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
+      |     self.gen.throw(value)
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+      |     raise exc
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
+      |     await func()
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
+      |     async for chunk in self.body_iterator:
+      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py", line 1961, in generate_stream
+      |     async for event in ai_service.generate_response(
+      | TypeError: 'async for' requires an object with __aiter__ method, got coroutine
+      +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
+    await func()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 217, in stream_response
+    return await super().stream_response(send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
+    async for chunk in self.body_iterator:
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 181, in body_stream
+    raise app_exc
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
+    await func()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
+    async for chunk in self.body_iterator:
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py", line 1961, in generate_stream
+    async for event in ai_service.generate_response(
+TypeError: 'async for' requires an object with __aiter__ method, got coroutine

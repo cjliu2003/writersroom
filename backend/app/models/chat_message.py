@@ -116,7 +116,7 @@ class ChatMessage(Base):
             'content': self.content,
             'embedding_vector': self.embedding_vector.tolist() if self.embedding_vector else None,
             'summarized': self.summarized,
-            'metadata': self.metadata or {},
+            'metadata': self.message_metadata or {},
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
         

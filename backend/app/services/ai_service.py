@@ -8,7 +8,8 @@ Integrates with Phase 2 RAG components for intelligent context assembly.
 from anthropic import AsyncAnthropic
 import tiktoken
 import logging
-from typing import Dict, Optional, AsyncGenerator, List, Any
+from typing import Dict, Optional, AsyncGenerator, List, Any, Union
+from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 
@@ -62,7 +63,7 @@ class AIService:
         prompt: dict,
         max_tokens: int = RAG_ONLY_DEFAULT_MAX_TOKENS,
         stream: bool = False
-    ) -> Dict:
+    ) -> Union[Dict, AsyncGenerator[Dict, None]]:
         """
         Generate AI response using Claude 3.5 Sonnet.
 
@@ -72,13 +73,16 @@ class AIService:
             stream: Whether to stream the response
 
         Returns:
-            Dict with content, usage statistics including cache metrics, and stop_reason
+            When stream=False: Dict with content, usage statistics, and stop_reason
+            When stream=True: AsyncGenerator yielding content_delta and message_complete events
 
         Raises:
             Exception: If Claude API call fails
         """
         if stream:
-            return await self._generate_streaming(prompt, max_tokens)
+            # Return the async generator directly (don't await it)
+            # Caller should use: async for event in ai_service.generate_response(..., stream=True)
+            return self._generate_streaming(prompt, max_tokens)
 
         try:
             response = await self.anthropic_client.messages.create(
@@ -164,7 +168,12 @@ class AIService:
         prompt: dict,
         tools: List[Dict[str, Any]],
         max_tokens: int = 1000,
-        max_iterations: int = 5
+        max_iterations: int = 5,
+        # Analytics context (optional - for detailed cost tracking)
+        user_id: Optional[UUID] = None,
+        script_id: Optional[UUID] = None,
+        conversation_id: Optional[UUID] = None,
+        message_id: Optional[UUID] = None,
     ) -> Dict[str, Any]:
         """
         Chat with tool calling support for multi-turn tool use loops.
@@ -176,11 +185,16 @@ class AIService:
             tools: List of MCP tool definitions (from mcp_tools.SCREENPLAY_TOOLS)
             max_tokens: Maximum output tokens per LLM call
             max_iterations: Maximum tool use iterations (prevents infinite loops)
+            user_id: For analytics tracking
+            script_id: For analytics tracking
+            conversation_id: For analytics tracking
+            message_id: For analytics tracking
 
         Returns:
             Dict with:
                 - content: Final text response
-                - usage: Token usage statistics
+                - usage: Token usage statistics (cumulative across all iterations)
+                - usage_breakdown: Per-iteration usage for analytics
                 - tool_calls: Number of tool call iterations used
                 - stop_reason: Why the loop ended
 
@@ -196,47 +210,130 @@ class AIService:
             )
         """
         from app.services.mcp_tools import MCPToolExecutor
+        from app.services.metrics_service import MetricsService, OperationTimer
+        from app.models.ai_operation_metrics import OperationType
 
         if not self.db:
             raise ValueError("AIService requires database session for tool calling")
 
         messages = list(prompt["messages"])  # Copy to avoid mutating original
         system = prompt.get("system", [])
+        model = prompt.get("model", "claude-haiku-4-5")
+
+        # Analytics tracking
+        track_metrics = all([user_id, script_id])
+        metrics_service = MetricsService(self.db) if track_metrics else None
+
+        # Cumulative usage tracking
+        cumulative_usage = {
+            "input_tokens": 0,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "output_tokens": 0
+        }
+        # Per-iteration breakdown for analytics
+        usage_breakdown = []
 
         logger.info(f"Starting tool-enabled chat with max {max_iterations} iterations")
 
         for iteration in range(max_iterations):
             logger.debug(f"Tool calling iteration {iteration + 1}/{max_iterations}")
 
-            # Call LLM with tools
-            response = await self.anthropic_client.messages.create(
-                model=prompt.get("model", "claude-haiku-4-5"),
-                max_tokens=max_tokens,
-                system=system,
-                messages=messages,
-                tools=tools
-            )
+            # Time the API call
+            timer = OperationTimer()
+            with timer:
+                response = await self.anthropic_client.messages.create(
+                    model=model,
+                    max_tokens=max_tokens,
+                    system=system,
+                    messages=messages,
+                    tools=tools
+                )
+
+            # Extract usage for this iteration
+            iter_usage = {
+                "input_tokens": response.usage.input_tokens,
+                "cache_creation_input_tokens": getattr(
+                    response.usage, 'cache_creation_input_tokens', 0
+                ),
+                "cache_read_input_tokens": getattr(
+                    response.usage, 'cache_read_input_tokens', 0
+                ),
+                "output_tokens": response.usage.output_tokens
+            }
+
+            # Accumulate
+            for key in cumulative_usage:
+                cumulative_usage[key] += iter_usage[key]
 
             # Check if LLM wants to use tools
             if response.stop_reason != "tool_use":
                 # LLM provided final answer without needing tools
                 logger.info(f"Chat completed after {iteration} tool call iterations")
-                # P0.1 fix: Extract ALL text blocks, not just content[0].text
+
+                # Track final iteration as synthesis (or RAG-only if no prior iterations)
+                if metrics_service:
+                    op_type = OperationType.CHAT_RAG_ONLY if iteration == 0 else OperationType.CHAT_SYNTHESIS
+                    await metrics_service.track_operation(
+                        operation_type=op_type,
+                        user_id=user_id,
+                        script_id=script_id,
+                        conversation_id=conversation_id,
+                        message_id=message_id,
+                        input_tokens=iter_usage["input_tokens"],
+                        output_tokens=iter_usage["output_tokens"],
+                        cache_creation_tokens=iter_usage["cache_creation_input_tokens"],
+                        cache_read_tokens=iter_usage["cache_read_input_tokens"],
+                        model=model,
+                        latency_ms=timer.elapsed_ms
+                    )
+
+                usage_breakdown.append({
+                    "iteration": iteration + 1,
+                    "type": "synthesis" if iteration > 0 else "rag_only",
+                    "usage": iter_usage,
+                    "latency_ms": timer.elapsed_ms
+                })
+
                 return {
                     "content": self._extract_all_text(response.content) if response.content else "",
-                    "usage": {
-                        "input_tokens": response.usage.input_tokens,
-                        "cache_creation_input_tokens": getattr(
-                            response.usage, 'cache_creation_input_tokens', 0
-                        ),
-                        "cache_read_input_tokens": getattr(
-                            response.usage, 'cache_read_input_tokens', 0
-                        ),
-                        "output_tokens": response.usage.output_tokens
-                    },
+                    "usage": cumulative_usage,
+                    "usage_breakdown": usage_breakdown,
                     "tool_calls": iteration,
                     "stop_reason": response.stop_reason
                 }
+
+            # Extract tool names for analytics
+            tool_names = [
+                block.name for block in response.content
+                if hasattr(block, 'type') and block.type == "tool_use"
+            ]
+
+            # Track this tool call iteration
+            if metrics_service:
+                await metrics_service.track_operation(
+                    operation_type=OperationType.CHAT_TOOL_CALL,
+                    user_id=user_id,
+                    script_id=script_id,
+                    conversation_id=conversation_id,
+                    message_id=message_id,
+                    iteration_number=iteration + 1,
+                    tool_name=tool_names[0] if tool_names else None,
+                    input_tokens=iter_usage["input_tokens"],
+                    output_tokens=iter_usage["output_tokens"],
+                    cache_creation_tokens=iter_usage["cache_creation_input_tokens"],
+                    cache_read_tokens=iter_usage["cache_read_input_tokens"],
+                    model=model,
+                    latency_ms=timer.elapsed_ms
+                )
+
+            usage_breakdown.append({
+                "iteration": iteration + 1,
+                "type": "tool_call",
+                "tools": tool_names,
+                "usage": iter_usage,
+                "latency_ms": timer.elapsed_ms
+            })
 
             # Extract and execute tool calls
             tool_results = []
@@ -296,16 +393,8 @@ class AIService:
                 "The question might be too complex or require breaking down into "
                 "smaller parts. Please try rephrasing or asking about specific scenes."
             ),
-            "usage": {
-                "input_tokens": response.usage.input_tokens,
-                "cache_creation_input_tokens": getattr(
-                    response.usage, 'cache_creation_input_tokens', 0
-                ),
-                "cache_read_input_tokens": getattr(
-                    response.usage, 'cache_read_input_tokens', 0
-                ),
-                "output_tokens": response.usage.output_tokens
-            },
+            "usage": cumulative_usage,
+            "usage_breakdown": usage_breakdown,
             "tool_calls": max_iterations,
             "stop_reason": "max_iterations"
         }

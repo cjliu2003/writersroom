@@ -15,7 +15,8 @@ import tiktoken
 from app.models.script_outline import ScriptOutline
 from app.models.character_sheet import CharacterSheet
 from app.models.scene import Scene
-from app.schemas.ai import IntentType, BudgetTier, TopicMode
+from app.models.conversation_state import ConversationState
+from app.schemas.ai import IntentType, BudgetTier, TopicMode, TopicModeOverride, ReferenceType, RequestType, DomainType
 from app.services.retrieval_service import RetrievalService
 from app.services.conversation_service import ConversationService
 from app.services.topic_detector import TopicDetector
@@ -55,7 +56,10 @@ class ContextBuilder:
         current_scene_id: Optional[UUID] = None,
         budget_tier: BudgetTier = BudgetTier.STANDARD,
         skip_scene_retrieval: bool = False,
-        tools_enabled: bool = False
+        tools_enabled: bool = False,
+        request_type: RequestType = RequestType.SUGGEST,
+        domain: DomainType = DomainType.SCRIPT,
+        topic_mode_override: Optional[TopicModeOverride] = None
     ) -> Dict:
         """
         Build optimized prompt with caching structure.
@@ -90,6 +94,9 @@ class ContextBuilder:
             budget_tier: Token budget tier
             skip_scene_retrieval: If True, skip scene card retrieval (use when tools enabled)
             tools_enabled: If True, adjust system prompt for tool-assisted mode
+            request_type: Type of request (SUGGEST, REWRITE, etc.) - Phase 4
+            domain: Domain classification (GENERAL, SCRIPT, HYBRID) - Phase 4
+            topic_mode_override: User override for topic continuity detection
 
         Returns:
             Dict with model, max_tokens, system, messages, and metadata
@@ -100,9 +107,14 @@ class ContextBuilder:
 
         total_budget = self.BUDGET_TIERS[budget_tier]
 
-        # 1. System prompt (cacheable) - adjust for tools mode
+        # 1. System prompt (cacheable) - adjust for tools mode, domain, and request type
         step_start = time.perf_counter()
-        system_prompt = self._get_system_prompt(intent, tools_enabled=tools_enabled)
+        system_prompt = self._get_system_prompt(
+            intent,
+            tools_enabled=tools_enabled,
+            request_type=request_type,
+            domain=domain
+        )
         system_tokens = self._count_tokens(system_prompt)
         logger.info(f"[CONTEXT] System prompt generation took {(time.perf_counter() - step_start) * 1000:.2f}ms")
 
@@ -148,8 +160,18 @@ class ContextBuilder:
                 token_budget=min(300, total_budget // 6)
             )
 
-            # Detect topic mode for history gating
-            if conv_data and conv_data.get("recent_messages"):
+            # Check for user override first
+            if topic_mode_override:
+                if topic_mode_override == TopicModeOverride.CONTINUE:
+                    topic_mode = TopicMode.FOLLOW_UP
+                    topic_confidence = 1.0
+                    logger.info("[CONTEXT] Topic mode: FOLLOW_UP (user override)")
+                elif topic_mode_override == TopicModeOverride.NEW_TOPIC:
+                    topic_mode = TopicMode.NEW_TOPIC
+                    topic_confidence = 1.0
+                    logger.info("[CONTEXT] Topic mode: NEW_TOPIC (user override)")
+            # Auto-detect topic mode for history gating
+            elif conv_data and conv_data.get("recent_messages"):
                 recent_msgs = conv_data["recent_messages"]
 
                 # Get last user and assistant messages for topic detection
@@ -283,6 +305,10 @@ class ContextBuilder:
         # Claude API requires alternating user/assistant messages
         if conv_data and conv_data.get("recent_messages"):
             for msg in conv_data["recent_messages"]:
+                # Skip messages with empty content - Claude API rejects these
+                if not msg.get('content') or not str(msg['content']).strip():
+                    continue
+
                 role = msg['role'].value if hasattr(msg['role'], 'value') else str(msg['role'])
                 role = role.lower()
 
@@ -348,69 +374,170 @@ class ContextBuilder:
             }
         }
 
-    def _get_system_prompt(self, intent: IntentType, tools_enabled: bool = False) -> str:
+    def _get_system_prompt(
+        self,
+        intent: IntentType,
+        tools_enabled: bool = False,
+        request_type: RequestType = RequestType.SUGGEST,
+        domain: DomainType = DomainType.SCRIPT
+    ) -> str:
         """
-        Get system prompt tailored to intent and tool mode.
+        Generate system prompt with domain and request type awareness.
+
+        Phase 4 Implementation: System prompt now adapts based on:
+        - Domain (GENERAL, SCRIPT, HYBRID)
+        - Request type (SUGGEST, REWRITE, DIAGNOSE, BRAINSTORM, FACTUAL)
+        - Intent (LOCAL_EDIT, SCENE_FEEDBACK, GLOBAL_QUESTION, BRAINSTORM)
+        - Tools enabled state
 
         Args:
             intent: User intent type
             tools_enabled: If True, adjust prompt for tool-assisted mode
+            request_type: Type of request (SUGGEST, REWRITE, etc.)
+            domain: Domain classification (GENERAL, SCRIPT, HYBRID)
 
         Returns:
             System prompt string
         """
-        base = """You are an expert screenplay writing assistant. You understand screenplay format, story structure, and character development.
+        # Optimized prompt structure following Claude's official prompt engineering best practices:
+        # 1. Role first with behavioral constraint
+        # 2. Critical rule at TOP with XML tags (not buried at bottom)
+        # 3. Multishot example showing correct behavior
+        # 4. Other instructions follow
+        # See: https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering
 
-Key guidelines:
-- Respect screenplay formatting conventions
-- When referencing scenes, use standard numbering (Scene 1, Scene 2, etc.) where Scene 1 is the first scene in the script
-- Focus on showing not telling
-- Maintain character voice consistency
-- Consider pacing and visual storytelling
-- Provide specific, actionable feedback
+        base = """You are an expert screenplay consultant who answers ONE question at a time.
 
-IMPORTANT: When conversation history is provided, it is for CONTEXT ONLY. Always start your response fresh and complete - never continue or complete a previous response. Each of your responses should stand alone as a complete answer."""
+<critical_rule>
+ANSWER ONLY THE USER'S CURRENT QUESTION.
+- Conversation history is background context, NOT a queue of questions to answer
+- If the current question is a NEW TOPIC, focus exclusively on it
+- Do NOT re-answer or combine answers from previous questions
+- Only reference previous discussion if the user explicitly asks (e.g., "going back to...", "about that scene...")
+</critical_rule>
 
-        # When tools are enabled, add tool-specific guidance
-        # This replaces the inline tool instructions that were appended in ai_router.py
-        if tools_enabled:
+<example>
+User previously asked: "How can I improve the dialogue in Scene 5?"
+User now asks: "What is dual-dialogue and when should I use it?"
+CORRECT: Answer only about dual-dialogue. Do not mention Scene 5.
+WRONG: "I'll answer both questions..." or combining the topics.
+</example>
+
+<principles>
+- Be a supportive collaborator, not a rewrite machine
+- Respect the writer's voice and vision
+- Provide actionable, specific feedback
+- Reference specific scenes, characters, and lines when discussing the script
+</principles>
+
+<response_format>
+DEFAULT (suggestions):
+**What's working:** [1-2 sentences]
+**What could improve:** [1-2 sentences]
+**Suggestions:** [2-3 specific, actionable items]
+
+REWRITE (only when explicitly requested with words: rewrite, revise, draft):
+REVISED: [Full rewritten content]
+**Changes made:** [Brief explanation]
+</response_format>
+
+<formatting>
+- Use 1-based scene numbering for user-facing references
+- Bold character names in ALL CAPS
+- Keep responses focused and concise
+</formatting>"""
+
+        # Add domain-specific instructions with XML tags
+        if domain == DomainType.GENERAL:
             base += """
 
-TOOL USAGE INSTRUCTIONS:
-You have access to tools that allow you to retrieve and analyze screenplay content dynamically.
+<domain type="general">
+This is a general screenwriting question (not script-specific).
+Answer with expert knowledge. No need to reference this particular script.
+</domain>"""
 
-SCENE INDEXING (CRITICAL): Tools use 0-based indexing. When a user mentions "Scene 5",
-use scene_index=4 (subtract 1 from the scene number).
-Examples: Scene 1 = index 0, Scene 5 = index 4, Scene 10 = index 9.
+        elif domain == DomainType.HYBRID:
+            base += """
 
-EFFICIENCY: If the user asks about a specific scene by number, ONE get_scene call
-is sufficient. Only fetch multiple scenes if comparison or broader context is needed.
+<domain type="hybrid">
+This question has both general and script-specific aspects.
+First, explain the concept briefly. Then, apply it to this script with specific examples.
+</domain>"""
 
-MULTIPLE RESULTS: When you receive multiple tool results, synthesize ALL of them equally.
-Do NOT focus only on the most recent result - earlier results often contain key information.
+        # Add request type instruction with XML tags
+        if request_type == RequestType.REWRITE:
+            base += """
 
-When answering questions:
-- Use tools to get accurate, up-to-date information from the screenplay
-- Provide specific scene numbers, character names, and quotes from tool results
-- The global context above (outline, characters) gives you overview; tools give you precision
-- After gathering information, synthesize ALL results into a clear, well-organized answer
+<request type="rewrite">
+The user explicitly asked for a rewrite. Provide a complete revised version.
+</request>"""
+        elif request_type == RequestType.DIAGNOSE:
+            base += """
 
-Available tools:
-- get_scene: Get full scene text (scene_index is 0-based: Scene 5 = index 4)
-- get_scene_context: Get scene plus surrounding scenes for context
-- get_character_scenes: Track all appearances of a character
-- search_script: Semantic/keyword search across the script
-- analyze_pacing: Get quantitative pacing metrics (scene lengths, dialogue ratio)
-- get_plot_threads: Retrieve plot thread and thematic information"""
+<request type="diagnose">
+Analysis only. Focus on what's working and what isn't. No rewrites.
+</request>"""
+        elif request_type == RequestType.BRAINSTORM:
+            base += """
 
+<request type="brainstorm">
+Creative alternatives requested. Provide multiple distinct options with trade-offs.
+</request>"""
+        elif request_type == RequestType.FACTUAL:
+            base += """
+
+<request type="factual">
+Factual information requested. Provide a clear, direct answer.
+</request>"""
+
+        # Add intent-specific additions
         intent_additions = {
-            IntentType.LOCAL_EDIT: "\n\nFocus on improving dialogue and action lines. Be concise and specific.",
-            IntentType.SCENE_FEEDBACK: "\n\nAnalyze scene structure, pacing, conflict, and character development.",
-            IntentType.GLOBAL_QUESTION: "\n\nConsider overall story arc, theme, and structural elements.",
-            IntentType.BRAINSTORM: "\n\nBe creative and exploratory. Offer multiple alternatives."
+            IntentType.LOCAL_EDIT: "\n\n<focus>Dialogue and action lines. Be concise and specific.</focus>",
+            IntentType.SCENE_FEEDBACK: "\n\n<focus>Scene structure, pacing, conflict, and character development.</focus>",
+            IntentType.GLOBAL_QUESTION: "\n\n<focus>Overall story arc, theme, and structural elements.</focus>",
+            IntentType.BRAINSTORM: "\n\n<focus>Be creative and exploratory. Offer multiple alternatives.</focus>"
         }
+        base += intent_additions.get(intent, "")
 
-        return base + intent_additions.get(intent, "")
+        # Add tool instructions if enabled
+        if tools_enabled:
+            base += self._get_tool_instructions()
+
+        return base
+
+    def _get_tool_instructions(self) -> str:
+        """
+        Get tool-specific instructions for the system prompt.
+
+        Returns:
+            Tool instructions string
+        """
+        return """
+
+<tools>
+You have access to tools to retrieve and analyze screenplay content dynamically.
+
+<critical_indexing>
+Tools use 0-based indexing. Scene 5 = scene_index 4 (subtract 1).
+Examples: Scene 1 = index 0, Scene 5 = index 4, Scene 10 = index 9.
+</critical_indexing>
+
+<tool_usage>
+- ONE get_scene call is sufficient for a specific scene by number
+- Only fetch multiple scenes if comparison or broader context is needed
+- Synthesize ALL tool results equally (don't ignore earlier results)
+- Provide specific scene numbers, character names, and quotes from results
+</tool_usage>
+
+<available_tools>
+- get_scene: Full scene text (0-based index)
+- get_scene_context: Scene plus surrounding scenes
+- get_character_scenes: Track character appearances
+- search_script: Semantic/keyword search
+- analyze_pacing: Quantitative pacing metrics
+- get_plot_threads: Plot thread and thematic info
+</available_tools>
+</tools>"""
 
     async def _get_global_context(self, script_id: UUID, intent: IntentType) -> str:
         """
@@ -605,71 +732,84 @@ Available tools:
 - get_plot_threads: Plot thread information
 - get_scene_relationships: Scene connections and foreshadowing"""
 
-    def get_synthesis_format_instructions(self, intent: IntentType = None) -> str:
+    def get_synthesis_format_instructions(
+        self,
+        intent: IntentType = None,
+        request_type: RequestType = RequestType.SUGGEST
+    ) -> str:
         """
-        Get format constraints for the synthesis phase.
+        Get format instructions for synthesis based on intent AND request type.
 
-        P1.3 Implementation: Replace token-based limits with structural constraints
-        that models follow better - word budgets and bullet limits.
+        Phase 4 Implementation: Request type takes priority over intent.
+        REWRITE requests get rewrite format regardless of intent.
 
         Args:
             intent: Optional intent type for intent-specific formatting
+            request_type: Request type (SUGGEST, REWRITE, DIAGNOSE, etc.)
 
         Returns:
             Format instruction string
         """
-        # Intent-specific format constraints
+        # If REWRITE explicitly requested, use rewrite format regardless of intent
+        if request_type == RequestType.REWRITE:
+            return """
+Format your response as a REWRITE:
+1. Start with "REVISED:" followed by the full rewritten content
+2. Use proper screenplay formatting
+3. End with a brief (1-2 sentence) explanation of changes
+4. Maximum 300 words for the revised content"""
+
+        # If DIAGNOSE requested, use diagnosis-only format
+        if request_type == RequestType.DIAGNOSE:
+            return """
+Format your response as DIAGNOSIS ONLY:
+1. **What's working:** 2-3 specific strengths with examples
+2. **What needs attention:** 2-3 specific issues with examples
+3. Do NOT provide suggestions or rewrites
+4. Maximum 200 words"""
+
+        # Otherwise, use intent-specific SUGGESTION format
         intent_formats = {
             IntentType.LOCAL_EDIT: """
-FORMAT REQUIREMENTS:
-- Provide exactly one revised version
-- Maximum 3 sentences of explanation before the revision
-- The revision should be clearly marked with "REVISED:" prefix
-- Maximum 150 words total""",
+Format your response as FEEDBACK (not a rewrite):
+1. **What's working:** One strength of the current version (1 sentence)
+2. **What could improve:** One specific issue (1 sentence)
+3. **Suggestions:** 2-3 specific, actionable suggestions
+4. End with: "If you'd like me to rewrite these lines, just ask!"
+Maximum 150 words.""",
 
             IntentType.SCENE_FEEDBACK: """
-FORMAT REQUIREMENTS:
-Structure your response as:
-1. Main Strength (1-2 sentences)
-2. Area for Improvement (1-2 sentences)
-3. Specific Suggestion (1-2 sentences)
-Maximum 150 words total.""",
+Format your response as SCENE ANALYSIS:
+1. **Main Strength:** What works well in this scene (1-2 sentences)
+2. **Area for Improvement:** Primary opportunity (1-2 sentences)
+3. **Specific Suggestions:** 2-4 concrete improvements
+4. Optional: Offer to rewrite specific lines if applicable
+Maximum 200 words.""",
 
             IntentType.GLOBAL_QUESTION: """
-FORMAT REQUIREMENTS:
-- Maximum 5 bullet points
-- Each bullet: scene reference + specific observation
-- Lead with the most significant finding
-- Be specific: cite scene numbers and quote key lines
-- Maximum 200 words total""",
+Format your response as STRUCTURAL ANALYSIS:
+- Use bullet points for clarity
+- Lead with the most significant insight
+- Reference specific scene numbers and characters
+- Maximum 5 key points
+- Maximum 200 words.""",
 
             IntentType.BRAINSTORM: """
-FORMAT REQUIREMENTS:
-- Provide 3-5 distinct options
-- Each option: 1-2 sentences
-- Briefly note trade-offs for each
-- Maximum 200 words total"""
+Format your response as CREATIVE OPTIONS:
+- Provide 3-5 distinct alternatives
+- For each: 1-2 sentences explaining the approach
+- Note trade-offs where relevant
+- Maximum 200 words."""
         }
 
-        # Default format for unknown intents
-        default_format = """
-RESPONSE FORMAT REQUIREMENTS (CRITICAL):
-1. Maximum 200 words
-2. Maximum 5 bullet points if listing
-3. Lead with the most important finding
-4. Be specific: cite scene numbers, quote key lines
-5. Do not mention tools, evidence, or analysis process
-
-If you cannot fit everything, prioritize the MOST IMPORTANT information first.
-Truncation from the end is acceptable; truncation of the key insight is not."""
-
-        return intent_formats.get(intent, default_format)
+        return intent_formats.get(intent, intent_formats[IntentType.SCENE_FEEDBACK])
 
     def build_synthesis_prompt(
         self,
         evidence_text: str,
         user_question: str,
-        intent: IntentType = None
+        intent: IntentType = None,
+        request_type: RequestType = RequestType.SUGGEST
     ) -> str:
         """
         Build the synthesis prompt with evidence and format constraints.
@@ -677,15 +817,18 @@ Truncation from the end is acceptable; truncation of the key insight is not."""
         P1.3 Implementation: Provides clean evidence to Claude for synthesis,
         replacing the raw tool dump approach.
 
+        Phase 4: Now accepts request_type for format customization.
+
         Args:
             evidence_text: Formatted evidence from EvidenceBuilder
             user_question: Original user question
             intent: Optional intent for format customization
+            request_type: Request type (SUGGEST, REWRITE, etc.) - Phase 4
 
         Returns:
             Complete synthesis prompt string
         """
-        format_instructions = self.get_synthesis_format_instructions(intent)
+        format_instructions = self.get_synthesis_format_instructions(intent, request_type)
 
         return f"""Answer this question: {user_question}
 
@@ -703,3 +846,134 @@ CRITICAL INSTRUCTIONS FOR YOUR RESPONSE:
 
 BAD starts (never use): "Now I can...", "Based on the evidence...", "Having gathered...", "Let me provide..."
 GOOD starts: Direct statement of the answer, insight, or feedback itself."""
+
+    # =========================================================================
+    # Phase 3: Enhanced Continuity - Reference Context
+    # =========================================================================
+
+    async def get_reference_context(
+        self,
+        refers_to: ReferenceType,
+        state: Optional[ConversationState],
+        script_id: UUID
+    ) -> str:
+        """
+        Get targeted context based on what user is referring to.
+
+        Phase 3 Implementation: Provides specific context for pronoun resolution
+        and callback handling based on the ReferenceType from routing.
+
+        Args:
+            refers_to: What the user is referencing (SCENE, CHARACTER, THREAD, PRIOR_ADVICE)
+            state: Current conversation state with active entities
+            script_id: Script ID for lookups
+
+        Returns:
+            Contextual information for the reference
+        """
+        if not state:
+            return ""
+
+        context_parts = []
+
+        if refers_to == ReferenceType.PRIOR_ADVICE:
+            # User is referencing what the assistant previously suggested
+            if state.last_assistant_commitment:
+                context_parts.append(
+                    f"[Previous suggestion: {state.last_assistant_commitment}]"
+                )
+
+        elif refers_to == ReferenceType.CHARACTER:
+            # User is referencing a character (e.g., "he", "she", "they")
+            if state.active_characters:
+                chars = ", ".join(state.active_characters[:3])
+                context_parts.append(f"[Active characters: {chars}]")
+
+                # Fetch character sheet for top character if available
+                if state.active_characters:
+                    top_char = state.active_characters[0]
+                    char_sheet = await self._get_character_sheet(script_id, top_char)
+                    if char_sheet:
+                        context_parts.append(
+                            f"[{top_char} profile: {char_sheet[:200]}...]"
+                            if len(char_sheet) > 200 else f"[{top_char} profile: {char_sheet}]"
+                        )
+
+        elif refers_to == ReferenceType.SCENE:
+            # User is referencing a scene (e.g., "that scene", "this part")
+            if state.active_scene_ids:
+                scenes = ", ".join([str(s) for s in state.active_scene_ids[:3]])
+                context_parts.append(f"[Active scenes: {scenes}]")
+
+                # Fetch brief info for top scene
+                if state.active_scene_ids:
+                    top_scene_idx = state.active_scene_ids[0]
+                    scene_info = await self._get_scene_brief(script_id, top_scene_idx)
+                    if scene_info:
+                        context_parts.append(f"[Scene {top_scene_idx} info: {scene_info}]")
+
+        elif refers_to == ReferenceType.THREAD:
+            # User is referencing a plot thread
+            if state.active_threads:
+                threads = ", ".join(state.active_threads[:3])
+                context_parts.append(f"[Active plot threads: {threads}]")
+
+        return "\n".join(context_parts)
+
+    async def _get_character_sheet(self, script_id: UUID, character_name: str) -> Optional[str]:
+        """
+        Get character sheet summary for a specific character.
+
+        Args:
+            script_id: Script ID
+            character_name: Character name to look up
+
+        Returns:
+            Character summary text or None
+        """
+        try:
+            result = await self.db.execute(
+                select(CharacterSheet)
+                .options(noload('*'))
+                .where(
+                    CharacterSheet.script_id == script_id,
+                    CharacterSheet.character_name.ilike(f"%{character_name}%")
+                )
+                .limit(1)
+            )
+            sheet = result.scalar_one_or_none()
+            return sheet.summary_text if sheet else None
+        except Exception:
+            return None
+
+    async def _get_scene_brief(self, script_id: UUID, scene_position: int) -> Optional[str]:
+        """
+        Get brief scene info (heading and first line) for a scene.
+
+        Args:
+            script_id: Script ID
+            scene_position: Scene position (1-based user-facing)
+
+        Returns:
+            Brief scene info or None
+        """
+        try:
+            # Convert to 0-based for database lookup
+            db_position = scene_position - 1 if scene_position > 0 else scene_position
+
+            result = await self.db.execute(
+                select(Scene)
+                .options(noload('*'))
+                .where(
+                    Scene.script_id == script_id,
+                    Scene.position == db_position
+                )
+                .limit(1)
+            )
+            scene = result.scalar_one_or_none()
+            if scene:
+                heading = scene.scene_heading or "Unknown"
+                return f"{heading}"
+            return None
+        except Exception:
+            return None

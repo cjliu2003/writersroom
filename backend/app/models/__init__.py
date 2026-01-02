@@ -31,6 +31,8 @@ from app.models.scene_relationship import SceneRelationship, SceneRelationshipTy
 from app.models.conversation_summary import ConversationSummary
 from app.models.script_state import ScriptState
 from app.models.token_usage import TokenUsage
+from app.models.conversation_state import ConversationState
+from app.models.ai_operation_metrics import AIOperationMetrics, OperationType
 
 # This ensures that all models are properly registered with SQLAlchemy's metadata
 # and will be picked up by Alembic for migrations
@@ -60,7 +62,11 @@ __all__ = [
     'PlotThread',
     'SceneRelationship',
     'ConversationSummary',
+    'ConversationState',
     'TokenUsage',
+
+    # AI Analytics
+    'AIOperationMetrics',
 
     # Enums
     'CollaboratorRole',
@@ -68,4 +74,5 @@ __all__ = [
     'PlotThreadType',
     'SceneRelationshipType',
     'ScriptState',
+    'OperationType',
 ]

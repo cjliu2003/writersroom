@@ -1,159 +1,73 @@
-I read your report, and you’re right that the “increase max_tokens” ideas are mostly bandaids. The root problems are: **(1) the tool loop is allowed to “talk” while it’s supposed to “act,” (2) you’re appending raw tool outputs/history in ways that amplify recency bias, and (3) your RAG-only default output cap is accidentally tiny**. All of that compounds as the conversation goes on.
+Yep — this log is *very* diagnostic, and it explains why you’re still seeing ~1–2¢ even for a “simple” question.
 
-Below are fixes I’d prioritize for a system exactly like yours (MCP tools + screenplay retrieval + multi-turn agent). I’ll reference specifics from your flow where relevant. 
+## 1) Do these numbers look weird?
 
----
+A couple things stand out:
 
-## P0: Fix the truncation + “partial return” failure modes (real bugs, not tuning)
+### A. Your “simple” turn is actually **big**
 
-### 1) RAG-only mode is effectively capped at 600 unless client overrides
+* `input_tokens: 5519`
+* `output_tokens: 519`
 
-Your report shows `max_tokens=request.max_tokens or 600` in RAG-only mode. That guarantees truncation for any meaningful answer unless the frontend always sends `max_tokens`. 
+That’s not insane for **dialogue analysis** if your `get_scene` tool returns the *full scene text* and you feed it back into the model (tool_result). But it does mean you’re routinely giving the model ~5k tokens of context for “simple” turns.
 
-**Fix**
+### B. **Prompt caching is being created but not used**
 
-* Raise the default for RAG-only (e.g., 1200–2000), *and* have the client always pass an explicit value.
+You have:
 
-### 2) You’re only returning `response.content[0].text` in `AIService.generate_response`
+* `cache_creation_tokens: 9366`
+* `cache_read_tokens: 0`
 
-That’s fragile: Anthropic responses can contain multiple content blocks, and even in non-tool calls you can end up dropping text if it’s not in the first block. Your report shows `response.content[0].text`. 
+Per Claude’s docs:
 
-**Fix**
+* `cache_creation_input_tokens` = tokens written to cache
+* `cache_read_input_tokens` = tokens read from cache
+* `input_tokens` = tokens **after** the last cache breakpoint (not cached / not read / not used to create cache) ([Claude][1])
 
-* Concatenate **all** `text` blocks in `response.content`, not just `[0]`.
+So in your request, roughly **9366 tokens were written to cache**, but **0 were read back** — meaning you paid the extra “cache write” cost and got none of the savings you *should* get on subsequent calls. (Some platforms even charge cache writes at a premium vs normal input. ([Google Cloud Documentation][2]))
 
-### 3) In the tool loop, `stop_reason != "tool_use"` immediately returns the first text block
+**Why this is weird in a tool loop:** if a single user message causes multiple model calls (call → tool_use → tool_result → final), you’d normally expect later calls to show **cache_read_tokens > 0** (because the system prompt + tool schemas are identical).
 
-Per your snippet, if a loop iteration ends (including `max_tokens`) you return the first `text` block and exit. 
-That means:
+**What to check**
 
-* if the model was *mid-plan* and got cut off → you prematurely return junk to the user
-* you never attempt a “continue” recovery
+* Are you logging **one row per API call**, or **one row per user message aggregated**? If aggregated, you may be only recording the *first* call’s cache fields.
+* If it *is* per API call, then caching isn’t hitting because your cacheable prefix likely isn’t identical across calls (common causes: timestamps, request ids, tool order changing, “dynamic” text placed before the cache breakpoint).
 
-**Fix**
-
-* Treat `stop_reason == "max_tokens"` during tool loop as “need to continue planning,” not “return to user.”
-* Add an automatic recovery step: re-call with a short “Continue tool planning; output tool calls only.” (No user-facing message yet.)
-
----
-
-## P1: Make the tool loop “tool-only” (this removes 80% of your drift + truncation)
-
-Right now, each tool-loop step has `max_tokens=600`. Your report explicitly calls out the risk: the model sometimes tries to answer + call tools and gets cut off. 
-
-**Best practice:** during the loop, force the assistant to output **only tool calls (and optionally a tiny plan)**. No prose answers until the final synthesis.
-
-Concretely:
-
-* Add a hard instruction:
-  “In tool loop iterations, do not write the user-facing answer. Either call tools or say you have enough info.”
-* Enforce it in code: if the assistant emits >N characters of text in a tool iteration, discard and retry with a stricter reminder.
-
-This matters more than increasing `TOOL_LOOP_MAX_TOKENS`.
+**Bottom line:** the cache fields don’t look “wrong,” but they look like **you’re not getting the benefit of caching** right now.
 
 ---
 
-## P1: Stop “reversing tool results” and replace with evidence assembly
+## 2) “Signal finish” tool call — is that correct?
 
-Your loop appends tool results “reversed for recency bias.” 
-That’s a clever hack, but it’s still a hack: the model will overweight *whatever is most salient / longest / most recent*, and raw tool dumps remain the problem.
+You don’t need it.
 
-**Replace with:**
+In Claude tool use, the model tells you it wants a tool by returning `stop_reason: "tool_use"` (and a `tool_use` content block). When it’s done, it returns a normal end-of-turn stop reason and **no tool_use blocks**. ([Claude][3])
 
-1. Execute tools
-2. Convert results into a **single structured “Evidence” object** (ranked + trimmed)
-3. Feed only that evidence into synthesis
+So the standard agent loop is:
 
-Example evidence structure:
+1. Call model
+2. If `stop_reason == "tool_use"`:
 
-* `evidence[ ]`: `{source_tool, scene_ids, snippet, why_relevant}`
-* cap snippets (e.g., 600–1200 chars each)
-* order by relevance score (embedding similarity to the user question)
+   * Execute tools
+   * Send `tool_result` blocks back (must match tool_use ids)
+   * Repeat
+3. Else:
 
-Also: your system prompt says “give equal weight to every tool result.” 
-That instruction is *counterproductive* in practice—some tool outputs are noise. Better: **weight by relevance**, and allow discarding.
+   * You’re finished → return assistant text
 
----
+A dedicated `signal_finish` tool is usually redundant and adds:
 
-## P1: Batch your tools (yes, do it)
+* another model step (extra cost/latency)
+* another possible failure mode
 
-You’re seeing sequential `get_scene` calls. That’s exactly the case where batching is the “correct” primitive.
-
-Add:
-
-* `get_scenes(scene_indices: int[], fields: ["summary","text"], max_chars_per_scene)`
-* `get_scene_context_batch(scene_indices: int[], window_size, max_chars_per_scene)`
-* and consider merging `get_scene` + `get_scene_context` into one tool with parameters.
-
-This reduces:
-
-* latency (one round trip)
-* tokens (one tool schema + one tool_result)
-* recency problems (one unified result)
+If you need “done” for UI/telemetry, just treat “no tool_use / stop_reason != tool_use” as done.
 
 ---
 
-## P2: Fix “independent question” contamination (history isn’t “context,” it’s training signal)
+## The  biggest cost wins for your case
 
-Your current prompt says history “may not be relevant,” but you still include it, so the model uses it. 
+1. **Fix prompt caching so your later tool-loop calls read cache** (you want cache_read_tokens > 0 on the 2nd/3rd call). ([Claude][1])
 
-**Best practice:** don’t send history unless you’ve decided it’s relevant.
 
-Implement a tiny “mode gate” before context building:
-
-* `mode = follow_up | new_topic`
-* If `new_topic`: include **0** prior turns (or just a 1–2 sentence stable user preference summary), then proceed with fresh retrieval.
-
-This will also improve cache hit stability because you won’t keep appending changing history to the prompt prefix.
-
----
-
-## Model / cost recommendations (pragmatic ladder)
-
-You currently use `claude-haiku-4-5` for everything. 
-That’s fine, but agentic systems usually do better with a “ladder”:
-
-* **Haiku (cheap):** intent classification, tool selection, evidence compression
-* **Stronger model:** final synthesis only when needed (complex narrative analysis, multi-source reasoning)
-
-If you consider switching to OpenAI: prompt caching is automatic there (no cache_control blocks needed), which can simplify your pipeline. ([OpenAI Platform][1])
-OpenAI also publishes “cached input” pricing explicitly (useful if your prefix is stable). ([OpenAI Platform][2])
-
-Anthropic caching: `cache_control: {"type":"ephemeral"}` is currently the supported cache type and has a short lifetime (commonly documented as ~5 minutes), so the “~90% cost reduction” claim only holds when traffic patterns reuse the prefix within that window. ([Claude][3])
-
----
-
-## Output length: stop relying on token caps
-
-Even with `FINAL_SYNTHESIS_MAX_TOKENS=1200`, the model will ramble and then get cut off. 
-
-**Instead:**
-
-* Force a response format: e.g. “5 bullets max, 1 sentence each.”
-* Add a word budget (“≤180 words”)—models follow this better than token numbers.
-* Put “most important first” instruction (truncation-safe).
-
----
-
-## A recommended architecture for your exact flow
-
-**Tool loop**
-
-1. Plan/tools (tool-only)
-2. Execute tools (batch)
-3. Evidence builder (compress + rank + discard)
-4. Synthesis (short, formatted)
-
-**Key principle:** the synthesis step should see *clean evidence*, not raw history + raw tool dumps.
-
----
-
-If you want, paste one real failing trace (user message + tool calls + tool outputs sizes + final answer). With that, I can propose:
-
-* the exact “Evidence JSON schema” I’d use,
-* the batching tool signatures,
-* and a concrete gating heuristic for new-topic vs follow-up tuned to screenplay chat.
-
-[1]: https://platform.openai.com/docs/guides/prompt-caching?utm_source=chatgpt.com "Prompt caching | OpenAI API"
-[2]: https://platform.openai.com/docs/pricing?utm_source=chatgpt.com "Pricing | OpenAI API"
-[3]: https://platform.claude.com/docs/en/build-with-claude/prompt-caching?utm_source=chatgpt.com "Prompt caching - Claude Docs"
+[1]: https://platform.claude.com/docs/en/build-with-claude/prompt-caching?utm_source=chatgpt.com "Prompt caching - Claude Docs"
+[3]: https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons?utm_source=chatgpt.com "Handling stop reasons - Claude Docs"

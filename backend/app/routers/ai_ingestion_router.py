@@ -56,7 +56,7 @@ async def analyze_script(
             allow_viewer=False  # Need editor permissions to trigger analysis
         )
 
-        state_service = ScriptStateService(db)
+        state_service = ScriptStateService(db, user_id=user.user_id)
 
         # Check if force reanalysis requested
         if request.force_full_analysis:
@@ -75,6 +75,7 @@ async def analyze_script(
                 job = queue.enqueue(
                     analyze_script_full,
                     str(script.script_id),
+                    str(user.user_id),  # Pass user_id for analytics cost tracking
                     job_timeout='30m'
                 )
 
@@ -128,12 +129,14 @@ async def analyze_script(
                     job = queue.enqueue(
                         analyze_script_partial,
                         str(script.script_id),
+                        str(user.user_id),  # Pass user_id for analytics cost tracking
                         job_timeout='15m'
                     )
                 else:  # ANALYZED
                     job = queue.enqueue(
                         analyze_script_full,
                         str(script.script_id),
+                        str(user.user_id),  # Pass user_id for analytics cost tracking
                         job_timeout='30m'
                     )
 
@@ -279,7 +282,7 @@ async def refresh_artifacts(
             allow_viewer=False
         )
 
-        ingestion_service = IngestionService(db)
+        ingestion_service = IngestionService(db, user_id=user.user_id)
         refreshed = []
         total_tokens = 0
 

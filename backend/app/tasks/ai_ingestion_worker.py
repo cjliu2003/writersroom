@@ -62,20 +62,24 @@ AsyncSessionLocal = sessionmaker(
 )
 
 
-def analyze_scene(scene_id: str) -> dict:
+def analyze_scene(scene_id: str, user_id: str = None) -> dict:
     """
     Generate scene summary and embedding for a single scene.
 
     Args:
         scene_id: Scene ID (string UUID)
+        user_id: User ID (string UUID) for analytics cost tracking
 
     Returns:
         Dict with success status and details
     """
-    return asyncio.run(_analyze_scene_async(UUID(scene_id)))
+    return asyncio.run(_analyze_scene_async(
+        UUID(scene_id),
+        UUID(user_id) if user_id else None
+    ))
 
 
-async def _analyze_scene_async(scene_id: UUID) -> dict:
+async def _analyze_scene_async(scene_id: UUID, user_id: UUID = None) -> dict:
     """
     Async implementation of scene analysis.
     """
@@ -83,7 +87,7 @@ async def _analyze_scene_async(scene_id: UUID) -> dict:
         try:
             logger.info(f"Starting scene analysis for {scene_id}")
 
-            ingestion_service = IngestionService(db)
+            ingestion_service = IngestionService(db, user_id=user_id)
             embedding_service = EmbeddingService(db)
 
             # Get scene
@@ -119,20 +123,24 @@ async def _analyze_scene_async(scene_id: UUID) -> dict:
             return {"success": False, "error": str(e)}
 
 
-def analyze_script_partial(script_id: str) -> dict:
+def analyze_script_partial(script_id: str, user_id: str = None) -> dict:
     """
     Partial ingestion: scene cards + embeddings.
 
     Args:
         script_id: Script ID (string UUID)
+        user_id: User ID (string UUID) for analytics cost tracking
 
     Returns:
         Dict with success status and details
     """
-    return asyncio.run(_analyze_script_partial_async(UUID(script_id)))
+    return asyncio.run(_analyze_script_partial_async(
+        UUID(script_id),
+        UUID(user_id) if user_id else None
+    ))
 
 
-async def _analyze_script_partial_async(script_id: UUID) -> dict:
+async def _analyze_script_partial_async(script_id: UUID, user_id: UUID = None) -> dict:
     """
     Async implementation of partial script analysis.
     """
@@ -140,7 +148,7 @@ async def _analyze_script_partial_async(script_id: UUID) -> dict:
         try:
             logger.info(f"Starting partial analysis for script {script_id}")
 
-            state_service = ScriptStateService(db)
+            state_service = ScriptStateService(db, user_id=user_id)
 
             # Trigger partial ingestion
             await state_service.trigger_partial_ingestion(script_id)
@@ -160,20 +168,24 @@ async def _analyze_script_partial_async(script_id: UUID) -> dict:
             return {"success": False, "error": str(e)}
 
 
-def analyze_script_full(script_id: str) -> dict:
+def analyze_script_full(script_id: str, user_id: str = None) -> dict:
     """
     Full analysis: scene cards + outline + character sheets + embeddings.
 
     Args:
         script_id: Script ID (string UUID)
+        user_id: User ID (string UUID) for analytics cost tracking
 
     Returns:
         Dict with success status and details
     """
-    return asyncio.run(_analyze_script_full_async(UUID(script_id)))
+    return asyncio.run(_analyze_script_full_async(
+        UUID(script_id),
+        UUID(user_id) if user_id else None
+    ))
 
 
-async def _analyze_script_full_async(script_id: UUID) -> dict:
+async def _analyze_script_full_async(script_id: UUID, user_id: UUID = None) -> dict:
     """
     Async implementation of full script analysis.
     """
@@ -181,7 +193,7 @@ async def _analyze_script_full_async(script_id: UUID) -> dict:
         try:
             logger.info(f"Starting full analysis for script {script_id}")
 
-            state_service = ScriptStateService(db)
+            state_service = ScriptStateService(db, user_id=user_id)
 
             # Trigger full analysis
             await state_service.trigger_full_analysis(script_id)
@@ -199,20 +211,24 @@ async def _analyze_script_full_async(script_id: UUID) -> dict:
             return {"success": False, "error": str(e)}
 
 
-def refresh_outline(script_id: str) -> dict:
+def refresh_outline(script_id: str, user_id: str = None) -> dict:
     """
     Regenerate script outline if stale.
 
     Args:
         script_id: Script ID (string UUID)
+        user_id: User ID (string UUID) for analytics cost tracking
 
     Returns:
         Dict with success status and details
     """
-    return asyncio.run(_refresh_outline_async(UUID(script_id)))
+    return asyncio.run(_refresh_outline_async(
+        UUID(script_id),
+        UUID(user_id) if user_id else None
+    ))
 
 
-async def _refresh_outline_async(script_id: UUID) -> dict:
+async def _refresh_outline_async(script_id: UUID, user_id: UUID = None) -> dict:
     """
     Async implementation of outline refresh.
     """
@@ -220,7 +236,7 @@ async def _refresh_outline_async(script_id: UUID) -> dict:
         try:
             logger.info(f"Refreshing outline for script {script_id}")
 
-            ingestion_service = IngestionService(db)
+            ingestion_service = IngestionService(db, user_id=user_id)
 
             # Regenerate outline
             outline = await ingestion_service.generate_script_outline(
@@ -242,21 +258,26 @@ async def _refresh_outline_async(script_id: UUID) -> dict:
             return {"success": False, "error": str(e)}
 
 
-def refresh_character_sheet(script_id: str, character_name: str) -> dict:
+def refresh_character_sheet(script_id: str, character_name: str, user_id: str = None) -> dict:
     """
     Regenerate character sheet if stale.
 
     Args:
         script_id: Script ID (string UUID)
         character_name: Character name
+        user_id: User ID (string UUID) for analytics cost tracking
 
     Returns:
         Dict with success status and details
     """
-    return asyncio.run(_refresh_character_sheet_async(UUID(script_id), character_name))
+    return asyncio.run(_refresh_character_sheet_async(
+        UUID(script_id),
+        character_name,
+        UUID(user_id) if user_id else None
+    ))
 
 
-async def _refresh_character_sheet_async(script_id: UUID, character_name: str) -> dict:
+async def _refresh_character_sheet_async(script_id: UUID, character_name: str, user_id: UUID = None) -> dict:
     """
     Async implementation of character sheet refresh.
     """
@@ -264,7 +285,7 @@ async def _refresh_character_sheet_async(script_id: UUID, character_name: str) -
         try:
             logger.info(f"Refreshing character sheet for {character_name} in script {script_id}")
 
-            ingestion_service = IngestionService(db)
+            ingestion_service = IngestionService(db, user_id=user_id)
 
             # Regenerate character sheet
             sheet = await ingestion_service.generate_character_sheet(

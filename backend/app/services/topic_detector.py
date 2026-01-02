@@ -34,6 +34,7 @@ class TopicDetector:
 
     # Phrases that indicate follow-up to previous topic
     FOLLOW_UP_PATTERNS = [
+        # Continuation phrases
         "also", "additionally", "another thing",
         "what about", "how about", "and what",
         "you mentioned", "earlier you said",
@@ -45,6 +46,19 @@ class TopicDetector:
         "in addition", "furthermore",
         "related to that", "on that note",
         "continuing", "following up",
+
+        # Disagreement/questioning patterns (responding to AI advice)
+        "i don't know", "i disagree", "i'm not sure",
+        "i think", "i feel like", "i feel that",
+        "but i", "but that", "but this", "but it",
+        "why doesn't", "why does", "why is", "why did", "why would",
+        "doesn't feel", "doesn't work", "doesn't make sense",
+        "doesn't seem", "don't think",
+
+        # Addressing AI's perspective
+        "to you", "for you",
+        "your suggestion", "your point", "your analysis",
+        "you said", "you think", "you suggested",
     ]
 
     # Phrases that indicate new topic
@@ -85,7 +99,19 @@ class TopicDetector:
             logger.debug("No conversation history - treating as NEW_TOPIC")
             return TopicMode.NEW_TOPIC, 1.0
 
-        # Check explicit patterns
+        # Check for EXPLICIT new topic signals first - these are strong intent signals
+        # If user says "new question", "switching topics", etc., respect that intent
+        explicit_new_topic_phrases = [
+            "new question", "different question", "switching topics",
+            "separate question", "quick question", "different topic",
+            "changing subjects", "on a different note", "moving on to",
+            "unrelated", "by the way",
+        ]
+        if any(phrase in message_lower for phrase in explicit_new_topic_phrases):
+            logger.debug("Explicit new topic phrase detected - respecting user intent")
+            return TopicMode.NEW_TOPIC, 0.9
+
+        # Check explicit patterns for scoring
         follow_up_score = sum(
             1 for p in self.FOLLOW_UP_PATTERNS
             if p in message_lower
@@ -104,7 +130,7 @@ class TopicDetector:
             logger.debug("Strong follow-up pattern match")
             return TopicMode.FOLLOW_UP, 0.9
 
-        # Clear new topic signal
+        # Clear new topic signal (for remaining patterns)
         if new_topic_score > follow_up_score + 1:
             logger.debug("Strong new topic pattern match")
             return TopicMode.NEW_TOPIC, 0.9
@@ -118,6 +144,22 @@ class TopicDetector:
         if pronoun_at_start:
             logger.debug("Pronoun at message start - likely follow-up")
             return TopicMode.FOLLOW_UP, 0.7
+
+        # Check for referential pronouns ANYWHERE in message (not just start)
+        # These suggest referring back to something previously discussed
+        if last_assistant_message:
+            referential_pronouns = ["this ", "that ", "these ", "those "]
+            if any(p in message_lower for p in referential_pronouns):
+                logger.debug("Referential pronoun found mid-sentence - likely follow-up")
+                return TopicMode.FOLLOW_UP, 0.65
+
+        # Questions addressing the AI's perspective are follow-ups
+        # e.g., "Why doesn't this feel authentic to you?"
+        if "?" in current_message:
+            ai_reference_patterns = ["you ", "your ", "to you", "for you"]
+            if any(p in message_lower for p in ai_reference_patterns):
+                logger.debug("Question addressing AI perspective - follow-up")
+                return TopicMode.FOLLOW_UP, 0.75
 
         # Check for scene number references matching previous context
         if last_assistant_message:
@@ -146,12 +188,16 @@ class TopicDetector:
                 )
                 return TopicMode.FOLLOW_UP, 0.6
 
-        # Default heuristic: short messages are more likely follow-ups
+        # Default: within an active conversation, assume FOLLOW_UP
+        # Rationale: Losing context (false NEW_TOPIC) causes worse UX than
+        # including extra context (false FOLLOW_UP). Users can explicitly
+        # indicate new topics, but implicit continuity should be preserved.
         word_count = len(current_message.split())
-        if word_count < 10:
-            logger.debug(f"Short message ({word_count} words) - treating as follow-up")
-            return TopicMode.FOLLOW_UP, 0.5
+        if word_count < 8:
+            logger.debug(f"Short message ({word_count} words) - strong follow-up signal")
+            return TopicMode.FOLLOW_UP, 0.7
 
-        # Longer messages without clear signals = likely new topic
-        logger.debug(f"Long message ({word_count} words) - treating as new topic")
-        return TopicMode.NEW_TOPIC, 0.5
+        # Default to FOLLOW_UP for ambiguous cases
+        # This is the key change: prefer continuity over isolation
+        logger.debug(f"Ambiguous ({word_count} words) - defaulting to follow-up")
+        return TopicMode.FOLLOW_UP, 0.5

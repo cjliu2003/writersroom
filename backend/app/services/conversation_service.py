@@ -76,6 +76,8 @@ class ConversationService:
         summary_obj = summary_result.scalar_one_or_none()
 
         # Format for prompt
+        # Filter out messages with empty content - these can occur if a previous
+        # streaming request failed before updating the placeholder assistant message
         context = {
             "summary": summary_obj.summary_text if summary_obj else None,
             "recent_messages": [
@@ -85,6 +87,7 @@ class ConversationService:
                     "timestamp": msg.created_at.isoformat() if msg.created_at else None
                 }
                 for msg in recent
+                if msg.content and msg.content.strip()  # Skip empty messages
             ]
         }
 

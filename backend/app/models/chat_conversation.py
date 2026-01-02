@@ -10,6 +10,7 @@ from app.models.base import Base
 
 if TYPE_CHECKING:
     from app.models.conversation_summary import ConversationSummary  # noqa: F401
+    from app.models.conversation_state import ConversationState  # noqa: F401
 
 class ChatConversation(Base):
     """
@@ -101,6 +102,15 @@ class ChatConversation(Base):
         cascade='all, delete-orphan',
         lazy='selectin',
         order_by='ConversationSummary.created_at.desc()'
+    )
+
+    # Phase 2: Working set state for continuity
+    state: Mapped[Optional['ConversationState']] = relationship(
+        'ConversationState',
+        back_populates='conversation',
+        cascade='all, delete-orphan',
+        uselist=False,
+        lazy='selectin'
     )
 
     def __repr__(self) -> str:

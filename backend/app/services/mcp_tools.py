@@ -116,6 +116,19 @@ from app.services.retrieval_service import RetrievalService
 
 
 # MCP Tool Definitions for Claude API
+#
+# TOOL LOOP ARCHITECTURE:
+# Claude uses tool_choice="auto" throughout the tool loop, allowing it to
+# naturally decide when to stop gathering information. When Claude's response
+# has stop_reason != "tool_use" AND tool results were gathered, we trigger
+# a synthesis phase with higher token budget for the final response.
+#
+# Flow:
+# 1. All iterations: tool_choice="auto" - Claude decides if more tools needed
+# 2. When Claude stops (stop_reason != "tool_use"): check for tool results
+# 3. If tool results exist: trigger synthesis with high token limit
+# 4. If no tool results: return Claude's direct response
+#
 SCREENPLAY_TOOLS = [
     {
         "name": "get_scene",

@@ -204,7 +204,7 @@ export default function TestTipTapPage() {
   } = useScriptYjsCollaboration({
     scriptId: scriptId,
     authToken: authToken,
-    enabled: !!authToken, // Only enable when we have auth token
+    enabled: !!authToken,
   });
 
   // Editor ref for autosave content extraction (set after editor is created)

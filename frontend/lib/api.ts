@@ -337,6 +337,9 @@ export interface ChatResponse {
   error?: string;
 }
 
+// Topic mode override for conversation continuity control
+export type TopicModeOverride = 'continue' | 'new_topic';
+
 // NEW chat interfaces with RAG support and optional tool support (Phase 6)
 export interface ChatMessageRequest {
   script_id: string;
@@ -350,6 +353,12 @@ export interface ChatMessageRequest {
   // Phase 6: Hybrid mode support (optional)
   enable_tools?: boolean;        // Enable MCP tool calling (default: true on backend)
   max_iterations?: number;       // Maximum tool calling iterations (default: 5)
+
+  // Topic continuity override - controls conversation context inclusion
+  // 'continue': Force include conversation history (FOLLOW_UP mode)
+  // 'new_topic': Force skip conversation history, fresh context (NEW_TOPIC mode)
+  // undefined: Use automatic topic detection (default)
+  topic_mode?: TopicModeOverride;
 }
 
 export interface TokenUsage {
@@ -443,15 +452,22 @@ export interface ThinkingEvent {
   message: string;
 }
 
+// NEW: Text streaming event - incremental text deltas from AI response
+export interface TextEvent {
+  type: 'text';
+  text: string;
+}
+
 export interface CompleteEvent {
   type: 'complete';
-  message: string;
+  message: string;  // Empty when streamed=true
   usage: TokenUsage;
   tool_metadata?: {
     tool_calls_made: number;
     tools_used: string[];
     stop_reason: string;
   };
+  streamed?: boolean;  // NEW: Indicates text was already streamed via text events
 }
 
 export interface StreamEndEvent {
@@ -459,7 +475,8 @@ export interface StreamEndEvent {
   conversation_id: string;
 }
 
-export type ChatStreamEvent = StatusEvent | ThinkingEvent | CompleteEvent | StreamEndEvent;
+// Union type for all SSE events including streaming text
+export type ChatStreamEvent = StatusEvent | ThinkingEvent | TextEvent | CompleteEvent | StreamEndEvent;
 
 // NEW: Streaming chat endpoint with real-time status updates
 // Returns an async generator that yields events as they arrive
@@ -553,7 +570,42 @@ export async function deleteConversation(conversationId: string): Promise<{ succ
   return response.json();
 }
 
-// Response type for conversation history
+// ============================================================================
+// Multi-Chat Support Types
+// ============================================================================
+
+// Single conversation in list (without messages)
+export interface ConversationListItem {
+  conversation_id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  message_count: number;
+  last_message_preview: string | null;
+}
+
+// Response type for listing conversations
+export interface ConversationListResponse {
+  conversations: ConversationListItem[];
+}
+
+// Response for creating a conversation
+export interface CreateConversationResponse {
+  conversation_id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  message_count: number;
+}
+
+// Response for updating/renaming a conversation
+export interface UpdateConversationResponse {
+  conversation_id: string;
+  title: string;
+  updated_at: string;
+}
+
+// Response type for conversation history (single conversation with messages)
 export interface ConversationHistoryResponse {
   conversation: {
     conversation_id: string;
@@ -575,14 +627,77 @@ export interface ConversationHistoryResponse {
   }>;
 }
 
-// Get conversation history for a script from the database
-// This is the source of truth - replaces localStorage-based history
-export async function getConversationForScript(scriptId: string): Promise<ConversationHistoryResponse> {
-  const response = await authenticatedFetch(`/ai/chat/script/${scriptId}/conversation`);
+// ============================================================================
+// Multi-Chat API Functions
+// ============================================================================
+
+/**
+ * List all conversations for a script.
+ * Returns conversations ordered by most recently updated first.
+ */
+export async function listConversations(scriptId: string): Promise<ConversationListResponse> {
+  const response = await authenticatedFetch(`/ai/chat/script/${scriptId}/conversations`);
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Failed to fetch conversation history');
+    throw new Error(errorData.detail || 'Failed to list conversations');
+  }
+
+  return response.json();
+}
+
+/**
+ * Create a new conversation for a script.
+ * @param scriptId - The script ID
+ * @param title - Optional title (defaults to "Untitled")
+ */
+export async function createConversation(
+  scriptId: string,
+  title?: string
+): Promise<CreateConversationResponse> {
+  const response = await authenticatedFetch(`/ai/chat/script/${scriptId}/conversations`, {
+    method: 'POST',
+    body: JSON.stringify({ title: title || 'Untitled' }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to create conversation');
+  }
+
+  return response.json();
+}
+
+/**
+ * Rename an existing conversation.
+ */
+export async function renameConversation(
+  conversationId: string,
+  title: string
+): Promise<UpdateConversationResponse> {
+  const response = await authenticatedFetch(`/ai/chat/conversations/${conversationId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ title }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to rename conversation');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get a single conversation with all its messages.
+ * Use this to load a conversation when switching between chats.
+ */
+export async function getConversation(conversationId: string): Promise<ConversationHistoryResponse> {
+  const response = await authenticatedFetch(`/ai/chat/conversations/${conversationId}`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to fetch conversation');
   }
 
   return response.json();

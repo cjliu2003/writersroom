@@ -159,8 +159,8 @@ class TestToolLoopWithEvidenceBuilder:
             intent=IntentType.GLOBAL_QUESTION
         )
 
-        assert "Maximum 5 bullet points" in synthesis_prompt
-        assert "scene reference" in synthesis_prompt.lower()
+        assert "Maximum 5 key points" in synthesis_prompt
+        assert "scene number" in synthesis_prompt.lower()
         assert "Maximum 200 words" in synthesis_prompt
 
         # Test LOCAL_EDIT format
@@ -170,7 +170,7 @@ class TestToolLoopWithEvidenceBuilder:
             intent=IntentType.LOCAL_EDIT
         )
 
-        assert "exactly one revised version" in synthesis_prompt_edit.lower()
+        assert "feedback" in synthesis_prompt_edit.lower()
         assert "Maximum 150 words" in synthesis_prompt_edit
 
 
@@ -178,148 +178,96 @@ class TestToolLoopWithEvidenceBuilder:
 # Test: Truncation Recovery (P0.3)
 # ============================================================================
 
-class TestTruncationRecovery:
-    """Test max_tokens truncation recovery mechanism."""
+class TestToolChoicePattern:
+    """Test tool_choice='auto' pattern for natural synthesis triggering."""
 
     @pytest.mark.asyncio
-    async def test_recovery_prompt_continues_tool_planning(self):
-        """Test that recovery prompt asks to continue without prose."""
-        # Import the recovery prompt constant
-        from app.routers.ai_router import RECOVERY_PROMPT, MAX_RECOVERY_ATTEMPTS
+    async def test_core_tools_exist(self):
+        """Test that core screenplay tools are defined (signal tool removed)."""
+        from app.services.mcp_tools import SCREENPLAY_TOOLS
 
-        # Verify recovery prompt content
-        assert "Continue" in RECOVERY_PROMPT
-        assert "ONLY tool calls" in RECOVERY_PROMPT
-        assert "no explanations" in RECOVERY_PROMPT.lower() or "no user-facing" in RECOVERY_PROMPT.lower()
+        # Verify core tools exist
+        tool_names = [tool["name"] for tool in SCREENPLAY_TOOLS]
 
-        # Verify max recovery attempts is reasonable
-        assert MAX_RECOVERY_ATTEMPTS >= 1
-        assert MAX_RECOVERY_ATTEMPTS <= 5
+        # These tools should exist
+        assert "get_scene" in tool_names
+        assert "get_scene_context" in tool_names
+        assert "get_character_scenes" in tool_names
+        assert "search_script" in tool_names
+
+        # Signal tool should NOT exist (removed)
+        assert "signal_ready_for_response" not in tool_names
 
     @pytest.mark.asyncio
-    async def test_recovery_metadata_tracks_attempts(self):
-        """Test that recovery attempts are tracked in metadata."""
-        # This tests the ToolCallMetadata schema
+    async def test_tool_call_metadata_schema(self):
+        """Test that ToolCallMetadata schema supports the new pattern."""
         from app.schemas.ai import ToolCallMetadata
 
+        # Test with end_turn stop reason (natural exit)
         metadata = ToolCallMetadata(
             tool_calls_made=3,
-            tools_used=["get_scene", "search_script"],
+            tools_used=["get_scene", "get_character_scenes"],
             stop_reason="end_turn",
-            recovery_attempts=2
+            recovery_attempts=0
         )
 
-        assert metadata.recovery_attempts == 2
-        assert metadata.tool_calls_made == 3
+        assert metadata.stop_reason == "end_turn"
+        assert metadata.recovery_attempts == 0
+        assert "get_scene" in metadata.tools_used
 
     @pytest.mark.asyncio
-    async def test_truncation_triggers_recovery(self):
-        """
-        Test that max_tokens stop_reason triggers recovery attempt.
+    async def test_tool_loop_constants(self):
+        """Test that token constants are properly defined."""
+        from app.routers.ai_router import (
+            TOOL_LOOP_MAX_TOKENS,
+            FINAL_SYNTHESIS_MAX_TOKENS
+        )
 
-        This is a logical test verifying the recovery conditions.
-        """
-        from app.routers.ai_router import MAX_RECOVERY_ATTEMPTS
-
-        # Simulate the recovery decision logic
-        stop_reason = "max_tokens"
-        recovery_attempts = 0
-
-        # Should trigger recovery
-        should_recover = (stop_reason == "max_tokens" and
-                          recovery_attempts < MAX_RECOVERY_ATTEMPTS)
-        assert should_recover is True
-
-        # After max attempts, should not recover
-        recovery_attempts = MAX_RECOVERY_ATTEMPTS
-        should_recover = (stop_reason == "max_tokens" and
-                          recovery_attempts < MAX_RECOVERY_ATTEMPTS)
-        assert should_recover is False
+        # Token limits should be reasonable
+        assert TOOL_LOOP_MAX_TOKENS >= 1000, "Tool loop needs sufficient tokens for planning"
+        assert FINAL_SYNTHESIS_MAX_TOKENS >= 2000, "Synthesis needs room for full responses"
+        assert FINAL_SYNTHESIS_MAX_TOKENS > TOOL_LOOP_MAX_TOKENS, "Synthesis should have more tokens"
 
     @pytest.mark.asyncio
-    async def test_post_recovery_synthesis_triggers_deterministically(self):
+    async def test_synthesis_triggers_with_tool_results(self):
         """
-        Test that synthesis is triggered based on two conditions:
+        Test that synthesis is triggered based on the new tool_choice='auto' pattern:
 
-        1. POST-RECOVERY (deterministic): If recovery_attempts > 0, ALWAYS synthesize
-           because RECOVERY_PROMPT explicitly told Claude to "output ONLY tool calls",
-           so any text after recovery is NOT the actual answer.
+        1. TOOL RESULTS EXIST: When tools have been called, always synthesize
+           to ensure consistent quality responses based on gathered evidence.
 
-        2. SHORT RESPONSE (fallback): If no recovery but text < 150 chars, synthesize.
-           This catches cases where Claude returns an acknowledgment instead of answering.
+        2. NO TOOLS: When Claude responds directly without tools (stop_reason != "tool_use"),
+           return the direct response without synthesis.
 
-        The P0.3 fix ensures post-recovery synthesis is deterministic, not probabilistic.
+        The tool_choice='auto' strategy allows Claude to naturally decide when
+        to stop using tools, relying on stop_reason to detect completion.
         """
-        SYNTHESIS_THRESHOLD = 150  # Must match ai_router.py
 
-        # Helper function matching the actual ai_router.py logic
-        def needs_synthesis(all_tool_results, recovery_attempts, final_text):
-            return (
-                len(all_tool_results) > 0 and (
-                    recovery_attempts > 0 or  # Post-recovery ALWAYS needs synthesis
-                    len(final_text.strip()) < SYNTHESIS_THRESHOLD  # Fallback for short responses
-                )
-            )
-
-        # Test data
+        # Test data simulating the new pattern
         tool_results = [
             {"tool_name": "get_scene", "tool_input": {"scene_index": 3}, "result": "Scene content..."}
         ]
         empty_results = []
 
-        # =========================================================
-        # DETERMINISTIC CASE: recovery_attempts > 0 always triggers
-        # =========================================================
-
-        # Scenario 1: Post-recovery with empty text -> MUST synthesize
-        assert needs_synthesis(tool_results, recovery_attempts=1, final_text="") is True
-
-        # Scenario 2: Post-recovery with acknowledgment phrase -> MUST synthesize
-        assert needs_synthesis(
-            tool_results,
-            recovery_attempts=1,
-            final_text="I have all the information I need to respond."
-        ) is True
-
-        # Scenario 3: Post-recovery with LONG text -> MUST STILL synthesize!
-        # This is the key test: even if Claude produces 200+ chars after recovery,
-        # it's not the real answer because RECOVERY_PROMPT said "ONLY tool calls"
-        long_text_after_recovery = (
-            "Based on my analysis of scene 4, I found that the dialogue between Sam and Lauren "
-            "effectively establishes the tension in their relationship. The scene opens with Sam "
-            "caring for their newborn while Lauren manages the apartment, setting up a domestic scene."
-        )
-        assert len(long_text_after_recovery) >= SYNTHESIS_THRESHOLD, "Test assumption: text is long"
-        assert needs_synthesis(tool_results, recovery_attempts=1, final_text=long_text_after_recovery) is True, \
-            "Post-recovery ALWAYS triggers synthesis regardless of text length"
-
-        # Scenario 4: Post-recovery with multiple recovery attempts -> MUST synthesize
-        assert needs_synthesis(tool_results, recovery_attempts=2, final_text="Some text") is True
+        # New synthesis trigger logic: synthesize when tool results exist
+        def needs_synthesis(all_tool_results):
+            """Synthesis trigger logic based on tool results."""
+            return len(all_tool_results) > 0
 
         # =========================================================
-        # FALLBACK CASE: no recovery, short text triggers
+        # TOOL RESULTS CASE: Always triggers synthesis
         # =========================================================
 
-        # Scenario 5: No recovery, empty text -> should trigger (fallback)
-        assert needs_synthesis(tool_results, recovery_attempts=0, final_text="") is True
-
-        # Scenario 6: No recovery, acknowledgment phrase -> should trigger (fallback)
-        ack_phrase = "I have all the information I need to respond."
-        assert len(ack_phrase) < SYNTHESIS_THRESHOLD
-        assert needs_synthesis(tool_results, recovery_attempts=0, final_text=ack_phrase) is True
-
-        # Scenario 7: No recovery, real answer -> should NOT trigger
-        assert needs_synthesis(tool_results, recovery_attempts=0, final_text=long_text_after_recovery) is False, \
-            "Without recovery, long text should NOT trigger synthesis"
+        # Scenario 1: Tool results exist -> synthesize
+        assert needs_synthesis(tool_results) is True
 
         # =========================================================
-        # EDGE CASES
+        # NO TOOLS CASE: No synthesis needed
         # =========================================================
 
-        # Scenario 8: No tool results -> never synthesize
-        assert needs_synthesis(empty_results, recovery_attempts=0, final_text="") is False
-        assert needs_synthesis(empty_results, recovery_attempts=1, final_text="") is False
-        assert needs_synthesis(empty_results, recovery_attempts=0, final_text="short") is False
+        # Scenario 2: No tool results -> no synthesis (direct response)
+        # This happens when Claude responds directly on any iteration
+        assert needs_synthesis(empty_results) is False
 
 
 # ============================================================================
@@ -448,9 +396,9 @@ class TestToolOnlyMode:
         brainstorm_format = context_builder.get_synthesis_format_instructions(IntentType.BRAINSTORM)
 
         # Each should have different constraints
-        assert "revised" in local_edit_format.lower()
+        assert "feedback" in local_edit_format.lower()
         assert "bullet" in global_question_format.lower()
-        assert "options" in brainstorm_format.lower()
+        assert "alternatives" in brainstorm_format.lower()
 
         # All should have word limits
         assert "words" in local_edit_format.lower()
