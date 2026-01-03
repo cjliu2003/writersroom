@@ -24,6 +24,8 @@ import { yUndoPluginKey } from 'y-prosemirror';
 // @ts-ignore - pagination extension may not have types
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
+import { useOfflineRecovery, detectConflictSeverity } from '@/hooks/use-offline-recovery';
+import { OfflineRecoveryDialog } from '@/components/offline-recovery-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
 import { ScreenplayDocument } from '@/extensions/screenplay/screenplay-document';
@@ -86,6 +88,11 @@ export default function TestTipTapPage() {
   const [editingTitle, setEditingTitle] = useState('');
   const [isSavingTitle, setIsSavingTitle] = useState(false);
 
+  // Offline recovery state (for crash recovery)
+  const [isRecovering, setIsRecovering] = useState(false);
+  const [recoveredContent, setRecoveredContent] = useState<any[] | null>(null);
+  const [forceApplyRecovered, setForceApplyRecovered] = useState(false); // Bypass Yjs check during recovery
+
   // Collapsible bar states
   const [isTopBarCollapsed, setIsTopBarCollapsed] = useState(false);
   const [isSceneNavCollapsed, setIsSceneNavCollapsed] = useState(false);
@@ -123,6 +130,33 @@ export default function TestTipTapPage() {
     fetchToken();
     return () => { cancelled = true };
   }, [user, getToken]);
+
+  // Offline recovery hook - checks IndexedDB for crash recovery
+  const [recoveryState, recoveryActions] = useOfflineRecovery(
+    scriptId,
+    script?.updated_at || null
+  );
+
+  // Handle recovery dialog actions
+  const handleRecover = async () => {
+    setIsRecovering(true);
+    try {
+      const content = await recoveryActions.recoverChanges();
+      console.log('[TipTapEditor] Recovered offline content:', content.length, 'blocks');
+      setRecoveredContent(content);
+      // This content will be used to seed Yjs instead of server content
+    } catch (e) {
+      console.error('[TipTapEditor] Recovery failed:', e);
+    } finally {
+      setIsRecovering(false);
+    }
+  };
+
+  const handleDiscard = async () => {
+    await recoveryActions.discardChanges();
+    console.log('[TipTapEditor] Discarded offline changes');
+    // Continue with normal load from server
+  };
 
   // Load script content from backend on mount
   useEffect(() => {
@@ -409,10 +443,16 @@ export default function TestTipTapPage() {
       // CRITICAL FIX: If backend has Yjs updates, skip seeding entirely
       // Yjs sync will provide the content from script_versions table
       // This prevents duplication when REST API returns stale content_blocks
-      if (script?.has_yjs_updates) {
+      // EXCEPTION: If we're recovering offline content, that content takes priority
+      if (script?.has_yjs_updates && !forceApplyRecovered) {
         console.log('[TestTipTap] Skipping setContent - Yjs updates exist in database (Yjs is source of truth)');
         setPendingContent(null); // Clear pending content to prevent retry
         return;
+      }
+
+      // Log if we're force-applying recovered content
+      if (forceApplyRecovered) {
+        console.log('[TestTipTap] Force-applying recovered content (bypassing Yjs check)');
       }
 
       // After sync completes, check if Yjs document already has MEANINGFUL content
@@ -432,7 +472,8 @@ export default function TestTipTapPage() {
       // which causes the scene heading seed to be skipped for new scripts
       const editorHasContent = editor.state.doc.textContent.trim().length > 0;
 
-      if (yjsHasContent || editorHasContent) {
+      // Skip seeding if content already exists - UNLESS we're force-applying recovered content
+      if ((yjsHasContent || editorHasContent) && !forceApplyRecovered) {
         console.log('[TestTipTap] Skipping setContent - content already exists:', {
           yjsFragmentLength: yjsFragment?.length || 0,
           yjsTextLength: yjsTextContent.length,
@@ -444,10 +485,19 @@ export default function TestTipTapPage() {
         return;
       }
 
-      // Both Yjs and editor are empty after sync - safe to seed
-      console.log('[TestTipTap] Seeding editor - no content found after sync');
+      // Safe to seed - either empty document or force-applying recovered content
+      console.log('[TestTipTap] Seeding editor:', forceApplyRecovered ? 'recovered content' : 'no content found after sync');
       editor.commands.setContent(pendingContent);
       console.log('[TestTipTap] Content applied successfully');
+
+      // Clear the force-apply flag and confirm recovery AFTER successful application
+      if (forceApplyRecovered) {
+        setForceApplyRecovered(false);
+        // NOW it's safe to clear IndexedDB - content is in Yjs and will be persisted
+        recoveryActions.confirmRecoveryComplete().catch(e => {
+          console.warn('[TestTipTap] Failed to confirm recovery:', e);
+        });
+      }
 
       // Clear undo stack after seeding to prevent "undo removes entire script" edge case
       // The initial content seeding should not be undoable - only user edits should be
@@ -465,7 +515,7 @@ export default function TestTipTapPage() {
 
       setPendingContent(null); // Clear after applying
     }
-  }, [editor, pendingContent, doc, syncStatus, script]);
+  }, [editor, pendingContent, doc, syncStatus, script, forceApplyRecovered, recoveryActions]);
 
   // Hide loading screen when Yjs sync completes (for has_yjs_updates case)
   useEffect(() => {
@@ -474,6 +524,60 @@ export default function TestTipTapPage() {
       setIsLoadingScript(false);
     }
   }, [script, syncStatus, isLoadingScript]);
+
+  // Detect conflicts between offline content and current Yjs document after sync
+  // This runs when:
+  // 1. Yjs has synced (we have the current collaborative state)
+  // 2. We have pending offline content that the user might want to recover
+  // 3. The recovery dialog is about to be shown
+  useEffect(() => {
+    // Only run when we have all required state
+    if (
+      syncStatus !== 'synced' ||
+      !editor ||
+      recoveryState.isChecking ||
+      !recoveryState.hasUnsyncedChanges ||
+      !recoveryState.pendingContent
+    ) {
+      return;
+    }
+
+    // Get current document stats from the synced Yjs/TipTap editor
+    const currentDoc = editor.state.doc;
+    const currentBlockCount = currentDoc.childCount;
+    const currentTextLength = currentDoc.textContent.length;
+
+    console.log('[TipTapEditor] Detecting conflicts between offline and current content:', {
+      offlineBlocks: recoveryState.pendingContent.length,
+      currentBlocks: currentBlockCount,
+      currentTextLength,
+    });
+
+    // Compare offline content with current Yjs state
+    const conflictInfo = detectConflictSeverity(
+      recoveryState.pendingContent,
+      currentBlockCount,
+      currentTextLength
+    );
+
+    // Update the recovery state with conflict info
+    recoveryActions.setConflictInfo(conflictInfo);
+
+    console.log('[TipTapEditor] Conflict detection result:', conflictInfo);
+  }, [syncStatus, editor, recoveryState.isChecking, recoveryState.hasUnsyncedChanges, recoveryState.pendingContent, recoveryActions]);
+
+  // Handle recovered offline content - convert to TipTap format and seed
+  useEffect(() => {
+    if (recoveredContent && recoveredContent.length > 0) {
+      console.log('[TipTapEditor] Using recovered content:', recoveredContent.length, 'blocks');
+      const tipTapDoc = contentBlocksToTipTap(recoveredContent);
+      setPendingContent(tipTapDoc);
+      setForceApplyRecovered(true); // Bypass Yjs check for this content
+      setRecoveredContent(null); // Clear after using
+      // Force hide loading screen since we have content to seed
+      setIsLoadingScript(false);
+    }
+  }, [recoveredContent]);
 
   // Verify that ScreenplayDocument schema fix is working
   // The custom Document with content: 'sceneHeading block*' should ensure
@@ -888,6 +992,17 @@ export default function TestTipTapPage() {
       <ProcessingScreen
         isVisible={isLoadingScript || authLoading || !script}
         mode="open"
+      />
+
+      {/* Offline Recovery Dialog - shown when crash recovery is available */}
+      <OfflineRecoveryDialog
+        isOpen={!recoveryState.isChecking && recoveryState.hasUnsyncedChanges}
+        pendingTimestamp={recoveryState.pendingTimestamp}
+        serverTimestamp={recoveryState.serverTimestamp}
+        conflictInfo={recoveryState.conflictInfo}
+        onRecover={handleRecover}
+        onDiscard={handleDiscard}
+        isRecovering={isRecovering}
       />
 
       <div className="flex h-screen bg-[#e0e2e6]">

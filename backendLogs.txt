@@ -1,100 +1,108 @@
-2026-01-01 16:16:19,498 - ai.conversation - INFO - 
---- USER MESSAGE ---
-What are your thoughts on the opening scene?
-
-2026-01-01 16:16:19,498 - app.routers.ai_router - INFO - [STREAM] Request type: suggest
-2026-01-01 16:16:19,500 - app.services.context_builder - INFO - [CONTEXT] System prompt generation took 2.28ms
-2026-01-01 16:16:19,538 - app.services.context_builder - INFO - [CONTEXT] Global context fetch took 37.43ms
-2026-01-01 16:16:21,286 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
-2026-01-01 16:16:21,289 - app.services.retrieval_service - INFO - [RETRIEVAL] Embedding generation took 1750.87ms
-2026-01-01 16:16:21,312 - app.services.retrieval_service - INFO - [RETRIEVAL] Vector search query execution took 21.33ms (returned 5 results)
-2026-01-01 16:16:21,312 - app.services.context_builder - INFO - [CONTEXT] Retrieval service took 1774.78ms
-2026-01-01 16:16:21,314 - app.services.context_builder - INFO - [CONTEXT] Scene card formatting took 1.68ms
-2026-01-01 16:16:21,351 - app.services.context_builder - INFO - [CONTEXT] NEW_TOPIC: Skipping recent conversation history
-2026-01-01 16:16:21,351 - app.routers.ai_router - INFO - [STREAM] Built prompt: 3276 tokens (skip_scenes=False)
-✅ Completed: POST /api/ai/chat/message/stream-with-status - 200 - 3.304s
-INFO:     127.0.0.1:52215 - "POST /api/ai/chat/message/stream-with-status HTTP/1.1" 200 OK
-/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py:1961: RuntimeWarning: coroutine 'AIService.generate_response' was never awaited
-  async for event in ai_service.generate_response(
-RuntimeWarning: Enable tracemalloc to get the object allocation traceback
-2026-01-01 16:16:21,414 - app.routers.ai_router - ERROR - Streaming failed, cleaning up empty assistant message: 'async for' requires an object with __aiter__ method, got coroutine
-2026-01-01 16:16:21,487 - app.routers.ai_router - INFO - Cleaned up empty assistant message 4ef04793-2332-432f-9d8c-492faef98ceb
-ERROR:    Exception in ASGI application
-  + Exception Group Traceback (most recent call last):
-  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
-  |     yield
-  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 190, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
-  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 781, in __aexit__
-  |     raise BaseExceptionGroup(
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Exception Group Traceback (most recent call last):
-    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 192, in __call__
-    |     await response(scope, wrapped_receive, send)
-    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 257, in __call__
-    |     async with anyio.create_task_group() as task_group:
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 781, in __aexit__
-    |     raise BaseExceptionGroup(
-    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-    +-+---------------- 1 ----------------
-      | Traceback (most recent call last):
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
-      |     result = await app(  # type: ignore[func-returns-value]
-      |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-      |     return await self.app(scope, receive, send)
-      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-      |     await super().__call__(scope, receive, send)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/applications.py", line 123, in __call__
-      |     await self.middleware_stack(scope, receive, send)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-      |     raise exc
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-      |     await self.app(scope, receive, _send)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
-      |     with collapse_excgroups():
-      |          ^^^^^^^^^^^^^^^^^^^^
-      |   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
-      |     self.gen.throw(value)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
-      |     raise exc
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
-      |     await func()
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 217, in stream_response
-      |     return await super().stream_response(send)
-      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
-      |     async for chunk in self.body_iterator:
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 181, in body_stream
-      |     raise app_exc
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 151, in coro
-      |     await self.app(scope, receive_or_disconnect, send_no_error)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
-      |     with collapse_excgroups():
-      |          ^^^^^^^^^^^^^^^^^^^^
-      |   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
-      |     self.gen.throw(value)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
-      |     raise exc
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
-      |     await func()
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
-      |     async for chunk in self.body_iterator:
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py", line 1961, in generate_stream
-      |     async for event in ai_service.generate_response(
-      | TypeError: 'async for' requires an object with __aiter__ method, got coroutine
-      +------------------------------------
-
-During handling of the above exception, another exception occurred:
-
+✅ Completed: PATCH /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e - 200 - 0.160s
+INFO:     127.0.0.1:61595 - "PATCH /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e HTTP/1.1" 200 OK
+2026-01-02 20:24:46,720 - app.routers.script_websocket - ERROR - Failed to load/initialize Yjs state for script 7e399408-010e-4910-9d3e-ade06c9e619e: 
 Traceback (most recent call last):
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/script_websocket.py", line 255, in script_collaboration_websocket
+    applied_count, was_compacted = await persistence.load_and_compact_if_needed(
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/services/script_yjs_persistence.py", line 164, in load_and_compact_if_needed
+    result = await self.db.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 452, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 199, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2306, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2191, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 296, in orm_execute_statement
+    return cls.orm_setup_cursor_result(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 587, in orm_setup_cursor_result
+    return loading.instances(result, querycontext)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 261, in instances
+    _prebuffered = list(chunks(None))
+                   ^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 246, in chunks
+    post_load.invoke(context, path)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 1543, in invoke
+    loader(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/strategies.py", line 3203, in _load_for_path
+    self._load_via_child(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/strategies.py", line 3234, in _load_via_child
+    for k, v in context.session.execute(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2306, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2191, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 293, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 514, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1849, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1989, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2359, in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1970, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 572, in execute
+    self._adapt_connection.await_(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 127, in await_only
+    return current.driver.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 192, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 550, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 501, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 791, in _handle_exception
+    raise error
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 538, in _prepare_and_execute
+    self._rows = await prepared_stmt.fetch(*parameters)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 176, in fetch
+    data = await self.__bind_execute(args, 0, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 241, in __bind_execute
+    data, status, _ = await self.__do_execute(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 230, in __do_execute
+    return await executor(protocol)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 207, in bind_execute
+TimeoutError
+2026-01-02 20:24:46,737 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:46,737 - app.services.redis_pubsub - INFO - Unsubscribed from script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:46,737 - app.routers.script_websocket - INFO - WebSocket connection closed for script 7e399408-010e-4910-9d3e-ade06c9e619e
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
     return await self.app(scope, receive, send)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -102,39 +110,94 @@ Traceback (most recent call last):
     await super().__call__(scope, receive, send)
   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/applications.py", line 123, in __call__
     await self.middleware_stack(scope, receive, send)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 103, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 103, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/cors.py", line 75, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/middleware/payload_size_limiter.py", line 26, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
     raise exc
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
-    with collapse_excgroups():
-         ^^^^^^^^^^^^^^^^^^^^
-  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 758, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 778, in app
+    await route.handle(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 375, in handle
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 98, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
     raise exc
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
-    await func()
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 217, in stream_response
-    return await super().stream_response(send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
-    async for chunk in self.body_iterator:
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 181, in body_stream
-    raise app_exc
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 151, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
-    with collapse_excgroups():
-         ^^^^^^^^^^^^^^^^^^^^
-  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
-    raise exc
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
-    await func()
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
-    async for chunk in self.body_iterator:
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py", line 1961, in generate_stream
-    async for event in ai_service.generate_response(
-TypeError: 'async for' requires an object with __aiter__ method, got coroutine
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 96, in app
+    await func(session)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/routing.py", line 345, in app
+    async with AsyncExitStack() as async_exit_stack:
+               ^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 754, in __aexit__
+    raise exc_details[1]
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 737, in __aexit__
+    cb_suppress = await cb(*exc_details)
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 217, in __aexit__
+    await anext(self.gen)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/db/base.py", line 63, in get_db
+    await session.commit()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 1000, in commit
+    await greenlet_spawn(self.sync_session.commit)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 186, in greenlet_spawn
+    result = context.switch(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1972, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1264, in commit
+    trans.commit()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2632, in commit
+    self._do_commit()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2737, in _do_commit
+    self._connection_commit_impl()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2708, in _connection_commit_impl
+    self.connection._commit_impl()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1149, in _commit_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2359, in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1147, in _commit_impl
+    self.engine.dialect.do_commit(self.connection)
+                                  ^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 588, in connection
+    return self._revalidate_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 680, in _revalidate_connection
+    self._invalid_transaction()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 670, in _invalid_transaction
+    raise exc.PendingRollbackError(
+sqlalchemy.exc.PendingRollbackError: Can't reconnect until invalid transaction is rolled back.  Please rollback() fully before proceeding (Background on this error at: https://sqlalche.me/e/20/8s2b)
+2026-01-02 20:24:48,892 - app.services.script_yjs_persistence - INFO - Applied 81 Yjs update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,892 - app.routers.script_websocket - INFO - Loaded 81 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,892 - app.routers.script_websocket - INFO - Yjs document ready with 81 updates for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,892 - app.services.redis_pubsub - INFO - Subscribed to script 7e399408-010e-4910-9d3e-ade06c9e619e channels
+2026-01-02 20:24:48,892 - app.routers.script_websocket - INFO - Subscribed to Redis for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,892 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,900 - app.routers.script_websocket - INFO - Replied with SyncStep2 (261253 bytes)
+2026-01-02 20:24:48,900 - app.routers.script_websocket - INFO - Sent SyncStep1 to client (188 bytes state vector)
+2026-01-02 20:24:48,901 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
+INFO:     connection closed
+2026-01-02 20:24:49,055 - app.routers.script_websocket - INFO - Client disconnected from script 7e399408-010e-4910-9d3e-ade06c9e619e: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
+2026-01-02 20:24:49,056 - app.services.websocket_manager - ERROR - Error broadcasting to user 2157d1b1-b88f-4b4f-a25b-13dc50dea852: Unexpected ASGI message 'websocket.send', after sending 'websocket.close' or response already completed.
+2026-01-02 20:24:49,056 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:49,056 - app.services.redis_pubsub - INFO - Unsubscribed from script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:49,056 - app.routers.script_websocket - INFO - WebSocket connection closed for script 7e399408-010e-4910-9d3e-ade06c9e619e

@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 import logging
 import json
+import asyncio
 from typing import Optional
 import y_py as Y
 from y_py import YDoc
@@ -21,7 +22,7 @@ from app.services.script_yjs_persistence import ScriptYjsPersistence
 from app.models.script import Script
 from app.models.script_version import ScriptVersion
 from app.models.user import User
-from sqlalchemy import select, desc
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
@@ -247,70 +248,32 @@ async def script_collaboration_websocket(
         # Load or initialize Yjs document with content
         try:
             # Get latest Yjs update timestamp
-            yjs_stmt = (
-                select(ScriptVersion.created_at)
-                .where(ScriptVersion.script_id == script_id)
-                .order_by(desc(ScriptVersion.created_at))
-                .limit(1)
+            # PHASE 2 SIMPLIFICATION: Yjs-primary model
+            # With SYNC_STEP2 pollution fixed and offline recovery in frontend,
+            # we no longer need timestamp comparison. Yjs is always source of truth.
+            # Offline crash recovery is handled by frontend via IndexedDB check.
+            applied_count, was_compacted = await persistence.load_and_compact_if_needed(
+                script_id, ydoc
             )
-            yjs_result = await db.execute(yjs_stmt)
-            latest_yjs_update = yjs_result.scalar_one_or_none()
-
-            rest_updated_at = script.updated_at
-
-            if latest_yjs_update and rest_updated_at > latest_yjs_update:
-                # REST is newer - skip stale Yjs history
-                logger.info(f"REST newer than Yjs for script {script_id}, skipping persisted updates")
-                applied_count = 0
-            else:
-                # Load persisted Yjs updates from script_versions table
-                applied_count = await persistence.load_persisted_updates(script_id, ydoc)
+            if was_compacted:
+                # Commit the compaction changes
+                await db.commit()
+                logger.info(f"Compacted and loaded Yjs updates for script {script_id}")
+            elif applied_count > 0:
                 logger.info(f"Loaded {applied_count} persisted update(s) for script {script_id}")
 
-            # Check if Yjs document is actually empty (even if updates were applied)
-            shared_root = ydoc.get_array('content')
-            yjs_content_length = len(shared_root)
-
-            logger.info(f"After loading {applied_count} updates, Yjs content length: {yjs_content_length}")
-
-            # If Yjs document is empty, populate from appropriate source
-            if yjs_content_length == 0:
-                content_blocks = []
-
-                # CRITICAL FIX: If REST is newer than Yjs, use scripts.content_blocks
-                # This prevents offline edits saved via REST from being overwritten by stale scenes
-                if latest_yjs_update and rest_updated_at > latest_yjs_update:
-                    # REST autosave is newer - use scripts.content_blocks as source of truth
-                    logger.info(f"Yjs document empty for script {script_id}, rebuilding from scripts.content_blocks (REST is newer)")
-                    content_blocks = script.content_blocks or []
-                    logger.info(f"Loaded {len(content_blocks)} blocks from scripts.content_blocks")
-                else:
-                    # Yjs is current or no REST updates - rebuild from scenes
-                    from app.models.scene import Scene
-
-                    logger.info(f"Yjs document empty for script {script_id}, rebuilding from scenes")
-                    scenes_result = await db.execute(
-                        select(Scene)
-                        .where(Scene.script_id == script_id)
-                        .order_by(Scene.position)
-                    )
-                    scenes = scenes_result.scalars().all()
-
-                    if scenes:
-                        for scene in scenes:
-                            if scene.content_blocks:
-                                content_blocks.extend(scene.content_blocks)
-                        logger.info(f"Rebuilt {len(content_blocks)} blocks from {len(scenes)} scenes")
-                    else:
-                        logger.warning(f"No scenes found for script {script_id}")
-
-                # Populate Yjs document with content_blocks
-                if content_blocks:
-                    # TEMPORARILY DISABLED: Backend seeding causes format issues
-                    # Let frontend seed the document from REST API instead
-                    logger.info(f"Backend seeding disabled - frontend will seed from REST API ({len(content_blocks)} blocks available)")
-                else:
-                    logger.warning(f"No content available to populate Yjs doc for script {script_id}")
+            # PHASE 1.75 FIX: Trust applied update count for content detection
+            # We cannot check XmlFragment content directly because y_py doesn't expose
+            # get_xml_fragment(). TipTap uses Y.XmlFragment('default'), not Y.Array('content').
+            # The old code checked ydoc.get_array('content') which always returned 0 length
+            # because TipTap doesn't use that shared type.
+            if applied_count > 0:
+                # Document has valid Yjs content - skip all fallback logic
+                logger.info(f"Yjs document ready with {applied_count} updates for script {script_id}")
+            else:
+                # No Yjs updates exist - this is a new/empty script or REST is newer
+                # Let frontend seed the document from REST API
+                logger.info(f"No Yjs updates for script {script_id} - frontend will seed from REST API")
         except Exception as e:
             logger.error(f"Failed to load/initialize Yjs state for script {script_id}: {e}", exc_info=True)
             await websocket.close(code=1011, reason=f"Failed to initialize: {str(e)[:100]}")
@@ -417,173 +380,215 @@ async def script_collaboration_websocket(
         SYNC_STEP2 = 1
         SYNC_UPDATE = 2
 
-        # Main message loop
-        logger.info(f"Entering message loop for user {user_name} on script {script_id}")
-        while True:
-            # Receive message from client
-            try:
-                message = await websocket.receive()
-
-                # Check for disconnect message
-                if message.get("type") == "websocket.disconnect":
-                    logger.info(f"Client disconnected from script {script_id}: {user_id}")
+        # Ping loop to keep WebSocket connection alive
+        # WebSocket connections disconnect after ~31 seconds without traffic
+        # Uses WebSocket protocol-level PING frames (not application messages)
+        # This is critical: binary application messages would be parsed by y-websocket
+        # and cause "Unexpected end of array" errors in lib0 decoder
+        async def ping_loop():
+            """Send periodic WebSocket ping frames to keep connection alive."""
+            while True:
+                try:
+                    await asyncio.sleep(25)  # Ping every 25 seconds (under 31s timeout)
+                    # Send WebSocket PING frame at protocol level
+                    # This is handled by the browser automatically (responds with PONG)
+                    # and does NOT reach the y-websocket message handler
+                    await websocket.send({"type": "websocket.ping", "bytes": b""})
+                    logger.debug(f"Sent WebSocket ping frame to user {user_id} on script {script_id}")
+                except asyncio.CancelledError:
+                    logger.debug(f"Ping loop cancelled for user {user_id}")
+                    break
+                except Exception as e:
+                    logger.debug(f"Ping loop error for user {user_id}: {e}")
                     break
 
-                if "text" in message:
-                    # JSON message
-                    data = json.loads(message["text"])
-                    message_type = data.get("type")
+        # Start ping task in background
+        ping_task = asyncio.create_task(ping_loop())
 
-                    if message_type == "awareness":
-                        # Presence/cursor update
-                        awareness_data = data.get("payload", {})
+        # Main message loop
+        logger.info(f"Entering message loop for user {user_name} on script {script_id}")
+        try:
+            while True:
+                # Receive message from client
+                try:
+                    message = await websocket.receive()
 
-                        # Broadcast to other clients in room
-                        await websocket_manager.send_json_to_room(
-                            script_id,
-                            {
-                                "type": "awareness",
-                                "user_id": str(user_id),
-                                "user_name": user_name,
-                                "payload": awareness_data
-                            },
-                            exclude=user_id
-                        )
+                    # Check for disconnect message
+                    if message.get("type") == "websocket.disconnect":
+                        logger.info(f"Client disconnected from script {script_id}: {user_id}")
+                        break
 
-                        # Publish to Redis for other servers
-                        if redis_manager:
-                            await redis_manager.publish_script_awareness(
+                    if "text" in message:
+                        # JSON message
+                        data = json.loads(message["text"])
+                        message_type = data.get("type")
+
+                        if message_type == "awareness":
+                            # Presence/cursor update
+                            awareness_data = data.get("payload", {})
+
+                            # Broadcast to other clients in room
+                            await websocket_manager.send_json_to_room(
                                 script_id,
-                                awareness_data,
-                                user_id
+                                {
+                                    "type": "awareness",
+                                    "user_id": str(user_id),
+                                    "user_name": user_name,
+                                    "payload": awareness_data
+                                },
+                                exclude=user_id
                             )
 
-                    elif message_type == "ping":
-                        # Heartbeat
-                        await websocket.send_json({"type": "pong"})
-
-                elif "bytes" in message:
-                    # Binary y-websocket framed message
-                    msg = message["bytes"]
-                    logger.debug(f"Received binary message ({len(msg)} bytes) from user {user_id}")
-
-                    if len(msg) == 0:
-                        continue
-
-                    try:
-                        # Decode top-level y-websocket message (varUint)
-                        offset = 0
-                        top_type, offset = _read_var_uint(msg, offset)
-                        if top_type == MESSAGE_SYNC:
-                            # One or more sync submessages may be concatenated
-                            while offset < len(msg):
-                                sub_type, offset = _read_var_uint(msg, offset)
-                                if sub_type == SYNC_STEP1:
-                                    # Read state vector from client
-                                    sv, offset = _read_var_uint8array(msg, offset)
-                                    update = Y.encode_state_as_update(ydoc, sv)
-                                    # Build SyncStep2 reply: [messageSync][syncStep2][update]
-                                    payload = _write_var_uint(SYNC_STEP2) + _write_var_uint8array(update)
-                                    reply = _write_var_uint(MESSAGE_SYNC) + payload
-                                    await websocket.send_bytes(reply)
-                                    logger.info(f"Replied with SyncStep2 ({len(update)} bytes)")
-
-                                    # Now prompt the client to send its missing updates to server
-                                    sv_server = Y.encode_state_vector(ydoc)
-                                    step1_payload = _write_var_uint(SYNC_STEP1) + _write_var_uint8array(sv_server)
-                                    step1_msg = _write_var_uint(MESSAGE_SYNC) + step1_payload
-                                    await websocket.send_bytes(step1_msg)
-                                    logger.info(f"Sent SyncStep1 to client ({len(sv_server)} bytes state vector)")
-                                elif sub_type == SYNC_STEP2 or sub_type == SYNC_UPDATE:
-                                    upd, offset = _read_var_uint8array(msg, offset)
-                                    # Apply update to server doc
-                                    Y.apply_update(ydoc, upd)
-                                    logger.debug(f"Applied UPDATE (type {sub_type}) size={len(upd)}")
-                                    # Persist the applied update for recovery/history
-                                    try:
-                                        await persistence.store_update(script_id, upd, user_id)
-                                        # Commit to ensure durability during long-lived WS sessions
-                                        await db.commit()
-                                    except Exception as e:
-                                        logger.error(f"Error persisting Yjs update for script {script_id}: {e}")
-
-                                    # Broadcast update to other clients
-                                    # For SYNC_STEP2 (initial state), repackage as SYNC_UPDATE for peers
-                                    # For SYNC_UPDATE (incremental), forward as-is
-                                    if sub_type == SYNC_STEP2:
-                                        # Repackage as SYNC_UPDATE so other clients apply it incrementally
-                                        bcast_payload = _write_var_uint(SYNC_UPDATE) + _write_var_uint8array(upd)
-                                        bcast_msg = _write_var_uint(MESSAGE_SYNC) + bcast_payload
-                                        await websocket_manager.broadcast_to_room(script_id, bcast_msg, exclude_websocket=websocket)
-                                        if redis_manager:
-                                            await redis_manager.publish_script_update(script_id, bcast_msg, user_id)
-                                        logger.info(f"Broadcasted SYNC_STEP2 as SYNC_UPDATE to peers")
-                                    elif sub_type == SYNC_UPDATE:
-                                        # Forward incremental update as-is
-                                        await websocket_manager.broadcast_to_room(script_id, msg, exclude_websocket=websocket)
-                                        if redis_manager:
-                                            await redis_manager.publish_script_update(script_id, msg, user_id)
-                                        logger.info(f"Broadcasted SYNC_UPDATE to peers")
-                                else:
-                                    logger.warning(f"Unknown sync submessage type: {sub_type}")
-                                    break
-                        elif top_type == MESSAGE_AWARENESS:
-                            # Parse awareness update to track clientIds and clocks
-                            try:
-                                aw_update, _ = _read_var_uint8array(msg, offset)
-                                # awareness update payload format:
-                                # [nClients][clientId][clock][stateString] ...
-                                o = 0
-                                n_clients, o = _read_var_uint(aw_update, o)
-                                for _i in range(n_clients):
-                                    c_id, o = _read_var_uint(aw_update, o)
-                                    c_clock, o = _read_var_uint(aw_update, o)
-                                    _state, o = _read_var_string(aw_update, o)
-                                    if connection_info:
-                                        # Track last observed clock for this clientId
-                                        connection_info.awareness_meta[int(c_id)] = int(c_clock)
-                            except Exception as e:
-                                logger.debug(f"Failed to parse awareness update: {e}")
-
-                            # Forward awareness messages as-is to other clients and Redis
-                            await websocket_manager.broadcast_to_room(script_id, msg, exclude_websocket=websocket)
+                            # Publish to Redis for other servers
                             if redis_manager:
-                                await redis_manager.publish_script_update(script_id, msg, user_id)
-                        elif top_type == MESSAGE_QUERY_AWARENESS:
-                            # Relay awareness query so other clients respond with their current state
-                            await websocket_manager.broadcast_to_room(script_id, msg, exclude_websocket=websocket)
-                            if redis_manager:
+                                await redis_manager.publish_script_awareness(
+                                    script_id,
+                                    awareness_data,
+                                    user_id
+                                )
+
+                        elif message_type == "ping":
+                            # Heartbeat
+                            await websocket.send_json({"type": "pong"})
+
+                    elif "bytes" in message:
+                        # Binary y-websocket framed message
+                        msg = message["bytes"]
+                        logger.debug(f"Received binary message ({len(msg)} bytes) from user {user_id}")
+
+                        if len(msg) == 0:
+                            continue
+
+                        try:
+                            # Decode top-level y-websocket message (varUint)
+                            offset = 0
+                            top_type, offset = _read_var_uint(msg, offset)
+                            if top_type == MESSAGE_SYNC:
+                                # One or more sync submessages may be concatenated
+                                while offset < len(msg):
+                                    sub_type, offset = _read_var_uint(msg, offset)
+                                    if sub_type == SYNC_STEP1:
+                                        # Read state vector from client
+                                        sv, offset = _read_var_uint8array(msg, offset)
+                                        update = Y.encode_state_as_update(ydoc, sv)
+                                        # Build SyncStep2 reply: [messageSync][syncStep2][update]
+                                        payload = _write_var_uint(SYNC_STEP2) + _write_var_uint8array(update)
+                                        reply = _write_var_uint(MESSAGE_SYNC) + payload
+                                        await websocket.send_bytes(reply)
+                                        logger.info(f"Replied with SyncStep2 ({len(update)} bytes)")
+
+                                        # Now prompt the client to send its missing updates to server
+                                        sv_server = Y.encode_state_vector(ydoc)
+                                        step1_payload = _write_var_uint(SYNC_STEP1) + _write_var_uint8array(sv_server)
+                                        step1_msg = _write_var_uint(MESSAGE_SYNC) + step1_payload
+                                        await websocket.send_bytes(step1_msg)
+                                        logger.info(f"Sent SyncStep1 to client ({len(sv_server)} bytes state vector)")
+                                    elif sub_type == SYNC_STEP2 or sub_type == SYNC_UPDATE:
+                                        upd, offset = _read_var_uint8array(msg, offset)
+                                        # Apply update to server doc (both SYNC_STEP2 and SYNC_UPDATE)
+                                        Y.apply_update(ydoc, upd)
+
+                                        # CRITICAL FIX: Only persist SYNC_UPDATE (actual user edits)
+                                        # Do NOT persist SYNC_STEP2 - it's the full document state sent on every
+                                        # connection and persisting it creates thousands of redundant entries
+                                        # without any actual new content (the SYNC_STEP2 pollution bug)
+                                        if sub_type == SYNC_UPDATE:
+                                            logger.debug(f"Applied and persisting SYNC_UPDATE size={len(upd)}")
+                                            try:
+                                                await persistence.store_update(script_id, upd, user_id)
+                                                # Commit to ensure durability during long-lived WS sessions
+                                                await db.commit()
+                                            except Exception as e:
+                                                logger.error(f"Error persisting Yjs update for script {script_id}: {e}")
+                                        else:
+                                            # SYNC_STEP2 - apply for sync protocol but don't persist
+                                            logger.debug(f"Applied SYNC_STEP2 size={len(upd)} (not persisted - sync protocol)")
+
+                                        # Broadcast update to other clients
+                                        # For SYNC_STEP2 (initial state), repackage as SYNC_UPDATE for peers
+                                        # For SYNC_UPDATE (incremental), forward as-is
+                                        if sub_type == SYNC_STEP2:
+                                            # Repackage as SYNC_UPDATE so other clients apply it incrementally
+                                            bcast_payload = _write_var_uint(SYNC_UPDATE) + _write_var_uint8array(upd)
+                                            bcast_msg = _write_var_uint(MESSAGE_SYNC) + bcast_payload
+                                            await websocket_manager.broadcast_to_room(script_id, bcast_msg, exclude_websocket=websocket)
+                                            if redis_manager:
+                                                await redis_manager.publish_script_update(script_id, bcast_msg, user_id)
+                                            logger.info(f"Broadcasted SYNC_STEP2 as SYNC_UPDATE to peers")
+                                        elif sub_type == SYNC_UPDATE:
+                                            # Forward incremental update as-is
+                                            await websocket_manager.broadcast_to_room(script_id, msg, exclude_websocket=websocket)
+                                            if redis_manager:
+                                                await redis_manager.publish_script_update(script_id, msg, user_id)
+                                            logger.info(f"Broadcasted SYNC_UPDATE to peers")
+                                    else:
+                                        logger.warning(f"Unknown sync submessage type: {sub_type}")
+                                        break
+                            elif top_type == MESSAGE_AWARENESS:
+                                # Parse awareness update to track clientIds and clocks
                                 try:
-                                    await redis_manager.publish_script_update(script_id, msg, user_id)
+                                    aw_update, _ = _read_var_uint8array(msg, offset)
+                                    # awareness update payload format:
+                                    # [nClients][clientId][clock][stateString] ...
+                                    o = 0
+                                    n_clients, o = _read_var_uint(aw_update, o)
+                                    for _i in range(n_clients):
+                                        c_id, o = _read_var_uint(aw_update, o)
+                                        c_clock, o = _read_var_uint(aw_update, o)
+                                        _state, o = _read_var_string(aw_update, o)
+                                        if connection_info:
+                                            # Track last observed clock for this clientId
+                                            connection_info.awareness_meta[int(c_id)] = int(c_clock)
                                 except Exception as e:
-                                    logger.error(f"Failed to publish awareness query via Redis: {e}")
-                        elif top_type == MESSAGE_AUTH:
-                            # Ignore - auth is handled at connection
-                            pass
-                        else:
-                            logger.warning(f"Unknown top-level message type: {top_type}")
-                    except Exception as e:
-                        logger.error(f"Error processing binary message: {e}")
+                                    logger.debug(f"Failed to parse awareness update: {e}")
 
-                else:
-                    # Unknown message type
-                    logger.warning(f"Received unknown message type: {message}")
+                                # Forward awareness messages as-is to other clients and Redis
+                                await websocket_manager.broadcast_to_room(script_id, msg, exclude_websocket=websocket)
+                                if redis_manager:
+                                    await redis_manager.publish_script_update(script_id, msg, user_id)
+                            elif top_type == MESSAGE_QUERY_AWARENESS:
+                                # Relay awareness query so other clients respond with their current state
+                                await websocket_manager.broadcast_to_room(script_id, msg, exclude_websocket=websocket)
+                                if redis_manager:
+                                    try:
+                                        await redis_manager.publish_script_update(script_id, msg, user_id)
+                                    except Exception as e:
+                                        logger.error(f"Failed to publish awareness query via Redis: {e}")
+                            elif top_type == MESSAGE_AUTH:
+                                # Ignore - auth is handled at connection
+                                pass
+                            else:
+                                logger.warning(f"Unknown top-level message type: {top_type}")
+                        except Exception as e:
+                            logger.error(f"Error processing binary message: {e}")
 
-            except WebSocketDisconnect:
-                logger.info(f"WebSocket disconnected for user {user_id} from script {script_id}")
-                break
-            except json.JSONDecodeError as e:
-                logger.error(f"Invalid JSON from client: {e}")
-                await websocket.send_json({
-                    "type": "error",
-                    "message": "Invalid JSON format"
-                })
-            except Exception as e:
-                logger.error(f"Error processing message: {e}")
-                await websocket.send_json({
-                    "type": "error",
-                    "message": "Error processing message"
-                })
+                    else:
+                        # Unknown message type
+                        logger.warning(f"Received unknown message type: {message}")
+
+                except WebSocketDisconnect:
+                    logger.info(f"WebSocket disconnected for user {user_id} from script {script_id}")
+                    break
+                except json.JSONDecodeError as e:
+                    logger.error(f"Invalid JSON from client: {e}")
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": "Invalid JSON format"
+                    })
+                except Exception as e:
+                    logger.error(f"Error processing message: {e}")
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": "Error processing message"
+                    })
+        finally:
+            # Cancel the ping task when message loop exits
+            ping_task.cancel()
+            try:
+                await ping_task
+            except asyncio.CancelledError:
+                pass
+            logger.debug(f"Ping task cancelled for user {user_id}")
 
     except HTTPException as e:
         logger.error(f"WebSocket HTTPException: {e.status_code}: {e.detail}")

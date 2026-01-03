@@ -1,5 +1,16 @@
 """
 Tests for script-level WebSocket collaboration and Yjs persistence.
+
+NOTE ON SHARED TYPES:
+=====================
+These tests use Y.Array('content') for testing Yjs persistence mechanics.
+In production, TipTap uses Y.XmlFragment('default') which y_py doesn't expose
+via get_xml_fragment(). The persistence layer stores binary updates agnostically,
+so these tests remain valid for verifying store/load/compact operations.
+
+The actual TipTap integration is tested via end-to-end browser tests.
+
+See: backend/YJS_COLLABORATION_FIX_SPEC.md for full technical details.
 """
 
 import pytest
@@ -33,17 +44,17 @@ async def test_script_yjs_persistence_store_and_load(db_session, test_script):
     update = Y.encode_state_as_update(doc)
 
     # Store the update
-    version = await persistence.store_update(test_test_script.script_id, update)
+    version = await persistence.store_update(test_script.script_id, update)
     await db_session.commit()
 
     # Verify the version was created
-    assert version.script_id == test_test_script.script_id
+    assert version.script_id == test_script.script_id
     assert version.update == update
     assert len(version.update) > 0
 
     # Load updates into a new document
     new_doc = Y.YDoc()
-    count = await persistence.load_persisted_updates(test_test_script.script_id, new_doc)
+    count = await persistence.load_persisted_updates(test_script.script_id, new_doc)
 
     # Verify the update was loaded
     assert count == 1

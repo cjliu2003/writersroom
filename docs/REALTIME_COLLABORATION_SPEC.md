@@ -1,9 +1,31 @@
 # Realtime Collaboration Implementation Spec
 ## Phase 1 P2: Realtime Presence + CRDT (Yjs) Alignment
 
-**Document Version:** 1.0  
-**Created:** 2025-09-30  
-**Status:** Planning Phase
+**Document Version:** 2.0
+**Created:** 2025-09-30
+**Last Updated:** 2026-01-02
+**Status:** IMPLEMENTED (with bug fixes)
+
+---
+
+## Implementation Notes (2026-01-02)
+
+> **Important Technical Details:**
+>
+> 1. **Shared Type**: TipTap uses `Y.XmlFragment('default')`, not `Y.Array('content')`.
+>    The `y_py` library doesn't expose `get_xml_fragment()`, so content detection
+>    relies on update count rather than content length.
+>
+> 2. **SYNC_STEP2 vs SYNC_UPDATE**: Only `SYNC_UPDATE` (type 2) messages are persisted.
+>    `SYNC_STEP2` (type 1) is the full document state sent on connection and should NOT
+>    be persisted to avoid database pollution.
+>
+> 3. **WebSocket Keepalive**: Server sends ping every 25 seconds to prevent ~31s timeout.
+>
+> 4. **Script-Level Collaboration**: Implementation is at script level (not scene level).
+>    WebSocket endpoint: `/ws/scripts/{script_id}`
+>
+> See `backend/YJS_COLLABORATION_FIX_SPEC.md` for detailed bug fixes and implementation.
 
 ---
 
@@ -50,11 +72,11 @@
 
 ### Key Components
 
-1. **Yjs Document (Frontend)** - CRDT data structure for scene content
-2. **WebSocket Server (Backend)** - FastAPI WebSocket endpoints  
-3. **Redis PubSub** - Multi-server coordination
-4. **PostgreSQL Persistence** - Append-only `scene_versions` table (exists)
-5. **Presence System** - User cursor positions, active selections
+1. **Yjs Document (Frontend)** - CRDT data structure for script content (uses `Y.XmlFragment('default')` via TipTap)
+2. **WebSocket Server (Backend)** - FastAPI WebSocket endpoint at `/ws/scripts/{script_id}`
+3. **Redis PubSub** - Multi-server coordination (optional - falls back to single-server mode)
+4. **PostgreSQL Persistence** - Append-only `script_versions` table for Yjs updates
+5. **Presence System** - User cursor positions, active selections via Yjs awareness
 
 ---
 
@@ -350,8 +372,16 @@ test('displays presence indicators')
 ```python
 fastapi-websocket==0.1.0
 redis==5.0.0
-y-py==0.6.0
+y-py==0.6.2  # NOTE: y_py is abandoned, consider migrating to pycrdt
 ```
+
+> **Future Migration Note:**
+> The `y_py` library (Python bindings for Yjs) is no longer maintained.
+> The successor is `pycrdt` which provides similar functionality.
+> When planning future updates, consider:
+> - `pycrdt` has `get_xml_fragment()` which `y_py` lacks
+> - Migration would allow direct content inspection
+> - API is similar but not identical - test thoroughly
 
 ### Frontend
 ```json
