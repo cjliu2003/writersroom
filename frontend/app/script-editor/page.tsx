@@ -24,7 +24,7 @@ import { yUndoPluginKey } from 'y-prosemirror';
 // @ts-ignore - pagination extension may not have types
 import { useScriptYjsCollaboration, SyncStatus } from '@/hooks/use-script-yjs-collaboration';
 import { useScriptAutosave, SaveState } from '@/hooks/use-script-autosave';
-import { useOfflineRecovery } from '@/hooks/use-offline-recovery';
+import { useOfflineRecovery, detectConflictSeverity } from '@/hooks/use-offline-recovery';
 import { OfflineRecoveryDialog } from '@/components/offline-recovery-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScreenplayKit, SmartTypePopup } from '@/extensions/screenplay/screenplay-kit';
@@ -490,9 +490,13 @@ export default function TestTipTapPage() {
       editor.commands.setContent(pendingContent);
       console.log('[TestTipTap] Content applied successfully');
 
-      // Clear the force-apply flag after successful application
+      // Clear the force-apply flag and confirm recovery AFTER successful application
       if (forceApplyRecovered) {
         setForceApplyRecovered(false);
+        // NOW it's safe to clear IndexedDB - content is in Yjs and will be persisted
+        recoveryActions.confirmRecoveryComplete().catch(e => {
+          console.warn('[TestTipTap] Failed to confirm recovery:', e);
+        });
       }
 
       // Clear undo stack after seeding to prevent "undo removes entire script" edge case
@@ -511,7 +515,7 @@ export default function TestTipTapPage() {
 
       setPendingContent(null); // Clear after applying
     }
-  }, [editor, pendingContent, doc, syncStatus, script, forceApplyRecovered]);
+  }, [editor, pendingContent, doc, syncStatus, script, forceApplyRecovered, recoveryActions]);
 
   // Hide loading screen when Yjs sync completes (for has_yjs_updates case)
   useEffect(() => {
@@ -520,6 +524,47 @@ export default function TestTipTapPage() {
       setIsLoadingScript(false);
     }
   }, [script, syncStatus, isLoadingScript]);
+
+  // Detect conflicts between offline content and current Yjs document after sync
+  // This runs when:
+  // 1. Yjs has synced (we have the current collaborative state)
+  // 2. We have pending offline content that the user might want to recover
+  // 3. The recovery dialog is about to be shown
+  useEffect(() => {
+    // Only run when we have all required state
+    if (
+      syncStatus !== 'synced' ||
+      !editor ||
+      recoveryState.isChecking ||
+      !recoveryState.hasUnsyncedChanges ||
+      !recoveryState.pendingContent
+    ) {
+      return;
+    }
+
+    // Get current document stats from the synced Yjs/TipTap editor
+    const currentDoc = editor.state.doc;
+    const currentBlockCount = currentDoc.childCount;
+    const currentTextLength = currentDoc.textContent.length;
+
+    console.log('[TipTapEditor] Detecting conflicts between offline and current content:', {
+      offlineBlocks: recoveryState.pendingContent.length,
+      currentBlocks: currentBlockCount,
+      currentTextLength,
+    });
+
+    // Compare offline content with current Yjs state
+    const conflictInfo = detectConflictSeverity(
+      recoveryState.pendingContent,
+      currentBlockCount,
+      currentTextLength
+    );
+
+    // Update the recovery state with conflict info
+    recoveryActions.setConflictInfo(conflictInfo);
+
+    console.log('[TipTapEditor] Conflict detection result:', conflictInfo);
+  }, [syncStatus, editor, recoveryState.isChecking, recoveryState.hasUnsyncedChanges, recoveryState.pendingContent, recoveryActions]);
 
   // Handle recovered offline content - convert to TipTap format and seed
   useEffect(() => {
@@ -954,6 +999,7 @@ export default function TestTipTapPage() {
         isOpen={!recoveryState.isChecking && recoveryState.hasUnsyncedChanges}
         pendingTimestamp={recoveryState.pendingTimestamp}
         serverTimestamp={recoveryState.serverTimestamp}
+        conflictInfo={recoveryState.conflictInfo}
         onRecover={handleRecover}
         onDiscard={handleDiscard}
         isRecovering={isRecovering}

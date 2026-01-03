@@ -1,140 +1,203 @@
->>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 7e399408-010e-4910-9d3e-ade06c9e619e <<<
-2026-01-02 10:00:17,377 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 7e399408-010e-4910-9d3e-ade06c9e619e <<<
-[SCRIPT WS] Step 1: Accepting WebSocket connection...
-INFO:     127.0.0.1:56626 - "WebSocket /api/ws/scripts/7e399408-010e-4910-9d3e-ade06c9e619e?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NzAzMTA5NSwidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY3Mzc0OTI0LCJleHAiOjE3NjczNzg1MjQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.enJayneMZtPZAIwSQGR-H_VMlAwHq5m2yDalD5EdP-G9I3oSx2CgNseQwX-edQoLJVQASJg1BvUhy7rOkgsCFipmZ0ZPAW0csq4BJlF8O8mJYRpbOBKWers3JJMF2Xnl07w7n7Dw2YJ3G1SoaSYs0kJTsFmsI-eTp18PuV1P4QuC2XiNf-GHo902UFoLXdJ15Vknf-AnRFgjipDE2GUA7vZE7Z-g4OBR4eBhQJZKQWo40tRhqL0Xz7iiALqXVT9aMTSCNjSrhn_jYKY0O7ixcaPeIgesrnx-pkCjLg91H7QL1TOYtRXB-CP-m-rzlZY0C6AAsF8VPxrio7tAqErbfw" [accepted]
-[SCRIPT WS] Step 2: WebSocket accepted successfully
-2026-01-02 10:00:17,378 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 7e399408-010e-4910-9d3e-ade06c9e619e
-[SCRIPT WS] Step 3: Starting token verification for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:17,378 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 7e399408-010e-4910-9d3e-ade06c9e619e
-[SCRIPT WS] Step 4: Calling verify_token_websocket()...
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
-DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 5: Token verification succeeded!
-2026-01-02 10:00:17,379 - app.routers.script_websocket - INFO - Token verified successfully for script 7e399408-010e-4910-9d3e-ade06c9e619e
-[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
-[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 8: Looking up user in database...
-INFO:     connection open
-🔵 Incoming request: OPTIONS /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations
-🔵 Incoming request: OPTIONS /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content
-✅ Completed: OPTIONS /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations - 200 - 0.000s
-✅ Completed: OPTIONS /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content - 200 - 0.000s
-INFO:     127.0.0.1:56614 - "OPTIONS /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56612 - "OPTIONS /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content HTTP/1.1" 200 OK
-🔵 Incoming request: GET /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations
-DEBUG: Authentication process started
-DEBUG: Token received: eyJhbGciOiJSUzI...
-DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-🔵 Incoming request: GET /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content
-DEBUG: Authentication process started
-DEBUG: Token received: eyJhbGciOiJSUzI...
-DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 9: Database lookup complete, user found = True
-[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
-2026-01-02 10:00:17,438 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 7e399408-010e-4910-9d3e-ade06c9e619e
-[SCRIPT WS] Step 11: Verifying script access...
-[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 7e399408-010e-4910-9d3e-ade06c9e619e
-[get_script_and_verify_access] Querying database for script...
-DEBUG: User lookup result: Found
-✅ Completed: GET /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations - 200 - 0.162s
-INFO:     127.0.0.1:56614 - "GET /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations HTTP/1.1" 200 OK
-🔵 Incoming request: OPTIONS /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259
-✅ Completed: OPTIONS /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 - 200 - 0.000s
-INFO:     127.0.0.1:56614 - "OPTIONS /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 HTTP/1.1" 200 OK
-🔵 Incoming request: GET /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259
-DEBUG: Authentication process started
-DEBUG: Token received: eyJhbGciOiJSUzI...
-DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[get_script_and_verify_access] Script found: True
-[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-[get_script_and_verify_access] User is the owner
-[get_script_and_verify_access] Access verified successfully
-[SCRIPT WS] Step 12: Script access verified! Script title: silk road
-[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
-2026-01-02 10:00:17,557 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:17,557 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 7e399408-010e-4910-9d3e-ade06c9e619e. Room now has 1 participant(s)
-[SCRIPT WS] Step 14: WebSocket registered successfully
-2026-01-02 10:00:17,557 - app.routers.script_websocket - INFO - WebSocket connection established for script 7e399408-010e-4910-9d3e-ade06c9e619e
-DEBUG: User lookup result: Found
-DEBUG: User lookup result: Found
-2026-01-02 10:00:17,797 - app.services.script_yjs_persistence - INFO - Applied 3316 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:17,797 - app.routers.script_websocket - INFO - Loaded 3316 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:17,797 - app.routers.script_websocket - INFO - After loading 3316 updates, Yjs content length: 0
-2026-01-02 10:00:17,797 - app.routers.script_websocket - INFO - Yjs document empty for script 7e399408-010e-4910-9d3e-ade06c9e619e, rebuilding from scenes
-2026-01-02 10:00:17,800 - app.routers.script_router - INFO - [GET /content] Script 7e399408-010e-4910-9d3e-ade06c9e619e: content_blocks=3317 blocks
-2026-01-02 10:00:17,825 - app.routers.script_router - INFO - [GET /content] Script 7e399408-010e-4910-9d3e-ade06c9e619e: has_yjs_updates=True
-✅ Completed: GET /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content - 200 - 0.446s
-INFO:     127.0.0.1:56612 - "GET /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content HTTP/1.1" 200 OK
-✅ Completed: GET /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 - 200 - 0.318s
-INFO:     127.0.0.1:56614 - "GET /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 HTTP/1.1" 200 OK
-2026-01-02 10:00:19,230 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
-2026-01-02 10:00:19,230 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
-2026-01-02 10:00:19,231 - app.services.redis_pubsub - INFO - Subscribed to script 7e399408-010e-4910-9d3e-ade06c9e619e channels
-2026-01-02 10:00:19,231 - app.routers.script_websocket - INFO - Subscribed to Redis for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:19,231 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:19,238 - app.routers.script_websocket - INFO - Replied with SyncStep2 (260313 bytes)
-2026-01-02 10:00:19,238 - app.routers.script_websocket - INFO - Sent SyncStep1 to client (138 bytes state vector)
-2026-01-02 10:00:19,238 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
-2026-01-02 10:00:19,389 - app.routers.script_websocket - INFO - Broadcasted SYNC_STEP2 as SYNC_UPDATE to peers
-2026-01-02 10:00:50,369 - app.routers.script_websocket - INFO - Client disconnected from script 7e399408-010e-4910-9d3e-ade06c9e619e: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-2026-01-02 10:00:50,370 - app.services.websocket_manager - ERROR - Error broadcasting to user 2157d1b1-b88f-4b4f-a25b-13dc50dea852: Unexpected ASGI message 'websocket.send', after sending 'websocket.close' or response already completed.
-2026-01-02 10:00:50,370 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 7e399408-010e-4910-9d3e-ade06c9e619e
+✅ Completed: PATCH /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e - 200 - 0.160s
+INFO:     127.0.0.1:61595 - "PATCH /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e HTTP/1.1" 200 OK
+2026-01-02 20:24:46,720 - app.routers.script_websocket - ERROR - Failed to load/initialize Yjs state for script 7e399408-010e-4910-9d3e-ade06c9e619e: 
+Traceback (most recent call last):
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/script_websocket.py", line 255, in script_collaboration_websocket
+    applied_count, was_compacted = await persistence.load_and_compact_if_needed(
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/services/script_yjs_persistence.py", line 164, in load_and_compact_if_needed
+    result = await self.db.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 452, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 199, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2306, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2191, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 296, in orm_execute_statement
+    return cls.orm_setup_cursor_result(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 587, in orm_setup_cursor_result
+    return loading.instances(result, querycontext)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 261, in instances
+    _prebuffered = list(chunks(None))
+                   ^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 246, in chunks
+    post_load.invoke(context, path)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 1543, in invoke
+    loader(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/strategies.py", line 3203, in _load_for_path
+    self._load_via_child(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/strategies.py", line 3234, in _load_via_child
+    for k, v in context.session.execute(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2306, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2191, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 293, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 514, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1849, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1989, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2359, in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1970, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 572, in execute
+    self._adapt_connection.await_(
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 127, in await_only
+    return current.driver.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 192, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 550, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 501, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 791, in _handle_exception
+    raise error
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 538, in _prepare_and_execute
+    self._rows = await prepared_stmt.fetch(*parameters)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 176, in fetch
+    data = await self.__bind_execute(args, 0, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 241, in __bind_execute
+    data, status, _ = await self.__do_execute(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 230, in __do_execute
+    return await executor(protocol)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 207, in bind_execute
+TimeoutError
+2026-01-02 20:24:46,737 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:46,737 - app.services.redis_pubsub - INFO - Unsubscribed from script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:46,737 - app.routers.script_websocket - INFO - WebSocket connection closed for script 7e399408-010e-4910-9d3e-ade06c9e619e
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/protocols/websockets/websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 103, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 103, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/cors.py", line 75, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/middleware/payload_size_limiter.py", line 26, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 758, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 778, in app
+    await route.handle(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 375, in handle
+    await self.app(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 98, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/routing.py", line 96, in app
+    await func(session)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/routing.py", line 345, in app
+    async with AsyncExitStack() as async_exit_stack:
+               ^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 754, in __aexit__
+    raise exc_details[1]
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 737, in __aexit__
+    cb_suppress = await cb(*exc_details)
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 217, in __aexit__
+    await anext(self.gen)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/db/base.py", line 63, in get_db
+    await session.commit()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 1000, in commit
+    await greenlet_spawn(self.sync_session.commit)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 186, in greenlet_spawn
+    result = context.switch(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1972, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1264, in commit
+    trans.commit()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2632, in commit
+    self._do_commit()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2737, in _do_commit
+    self._connection_commit_impl()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2708, in _connection_commit_impl
+    self.connection._commit_impl()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1149, in _commit_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2359, in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1147, in _commit_impl
+    self.engine.dialect.do_commit(self.connection)
+                                  ^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 588, in connection
+    return self._revalidate_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 680, in _revalidate_connection
+    self._invalid_transaction()
+  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 670, in _invalid_transaction
+    raise exc.PendingRollbackError(
+sqlalchemy.exc.PendingRollbackError: Can't reconnect until invalid transaction is rolled back.  Please rollback() fully before proceeding (Background on this error at: https://sqlalche.me/e/20/8s2b)
+2026-01-02 20:24:48,892 - app.services.script_yjs_persistence - INFO - Applied 81 Yjs update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,892 - app.routers.script_websocket - INFO - Loaded 81 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,892 - app.routers.script_websocket - INFO - Yjs document ready with 81 updates for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,892 - app.services.redis_pubsub - INFO - Subscribed to script 7e399408-010e-4910-9d3e-ade06c9e619e channels
+2026-01-02 20:24:48,892 - app.routers.script_websocket - INFO - Subscribed to Redis for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,892 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:48,900 - app.routers.script_websocket - INFO - Replied with SyncStep2 (261253 bytes)
+2026-01-02 20:24:48,900 - app.routers.script_websocket - INFO - Sent SyncStep1 to client (188 bytes state vector)
+2026-01-02 20:24:48,901 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
 INFO:     connection closed
-2026-01-02 10:00:50,370 - app.services.redis_pubsub - INFO - Unsubscribed from script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:50,371 - app.routers.script_websocket - INFO - WebSocket connection closed for script 7e399408-010e-4910-9d3e-ade06c9e619e
-
->>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 7e399408-010e-4910-9d3e-ade06c9e619e <<<
-2026-01-02 10:00:50,474 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 7e399408-010e-4910-9d3e-ade06c9e619e <<<
-[SCRIPT WS] Step 1: Accepting WebSocket connection...
-INFO:     127.0.0.1:56672 - "WebSocket /api/ws/scripts/7e399408-010e-4910-9d3e-ade06c9e619e?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NzAzMTA5NSwidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY3Mzc0OTI0LCJleHAiOjE3NjczNzg1MjQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.enJayneMZtPZAIwSQGR-H_VMlAwHq5m2yDalD5EdP-G9I3oSx2CgNseQwX-edQoLJVQASJg1BvUhy7rOkgsCFipmZ0ZPAW0csq4BJlF8O8mJYRpbOBKWers3JJMF2Xnl07w7n7Dw2YJ3G1SoaSYs0kJTsFmsI-eTp18PuV1P4QuC2XiNf-GHo902UFoLXdJ15Vknf-AnRFgjipDE2GUA7vZE7Z-g4OBR4eBhQJZKQWo40tRhqL0Xz7iiALqXVT9aMTSCNjSrhn_jYKY0O7ixcaPeIgesrnx-pkCjLg91H7QL1TOYtRXB-CP-m-rzlZY0C6AAsF8VPxrio7tAqErbfw" [accepted]
-[SCRIPT WS] Step 2: WebSocket accepted successfully
-2026-01-02 10:00:50,474 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 7e399408-010e-4910-9d3e-ade06c9e619e
-[SCRIPT WS] Step 3: Starting token verification for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:50,474 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 7e399408-010e-4910-9d3e-ade06c9e619e
-[SCRIPT WS] Step 4: Calling verify_token_websocket()...
-DEBUG WS: Token received: eyJhbGciOiJSUzI...
-DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
-DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 5: Token verification succeeded!
-2026-01-02 10:00:50,477 - app.routers.script_websocket - INFO - Token verified successfully for script 7e399408-010e-4910-9d3e-ade06c9e619e
-[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
-[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
-[SCRIPT WS] Step 8: Looking up user in database...
-INFO:     connection open
-[SCRIPT WS] Step 9: Database lookup complete, user found = True
-[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
-2026-01-02 10:00:50,529 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 7e399408-010e-4910-9d3e-ade06c9e619e
-[SCRIPT WS] Step 11: Verifying script access...
-[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 7e399408-010e-4910-9d3e-ade06c9e619e
-[get_script_and_verify_access] Querying database for script...
-[get_script_and_verify_access] Script found: True
-[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
-[get_script_and_verify_access] User is the owner
-[get_script_and_verify_access] Access verified successfully
-[SCRIPT WS] Step 12: Script access verified! Script title: silk road
-[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
-2026-01-02 10:00:50,632 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:50,633 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 7e399408-010e-4910-9d3e-ade06c9e619e. Room now has 1 participant(s)
-[SCRIPT WS] Step 14: WebSocket registered successfully
-2026-01-02 10:00:50,633 - app.routers.script_websocket - INFO - WebSocket connection established for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:51,194 - app.services.script_yjs_persistence - INFO - Applied 3317 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:51,194 - app.routers.script_websocket - INFO - Loaded 3317 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:51,194 - app.routers.script_websocket - INFO - After loading 3317 updates, Yjs content length: 0
-2026-01-02 10:00:51,194 - app.routers.script_websocket - INFO - Yjs document empty for script 7e399408-010e-4910-9d3e-ade06c9e619e, rebuilding from scenes
-2026-01-02 10:00:55,223 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
-2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
-2026-01-02 10:00:55,224 - app.services.redis_pubsub - INFO - Subscribed to script 7e399408-010e-4910-9d3e-ade06c9e619e channels
-2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Subscribed to Redis for script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 7e399408-010e-4910-9d3e-ade06c9e619e
-2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Replied with SyncStep2 (270 bytes)
-2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Sent SyncStep1 to client (138 bytes state vector)
-2026-01-02 10:00:55,224 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
-2026-01-02 10:00:55,278 - app.routers.script_websocket - INFO - Broadcasted SYNC_STEP2 as SYNC_UPDATE to peers
+2026-01-02 20:24:49,055 - app.routers.script_websocket - INFO - Client disconnected from script 7e399408-010e-4910-9d3e-ade06c9e619e: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
+2026-01-02 20:24:49,056 - app.services.websocket_manager - ERROR - Error broadcasting to user 2157d1b1-b88f-4b4f-a25b-13dc50dea852: Unexpected ASGI message 'websocket.send', after sending 'websocket.close' or response already completed.
+2026-01-02 20:24:49,056 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:49,056 - app.services.redis_pubsub - INFO - Unsubscribed from script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 20:24:49,056 - app.routers.script_websocket - INFO - WebSocket connection closed for script 7e399408-010e-4910-9d3e-ade06c9e619e
