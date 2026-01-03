@@ -69,7 +69,9 @@
       "WebFetch(domain:nofilmschool.com)",
       "WebFetch(domain:johnaugust.com)",
       "WebFetch(domain:kb.finaldraft.com)",
-      "WebFetch(domain:screenwriting.io)"
+      "WebFetch(domain:screenwriting.io)",
+      "WebFetch(domain:www.finaldraft.com)",
+      "WebFetch(domain:blog.celtx.com)"
     ],
     "deny": [],
     "ask": []
