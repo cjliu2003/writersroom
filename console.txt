@@ -1,313 +1,315 @@
-script-editor?scriptId=7e399408-010e-4910-9d3e-ade06c9e619e:1 Access to fetch at 'http://localhost:8000/api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversation' from origin 'http://localhost:3102' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
-api.ts:20  GET http://localhost:8000/api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversation net::ERR_FAILED 500 (Internal Server Error)
-fetchWithTimeout @ api.ts:20
-authenticatedFetch @ api.ts:56
-await in authenticatedFetch
-getConversationForScript @ api.ts:556
-loadConversation @ ai-chatbot.tsx:67
-eval @ ai-chatbot.tsx:91
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23334
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23334
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23267
-commitPassiveMountEffects @ react-dom.development.js:23225
-flushPassiveEffectsImpl @ react-dom.development.js:26497
-flushPassiveEffects @ react-dom.development.js:26438
-performSyncWorkOnRoot @ react-dom.development.js:24870
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-commitRootImpl @ react-dom.development.js:26369
-commitRoot @ react-dom.development.js:26077
-commitRootWhenReady @ react-dom.development.js:24749
-finishConcurrentRender @ react-dom.development.js:24714
-performConcurrentWorkOnRoot @ react-dom.development.js:24559
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-api.ts:26 [fetchWithTimeout] Fetch failed after 16048ms: TypeError Failed to fetch for: http://localhost:8000/api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversation
+[OfflineRecovery] Local content is NEWER than server - recovery available
+app-index.js:33 Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `Primitive.div.SlotClone`.
+    at DialogOverlay (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:74:11)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:44:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:20:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-portal/dist/index.mjs:22:24)
+    at Presence (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-presence/dist/index.mjs:27:13)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at DialogPortal (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:131:13)
+    at DialogPortal (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:50:14)
+    at DialogContent (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:87:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at Dialog (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:61:13)
+    at Dialog (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:26:14)
+    at OfflineRecoveryDialog (webpack-internal:///(app-pages-browser)/./components/offline-recovery-dialog.tsx:36:11)
+    at TestTipTapPage (webpack-internal:///(app-pages-browser)/./app/script-editor/page.tsx:109:79)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at Suspense
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at AuthProvider (webpack-internal:///(app-pages-browser)/./contexts/AuthContext.tsx:27:11)
+    at Suspense
+    at ClientOnlyWrapper (webpack-internal:///(app-pages-browser)/./components/ClientOnlyWrapper.tsx:12:11)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
 window.console.error @ app-index.js:33
-console.error @ hydration-error-info.js:63
-fetchWithTimeout @ api.ts:26
-await in fetchWithTimeout
-authenticatedFetch @ api.ts:56
-await in authenticatedFetch
-getConversationForScript @ api.ts:556
-loadConversation @ ai-chatbot.tsx:67
-eval @ ai-chatbot.tsx:91
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23334
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23334
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23267
-commitPassiveMountEffects @ react-dom.development.js:23225
-flushPassiveEffectsImpl @ react-dom.development.js:26497
-flushPassiveEffects @ react-dom.development.js:26438
-performSyncWorkOnRoot @ react-dom.development.js:24870
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-commitRootImpl @ react-dom.development.js:26369
-commitRoot @ react-dom.development.js:26077
-commitRootWhenReady @ react-dom.development.js:24749
-finishConcurrentRender @ react-dom.development.js:24714
-performConcurrentWorkOnRoot @ react-dom.development.js:24559
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-ai-chatbot.tsx:86 [AIChatbot] Failed to load conversation from database: TypeError: Failed to fetch
-    at fetchWithTimeout (api.ts:20:23)
-    at authenticatedFetch (api.ts:56:26)
-    at async getConversationForScript (api.ts:556:20)
-    at async loadConversation (ai-chatbot.tsx:67:26)
+app-index.js:33 Warning: In HTML, <p> cannot be a descendant of <p>.
+This will cause a hydration error.
+    at p
+    at p
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:386:13)
+    at DialogDescription (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:179:11)
+    at div
+    at DialogHeader (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:140:11)
+    at div
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs:37:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:44:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:20:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-focus-scope/dist/index.mjs:27:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:317:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:239:58)
+    at Presence (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-presence/dist/index.mjs:27:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:211:64)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:44:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:20:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-portal/dist/index.mjs:22:24)
+    at Presence (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-presence/dist/index.mjs:27:13)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at DialogPortal (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:131:13)
+    at DialogPortal (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:50:14)
+    at DialogContent (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:87:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at Dialog (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:61:13)
+    at Dialog (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:26:14)
+    at OfflineRecoveryDialog (webpack-internal:///(app-pages-browser)/./components/offline-recovery-dialog.tsx:36:11)
+    at TestTipTapPage (webpack-internal:///(app-pages-browser)/./app/script-editor/page.tsx:109:79)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at Suspense
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at AuthProvider (webpack-internal:///(app-pages-browser)/./contexts/AuthContext.tsx:27:11)
+    at Suspense
+    at ClientOnlyWrapper (webpack-internal:///(app-pages-browser)/./components/ClientOnlyWrapper.tsx:12:11)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+app-index.js:33 Warning: In HTML, <div> cannot be a descendant of <p>.
+This will cause a hydration error.
+    at div
+    at div
+    at p
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:386:13)
+    at DialogDescription (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:179:11)
+    at div
+    at DialogHeader (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:140:11)
+    at div
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs:37:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:44:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:20:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-focus-scope/dist/index.mjs:27:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:317:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:239:58)
+    at Presence (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-presence/dist/index.mjs:27:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:211:64)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:44:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/node_modules/@radix-ui/react-slot/dist/index.mjs:20:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-primitive/dist/index.mjs:38:13)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-portal/dist/index.mjs:22:24)
+    at Presence (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-presence/dist/index.mjs:27:13)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at DialogPortal (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:131:13)
+    at DialogPortal (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:50:14)
+    at DialogContent (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:87:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at Dialog (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-dialog/dist/index.mjs:61:13)
+    at Dialog (webpack-internal:///(app-pages-browser)/./components/ui/dialog.tsx:26:14)
+    at OfflineRecoveryDialog (webpack-internal:///(app-pages-browser)/./components/offline-recovery-dialog.tsx:36:11)
+    at TestTipTapPage (webpack-internal:///(app-pages-browser)/./app/script-editor/page.tsx:109:79)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at Suspense
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at AuthProvider (webpack-internal:///(app-pages-browser)/./contexts/AuthContext.tsx:27:11)
+    at Suspense
+    at ClientOnlyWrapper (webpack-internal:///(app-pages-browser)/./components/ClientOnlyWrapper.tsx:12:11)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+script-autosave-storage.ts:117 [ScriptStorage] Retrieved pending saves: 7
+use-script-autosave.ts:394 📥 [ScriptAutosave] Processing offline queue: Object
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: 403c437d-bd51-449f-a209-17e1dc34b49f baseVersion: 1
+api.ts:22 [fetchWithTimeout] Fetch completed in 251ms for: http://localhost:8000/api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content
+page.tsx:169 [TipTapEditor] Script content received: Object
+page.tsx:201 [TipTapEditor] Converted to TipTap document: Object
+page.tsx:207 [TipTapEditor] Storing content for application to editor
+page.tsx:217 [TipTapEditor] Yjs updates exist, keeping loading screen until sync completes
+use-offline-recovery.ts:69 [OfflineRecovery] Checking for pending saves for script: 7e399408-010e-4910-9d3e-ade06c9e619e
+page.tsx:438 [TestTipTap] Waiting for sync before seeding, current status: connected
+script-autosave-storage.ts:117 [ScriptStorage] Retrieved pending saves: 7
+use-offline-recovery.ts:84 [OfflineRecovery] Found pending save: Object
+use-offline-recovery.ts:95 [OfflineRecovery] Local content is NEWER than server - recovery available
+script-autosave-storage.ts:170 [ScriptStorage] Removed save: 403c437d-bd51-449f-a209-17e1dc34b49f
+use-script-autosave.ts:416 ✅ [ScriptAutosave] Queued save successful, removed from queue: 403c437d-bd51-449f-a209-17e1dc34b49f
+use-script-autosave.ts:421 🔄 [ScriptAutosave] Updating remaining queue items to baseVersion: undefined
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: 58b9ee47-4d1e-4bd1-8afd-969afebbc8a4
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: 63dfff68-b567-4121-bec8-4f3c9f82097d
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: 69289825-c564-4838-bab1-ece5854bd117
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b6b8ee1c-1b5d-42e5-872b-0e00edf5f74c
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b85558ac-4c4d-4aec-a2ee-54f42ce3c841
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: c1b63572-74a5-43d8-addd-2f0bbe475ede
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: 58b9ee47-4d1e-4bd1-8afd-969afebbc8a4 baseVersion: undefined
+script-autosave-storage.ts:170 [ScriptStorage] Removed save: 58b9ee47-4d1e-4bd1-8afd-969afebbc8a4
+use-script-autosave.ts:416 ✅ [ScriptAutosave] Queued save successful, removed from queue: 58b9ee47-4d1e-4bd1-8afd-969afebbc8a4
+use-script-autosave.ts:421 🔄 [ScriptAutosave] Updating remaining queue items to baseVersion: undefined
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: 63dfff68-b567-4121-bec8-4f3c9f82097d
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: 69289825-c564-4838-bab1-ece5854bd117
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b6b8ee1c-1b5d-42e5-872b-0e00edf5f74c
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b85558ac-4c4d-4aec-a2ee-54f42ce3c841
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: c1b63572-74a5-43d8-addd-2f0bbe475ede
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: 63dfff68-b567-4121-bec8-4f3c9f82097d baseVersion: undefined
+script-autosave-storage.ts:170 [ScriptStorage] Removed save: 63dfff68-b567-4121-bec8-4f3c9f82097d
+use-script-autosave.ts:416 ✅ [ScriptAutosave] Queued save successful, removed from queue: 63dfff68-b567-4121-bec8-4f3c9f82097d
+use-script-autosave.ts:421 🔄 [ScriptAutosave] Updating remaining queue items to baseVersion: undefined
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: 69289825-c564-4838-bab1-ece5854bd117
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b6b8ee1c-1b5d-42e5-872b-0e00edf5f74c
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b85558ac-4c4d-4aec-a2ee-54f42ce3c841
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: c1b63572-74a5-43d8-addd-2f0bbe475ede
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: 69289825-c564-4838-bab1-ece5854bd117 baseVersion: undefined
+script-autosave-storage.ts:170 [ScriptStorage] Removed save: 69289825-c564-4838-bab1-ece5854bd117
+use-script-autosave.ts:416 ✅ [ScriptAutosave] Queued save successful, removed from queue: 69289825-c564-4838-bab1-ece5854bd117
+use-script-autosave.ts:421 🔄 [ScriptAutosave] Updating remaining queue items to baseVersion: undefined
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b6b8ee1c-1b5d-42e5-872b-0e00edf5f74c
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b85558ac-4c4d-4aec-a2ee-54f42ce3c841
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: c1b63572-74a5-43d8-addd-2f0bbe475ede
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: b6b8ee1c-1b5d-42e5-872b-0e00edf5f74c baseVersion: undefined
+script-autosave-storage.ts:170 [ScriptStorage] Removed save: b6b8ee1c-1b5d-42e5-872b-0e00edf5f74c
+use-script-autosave.ts:416 ✅ [ScriptAutosave] Queued save successful, removed from queue: b6b8ee1c-1b5d-42e5-872b-0e00edf5f74c
+use-script-autosave.ts:421 🔄 [ScriptAutosave] Updating remaining queue items to baseVersion: undefined
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: b85558ac-4c4d-4aec-a2ee-54f42ce3c841
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: c1b63572-74a5-43d8-addd-2f0bbe475ede
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: b85558ac-4c4d-4aec-a2ee-54f42ce3c841 baseVersion: undefined
+script-autosave-storage.ts:170 [ScriptStorage] Removed save: b85558ac-4c4d-4aec-a2ee-54f42ce3c841
+use-script-autosave.ts:416 ✅ [ScriptAutosave] Queued save successful, removed from queue: b85558ac-4c4d-4aec-a2ee-54f42ce3c841
+use-script-autosave.ts:421 🔄 [ScriptAutosave] Updating remaining queue items to baseVersion: undefined
+script-autosave-storage.ts:87 [ScriptStorage] Queued save: c1b63572-74a5-43d8-addd-2f0bbe475ede
+use-script-autosave.ts:410 📤 [ScriptAutosave] Attempting to save queued item: c1b63572-74a5-43d8-addd-2f0bbe475ede baseVersion: undefined
+script-autosave-storage.ts:170 [ScriptStorage] Removed save: c1b63572-74a5-43d8-addd-2f0bbe475ede
+use-script-autosave.ts:416 ✅ [ScriptAutosave] Queued save successful, removed from queue: c1b63572-74a5-43d8-addd-2f0bbe475ede
+use-script-autosave.ts:421 🔄 [ScriptAutosave] Updating remaining queue items to baseVersion: undefined
+use-script-autosave.ts:459 ✅ [ScriptAutosave] Finished processing offline queue
+api.ts:22 [fetchWithTimeout] Fetch completed in 18195ms for: http://localhost:8000/api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations
+api.ts:43 [api] requesting http://localhost:8000/api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 token? true retry: 0
+api.ts:19 [fetchWithTimeout] Starting fetch to: http://localhost:8000/api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 with timeout 30000ms
+api.ts:22 [fetchWithTimeout] Fetch completed in 528ms for: http://localhost:8000/api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259
+ai-chatbot.tsx:95 [AIChatbot] Switched to conversation: 6bd76efd-ff62-43da-9089-b144f33f7259
+ai-chatbot.tsx:115 [AIChatbot] Loaded conversations: 5
+use-script-yjs-collaboration.ts:202 [ScriptYjsCollaboration] doc.update Object
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
+page.tsx:446 [TestTipTap] Skipping setContent - Yjs updates exist in database (Yjs is source of truth)
+page.tsx:506 [TipTapEditor] Yjs sync complete, hiding loading screen
+page.tsx:534 [TipTapEditor] Document initialized: Object
+tiptap-scene-tracker.ts:107 [TipTapSceneTracker] Extracted scene boundaries: Object
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: false
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+use-offline-recovery.ts:128 [OfflineRecovery] Recovering offline changes
+script-autosave-storage.ts:117 [ScriptStorage] Retrieved pending saves: 0
+script-autosave-storage.ts:196 [ScriptStorage] Cleared all pending saves for script: 7e399408-010e-4910-9d3e-ade06c9e619e
+use-offline-recovery.ts:133 [OfflineRecovery] Cleared pending saves after recovery
+page.tsx:144 [TipTapEditor] Recovered offline content: 3325 blocks
+page.tsx:514 [TipTapEditor] Using recovered content: 3325 blocks
+page.tsx:438 [TestTipTap] Waiting for sync before seeding, current status: connected
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
+page.tsx:446 [TestTipTap] Skipping setContent - Yjs updates exist in database (Yjs is source of truth)
+page.tsx:534 [TipTapEditor] Document initialized: Object
+hot-reloader-client.js:187 [Fast Refresh] rebuilding
+hot-reloader-client.js:44 [Fast Refresh] done in 28ms
+use-script-yjs-collaboration.ts:324 [ScriptYjsCollaboration] Connection closed: CloseEvent {isTrusted: true, wasClean: true, code: 1005, reason: '', type: 'close', …}
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: false
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: disconnected
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connecting
+use-script-yjs-collaboration.ts:255 [ScriptYjsCollaboration] Status: connected
+use-script-yjs-collaboration.ts:273 [ScriptYjsCollaboration] Synced: true
+page.tsx:534 [TipTapEditor] Document initialized: {firstNodeType: 'sceneHeading', isEmpty: false, nodeCount: 3325}

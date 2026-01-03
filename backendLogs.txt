@@ -1,140 +1,140 @@
-2026-01-01 16:16:19,498 - ai.conversation - INFO - 
---- USER MESSAGE ---
-What are your thoughts on the opening scene?
+>>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 7e399408-010e-4910-9d3e-ade06c9e619e <<<
+2026-01-02 10:00:17,377 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 7e399408-010e-4910-9d3e-ade06c9e619e <<<
+[SCRIPT WS] Step 1: Accepting WebSocket connection...
+INFO:     127.0.0.1:56626 - "WebSocket /api/ws/scripts/7e399408-010e-4910-9d3e-ade06c9e619e?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NzAzMTA5NSwidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY3Mzc0OTI0LCJleHAiOjE3NjczNzg1MjQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.enJayneMZtPZAIwSQGR-H_VMlAwHq5m2yDalD5EdP-G9I3oSx2CgNseQwX-edQoLJVQASJg1BvUhy7rOkgsCFipmZ0ZPAW0csq4BJlF8O8mJYRpbOBKWers3JJMF2Xnl07w7n7Dw2YJ3G1SoaSYs0kJTsFmsI-eTp18PuV1P4QuC2XiNf-GHo902UFoLXdJ15Vknf-AnRFgjipDE2GUA7vZE7Z-g4OBR4eBhQJZKQWo40tRhqL0Xz7iiALqXVT9aMTSCNjSrhn_jYKY0O7ixcaPeIgesrnx-pkCjLg91H7QL1TOYtRXB-CP-m-rzlZY0C6AAsF8VPxrio7tAqErbfw" [accepted]
+[SCRIPT WS] Step 2: WebSocket accepted successfully
+2026-01-02 10:00:17,378 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 7e399408-010e-4910-9d3e-ade06c9e619e
+[SCRIPT WS] Step 3: Starting token verification for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:17,378 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 7e399408-010e-4910-9d3e-ade06c9e619e
+[SCRIPT WS] Step 4: Calling verify_token_websocket()...
+DEBUG WS: Token received: eyJhbGciOiJSUzI...
+DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
+DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+[SCRIPT WS] Step 5: Token verification succeeded!
+2026-01-02 10:00:17,379 - app.routers.script_websocket - INFO - Token verified successfully for script 7e399408-010e-4910-9d3e-ade06c9e619e
+[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
+[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
+[SCRIPT WS] Step 8: Looking up user in database...
+INFO:     connection open
+🔵 Incoming request: OPTIONS /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations
+🔵 Incoming request: OPTIONS /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content
+✅ Completed: OPTIONS /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations - 200 - 0.000s
+✅ Completed: OPTIONS /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content - 200 - 0.000s
+INFO:     127.0.0.1:56614 - "OPTIONS /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56612 - "OPTIONS /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content HTTP/1.1" 200 OK
+🔵 Incoming request: GET /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations
+DEBUG: Authentication process started
+DEBUG: Token received: eyJhbGciOiJSUzI...
+DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+🔵 Incoming request: GET /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content
+DEBUG: Authentication process started
+DEBUG: Token received: eyJhbGciOiJSUzI...
+DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+[SCRIPT WS] Step 9: Database lookup complete, user found = True
+[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
+2026-01-02 10:00:17,438 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 7e399408-010e-4910-9d3e-ade06c9e619e
+[SCRIPT WS] Step 11: Verifying script access...
+[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 7e399408-010e-4910-9d3e-ade06c9e619e
+[get_script_and_verify_access] Querying database for script...
+DEBUG: User lookup result: Found
+✅ Completed: GET /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations - 200 - 0.162s
+INFO:     127.0.0.1:56614 - "GET /api/ai/chat/script/7e399408-010e-4910-9d3e-ade06c9e619e/conversations HTTP/1.1" 200 OK
+🔵 Incoming request: OPTIONS /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259
+✅ Completed: OPTIONS /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 - 200 - 0.000s
+INFO:     127.0.0.1:56614 - "OPTIONS /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 HTTP/1.1" 200 OK
+🔵 Incoming request: GET /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259
+DEBUG: Authentication process started
+DEBUG: Token received: eyJhbGciOiJSUzI...
+DEBUG: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG: Looking up user with firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+[get_script_and_verify_access] Script found: True
+[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
+[get_script_and_verify_access] User is the owner
+[get_script_and_verify_access] Access verified successfully
+[SCRIPT WS] Step 12: Script access verified! Script title: silk road
+[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
+2026-01-02 10:00:17,557 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:17,557 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 7e399408-010e-4910-9d3e-ade06c9e619e. Room now has 1 participant(s)
+[SCRIPT WS] Step 14: WebSocket registered successfully
+2026-01-02 10:00:17,557 - app.routers.script_websocket - INFO - WebSocket connection established for script 7e399408-010e-4910-9d3e-ade06c9e619e
+DEBUG: User lookup result: Found
+DEBUG: User lookup result: Found
+2026-01-02 10:00:17,797 - app.services.script_yjs_persistence - INFO - Applied 3316 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:17,797 - app.routers.script_websocket - INFO - Loaded 3316 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:17,797 - app.routers.script_websocket - INFO - After loading 3316 updates, Yjs content length: 0
+2026-01-02 10:00:17,797 - app.routers.script_websocket - INFO - Yjs document empty for script 7e399408-010e-4910-9d3e-ade06c9e619e, rebuilding from scenes
+2026-01-02 10:00:17,800 - app.routers.script_router - INFO - [GET /content] Script 7e399408-010e-4910-9d3e-ade06c9e619e: content_blocks=3317 blocks
+2026-01-02 10:00:17,825 - app.routers.script_router - INFO - [GET /content] Script 7e399408-010e-4910-9d3e-ade06c9e619e: has_yjs_updates=True
+✅ Completed: GET /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content - 200 - 0.446s
+INFO:     127.0.0.1:56612 - "GET /api/scripts/7e399408-010e-4910-9d3e-ade06c9e619e/content HTTP/1.1" 200 OK
+✅ Completed: GET /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 - 200 - 0.318s
+INFO:     127.0.0.1:56614 - "GET /api/ai/chat/conversations/6bd76efd-ff62-43da-9089-b144f33f7259 HTTP/1.1" 200 OK
+2026-01-02 10:00:19,230 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
+2026-01-02 10:00:19,230 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
+2026-01-02 10:00:19,231 - app.services.redis_pubsub - INFO - Subscribed to script 7e399408-010e-4910-9d3e-ade06c9e619e channels
+2026-01-02 10:00:19,231 - app.routers.script_websocket - INFO - Subscribed to Redis for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:19,231 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:19,238 - app.routers.script_websocket - INFO - Replied with SyncStep2 (260313 bytes)
+2026-01-02 10:00:19,238 - app.routers.script_websocket - INFO - Sent SyncStep1 to client (138 bytes state vector)
+2026-01-02 10:00:19,238 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
+2026-01-02 10:00:19,389 - app.routers.script_websocket - INFO - Broadcasted SYNC_STEP2 as SYNC_UPDATE to peers
+2026-01-02 10:00:50,369 - app.routers.script_websocket - INFO - Client disconnected from script 7e399408-010e-4910-9d3e-ade06c9e619e: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
+2026-01-02 10:00:50,370 - app.services.websocket_manager - ERROR - Error broadcasting to user 2157d1b1-b88f-4b4f-a25b-13dc50dea852: Unexpected ASGI message 'websocket.send', after sending 'websocket.close' or response already completed.
+2026-01-02 10:00:50,370 - app.services.websocket_manager - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) disconnected from scene 7e399408-010e-4910-9d3e-ade06c9e619e
+INFO:     connection closed
+2026-01-02 10:00:50,370 - app.services.redis_pubsub - INFO - Unsubscribed from script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:50,371 - app.routers.script_websocket - INFO - WebSocket connection closed for script 7e399408-010e-4910-9d3e-ade06c9e619e
 
-2026-01-01 16:16:19,498 - app.routers.ai_router - INFO - [STREAM] Request type: suggest
-2026-01-01 16:16:19,500 - app.services.context_builder - INFO - [CONTEXT] System prompt generation took 2.28ms
-2026-01-01 16:16:19,538 - app.services.context_builder - INFO - [CONTEXT] Global context fetch took 37.43ms
-2026-01-01 16:16:21,286 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
-2026-01-01 16:16:21,289 - app.services.retrieval_service - INFO - [RETRIEVAL] Embedding generation took 1750.87ms
-2026-01-01 16:16:21,312 - app.services.retrieval_service - INFO - [RETRIEVAL] Vector search query execution took 21.33ms (returned 5 results)
-2026-01-01 16:16:21,312 - app.services.context_builder - INFO - [CONTEXT] Retrieval service took 1774.78ms
-2026-01-01 16:16:21,314 - app.services.context_builder - INFO - [CONTEXT] Scene card formatting took 1.68ms
-2026-01-01 16:16:21,351 - app.services.context_builder - INFO - [CONTEXT] NEW_TOPIC: Skipping recent conversation history
-2026-01-01 16:16:21,351 - app.routers.ai_router - INFO - [STREAM] Built prompt: 3276 tokens (skip_scenes=False)
-✅ Completed: POST /api/ai/chat/message/stream-with-status - 200 - 3.304s
-INFO:     127.0.0.1:52215 - "POST /api/ai/chat/message/stream-with-status HTTP/1.1" 200 OK
-/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py:1961: RuntimeWarning: coroutine 'AIService.generate_response' was never awaited
-  async for event in ai_service.generate_response(
-RuntimeWarning: Enable tracemalloc to get the object allocation traceback
-2026-01-01 16:16:21,414 - app.routers.ai_router - ERROR - Streaming failed, cleaning up empty assistant message: 'async for' requires an object with __aiter__ method, got coroutine
-2026-01-01 16:16:21,487 - app.routers.ai_router - INFO - Cleaned up empty assistant message 4ef04793-2332-432f-9d8c-492faef98ceb
-ERROR:    Exception in ASGI application
-  + Exception Group Traceback (most recent call last):
-  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
-  |     yield
-  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 190, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
-  |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 781, in __aexit__
-  |     raise BaseExceptionGroup(
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Exception Group Traceback (most recent call last):
-    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 192, in __call__
-    |     await response(scope, wrapped_receive, send)
-    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 257, in __call__
-    |     async with anyio.create_task_group() as task_group:
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 781, in __aexit__
-    |     raise BaseExceptionGroup(
-    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-    +-+---------------- 1 ----------------
-      | Traceback (most recent call last):
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
-      |     result = await app(  # type: ignore[func-returns-value]
-      |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-      |     return await self.app(scope, receive, send)
-      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-      |     await super().__call__(scope, receive, send)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/applications.py", line 123, in __call__
-      |     await self.middleware_stack(scope, receive, send)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-      |     raise exc
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-      |     await self.app(scope, receive, _send)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
-      |     with collapse_excgroups():
-      |          ^^^^^^^^^^^^^^^^^^^^
-      |   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
-      |     self.gen.throw(value)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
-      |     raise exc
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
-      |     await func()
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 217, in stream_response
-      |     return await super().stream_response(send)
-      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
-      |     async for chunk in self.body_iterator:
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 181, in body_stream
-      |     raise app_exc
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 151, in coro
-      |     await self.app(scope, receive_or_disconnect, send_no_error)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
-      |     with collapse_excgroups():
-      |          ^^^^^^^^^^^^^^^^^^^^
-      |   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
-      |     self.gen.throw(value)
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
-      |     raise exc
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
-      |     await func()
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
-      |     async for chunk in self.body_iterator:
-      |   File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py", line 1961, in generate_stream
-      |     async for event in ai_service.generate_response(
-      | TypeError: 'async for' requires an object with __aiter__ method, got coroutine
-      +------------------------------------
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    raise exc
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
-    with collapse_excgroups():
-         ^^^^^^^^^^^^^^^^^^^^
-  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
-    raise exc
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
-    await func()
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 217, in stream_response
-    return await super().stream_response(send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
-    async for chunk in self.body_iterator:
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 181, in body_stream
-    raise app_exc
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 151, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/middleware/base.py", line 189, in __call__
-    with collapse_excgroups():
-         ^^^^^^^^^^^^^^^^^^^^
-  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
-    raise exc
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 260, in wrap
-    await func()
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/writersRoom/lib/python3.12/site-packages/starlette/responses.py", line 249, in stream_response
-    async for chunk in self.body_iterator:
-  File "/Users/jacklofwall/Documents/GitHub/writersroom/backend/app/routers/ai_router.py", line 1961, in generate_stream
-    async for event in ai_service.generate_response(
-TypeError: 'async for' requires an object with __aiter__ method, got coroutine
+>>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 7e399408-010e-4910-9d3e-ade06c9e619e <<<
+2026-01-02 10:00:50,474 - app.routers.script_websocket - INFO - >>> SCRIPT WEBSOCKET ENDPOINT CALLED for script 7e399408-010e-4910-9d3e-ade06c9e619e <<<
+[SCRIPT WS] Step 1: Accepting WebSocket connection...
+INFO:     127.0.0.1:56672 - "WebSocket /api/ws/scripts/7e399408-010e-4910-9d3e-ade06c9e619e?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzOGVhNmEwNDA4YjBjYzVkYTE4OWRmYzg4ODgyZDBmMWI3ZmJmMGUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSmFjayBMb2Z3YWxsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0paVWpvN0E5QzcxNnNTdW1yUldHMmV0ck92RmNqRWlaMUg0eTRhUG9PR3o1MkwtQ3M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vd3JpdGVyc3Jvb20tYzc4YzkiLCJhdWQiOiJ3cml0ZXJzcm9vbS1jNzhjOSIsImF1dGhfdGltZSI6MTc2NzAzMTA5NSwidXNlcl9pZCI6InJMaExtT2dKRVVZOFVlQUFuZHM4STdNaTFYNzIiLCJzdWIiOiJyTGhMbU9nSkVVWThVZUFBbmRzOEk3TWkxWDcyIiwiaWF0IjoxNzY3Mzc0OTI0LCJleHAiOjE3NjczNzg1MjQsImVtYWlsIjoiamxvZndhbGxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTIwMjU4NjA1OTcwMTY2MDA1MDQiXSwiZW1haWwiOlsiamxvZndhbGxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.enJayneMZtPZAIwSQGR-H_VMlAwHq5m2yDalD5EdP-G9I3oSx2CgNseQwX-edQoLJVQASJg1BvUhy7rOkgsCFipmZ0ZPAW0csq4BJlF8O8mJYRpbOBKWers3JJMF2Xnl07w7n7Dw2YJ3G1SoaSYs0kJTsFmsI-eTp18PuV1P4QuC2XiNf-GHo902UFoLXdJ15Vknf-AnRFgjipDE2GUA7vZE7Z-g4OBR4eBhQJZKQWo40tRhqL0Xz7iiALqXVT9aMTSCNjSrhn_jYKY0O7ixcaPeIgesrnx-pkCjLg91H7QL1TOYtRXB-CP-m-rzlZY0C6AAsF8VPxrio7tAqErbfw" [accepted]
+[SCRIPT WS] Step 2: WebSocket accepted successfully
+2026-01-02 10:00:50,474 - app.routers.script_websocket - INFO - WebSocket connection accepted for script 7e399408-010e-4910-9d3e-ade06c9e619e
+[SCRIPT WS] Step 3: Starting token verification for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:50,474 - app.routers.script_websocket - INFO - Verifying token for WebSocket connection to script 7e399408-010e-4910-9d3e-ade06c9e619e
+[SCRIPT WS] Step 4: Calling verify_token_websocket()...
+DEBUG WS: Token received: eyJhbGciOiJSUzI...
+DEBUG WS: Token verified successfully, uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG WS: Token keys: ['name', 'picture', 'iss', 'aud', 'auth_time', 'user_id', 'sub', 'iat', 'exp', 'email', 'email_verified', 'firebase', 'uid']
+DEBUG WS: Extracted firebase_uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+DEBUG WS: Returning decoded token with uid: rLhLmOgJEUY8UeAAnds8I7Mi1X72
+[SCRIPT WS] Step 5: Token verification succeeded!
+2026-01-02 10:00:50,477 - app.routers.script_websocket - INFO - Token verified successfully for script 7e399408-010e-4910-9d3e-ade06c9e619e
+[SCRIPT WS] Step 6: Extracting firebase_uid from user_info...
+[SCRIPT WS] Step 7: firebase_uid = rLhLmOgJEUY8UeAAnds8I7Mi1X72
+[SCRIPT WS] Step 8: Looking up user in database...
+INFO:     connection open
+[SCRIPT WS] Step 9: Database lookup complete, user found = True
+[SCRIPT WS] Step 10: User identified - Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852)
+2026-01-02 10:00:50,529 - app.routers.script_websocket - INFO - WebSocket connection attempt by user Jack Lofwall to script 7e399408-010e-4910-9d3e-ade06c9e619e
+[SCRIPT WS] Step 11: Verifying script access...
+[get_script_and_verify_access] Checking access for user 2157d1b1-b88f-4b4f-a25b-13dc50dea852 to script 7e399408-010e-4910-9d3e-ade06c9e619e
+[get_script_and_verify_access] Querying database for script...
+[get_script_and_verify_access] Script found: True
+[get_script_and_verify_access] Script owner: 2157d1b1-b88f-4b4f-a25b-13dc50dea852, User: 2157d1b1-b88f-4b4f-a25b-13dc50dea852
+[get_script_and_verify_access] User is the owner
+[get_script_and_verify_access] Access verified successfully
+[SCRIPT WS] Step 12: Script access verified! Script title: silk road
+[SCRIPT WS] Step 13: Registering with WebSocket manager (connection already accepted)...
+2026-01-02 10:00:50,632 - app.routers.script_websocket - INFO - Registering WebSocket for user Jack Lofwall to script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:50,633 - app.routers.script_websocket - INFO - User Jack Lofwall (2157d1b1-b88f-4b4f-a25b-13dc50dea852) connected to script 7e399408-010e-4910-9d3e-ade06c9e619e. Room now has 1 participant(s)
+[SCRIPT WS] Step 14: WebSocket registered successfully
+2026-01-02 10:00:50,633 - app.routers.script_websocket - INFO - WebSocket connection established for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:51,194 - app.services.script_yjs_persistence - INFO - Applied 3317 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:51,194 - app.routers.script_websocket - INFO - Loaded 3317 persisted update(s) for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:51,194 - app.routers.script_websocket - INFO - After loading 3317 updates, Yjs content length: 0
+2026-01-02 10:00:51,194 - app.routers.script_websocket - INFO - Yjs document empty for script 7e399408-010e-4910-9d3e-ade06c9e619e, rebuilding from scenes
+2026-01-02 10:00:55,223 - app.routers.script_websocket - INFO - Rebuilt 3317 blocks from 148 scenes
+2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Backend seeding disabled - frontend will seed from REST API (3317 blocks available)
+2026-01-02 10:00:55,224 - app.services.redis_pubsub - INFO - Subscribed to script 7e399408-010e-4910-9d3e-ade06c9e619e channels
+2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Subscribed to Redis for script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Entering message loop for user Jack Lofwall on script 7e399408-010e-4910-9d3e-ade06c9e619e
+2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Replied with SyncStep2 (270 bytes)
+2026-01-02 10:00:55,224 - app.routers.script_websocket - INFO - Sent SyncStep1 to client (138 bytes state vector)
+2026-01-02 10:00:55,224 - app.services.redis_pubsub - INFO - Started listening to Redis pub/sub messages
+2026-01-02 10:00:55,278 - app.routers.script_websocket - INFO - Broadcasted SYNC_STEP2 as SYNC_UPDATE to peers
